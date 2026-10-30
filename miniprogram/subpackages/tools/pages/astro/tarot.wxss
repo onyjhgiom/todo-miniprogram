@@ -1,0 +1,96 @@
+/* pages/astro/tarot.wxss */
+@import "../../styles/astro-common.wxss";
+
+.layout-row {
+  display: flex; flex-wrap: wrap; gap: 12rpx;
+  margin-top: 14rpx;
+}
+.layout-item {
+  flex: 1 0 calc(50% - 6rpx);
+  padding: 16rpx 14rpx;
+  border-radius: 16rpx;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1rpx solid rgba(255, 255, 255, 0.06);
+  display: flex; flex-direction: column; gap: 4rpx;
+  transition: all 200ms ease;
+}
+.layout-item.is-active {
+  background: linear-gradient(135deg, #96573A, #C08468);
+  color: #fff;
+  box-shadow: 0 6rpx 16rpx rgba(99, 102, 241, 0.4);
+  border-color: transparent;
+}
+.layout-item--hover { transform: scale(0.97); }
+.layout-item__name { font-size: 24rpx; font-weight: 600; }
+.layout-item__desc { font-size: 20rpx; color: rgba(200, 210, 240, 0.65); }
+.layout-item.is-active .layout-item__desc { color: rgba(255, 255, 255, 0.85); }
+
+/* CSS3D 翻牌 */
+.card-stage {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  justify-content: space-around;
+  perspective: 1000rpx;
+  margin-top: 18rpx;
+}
+.card3d {
+  position: relative;
+  width: 160rpx; height: 230rpx;
+  transform-style: preserve-3d;
+  transition: transform 520ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.card3d.is-flipped { transform: rotateY(180deg); }
+.card3d--hover { transform: scale(0.97) rotateY(0deg); }
+.card3d.is-flipped.card3d--hover { transform: scale(0.97) rotateY(180deg); }
+.card3d__face {
+  position: absolute;
+  inset: 0;
+  border-radius: 14rpx;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.45);
+  backface-visibility: hidden;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 10rpx;
+}
+.card3d__face--front { background: linear-gradient(160deg, rgba(99, 102, 241, 0.18), rgba(168, 85, 247, 0.18)); }
+.card3d__face--back {
+  background: linear-gradient(160deg, rgba(36, 42, 80, 0.96), rgba(20, 22, 50, 0.96));
+  transform: rotateY(180deg);
+}
+.card3d__img {
+  width: 130rpx; height: 130rpx;
+  border-radius: 10rpx;
+}
+.card3d__name {
+  font-size: 22rpx; font-weight: 600;
+  color: #f1f5ff;
+  margin-top: 6rpx; text-align: center;
+}
+.card3d__pos {
+  font-size: 18rpx; color: rgba(190, 200, 230, 0.7);
+  margin-top: 4rpx;
+}
+
+/* 图鉴 */
+.gallery-row {
+  display: flex; flex-wrap: wrap; gap: 12rpx;
+  margin-top: 14rpx;
+}
+.gallery-cell {
+  flex: 0 0 calc(33.33% - 8rpx);
+  box-sizing: border-box;
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding: 14rpx 6rpx 12rpx;
+  border-radius: 14rpx;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1rpx solid rgba(255, 255, 255, 0.05);
+  transition: all 200ms ease;
+}
+.gallery-cell--hover { transform: scale(0.95); background: rgba(255, 255, 255, 0.08); }
+.gallery-cell__img { width: 90rpx; height: 90rpx; border-radius: 8rpx; }
+.gallery-cell__name { font-size: 20rpx; color: rgba(220, 225, 245, 0.85); margin-top: 8rpx; }

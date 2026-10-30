@@ -1,0 +1,132 @@
+<!--pages/love/moment/moment.wxml-->
+<view class="ay" style="{{skin.style}}">
+
+  <!-- 未绑定提示 -->
+  <view class="duo-banner" wx:if="{{!bound}}">
+    <text class="duo-banner__ico">🔒</text>
+    <view class="duo-banner__main">
+      <text class="duo-banner__t">当前未绑定，动态仅自己可见</text>
+      <text class="duo-banner__d">绑定后就是只属于你们两个人的时间线</text>
+    </view>
+    <view class="duo-banner__btn" bindtap="onGoBind">去绑定</view>
+  </view>
+
+  <!-- 发布 -->
+  <view class="ay-card ay-glass ay-anim">
+    <view class="ay-card__hd"><text class="ay-card__title">✍️ 记录此刻</text></view>
+
+    <view class="duo-tabs">
+      <view class="duo-tab {{kind === item.key ? 'is-on' : ''}}"
+            wx:for="{{kinds}}" wx:key="key" bindtap="onKind" data-k="{{item.key}}">
+        {{item.emoji}} {{item.label}}
+      </view>
+    </view>
+
+    <view class="ay-field">
+      <text class="ay-field__label">标题</text>
+      <input class="ay-field__input" value="{{title}}" bindinput="onTitle"
+             placeholder="给这一刻起个名字" placeholder-class="ay-field__ph" maxlength="30" />
+    </view>
+
+    <view class="ay-field">
+      <text class="ay-field__label">日期</text>
+      <picker mode="date" value="{{date}}" bindchange="onDate">
+        <view class="ay-field__input">{{date}}</view>
+      </picker>
+    </view>
+
+    <textarea
+      class="duo-post-text"
+      value="{{text}}"
+      bindinput="onText"
+      placeholder="写点什么…"
+      placeholder-class="ay-field__ph"
+      maxlength="1000"
+      auto-height />
+
+    <!-- 配图 -->
+    <view class="duo-photos">
+      <view class="duo-photos__cell" wx:for="{{photos}}" wx:key="index">
+        <image class="duo-photos__img" src="{{item}}" mode="aspectFill"
+               bindtap="onPreview" data-i="{{index}}" />
+        <text class="duo-photos__x" bindtap="onDelPhoto" data-i="{{index}}">✕</text>
+      </view>
+      <view class="duo-photos__add" wx:if="{{photos.length < 9}}" bindtap="onPickImage">
+        <text>{{uploading ? '上传中…' : '＋'}}</text>
+      </view>
+    </view>
+
+    <view class="ay-wrap" style="margin-top:24rpx">
+      <view class="ay-btn ay-btn--block" hover-class="ay-btn--off" bindtap="onPublish">发布</view>
+    </view>
+  </view>
+
+  <!-- 时间线 -->
+  <view class="ay-card ay-glass">
+    <view class="duo-sec__hd">
+      <text class="duo-sec__t">🕰 我们的时间线</text>
+      <text class="duo-sec__x">{{posts.length}} 条</text>
+    </view>
+
+    <block wx:if="{{posts.length}}">
+      <view class="duo-post" wx:for="{{posts}}" wx:key="id">
+        <view class="duo-post__hd">
+          <text class="duo-post__kind">{{item.kindText}}</text>
+          <text class="duo-post__date">{{item.date}}</text>
+          <text class="duo-who {{item.mine ? 'duo-who--mine' : ''}}">{{item.who}}</text>
+          <text class="duo-post__date">{{item.at}}</text>
+        </view>
+
+        <text class="duo-post__title" wx:if="{{item.title}}">{{item.title}}</text>
+        <text class="duo-post__text" wx:if="{{item.text}}">{{item.text}}</text>
+
+        <view class="duo-post__photos" wx:if="{{item.photos.length}}">
+          <image class="duo-post__photo" wx:for="{{item.photos}}" wx:for-item="ph" wx:key="index"
+                 src="{{ph}}" mode="aspectFill" />
+        </view>
+
+        <view class="duo-post__foot">
+          <text class="duo-post__act" bindtap="onToggleCmt" data-id="{{item.id}}">
+            💬 评论 {{item.cmtCount ? '(' + item.cmtCount + ')' : ''}}
+          </text>
+          <text class="duo-post__act" bindtap="onDelPost" data-id="{{item.id}}">🗑 删除</text>
+        </view>
+
+        <!-- 评论 -->
+        <view class="duo-cmts" wx:if="{{item.open}}">
+          <block wx:if="{{item.cmts.length}}">
+            <view class="duo-cmt" wx:for="{{item.cmts}}" wx:for-item="c" wx:key="id">
+              <view class="duo-cmt__hd">
+                <text class="duo-cmt__name">{{c.name}}</text>
+                <text class="duo-cmt__at">{{c.at}}</text>
+                <text class="duo-cmt__del" wx:if="{{c.mine}}" bindtap="onDelCmt" data-id="{{c.id}}">删除</text>
+              </view>
+              <text class="duo-cmt__text">{{c.text}}</text>
+            </view>
+          </block>
+          <view class="duo-cmt__none" wx:else>还没有评论，来说两句</view>
+
+          <view class="duo-cmt__compose">
+            <input
+              class="duo-cmt__input"
+              value="{{cmtDraft}}"
+              bindinput="onCmtInput"
+              placeholder="写评论…"
+              placeholder-class="ay-field__ph"
+              maxlength="200"
+              cursor-spacing="20" />
+            <text class="duo-cmt__send" bindtap="onSendCmt" data-id="{{item.id}}">发送</text>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <view class="ay-empty" wx:else>
+      <view class="ay-empty__ico">📷</view>
+      <view class="ay-empty__t">还没有动态</view>
+      <view class="ay-empty__t" style="margin-top:8rpx">发一条图文，或把今天的日记存进来</view>
+    </view>
+  </view>
+
+  <view class="duo-safe" />
+</view>

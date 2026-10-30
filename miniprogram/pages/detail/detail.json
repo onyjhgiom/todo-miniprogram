@@ -1,0 +1,12 @@
+{
+  "navigationBarTitleText": "任务详情",
+  "navigationBarBackgroundColor": "#15110D",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#15110D",
+  "usingComponents": {
+    "subtask-list": "/components/subtask-list/subtask-list",
+    "attachment-bar": "/components/attachment-bar/attachment-bar",
+    "recurrence-editor": "/components/recurrence-editor/recurrence-editor",
+    "reminder-editor": "/components/reminder-editor/reminder-editor"
+  }
+}

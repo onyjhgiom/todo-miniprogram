@@ -1,0 +1,17 @@
+<game-shell title="{{title}}" timeText="{{timeText}}" statText="{{statText}}" paused="{{paused}}"
+  bind:back="onBack" bind:reset="onReset" bind:hint="onHint" bind:home="onHome" bind:pause="onPause">
+  <view class="pz">
+    <view class="row pz__bar">
+      <view class="chip {{size===3?'chip--active':''}}" data-size="3" bindtap="pick">3×3</view>
+      <view class="chip {{size===4?'chip--active':''}}" data-size="4" bindtap="pick">4×4</view>
+    </view>
+    <view class="pz__board" style="grid-template-columns: repeat({{size}}, 1fr);">
+      <view wx:for="{{tiles}}" wx:key="index"
+        class="pz__cell pz__cell--v{{item}} {{first===index?'pz__cell--sel':''}}"
+        data-index="{{index}}" bindtap="onTap">
+        <text class="pz__num serif">{{item}}</text>
+      </view>
+    </view>
+    <text class="t-xs muted-2 center mt-16">按顺序拼成 1~{{size*size}} 即完成</text>
+  </view>
+</game-shell>

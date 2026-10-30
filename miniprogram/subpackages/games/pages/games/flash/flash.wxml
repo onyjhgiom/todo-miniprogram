@@ -1,0 +1,12 @@
+<game-shell title="{{title}}" timeText="{{timeText}}" statText="{{statText}}" paused="{{paused}}"
+  bind:back="onBack" bind:reset="onReset" bind:hint="onHint" bind:home="onHome" bind:pause="onPause">
+  <view class="fl">
+    <text class="t-sm muted-2 center">{{phase==='show' ? '记住亮起的位置…' : '点出刚才亮起的所有格子'}}</text>
+    <view class="fl__board">
+      <view wx:for="{{cells}}" wx:key="index"
+        class="fl__cell {{item?'fl__cell--on':''}} {{phase==='input'?'fl__cell--tap':''}}"
+        data-index="{{index}}" bindtap="onTap"></view>
+    </view>
+    <text class="t-xs muted-2 center mt-16">本关需记住 {{count}} 个位置</text>
+  </view>
+</game-shell>

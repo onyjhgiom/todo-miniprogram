@@ -1,0 +1,297 @@
+/* components/todo-composer/todo-composer.wxss */
+
+.composer-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+.composer-modal--visible {
+  pointer-events: auto;
+}
+
+.composer-modal__mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(6rpx);
+  opacity: 0;
+  transition: opacity 0.28s ease;
+}
+.composer-modal--visible .composer-modal__mask {
+  opacity: 1;
+}
+
+.composer-modal__sheet {
+  position: relative;
+  background: var(--color-card);
+  border-top-left-radius: 36rpx;
+  border-top-right-radius: 36rpx;
+  padding: 12rpx 0 0;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 -16rpx 48rpx rgba(15, 23, 42, 0.12);
+}
+.composer-modal--visible .composer-modal__sheet {
+  transform: translateY(0);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.composer-modal__handle {
+  width: 80rpx;
+  height: 8rpx;
+  border-radius: 999rpx;
+  background: var(--color-border);
+  margin: 0 auto 8rpx;
+}
+
+.composer-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12rpx 36rpx 16rpx;
+}
+.composer-modal__title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: 0.2rpx;
+}
+.composer-modal__close {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-bg-soft);
+  color: var(--color-text-soft);
+  font-size: 36rpx;
+  line-height: 1;
+  transition: background 0.18s ease;
+}
+.composer-modal__close:active {
+  background: var(--color-border);
+}
+
+.composer-modal__body {
+  flex: 1;
+  padding: 8rpx 36rpx 24rpx;
+  min-height: 200rpx;
+  max-height: 70vh;
+}
+
+.composer-modal__footer {
+  display: flex;
+  gap: 20rpx;
+  padding: 20rpx 36rpx calc(20rpx + env(safe-area-inset-bottom));
+  border-top: 1rpx solid var(--color-border);
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+.composer-modal__btn {
+  flex: 1;
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 20rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.18s ease;
+}
+.composer-modal__btn--ghost {
+  background: var(--color-bg-soft);
+  color: var(--color-text-soft);
+}
+.composer-modal__btn--ghost:active {
+  background: var(--color-border);
+}
+.composer-modal__btn--primary {
+  background: var(--gradient-primary);
+  color: var(--color-bg-elevated);
+  box-shadow: 0 8rpx 24rpx var(--color-primary-shadow);
+}
+.composer-modal__btn--primary:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 4rpx 12rpx var(--color-primary-shadow);
+}
+
+/* ============ 表单字段 ============ */
+.field {
+  margin-bottom: 28rpx;
+}
+.field__label {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: var(--color-text-soft);
+  margin-bottom: 12rpx;
+  letter-spacing: 0.4rpx;
+}
+.field__placeholder {
+  color: var(--color-text-mute);
+}
+.field__input,
+.field__textarea,
+.field__picker-inner {
+  width: 100%;
+  background: var(--color-bg-soft);
+  border-radius: 20rpx;
+  padding: 28rpx 30rpx;
+  font-size: 32rpx;
+  color: var(--color-text);
+  line-height: 1.6;
+  border: 2rpx solid transparent;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+.field__input:focus,
+.field__textarea:focus {
+  border-color: var(--color-primary);
+  background: var(--color-bg-elevated);
+}
+.field__textarea {
+  min-height: 152rpx;
+}
+.field__textarea--small {
+  min-height: 112rpx;
+}
+.field__picker {
+  display: block;
+}
+.field__picker-inner {
+  display: block;
+  min-height: 112rpx;
+  line-height: 1.6;
+}
+.field__clear {
+  display: inline-block;
+  margin-top: 12rpx;
+  font-size: 26rpx;
+  color: var(--color-primary);
+  font-weight: 500;
+}
+.field__hint {
+  font-size: 24rpx;
+  color: var(--color-text-mute);
+  margin-top: 10rpx;
+}
+
+/* ============ 优先级 segment ============ */
+.priority-segment {
+  display: flex;
+  gap: 12rpx;
+  background: var(--color-bg-soft);
+  padding: 8rpx;
+  border-radius: 18rpx;
+}
+.priority-segment__item {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx 0;
+  font-size: 26rpx;
+  border-radius: 14rpx;
+  color: var(--color-text-soft);
+  font-weight: 500;
+  transition: all 0.18s ease;
+  position: relative;
+}
+.priority-segment__item--active.priority-segment__item--high {
+  background: var(--color-bg-elevated);
+  color: #F08A8A;
+  box-shadow: 0 2rpx 8rpx rgba(244, 63, 94, 0.18);
+  font-weight: 600;
+}
+.priority-segment__item--active.priority-segment__item--medium {
+  background: var(--color-bg-elevated);
+  color: #E8B26E;
+  box-shadow: 0 2rpx 8rpx rgba(245, 158, 11, 0.18);
+  font-weight: 600;
+}
+.priority-segment__item--active.priority-segment__item--low {
+  background: var(--color-bg-elevated);
+  color: #9CC49C;
+  box-shadow: 0 2rpx 8rpx rgba(16, 185, 129, 0.18);
+  font-weight: 600;
+}
+
+/* ============ chip 输入 ============ */
+.chips-input {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+  background: var(--color-bg-soft);
+  border-radius: 20rpx;
+  padding: 20rpx 22rpx;
+  min-height: 108rpx;
+  align-items: center;
+  border: 2rpx solid transparent;
+  transition: border-color 0.18s ease;
+}
+.chips-input:focus-within {
+  border-color: var(--color-primary);
+  background: var(--color-bg-elevated);
+}
+.chips-input__field {
+  flex: 1;
+  min-width: 220rpx;
+  font-size: 30rpx;
+  color: var(--color-text);
+  padding: 8rpx 6rpx;
+  background: transparent;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 6rpx 12rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  font-weight: 500;
+  max-width: 100%;
+}
+.chip--people {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-deep);
+}
+.chip--tag {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8C6E30;
+}
+.chip__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 240rpx;
+}
+.chip__x {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28rpx;
+  height: 28rpx;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.06);
+  color: inherit;
+  font-size: 22rpx;
+  line-height: 1;
+  font-weight: 600;
+}
+.chip__x:active {
+  background: rgba(15, 23, 42, 0.14);
+}
+
+/* 即时按压反馈（view 需 hover-class 才生效） */
+.cmp-press {
+  opacity: 0.7;
+  transform: scale(0.97);
+}

@@ -1,0 +1,502 @@
+@import "../../../../styles/tool-shell.wxss";
+
+/* subpackages/travel/pages/packing/packing.wxss */
+
+.tshell__wrap {
+  padding-bottom: 160rpx;
+}
+
+/* ===== 进度头 ===== */
+.ph {
+  padding: 24rpx;
+}
+.ph__top {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+}
+.ph__texts {
+  flex: 1;
+  min-width: 0;
+}
+.ph__title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.ph__sub {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: var(--color-text-mute);
+}
+.ph__ops {
+  display: flex;
+  gap: 10rpx;
+  flex-shrink: 0;
+}
+.ph__op {
+  padding: 10rpx 20rpx;
+  border-radius: 999rpx;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 22rpx;
+  font-weight: 600;
+}
+.ph__num {
+  margin-top: 22rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.ph__bar {
+  margin-top: 12rpx;
+  height: 16rpx;
+  border-radius: 999rpx;
+  background: var(--color-bg-soft);
+  overflow: hidden;
+}
+.ph__barfill {
+  height: 100%;
+  border-radius: 999rpx;
+  background: var(--color-primary);
+  transition: width 0.3s ease;
+}
+.ph__warn {
+  margin-top: 14rpx;
+  font-size: 22rpx;
+  color: var(--color-warning, #C0703F);
+}
+.ph__done {
+  margin-top: 14rpx;
+  font-size: 22rpx;
+  color: var(--color-success, #6E8E6E);
+  font-weight: 600;
+}
+
+/* ===== 筛选 ===== */
+.filters {
+  padding: 18rpx 20rpx;
+}
+.filters__row,
+.filters__batch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+.filters__batch {
+  margin-top: 14rpx;
+  padding-top: 14rpx;
+  border-top: 1rpx solid var(--color-border);
+}
+.fchip {
+  padding: 10rpx 20rpx;
+  border-radius: 999rpx;
+  border: 1rpx solid var(--color-border);
+  background: var(--color-bg-elevated);
+  font-size: 23rpx;
+  color: var(--color-text-soft);
+}
+.fchip.is-on {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+.fchip--mute {
+  background: transparent;
+  border-style: dashed;
+  color: var(--color-text-mute);
+}
+
+/* ===== 分组 ===== */
+.grp {
+  padding: 0;
+  overflow: hidden;
+}
+.grp__head {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 22rpx 24rpx;
+}
+.grp__emo {
+  font-size: 30rpx;
+}
+.grp__name {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.grp__count {
+  flex: 1;
+  font-size: 22rpx;
+  color: var(--color-text-mute);
+}
+.grp__ess {
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  background: rgba(192, 82, 47, 0.12);
+  color: var(--color-danger, #C0522F);
+  font-size: 20rpx;
+}
+.grp__fold {
+  font-size: 22rpx;
+  color: var(--color-text-mute);
+}
+
+.grp__body {
+  padding: 0 24rpx 8rpx;
+}
+
+/* ===== 物品 ===== */
+.item {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 18rpx 0;
+  border-top: 1rpx solid var(--color-border);
+}
+.item.is-done {
+  opacity: 0.5;
+}
+.item.is-done .item__name {
+  text-decoration: line-through;
+}
+.item__circle {
+  flex-shrink: 0;
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  border: 2rpx solid var(--color-input-line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.item__circle.is-on {
+  background: var(--color-success, #6E8E6E);
+  border-color: var(--color-success, #6E8E6E);
+}
+.item__tick {
+  font-size: 26rpx;
+  color: #fff;
+  font-weight: 700;
+}
+.item__check {
+  flex-shrink: 0;
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  border: 2rpx solid var(--color-input-line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  color: #fff;
+}
+.item__check.is-on {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.item__main {
+  flex: 1;
+  min-width: 0;
+}
+.item__line1 {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+.item__name {
+  font-size: 27rpx;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.item__count {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  color: var(--color-text-mute);
+}
+.item__ess {
+  flex-shrink: 0;
+  padding: 3rpx 12rpx;
+  border-radius: 999rpx;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 19rpx;
+}
+.item__line2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 6rpx;
+}
+.item__meta {
+  font-size: 21rpx;
+  color: var(--color-text-mute);
+}
+.item__meta--note {
+  color: var(--color-text-soft);
+}
+
+/* ===== 危险区 ===== */
+.danger {
+  padding: 20rpx 24rpx;
+}
+.danger__btn {
+  text-align: center;
+  font-size: 24rpx;
+  color: var(--color-danger, #C0522F);
+}
+
+/* ===== FAB ===== */
+.fab {
+  position: fixed;
+  right: 40rpx;
+  bottom: 60rpx;
+  z-index: 90;
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 52rpx;
+  line-height: 92rpx;
+  text-align: center;
+  box-shadow: var(--shadow-lg, 0 8rpx 24rpx rgba(0, 0, 0, 0.2));
+}
+
+/* ===== 撒花 ===== */
+.confetti {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  pointer-events: none;
+  overflow: hidden;
+}
+.confetti__dot {
+  position: absolute;
+  top: -40rpx;
+  border-radius: 3rpx;
+  animation: fall 2.4s linear forwards;
+}
+@keyframes fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(1400rpx) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* ===== 弹层 ===== */
+.mask {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--color-overlay);
+  display: flex;
+  align-items: flex-end;
+}
+.gen,
+.sheet {
+  width: 100%;
+  max-height: 84vh;
+  overflow-y: auto;
+  padding: 32rpx 28rpx 40rpx;
+  border-radius: 28rpx 28rpx 0 0;
+  background: var(--color-bg-elevated);
+}
+.gen__title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.gen__sub {
+  margin-top: 8rpx;
+  font-size: 23rpx;
+  color: var(--color-text-mute);
+}
+.gen__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+  margin-top: 24rpx;
+}
+.gchip {
+  width: calc(50% - 7rpx);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 18rpx 16rpx;
+  border-radius: var(--radius-md, 16rpx);
+  border: 1rpx solid var(--color-border);
+  background: var(--color-bg);
+}
+.gchip.is-on {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+.gchip__emo {
+  font-size: 32rpx;
+  flex-shrink: 0;
+}
+.gchip__texts {
+  min-width: 0;
+}
+.gchip__name {
+  display: block;
+  font-size: 25rpx;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.gchip__desc {
+  display: block;
+  margin-top: 4rpx;
+  font-size: 20rpx;
+  color: var(--color-text-mute);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gen__quick {
+  margin-top: 28rpx;
+  padding-top: 22rpx;
+  border-top: 1rpx solid var(--color-border);
+}
+.gen__quicktitle {
+  font-size: 24rpx;
+  color: var(--color-text-soft);
+}
+.gen__quickrow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 14rpx;
+}
+.qchip {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 18rpx;
+  border-radius: 999rpx;
+  background: var(--color-bg);
+  border: 1rpx solid var(--color-border);
+}
+.qchip__name {
+  font-size: 23rpx;
+  color: var(--color-text);
+}
+.qchip__n {
+  font-size: 20rpx;
+  color: var(--color-text-mute);
+}
+
+.gen__ops,
+.sheet__ops {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 30rpx;
+}
+.gen__ops .ts-btn,
+.sheet__ops .ts-btn {
+  flex: 1;
+}
+
+/* 编辑弹层字段（与 trip-detail 保持一致的手感） */
+.sheet__title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 24rpx;
+}
+.sheet__field {
+  margin-bottom: 22rpx;
+}
+.sheet__field--row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sheet__label {
+  display: block;
+  margin-bottom: 10rpx;
+  font-size: 23rpx;
+  color: var(--color-text-soft);
+}
+.sheet__field--row .sheet__label {
+  margin-bottom: 0;
+}
+/* ⚠️ 原生 <input> 必须显式定高：box-sizing: border-box + 竖向 padding 会把 input
+ * 自带的默认高度吃光，占位文字被裁半截（详见 trip-edit.wxss 的注释）。 */
+.sheet__input {
+  width: 100%;
+  height: 88rpx;
+  box-sizing: border-box;
+  padding: 0 22rpx;
+  border-radius: var(--radius-md, 16rpx);
+  border: 1rpx solid var(--color-input-line);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 27rpx;
+}
+/* 占位文案走主题弱化色（input / textarea 共用） */
+.sheet__ph {
+  color: var(--color-text-mute);
+}
+/* textarea 要保留竖向 padding（多行文字需要行内留白），只把高度放宽一点 */
+.sheet__area {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 140rpx;
+  padding: 18rpx 20rpx;
+  border-radius: var(--radius-md, 16rpx);
+  border: 1rpx solid var(--color-input-line);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 27rpx;
+}
+/* picker 是 <view>，定高后需自己居中；高度与 .sheet__input 对齐 */
+.sheet__picker {
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 22rpx;
+  border-radius: var(--radius-md, 16rpx);
+  border: 1rpx solid var(--color-input-line);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 27rpx;
+}
+
+/* 数量步进器 */
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+.stepper__btn {
+  width: 68rpx;
+  height: 68rpx;
+  border-radius: 50%;
+  background: var(--color-bg-soft);
+  color: var(--color-text);
+  font-size: 34rpx;
+  line-height: 68rpx;
+  text-align: center;
+}
+.stepper__val {
+  min-width: 70rpx;
+  text-align: center;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.press {
+  opacity: 0.86;
+}

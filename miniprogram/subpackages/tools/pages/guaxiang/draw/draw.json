@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "六爻涂爻",
+  "navigationBarBackgroundColor": "#15110D",
+  "navigationBarTextStyle": "white",
+  "usingComponents": {
+    "fx-stage": "/components/fx-stage/fx-stage"
+  }
+}

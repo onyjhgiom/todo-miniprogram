@@ -1,0 +1,186 @@
+<!--pages/love/couple/couple.wxml-->
+<view class="ay" style="{{skin.style}}">
+
+  <!-- 头部 -->
+  <view class="ay-hero">
+    <view class="ay-hero__row">
+      <view>
+        <view class="ay-hero__title">双人空间</view>
+        <view class="ay-hero__sub">{{subTitle}}</view>
+      </view>
+      <view class="ay-hero__badge">{{statusText}}</view>
+    </view>
+
+    <view class="ay-hero__stats" wx:if="{{bound}}">
+      <view class="ay-hero__stat">
+        <text class="ay-hero__stat-n">{{togetherDays >= 0 ? togetherDays : '—'}}</text>
+        <text class="ay-hero__stat-l">在一起（天）</text>
+      </view>
+      <view class="ay-hero__stat">
+        <text class="ay-hero__stat-n">{{counts.msg}}</text>
+        <text class="ay-hero__stat-l">私密留言</text>
+      </view>
+      <view class="ay-hero__stat">
+        <text class="ay-hero__stat-n">{{counts.wish + counts.task}}</text>
+        <text class="ay-hero__stat-l">心愿约定</text>
+      </view>
+      <view class="ay-hero__stat">
+        <text class="ay-hero__stat-n">{{counts.post}}</text>
+        <text class="ay-hero__stat-l">双人动态</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 未绑定：绑定引导 ===== -->
+  <block wx:if="{{!bound}}">
+    <view class="ay-card ay-glass ay-anim">
+      <view class="ay-card__hd">
+        <text class="ay-card__title">💞 先和 TA 绑定</text>
+      </view>
+
+      <view class="duo-tabs">
+        <view class="duo-tab {{tab === 'create' ? 'is-on' : ''}}" bindtap="onTab" data-t="create">我发起邀请</view>
+        <view class="duo-tab {{tab === 'join' ? 'is-on' : ''}}" bindtap="onTab" data-t="join">我有邀请码</view>
+      </view>
+
+      <block wx:if="{{tab === 'create'}}">
+        <view class="duo-code" wx:if="{{code}}">
+          <text class="duo-code__n">{{code}}</text>
+          <text class="duo-code__tip">让 TA 在「双人空间」里输入这 6 位邀请码即可配对</text>
+        </view>
+        <view class="ay-wrap">
+          <view class="ay-btn ay-btn--block" hover-class="ay-btn--off" bindtap="onCreateCode">
+            {{code ? '换个新邀请码' : '生成邀请码'}}
+          </view>
+          <view class="ay-btn ay-btn--ghost ay-btn--block" wx:if="{{code}}" bindtap="onCopyCode">复制邀请码发给 TA</view>
+          <view class="ay-btn ay-btn--ghost ay-btn--block" wx:if="{{code}}" bindtap="onRefreshCode">重新生成</view>
+        </view>
+      </block>
+
+      <block wx:else>
+        <view class="ay-field">
+          <input
+            class="ay-field__input"
+            placeholder="输入 TA 的 6 位邀请码"
+            placeholder-class="ay-field__ph"
+            value="{{inputCode}}"
+            maxlength="6"
+            bindinput="onInputCode" />
+        </view>
+        <view class="ay-wrap" style="margin-top:24rpx">
+          <view class="ay-btn ay-btn--block" hover-class="ay-btn--off" bindtap="onJoin">配对</view>
+        </view>
+      </block>
+
+      <text class="duo-hint">配对后，留言、心情、心愿、动态等才会双向同步。未绑定时这些内容依然可以记录，只是仅你自己可见。</text>
+    </view>
+  </block>
+
+  <!-- ===== 已绑定：关系概览 ===== -->
+  <block wx:if="{{bound}}">
+    <!-- 今日心情对照 -->
+    <view class="ay-card ay-glass ay-anim">
+      <view class="ay-card__hd">
+        <text class="ay-card__title">😊 今天的心情</text>
+        <text class="ay-card__more" bindtap="onEntry" data-key="mood">去打卡 ›</text>
+      </view>
+      <view class="duo-pair">
+        <view class="duo-pair__side {{myMood ? '' : 'duo-pair__side--empty'}}">
+          <text class="duo-pair__who">我</text>
+          <text class="duo-pair__emoji">{{myMood ? myMood.emoji : '❔'}}</text>
+          <text class="duo-pair__label">{{myMood ? myMood.label : '还没打卡'}}</text>
+        </view>
+        <view class="duo-pair__side {{taMood ? '' : 'duo-pair__side--empty'}}">
+          <text class="duo-pair__who">{{partner}}</text>
+          <text class="duo-pair__emoji">{{taMood ? taMood.emoji : '❔'}}</text>
+          <text class="duo-pair__label">{{taMood ? taMood.label : '还没打卡'}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 最近纪念日 -->
+    <view class="ay-card ay-glass" wx:if="{{nextAnniv}}">
+      <view class="ay-card__hd">
+        <text class="ay-card__title">🎂 快要到了</text>
+        <text class="ay-card__more" bindtap="onEntry" data-key="anniv">全部 ›</text>
+      </view>
+      <view class="duo-anniv">
+        <view class="duo-anniv__days">
+          <text class="duo-anniv__n">{{nextAnniv.days}}</text>
+          <text class="duo-anniv__u">天后</text>
+        </view>
+        <view class="duo-anniv__main">
+          <text class="duo-anniv__t">{{nextAnniv.title}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- TA 的最新留言 -->
+    <view class="ay-card ay-glass" wx:if="{{lastMsg}}">
+      <view class="ay-card__hd">
+        <text class="ay-card__title">💌 最新留言</text>
+        <text class="ay-card__more" bindtap="onEntry" data-key="letter">去留言 ›</text>
+      </view>
+      <view class="duo-bubble {{lastMsg.mine ? 'duo-bubble--mine' : ''}}">
+        <view class="duo-bubble__box">
+          <text class="duo-bubble__text">{{lastMsg.text}}</text>
+          <text class="duo-bubble__meta">{{lastMsg.mine ? '我' : partner}} · {{lastMsg.at}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- TA 的互动 -->
+    <view class="ay-card ay-glass" wx:if="{{lastSignal}}">
+      <view class="ay-card__hd"><text class="ay-card__title">🔔 TA 的互动</text></view>
+      <view class="ay-row">
+        <text class="ay-row__ico">{{lastSignal.emoji}}</text>
+        <view class="ay-row__main">
+          <view class="ay-row__t">{{partner}} {{lastSignal.label}}</view>
+          <view class="ay-row__d">{{lastSignal.at}}</view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== 快捷互动（未绑定也可自娱自乐，仅自己可见） ===== -->
+  <view class="ay-card ay-glass">
+    <view class="ay-card__hd"><text class="ay-card__title">✨ 一个小动作</text></view>
+    <view class="duo-acts">
+      <view class="duo-act" wx:for="{{signals}}" wx:key="key" hover-class="ay-btn--off"
+            bindtap="onSignal" data-k="{{item.key}}">
+        <text class="duo-act__ico">{{item.emoji}}</text>
+        <text class="duo-act__t">{{item.label}}</text>
+      </view>
+    </view>
+    <text class="duo-hint" wx:if="{{!bound}}">未绑定时这些互动只记录在自己这里；绑定后 TA 会立刻收到。</text>
+  </view>
+
+  <!-- ===== 双人功能入口 ===== -->
+  <view class="ay-card ay-glass">
+    <view class="ay-card__hd"><text class="ay-card__title">🌷 双人功能</text></view>
+    <view class="duo-acts">
+      <view class="duo-act" wx:for="{{entries}}" wx:key="key" hover-class="ay-btn--off"
+            bindtap="onEntry" data-key="{{item.key}}">
+        <text class="duo-act__ico">{{item.icon}}</text>
+        <text class="duo-act__t">{{item.name}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 云端状态 + 解除绑定 -->
+  <view class="ay-card ay-glass" wx:if="{{bound}}">
+    <view class="ay-card__hd"><text class="ay-card__title">⚙️ 关系管理</text></view>
+    <view class="ay-row">
+      <text class="ay-row__ico">{{cloudOn ? '☁️' : '📴'}}</text>
+      <view class="ay-row__main">
+        <view class="ay-row__t">{{cloudOn ? '云端同步已开启' : '云端未连接（本地模式）'}}</view>
+        <view class="ay-row__d">{{cloudOn ? '新增内容会自动同步给 TA' : '内容暂存在本机，联网后自动同步'}}</view>
+      </view>
+    </view>
+    <view class="ay-wrap" style="margin-top:20rpx">
+      <view class="ay-btn ay-btn--ghost ay-btn--block" bindtap="onLeave">解除绑定</view>
+    </view>
+  </view>
+
+  <view class="duo-safe" />
+</view>

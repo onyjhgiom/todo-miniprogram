@@ -1,0 +1,255 @@
+<!--pages/astro/index.wxml
+  星语星球 · 沉浸式 3D 星象仪表盘
+
+  结构（对应需求的页面树）：
+    AstroHome
+    ├── CosmicBackground   动态宇宙背景（2 团星云 + 星尘 + 环境辉光，20~40s 慢周期）
+    ├── AstroHeader        副标题 + 主标题（压在星球上方）
+    ├── AstroSphere        3D 星球（Canvas 2D：玻璃球 + 内部星云 + 星座 + 轨道 + 核心）
+    ├── 本命星座选择器      既有业务逻辑（切星座 → 同步运势页）
+    ├── DailyEnergy        今日能量（大数字 + 四维分值）
+    ├── AIInsight          AI 今日星象 + 「AI 为你解读」
+    ├── AstroFeatures      功能卡（3D 图标 / 标题 / 副标题 / 能量色）
+    ├── 立即测算 CTA
+    ├── 最近足迹            既有业务逻辑（保留，空则隐藏）
+    └── BottomNavigation   底部导航
+
+  入场节奏（stage 由 ts 用定时器推进；prefers-reduced-motion 时直接到末态）
+    1 背景+标题 → 2 星球 → 3 星座+今日能量 → 4 AI+功能 → 5 CTA+导航
+-->
+<view class="astro-home {{wide ? 'is-wide' : ''}} {{wideXl ? 'is-wide-xl' : ''}}" style="{{uUnit ? '--u: ' + uUnit : ''}}">
+
+  <!-- ============ 一、CosmicBackground：动态宇宙背景 ============ -->
+  <view class="cbg">
+    <view class="cbg__nebula cbg__nebula--1"></view>
+    <view class="cbg__nebula cbg__nebula--2"></view>
+    <view class="cbg__dust"></view>
+    <view class="cbg__glow"></view>
+    <view class="cbg__horizon"></view>
+  </view>
+
+  <!-- ============ 二、AstroHeader + 三、AstroSphere（Hero） ============ -->
+  <view class="hero {{stage >= 2 ? 'is-on' : ''}}">
+    <view class="hero__canvas">
+      <astro-sphere
+        id="sphere"
+        signs="{{signs}}"
+        active="{{signKey}}"
+        reduced="{{reducedMotion}}"
+        paused="{{spherePaused}}"
+        auto-spin="{{true}}"
+        height="{{720}}"
+        bind:node="onTapNode"
+        bind:core="onTapCore"
+      ></astro-sphere>
+    </view>
+
+    <view class="hero__text {{stage >= 1 ? 'is-on' : ''}}">
+      <view class="hero__sub">星辰为你指引 · 每一颗星都在说爱你</view>
+      <view class="hero__title">星语星球</view>
+    </view>
+
+    <view class="hero__note {{stage >= 2 ? 'is-on' : ''}}">
+      <text>在这里</text>
+      <text>遇见更好的自己 ♡</text>
+    </view>
+
+    <view class="hero__hint {{stage >= 2 ? 'is-on' : ''}}">拖动星球探索 · 点击星座看今日能量</view>
+  </view>
+
+  <!-- ============ 本命星座选择器（既有业务逻辑） ============ -->
+  <scroll-view class="zodiac {{stage >= 3 ? 'is-on' : ''}}" scroll-x="true" enhanced="true" show-scrollbar="{{false}}">
+    <view class="zodiac__inner">
+      <view
+        wx:for="{{zodiacs}}"
+        wx:key="key"
+        class="zodiac__item {{signKey === item.key ? 'is-active' : ''}}"
+        hover-class="zodiac__item--hover"
+        hover-stay-time="60"
+        bindtap="onPickSign"
+        data-key="{{item.key}}"
+      >
+        <image class="zodiac__icon" src="{{item.icon}}" mode="aspectFit" binderror="onImgErr"></image>
+        <text class="zodiac__name">{{item.name}}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- ============ 五、DailyEnergy：今日能量 ============ -->
+  <view class="energy {{stage >= 3 ? 'is-on' : ''}}" id="energyCard" bindtap="onTapEnergyCard">
+    <view class="energy__hd">
+      <view class="energy__tag">
+        <text class="energy__spark">✧</text>
+        <text>今日 · {{zodiacName}}</text>
+      </view>
+      <view class="energy__date">{{date}}</view>
+    </view>
+
+    <view class="energy__body">
+      <!-- 综合运势环 -->
+      <view class="ring" hover-class="ring--hover" hover-stay-time="60">
+        <view class="ring__glow"></view>
+        <view class="ring__inner">
+          <text class="ring__num">{{energyShown}}</text>
+          <text class="ring__unit">/100</text>
+        </view>
+        <text class="ring__label">综合运势</text>
+      </view>
+
+      <!-- 文案 + 四维分值 -->
+      <view class="energy__right">
+        <text class="energy__summary">{{aiSummary}}</text>
+        <view class="dims">
+          <view class="dim" wx:for="{{dims}}" wx:key="key">
+            <view class="dim__hd">
+              <text class="dim__ico">{{item.icon}}</text>
+              <text class="dim__label">{{item.label}}</text>
+              <text class="dim__val">{{item.value}}</text>
+            </view>
+            <view class="dim__bar"><view class="dim__in" style="width:{{item.percent}}%"></view></view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="energy__foot">
+      <text>轻触星球核心注入能量 · 点一次综合运势 +1</text>
+      <text class="energy__pulse" wx:if="{{pulseCount > 0}}">已注入 {{pulseCount}} 次 ♡</text>
+    </view>
+  </view>
+
+  <!-- ============ 七、AIInsight：AI 今日星象 ============ -->
+  <view class="ai {{stage >= 4 ? 'is-on' : ''}}">
+    <view class="ai__hd">
+      <view class="ai__avatar">✦</view>
+      <view class="ai__meta">
+        <text class="ai__t">AI 今日星象</text>
+        <text class="ai__s">基于你的本命星座与今日天象</text>
+      </view>
+      <view class="ai__moon" wx:if="{{moonName}}">
+        <text class="ai__moonico">🌙</text>
+        <text class="ai__moontx">{{moonName}}</text>
+      </view>
+    </view>
+
+    <view class="ai__quote">{{aiSummary}}</view>
+
+    <view class="ai__scores">
+      <view class="ai__score" wx:for="{{dims}}" wx:key="key">
+        <text class="ai__scoreico">{{item.icon}}</text>
+        <text class="ai__scorev">{{item.value}}</text>
+        <text class="ai__scorel">{{item.label}}</text>
+      </view>
+    </view>
+
+    <view class="ai__cta" hover-class="ai__cta--hover" hover-stay-time="60" bindtap="onOpenAi">
+      <text class="ai__ctatx">AI 为你解读</text>
+      <text class="ai__ctaarrow">→</text>
+    </view>
+  </view>
+
+  <!-- ============ 八、AstroFeatures：功能模块（统一卡片规格 + 显式分组） ============
+       八个模块共用同一套排布：3D 图标 → 标题 → 描述（自上而下，顺序固定）。
+       列数由 flex/grid 自适应：手机 2 列，平板 / PC 宽窗自动升到 4 列，
+       因此不会再出现「每行只有一两个、右侧空一大片」的不平衡留白。 -->
+  <view class="feats {{stage >= 4 ? 'is-on' : ''}}">
+    <view class="feats__hd">
+      <text class="feats__t">功能模块</text>
+      <text class="feats__s">八个入口，同一套排布</text>
+    </view>
+
+    <view class="fgroup" wx:for="{{featureGroups}}" wx:for-item="grp" wx:for-index="gi" wx:key="label">
+      <view class="fgroup__hd">
+        <view class="fgroup__bar"></view>
+        <text class="fgroup__t">{{grp.label}}</text>
+        <text class="fgroup__hint">{{grp.hint}}</text>
+      </view>
+
+      <view class="fgrid">
+        <view
+          class="fcard"
+          wx:for="{{grp.items}}"
+          wx:for-item="f"
+          wx:for-index="fi"
+          wx:key="id"
+          hover-class="fcard--hover"
+          hover-stay-time="60"
+          style="animation-delay:{{f.order * 70}}ms"
+          bindtap="onOpenModule"
+          data-route="{{f.route}}"
+        >
+          <view class="fcard__ico ico-{{f.tone}}">
+            <view class="fcard__glyph">{{f.icon}}</view>
+            <view class="fcard__shine"></view>
+          </view>
+          <text class="fcard__badge" wx:if="{{f.badge}}">{{f.badge}}</text>
+          <text class="fcard__name">{{f.name}}</text>
+          <text class="fcard__desc">{{f.desc}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ============ 立即测算 CTA ============ -->
+  <view class="cta {{stage >= 5 ? 'is-on' : ''}}" hover-class="cta--hover" hover-stay-time="60" bindtap="onOpenHoroscope">
+    <view class="cta__orb"></view>
+    <view class="cta__body">
+      <text class="cta__t">开启你的专属星盘</text>
+      <text class="cta__s">探索属于你的星辰轨迹</text>
+    </view>
+    <view class="cta__btn"><text>立即测算</text><text class="cta__arrow">→</text></view>
+  </view>
+
+  <!-- ============ 最近足迹（既有业务逻辑，空则隐藏） ============ -->
+  <view class="recent {{stage >= 5 ? 'is-on' : ''}}" wx:if="{{recentList.length}}">
+    <view class="recent__hd"><text class="recent__t">最近足迹</text></view>
+    <view class="recent__list">
+      <view wx:for="{{recentList}}" wx:key="id" class="recent__row"
+        hover-class="recent__row--hover" hover-stay-time="50"
+        bindtap="onOpenRecent" data-route="{{item.route}}">
+        <text class="recent__ico">{{item.icon}}</text>
+        <view class="recent__body">
+          <text class="recent__name">{{item.name}}</text>
+          <text class="recent__time">{{item.timeLabel}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="astro-foot">所有数据只存在你的手机里 · 星辰只为你亮着</view>
+
+  <!-- ============ BottomNavigation ============ -->
+  <view class="bnav">
+    <view
+      wx:for="{{navs}}"
+      wx:key="key"
+      class="bnav__i {{navActive === item.key ? 'is-on' : ''}}"
+      hover-class="bnav__i--hover"
+      hover-stay-time="50"
+      bindtap="onNav"
+      data-key="{{item.key}}"
+    >
+      <text class="bnav__ic">{{item.icon}}</text>
+      <text class="bnav__tx">{{item.name}}</text>
+    </view>
+  </view>
+
+  <!-- ============ AstrologyDetail：点星座节点弹出 ============ -->
+  <view class="mask" wx:if="{{detail}}" bindtap="onCloseDetail">
+    <view class="detail" catchtap="noop">
+      <view class="detail__halo"></view>
+      <view class="detail__name">{{detail.name}}</view>
+      <view class="detail__energy">
+        <text class="detail__elabel">今日能量</text>
+        <text class="detail__eval">{{detail.energy}}</text>
+        <text class="detail__eunit">/10</text>
+      </view>
+      <view class="detail__bar"><view class="detail__bin" style="width:{{detail.percent}}%"></view></view>
+      <view class="detail__hint">{{detail.hint}}</view>
+      <view class="detail__acts">
+        <view class="detail__btn detail__btn--ghost" bindtap="onCloseDetail">知道了</view>
+        <view class="detail__btn" bindtap="onSetActiveFromDetail">设为本命星座</view>
+      </view>
+    </view>
+  </view>
+</view>

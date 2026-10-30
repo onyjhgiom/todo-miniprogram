@@ -1,0 +1,68 @@
+/* components/streak-card/streak-card.wxss
+ * 统一卡片规格：左右 24u / 上下 18u（与 task / stats / moti 同值），
+ * 四张卡文字左边线因此完全重合。
+ * 【2026-10-06 收紧】内边距、圆角、大数字（40u → 30u）、圆点尺寸同步下调。 */
+.streak {
+  box-sizing: border-box;
+  padding: calc(14 * var(--u, 1rpx)) calc(22 * var(--u, 1rpx));
+  border-radius: calc(24 * var(--u, 1rpx));
+  background: rgba(255, 255, 255, 0.82);
+  border: calc(1 * var(--u, 1rpx)) solid rgba(120, 140, 170, 0.08);
+  box-shadow: 0 calc(8 * var(--u, 1rpx)) calc(28 * var(--u, 1rpx)) rgba(60, 80, 120, 0.06);
+}
+.streak__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.streak__cap {
+  font-size: calc(21 * var(--u, 1rpx));
+  font-weight: 600;
+  letter-spacing: 0;
+  color: #2E3644;
+  white-space: nowrap;
+}
+.streak__days {
+  display: flex;
+  align-items: baseline;
+  gap: calc(3 * var(--u, 1rpx));
+}
+.streak__days-n {
+  font-size: calc(27 * var(--u, 1rpx));
+  font-weight: 700;
+  line-height: 1;
+  color: #5F76BE;
+  font-variant-numeric: tabular-nums;
+}
+.streak__days-u {
+  font-size: calc(19 * var(--u, 1rpx));
+  color: #7C8AA2;
+  white-space: nowrap;
+}
+
+.streak__dots {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: calc(11 * var(--u, 1rpx));
+}
+.streak__dot {
+  flex: 1;
+  max-width: calc(34 * var(--u, 1rpx));
+  height: calc(12 * var(--u, 1rpx));
+  border-radius: calc(999 * var(--u, 1rpx));
+  background: rgba(120, 140, 170, 0.14);
+  transition: background 300ms ease;
+}
+.streak__dot.is-on {
+  background: linear-gradient(90deg, #7188D1, #8EA6E8);
+  box-shadow: 0 calc(2 * var(--u, 1rpx)) calc(8 * var(--u, 1rpx)) rgba(113, 136, 209, 0.35);
+}
+
+.streak__msg {
+  display: block;
+  margin-top: calc(10 * var(--u, 1rpx));
+  font-size: calc(19 * var(--u, 1rpx));
+  line-height: 1.5;
+  color: #6E7B92;
+}

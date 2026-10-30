@@ -1,0 +1,718 @@
+<!--subpackages/toolbox/pages/important-day/important-day.wxml
+  重要日 · 时间管理中心
+  结构对齐参考图：天空 Hero（标语 + ＋）→ 玻璃核心卡 → 即将到来/已过期 Tab
+  → 考研倒计时 → 重要日列表 / 高级空状态 → 底部 Better Me Every Day 装饰。
+-->
+<view class="imp">
+
+  <!-- ================= 天空 Hero（含自定义导航） ================= -->
+  <view class="sky">
+    <view class="sky__wash"></view>
+    <view class="sky__cloud sky__cloud--1"></view>
+    <view class="sky__cloud sky__cloud--2"></view>
+    <view class="sky__cloud sky__cloud--3"></view>
+    <view class="sky__cloud sky__cloud--4"></view>
+    <view class="sky__sun"></view>
+    <view class="sky__glow"></view>
+
+    <!-- 城市天际线（左低右高，右侧为陆家嘴簇） -->
+    <view class="sky__city">
+      <view
+        wx:for="{{city}}"
+        wx:key="k"
+        class="sky__b"
+        style="left:{{item.l}}%;width:{{item.w}}%;height:{{item.h}}%;opacity:{{item.o}}"
+      ></view>
+      <!-- 东方明珠：尖塔 + 双球 -->
+      <view class="sky__tower">
+        <view class="sky__tower-spire"></view>
+        <view class="sky__tower-ball sky__tower-ball--top"></view>
+        <view class="sky__tower-ball sky__tower-ball--bot"></view>
+        <view class="sky__tower-shaft"></view>
+      </view>
+    </view>
+    <view class="sky__water"></view>
+    <view class="sky__fade"></view>
+
+    <!-- 导航 -->
+    <view class="nav {{navBlur ? 'nav--blur' : ''}}" style="padding-top:{{statusBarH}}px">
+      <view class="nav__row" style="height:{{navH}}px">
+        <view class="nav__back" hover-class="press" bindtap="onBack">
+          <view class="ic ic--back"></view>
+        </view>
+        <view class="nav__title">重要日</view>
+        <view class="nav__acts" style="right:{{navActRight}}px">
+          <view class="nav__btn" hover-class="press" bindtap="onMore">
+            <view class="ic ic--dots"></view>
+          </view>
+          <view class="nav__btn" hover-class="press" bindtap="onSettings">
+            <view class="ic ic--gear"></view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 标语（手写体 + 手绘下划线） -->
+    <view class="sky__slogan">
+      <view class="sky__slogan-t">“把重要的日子，</view>
+      <view class="sky__slogan-t">都放在心上”</view>
+      <view class="sky__slogan-line"></view>
+    </view>
+
+    <!-- ＋ 新增 -->
+    <view class="sky__add" hover-class="press" bindtap="onAdd">
+      <view class="ic ic--plus"></view>
+    </view>
+  </view>
+
+  <!-- ================= 玻璃核心信息卡 ================= -->
+  <view class="hero" hover-class="press" bindtap="onOpenCategories">
+    <view class="hero__icon">
+      <view class="cal3d">
+        <view class="cal3d__ring cal3d__ring--l"></view>
+        <view class="cal3d__ring cal3d__ring--r"></view>
+        <view class="cal3d__body">
+          <view class="cal3d__bar"></view>
+          <view class="cal3d__lines">
+            <view class="cal3d__line"></view>
+            <view class="cal3d__line cal3d__line--s"></view>
+          </view>
+          <view class="heart"></view>
+        </view>
+      </view>
+    </view>
+    <view class="hero__body">
+      <view class="hero__title">把重要的日子，都放在心上</view>
+      <view class="hero__sub">生日、纪念日、到期日…分成「即将到来」与「已过期」帮你管理</view>
+    </view>
+    <view class="ic ic--right hero__arrow"></view>
+  </view>
+
+  <!-- ================= Tab：即将到来 / 已过期 ================= -->
+  <view class="tabs">
+    <view class="tabs__pill" style="left:{{tabPillLeft}}%;width:{{tabPillWidth}}%"></view>
+    <view
+      class="tabs__item {{tab === 'future' ? 'is-on' : ''}}"
+      data-key="future"
+      bindtap="onTab"
+    >
+      <view class="ic ic--cal"></view>
+      <text class="tabs__t">即将到来</text>
+    </view>
+    <view
+      class="tabs__item {{tab === 'past' ? 'is-on' : ''}}"
+      data-key="past"
+      bindtap="onTab"
+    >
+      <view class="ic ic--checkc"></view>
+      <text class="tabs__t">已过期</text>
+    </view>
+  </view>
+
+  <!-- ================= 考研倒计时（智能倒计时 · 时间感核心） ================= -->
+  <view class="ky" hover-class="press" bindtap="onOpenKaoyan">
+    <block wx:if="{{ky.show}}">
+      <view class="ky__top">
+        <text class="ky__label">距离{{ky.nodeName}}</text>
+        <text class="ky__tag {{ky.official ? 'is-on' : ''}}">{{ky.official ? '官方日期' : '参考日期'}}</text>
+      </view>
+      <view class="ky__num-row">
+        <text class="ky__num">{{ky.days}}</text>
+        <text class="ky__unit">天</text>
+      </view>
+      <view class="ky__meta">
+        <text class="ky__date">{{ky.dateText}} · {{ky.weekdayText}}</text>
+        <text class="ky__weeks">距目标还有 {{ky.weeksText}}</text>
+      </view>
+      <view class="ky__bar">
+        <view class="ky__bar-fill" style="width:{{ky.progress}}%"></view>
+      </view>
+      <view class="ky__foot">
+        <text class="ky__foot-t">🎓 {{ky.cohortLabel}} 关键节点</text>
+        <text class="ky__foot-a">一键加进重要日</text>
+        <view class="ic ic--right"></view>
+      </view>
+    </block>
+    <block wx:else>
+      <view class="ky__top">
+        <text class="ky__label">考研倒计时</text>
+        <text class="ky__tag">未设置目标</text>
+      </view>
+      <view class="ky__set">选一个关键节点设为倒计时目标，设好后首页也会同步显示。</view>
+      <view class="ky__foot">
+        <text class="ky__foot-t">🎓 {{ky.cohortLabel}} 关键节点</text>
+        <text class="ky__foot-a">去设置</text>
+        <view class="ic ic--right"></view>
+      </view>
+    </block>
+  </view>
+
+  <!-- ================= 检索 / 排序 / 管理模式 工具条 ================= -->
+  <view class="tools">
+    <view class="tools__search {{searching ? 'is-open' : ''}}">
+      <view class="ic ic--search"></view>
+      <input
+        class="tools__input"
+        value="{{keyword}}"
+        placeholder="搜索重要日"
+        placeholder-class="tools__ph"
+        confirm-type="search"
+        bindinput="onSearchInput"
+        bindfocus="onSearchFocus"
+        bindblur="onSearchBlur"
+      />
+      <view wx:if="{{keyword}}" class="ic ic--close" hover-class="press" bindtap="onClearKeyword"></view>
+    </view>
+    <view class="tools__btn" hover-class="press" bindtap="onOpenSort">
+      <view class="ic ic--sort"></view>
+    </view>
+    <view class="tools__btn" hover-class="press" bindtap="onOpenCategories">
+      <view class="ic ic--funnel"></view>
+    </view>
+  </view>
+
+  <!-- 当前筛选 / 排序状态条 -->
+  <view wx:if="{{filterChipText || sortChipText}}" class="chips-row">
+    <view wx:if="{{filterChipText}}" class="chip chip--on" bindtap="onClearCategory">
+      <text>{{filterChipText}}</text>
+      <view class="ic ic--close"></view>
+    </view>
+    <view wx:if="{{sortChipText}}" class="chip" bindtap="onOpenSort">
+      <text>{{sortChipText}}</text>
+    </view>
+  </view>
+
+  <!-- ================= 管理模式操作条 ================= -->
+  <view wx:if="{{manageMode}}" class="manage">
+    <text class="manage__t">已选 {{selectedIds.length}} 项</text>
+    <view class="manage__acts">
+      <view class="manage__btn" hover-class="press" bindtap="onSelectAll">全选</view>
+      <view class="manage__btn" hover-class="press" bindtap="onBatchArchive">归档</view>
+      <view class="manage__btn manage__btn--danger" hover-class="press" bindtap="onBatchDelete">删除</view>
+      <view class="manage__btn" hover-class="press" bindtap="onExitManage">完成</view>
+    </view>
+  </view>
+
+  <!-- ================= 列表 ================= -->
+  <view class="list">
+    <view
+      wx:for="{{list}}"
+      wx:key="id"
+      class="day {{item.id === swipeId ? 'is-open' : ''}} {{item.status !== 'active' ? 'day--closed' : ''}} {{item.urgent ? 'day--urgent' : ''}} {{item.isPast ? 'day--past' : ''}}"
+      data-id="{{item.id}}"
+    >
+      <!-- 左滑露出的删除键 -->
+      <view class="day__del" hover-class="press" data-id="{{item.id}}" catchtap="onDeleteOne">
+        <view class="ic ic--trash"></view>
+        <text>删除</text>
+      </view>
+
+      <view
+        class="day__slide"
+        data-id="{{item.id}}"
+        bindtouchstart="onSwipeStart"
+        bindtouchmove="onSwipeMove"
+        bindtouchend="onSwipeEnd"
+        bindtouchcancel="onSwipeEnd"
+        bindlongpress="onLongPress"
+        bindtap="onTapCard"
+      >
+        <view class="day__top">
+          <view class="day__datebox">
+            <text class="day__num">{{item.dayNumText}}</text>
+            <text class="day__mon">{{item.monthText}}</text>
+          </view>
+          <view class="day__topr">
+            <text class="day__cd {{item.urgent ? 'is-urgent' : ''}} {{item.isPast ? 'is-past' : ''}}">{{item.countdownText}}</text>
+            <text class="day__date">{{item.dateText}} · {{item.time}}</text>
+            <text class="day__wk">{{item.weekdayText}}<text wx:if="{{item.isToday}}" class="day__today">今天</text></text>
+          </view>
+          <!-- 管理模式选择圈 -->
+          <view wx:if="{{manageMode}}" class="day__pick {{selectedIds.indexOf(item.id) >= 0 ? 'is-on' : ''}}">
+            <view class="ic ic--check"></view>
+          </view>
+          <!-- 快捷编辑 -->
+          <view wx:else class="day__edit" hover-class="press" data-id="{{item.id}}" catchtap="onTapEdit">
+            <view class="ic ic--edit"></view>
+          </view>
+        </view>
+
+        <view class="day__hr"></view>
+
+        <view class="day__main">
+          <view class="day__ico" style="background:{{item.categoryGrad}}">{{item.categoryIcon}}</view>
+          <view class="day__main-b">
+            <text class="day__title">{{item.title}}</text>
+            <text wx:if="{{item.statusLabel}}" class="day__st">{{item.statusLabel}}</text>
+          </view>
+          <view wx:if="{{item.reminder}}" class="day__bell">
+            <view class="ic ic--bell"></view>
+          </view>
+        </view>
+
+        <view class="day__meta">
+          <text class="tag" style="color:{{item.categoryColor}}">{{item.categoryLabel}}</text>
+          <text wx:if="{{item.repeatLabel}}" class="tag">{{item.repeatLabel}}</text>
+          <text
+            class="tag tag--pri"
+            style="color:{{item.priorityColor}}"
+          >{{item.priorityLabel}}优先</text>
+          <text wx:if="{{item.reminder}}" class="tag">{{item.reminderText}}提醒</text>
+          <text wx:if="{{item.preset}}" class="tag tag--sys">系统预置</text>
+        </view>
+
+        <view wx:if="{{item.description}}" class="day__desc">{{item.description}}</view>
+
+        <view class="day__foot">
+          <text class="day__foot-t">查看详情</text>
+          <view class="ic ic--right"></view>
+          <text class="day__foot-d">{{item.dateText}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ================= 空状态 ================= -->
+  <view wx:if="{{list.length === 0 && !loading}}" class="empty">
+    <view class="empty__art">
+      <view class="empty__ring"></view>
+      <view class="empty__spark">
+        <view class="spark"></view>
+      </view>
+      <view class="cal3d cal3d--big">
+        <view class="cal3d__ring cal3d__ring--l"></view>
+        <view class="cal3d__ring cal3d__ring--r"></view>
+        <view class="cal3d__body">
+          <view class="cal3d__bar"></view>
+          <view class="cal3d__lines">
+            <view class="cal3d__line"></view>
+            <view class="cal3d__line cal3d__line--s"></view>
+            <view class="cal3d__line cal3d__line--s"></view>
+          </view>
+          <view class="heart"></view>
+        </view>
+      </view>
+      <view class="empty__swoosh"></view>
+    </view>
+
+    <view class="empty__title">{{emptyTitle}}</view>
+    <view class="empty__sub">{{emptySub}}</view>
+
+    <view class="empty__btn" hover-class="press" bindtap="onEmptyAction">
+      <view class="ic ic--plus"></view>
+      <text>{{emptyAction}}</text>
+    </view>
+  </view>
+
+  <!-- ================= 底部「时间感」装饰 ================= -->
+  <view class="foot">
+    <view class="foot__wave foot__wave--a"></view>
+    <view class="foot__wave foot__wave--b"></view>
+    <view class="foot__leaf">
+      <view class="leaf leaf--1"></view>
+      <view class="leaf leaf--2"></view>
+      <view class="leaf leaf--3"></view>
+    </view>
+    <view class="foot__slogan">
+      <text class="foot__slogan-t">Better Me</text>
+      <text class="foot__slogan-t">Every Day</text>
+      <view class="foot__slogan-line"></view>
+    </view>
+  </view>
+
+  <!-- ================= 详情 ================= -->
+  <view wx:if="{{sheet === 'detail' && detail}}" class="mask" catchtap="onCloseSheet" catchtouchmove="onSheetStop">
+    <view class="sheet" catchtap="onSheetStop">
+      <view class="sheet__handle"></view>
+      <view class="detail">
+        <view class="detail__head">
+          <view class="detail__ico" style="background:{{detail.categoryGrad}}">{{detail.categoryIcon}}</view>
+          <view class="detail__head-b">
+            <text class="detail__title">{{detail.title}}</text>
+            <text class="detail__lab" style="color:{{detail.categoryColor}}">{{detail.categoryLabel}}</text>
+          </view>
+          <view class="ic ic--close" hover-class="press" bindtap="onCloseSheet"></view>
+        </view>
+
+        <view class="detail__cd">
+          <view class="detail__cd-l">
+            <text class="detail__cd-label">{{detail.isPast ? '已过去' : '距离本此目标'}}</text>
+            <view class="detail__cd-num">
+              <text class="detail__cd-n">{{detail.bigNum}}</text>
+              <text class="detail__cd-u">天</text>
+            </view>
+          </view>
+          <view class="detail__cd-r">
+            <text class="detail__cd-date">{{detail.anchorDate}}</text>
+            <text class="detail__cd-wk">{{detail.weekdayText}}</text>
+            <text class="detail__cd-weeks">{{detail.weeksText}}</text>
+          </view>
+        </view>
+
+        <scroll-view scroll-y class="sheet__scroll">
+        <view class="detail__rows">
+          <view class="drow"><text class="drow__k">时间</text><text class="drow__v">{{detail.time}}</text></view>
+          <view class="drow"><text class="drow__k">重复</text><text class="drow__v">{{detail.repeatLabel || '不重复'}}</text></view>
+          <view class="drow"><text class="drow__k">优先级</text><text class="drow__v" style="color:{{detail.priorityColor}}">{{detail.priorityLabel}}</text></view>
+          <view class="drow"><text class="drow__k">提醒</text><text class="drow__v">{{detail.reminder ? detail.reminderText : '未开启'}}</text></view>
+          <view wx:if="{{detail.description}}" class="drow"><text class="drow__k">备注</text><text class="drow__v drow__v--wrap">{{detail.description}}</text></view>
+          <view wx:if="{{detail.preset}}" class="drow"><text class="drow__k">来源</text><text class="drow__v">系统预置考研节点</text></view>
+        </view>
+
+        <view class="detail__grid">
+          <view class="dact" hover-class="press" data-id="{{detail.id}}" bindtap="onToggleRemindFromDetail">
+            <view class="ic ic--bell"></view>
+            <text>{{detail.reminder ? '关闭提醒' : '开启提醒'}}</text>
+          </view>
+          <view class="dact" hover-class="press" data-id="{{detail.id}}" bindtap="onEditFromDetail">
+            <view class="ic ic--edit"></view>
+            <text>编辑</text>
+          </view>
+          <view class="dact" hover-class="press" data-id="{{detail.id}}" bindtap="onCopyDay">
+            <view class="ic ic--copy"></view>
+            <text>复制</text>
+          </view>
+          <view class="dact" hover-class="press" data-id="{{detail.id}}" bindtap="onArchiveDay">
+            <view class="ic ic--archive"></view>
+            <text>{{detail.status === 'active' ? '完成归档' : '恢复'}}</text>
+          </view>
+        </view>
+
+        <view class="detail__danger" hover-class="press" data-id="{{detail.id}}" bindtap="onDeleteFromDetail">
+          删除这个重要日
+        </view>
+        </scroll-view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ================= 新建 / 编辑 ================= -->
+  <view wx:if="{{sheet === 'editor'}}" class="mask" catchtap="onEditorClose" catchtouchmove="onSheetStop">
+    <view class="sheet sheet--editor" catchtap="onSheetStop">
+      <view class="sheet__handle"></view>
+      <view class="sheet__title">{{editingId ? '编辑重要日' : '新建重要日'}}</view>
+
+      <scroll-view class="sheet__body" scroll-y>
+        <view class="field">
+          <text class="field__label">事件名称</text>
+          <input
+            class="field__input"
+            value="{{formTitle}}"
+            placeholder="例如：研究生考试"
+            placeholder-class="field__ph"
+            maxlength="40"
+            bindinput="onTitle"
+          />
+        </view>
+
+        <view class="field field--half">
+          <view class="field__col">
+            <text class="field__label">日期</text>
+            <picker mode="date" value="{{formDate}}" bindchange="onDate">
+              <view class="pick">
+                <text>{{formDateText}}</text>
+                <view class="ic ic--right"></view>
+              </view>
+            </picker>
+          </view>
+          <view class="field__col">
+            <text class="field__label">时间</text>
+            <picker mode="time" value="{{formTime}}" bindchange="onTime">
+              <view class="pick">
+                <text>{{formTime}}</text>
+                <view class="ic ic--right"></view>
+              </view>
+            </picker>
+          </view>
+        </view>
+
+        <view class="field">
+          <text class="field__label">类型</text>
+          <view class="chips">
+            <view
+              wx:for="{{categories}}"
+              wx:key="key"
+              class="chip chip--cat {{formCategory === item.key ? 'is-on' : ''}}"
+              data-key="{{item.key}}"
+              bindtap="onCategory"
+            >
+              <view class="chip__ico" style="background:{{item.grad}}">{{item.icon}}</view>
+              <text>{{item.label}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="field">
+          <text class="field__label">是否重复</text>
+          <view class="chips">
+            <view
+              wx:for="{{repeats}}"
+              wx:key="key"
+              class="chip {{formRepeat === item.key ? 'is-on' : ''}}"
+              data-key="{{item.key}}"
+              bindtap="onRepeat"
+            >{{item.label}}</view>
+          </view>
+          <view wx:if="{{formRepeat === 'custom'}}" class="field__inline">
+            <text class="field__hint">每隔</text>
+            <input class="field__tiny" type="number" value="{{formRepeatDays}}" bindinput="onRepeatDays" />
+            <text class="field__hint">天重复一次</text>
+          </view>
+        </view>
+
+        <view class="field">
+          <text class="field__label">优先级</text>
+          <view class="chips">
+            <view
+              wx:for="{{priorities}}"
+              wx:key="key"
+              class="chip {{formPriority === item.key ? 'is-on' : ''}}"
+              data-key="{{item.key}}"
+              bindtap="onPriority"
+            >{{item.label}}</view>
+          </view>
+        </view>
+
+        <view class="field field--switch">
+          <text class="field__label">提醒</text>
+          <switch
+            class="field__switch"
+            checked="{{formReminder}}"
+            color="#6C7BE0"
+            bindchange="onReminder"
+          />
+        </view>
+
+        <view wx:if="{{formReminder}}" class="field">
+          <text class="field__label">提前提醒</text>
+          <view class="chips">
+            <view
+              wx:for="{{remindOptions}}"
+              wx:key="*this"
+              class="chip {{formReminderTime === item ? 'is-on' : ''}}"
+              data-v="{{item}}"
+              bindtap="onRemindTime"
+            >{{item}} 天前</view>
+          </view>
+        </view>
+
+        <view class="field">
+          <text class="field__label">备注</text>
+          <input
+            class="field__input"
+            value="{{formDesc}}"
+            placeholder="添加备注……"
+            placeholder-class="field__ph"
+            maxlength="80"
+            bindinput="onDesc"
+          />
+        </view>
+
+        <view wx:if="{{formError}}" class="field__err">{{formError}}</view>
+      </scroll-view>
+
+      <view class="sheet__save" hover-class="press" bindtap="onSave">
+        {{editingId ? '保存修改' : '保存重要日'}}
+      </view>
+    </view>
+  </view>
+
+  <!-- ================= 分类管理 ================= -->
+  <view wx:if="{{sheet === 'categories'}}" class="mask" catchtap="onCloseSheet" catchtouchmove="onSheetStop">
+    <view class="sheet" catchtap="onSheetStop">
+      <view class="sheet__handle"></view>
+      <view class="sheet__title">重要日分类管理</view>
+      <view class="sheet__desc">按分类查看与管理你的重要日</view>
+      <view class="catlist">
+        <view
+          class="catrow {{categoryFilter === item.key ? 'is-on' : ''}}"
+          wx:for="{{catStats}}"
+          wx:key="key"
+          data-key="{{item.key}}"
+          bindtap="onPickCategory"
+        >
+          <view class="catrow__ico" style="background:{{item.grad}}">{{item.icon}}</view>
+          <view class="catrow__b">
+            <text class="catrow__t">{{item.label}}</text>
+            <text class="catrow__d">{{item.desc}}</text>
+          </view>
+          <text class="catrow__n">{{item.count}}</text>
+          <view class="ic ic--right"></view>
+        </view>
+        <view class="catrow catrow--all {{categoryFilter === 'all' ? 'is-on' : ''}}" data-key="all" bindtap="onPickCategory">
+          <view class="catrow__ico catrow__ico--all"><view class="ic ic--spark"></view></view>
+          <view class="catrow__b">
+            <text class="catrow__t">全部重要日</text>
+            <text class="catrow__d">不做分类筛选</text>
+          </view>
+          <text class="catrow__n">{{totalCount}}</text>
+          <view class="ic ic--right"></view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ================= 考研关键节点 ================= -->
+  <view wx:if="{{sheet === 'kaoyan'}}" class="mask" catchtap="onCloseSheet" catchtouchmove="onSheetStop">
+    <view class="sheet" catchtap="onSheetStop">
+      <view class="sheet__handle"></view>
+      <view class="sheet__title">考研关键节点</view>
+      <view class="sheet__desc">
+        下列日期中，标注「官方」的来自教育部已公布安排；标注「参考」的按历年规律推算，请以官方通知为准。点击任一行可设为倒计时目标；官方公布真实日期后，可用 ✎ 改期修正（首页与倒计时会同步）。
+      </view>
+      <scroll-view scroll-y class="kylist">
+        <view
+          wx:for="{{kyNodes}}"
+          wx:key="key"
+          class="kyrow {{item.isTarget ? 'is-target' : ''}} {{item.added ? 'is-added' : ''}}"
+          data-key="{{item.key}}"
+          bindtap="onPickKaoyanTarget"
+        >
+          <view class="kyrow__b">
+            <view class="kyrow__line">
+              <text class="kyrow__t">{{item.name}}</text>
+              <text class="kyrow__tag {{item.official ? 'is-on' : ''}}">{{item.official ? '官方' : '参考'}}</text>
+              <text wx:if="{{item.edited}}" class="kyrow__edited">已改期</text>
+              <text wx:if="{{item.added}}" class="kyrow__added">已加入</text>
+            </view>
+            <text class="kyrow__date">{{item.dateText}} · {{item.weekdayText}} · {{item.diffText}}</text>
+            <text class="kyrow__desc">{{item.desc}}</text>
+          </view>
+          <view class="kyrow__acts">
+            <picker
+              class="kyrow__edit"
+              mode="date"
+              value="{{item.date}}"
+              data-key="{{item.key}}"
+              bindchange="onKyDateChange"
+            >
+              <view class="kyrow__edit-btn press" hover-class="press" catchtap="noop">
+                <view class="ic ic--edit"></view>
+              </view>
+            </picker>
+            <view
+              class="kyrow__add {{item.added ? 'is-done' : ''}}"
+              hover-class="press"
+              data-key="{{item.key}}"
+              catchtap="onImportNode"
+            >
+              <view class="ic ic--plus"></view>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+      <view wx:if="{{kyHasTarget}}" class="sheet__clear" hover-class="press" bindtap="onClearKaoyanTarget">
+        清除倒计时目标（首页与倒计时将不再显示）
+      </view>
+      <view class="sheet__save" hover-class="press" bindtap="onImportAllNodes">
+        一键添加全部节点
+      </view>
+      <view class="sheet__note">数据来源：中国研究生招生信息网 yz.chsi.com.cn</view>
+    </view>
+  </view>
+
+  <!-- ================= 排序 ================= -->
+  <view wx:if="{{sheet === 'sort'}}" class="mask" catchtap="onCloseSheet" catchtouchmove="onSheetStop">
+    <view class="sheet" catchtap="onSheetStop">
+      <view class="sheet__handle"></view>
+      <view class="sheet__title">排序方式</view>
+      <view class="sortlist">
+        <view
+          wx:for="{{sorts}}"
+          wx:key="key"
+          class="sortrow {{sortMode === item.key ? 'is-on' : ''}}"
+          data-key="{{item.key}}"
+          bindtap="onPickSort"
+        >
+          <text class="sortrow__t">{{item.label}}</text>
+          <view wx:if="{{sortMode === item.key}}" class="ic ic--check"></view>
+        </view>
+      </view>
+      <view wx:if="{{sortMode === 'custom'}}" class="sheet__note">
+        自定义排序：长按卡片进入管理模式，用 ↑ 置顶 调整顺序。
+      </view>
+    </view>
+  </view>
+
+  <!-- ================= 更多菜单 ================= -->
+  <view wx:if="{{sheet === 'more'}}" class="mask" catchtap="onCloseSheet" catchtouchmove="onSheetStop">
+    <view class="sheet" catchtap="onSheetStop">
+      <view class="sheet__handle"></view>
+      <view class="sheet__title">更多</view>
+      <view class="menulist">
+        <view class="menurow" hover-class="press" bindtap="onOpenSearchFromMenu">
+          <view class="ic ic--search"></view><text>搜索重要日</text>
+        </view>
+        <view class="menurow" hover-class="press" bindtap="onOpenSort">
+          <view class="ic ic--sort"></view><text>排序方式</text>
+        </view>
+        <view class="menurow" hover-class="press" bindtap="onOpenCategories">
+          <view class="ic ic--funnel"></view><text>分类管理</text>
+        </view>
+        <view class="menurow" hover-class="press" bindtap="onOpenKaoyan">
+          <text class="menurow__e">🎓</text><text>考研关键节点</text>
+        </view>
+        <view class="menurow" hover-class="press" bindtap="onEnterManage">
+          <view class="ic ic--edit"></view><text>进入管理模式（批量归档 / 删除）</text>
+        </view>
+        <view class="menurow" hover-class="press" bindtap="onClearArchived">
+          <view class="ic ic--archive"></view><text>清除已归档</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ================= 设置 ================= -->
+  <view wx:if="{{sheet === 'settings'}}" class="mask" catchtap="onCloseSheet" catchtouchmove="onSheetStop">
+    <view class="sheet" catchtap="onSheetStop">
+      <view class="sheet__handle"></view>
+      <view class="sheet__title">设置</view>
+
+      <scroll-view scroll-y class="sheet__scroll">
+        <view class="setblock">
+          <view class="setblock__h">首页倒计时卡片</view>
+          <view class="setblock__d">
+            控制首页顶部是否显示「考研倒计时 + 最近的重要日」卡片。关闭后首页保持清爽，倒计时与节点仍可在重要日页查看与编辑。
+          </view>
+          <view class="setblock__row">
+            <text class="setblock__state">{{homeBanner ? '已显示' : '已隐藏'}}</text>
+            <switch class="setblock__switch" checked="{{homeBanner}}" color="#6C7BE0" bindchange="onToggleHomeBanner" />
+          </view>
+        </view>
+
+        <view class="setblock">
+          <view class="setblock__h">到期提醒</view>
+          <view class="setblock__d">
+            重要日到达时会用本机提醒告知；开启微信订阅消息后，即使没打开小程序也能收到服务端推送。
+          </view>
+          <view class="setblock__row">
+            <text class="setblock__state">{{subStateText}}</text>
+            <view class="setblock__btn" hover-class="press" bindtap="onEnableSubscribe">开启订阅提醒</view>
+          </view>
+        </view>
+
+        <view class="setblock">
+          <view class="setblock__h">考研届次</view>
+          <view class="setblock__d">决定考研关键节点的日期口径（默认按当前进行中的届次）。</view>
+          <view class="chips">
+            <view
+              wx:for="{{cohorts}}"
+              wx:key="*this"
+              class="chip {{cohort === item ? 'is-on' : ''}}"
+              data-v="{{item}}"
+              bindtap="onPickCohort"
+            >{{item}} 考研</view>
+          </view>
+        </view>
+
+        <view class="setblock setblock--last">
+          <view class="setblock__h">关于重要日</view>
+          <view class="setblock__d">
+            数据保存在本机，不上传。支持生日 / 纪念日 / 到期日 / 考研节点等 9 类分类，按「距离最近 → 优先级 → 创建时间」排序，临近 7 天自动进入提醒状态。
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+</view>

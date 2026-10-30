@@ -1,0 +1,6 @@
+.cq { display: flex; flex-direction: column; align-items: center; gap: 20rpx; }
+.cq__src { width: 100%; max-width: 560rpx; }
+.cq__q { width: 100%; max-width: 560rpx; padding: 40rpx 32rpx; text-align: center; }
+.cq__opts { width: 100%; max-width: 560rpx; display: flex; flex-direction: column; gap: 18rpx; }
+.cq__opt { padding: 28rpx 32rpx; }
+.cq__opt:active { transform: scale(.99); }

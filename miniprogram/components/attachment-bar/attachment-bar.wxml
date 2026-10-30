@@ -1,0 +1,70 @@
+<view class="attachment-bar">
+  <view class="attach-title">附件 ({{medias.length + links.length}})</view>
+
+  <!-- 图片 / 视频：统一网格。视频用封面图 + ▶ 播放角标 + 时长角标 -->
+  <view class="attach-images" wx:if="{{medias.length > 0}}">
+    <view
+      wx:for="{{medias}}"
+      wx:key="id"
+      class="attach-img-wrap {{item.kind === 'video' ? 'attach-img-wrap--video' : ''}}"
+      data-id="{{item.id}}"
+      bindtap="onPreview"
+    >
+      <image
+        wx:if="{{item.kind === 'image'}}"
+        class="attach-img"
+        src="{{item.src}}"
+        mode="aspectFill"
+        data-id="{{item.id}}"
+        binderror="onMediaError"
+      />
+      <block wx:else>
+        <image
+          wx:if="{{item.posterSrc}}"
+          class="attach-img"
+          src="{{item.posterSrc}}"
+          mode="aspectFill"
+          data-id="{{item.id}}"
+          binderror="onMediaError"
+        />
+        <view wx:else class="attach-video-blank"></view>
+        <view class="attach-play">▶</view>
+        <view class="attach-dur" wx:if="{{item.duration > 0}}">{{item.durationText}}</view>
+      </block>
+
+      <view class="attach-img-mask" wx:if="{{item.state === 'uploading'}}">
+        <view class="attach-spinner"></view>
+        <text class="attach-mask-text" wx:if="{{item.kind === 'video'}}">上传中</text>
+      </view>
+      <view class="attach-img-fail" wx:if="{{item.state === 'failed' || item.state === 'stale'}}">{{item.state === 'failed' ? '仅本机' : '已失效'}}</view>
+      <view class="attach-img-del" catchtap="onRemove" data-id="{{item.id}}">×</view>
+    </view>
+
+    <!-- 继续添加图片 -->
+    <view class="attach-add" wx:if="{{imageCount < maxImages}}" bindtap="onPickImage">+</view>
+  </view>
+
+  <!-- 还没有任何附件时，保留整行的图片入口 -->
+  <view wx:if="{{medias.length === 0}}" class="attach-add-row" bindtap="onPickImage">
+    <text>+ 添加图片</text>
+  </view>
+
+  <!-- 视频入口（视频体积大、上传慢，入口单独一行并标明限制） -->
+  <view class="attach-add-row attach-add-row--video" wx:if="{{videoCount < maxVideos}}" bindtap="onPickVideo">
+    <text>+ 添加视频（≤{{maxVideoSec}} 秒，单个 ≤{{maxVideoMb}}MB）</text>
+  </view>
+
+  <view class="attach-links" wx:if="{{links.length > 0}}">
+    <view wx:for="{{links}}" wx:key="id" class="attach-link-card">
+      <view class="attach-link-icon">🔗</view>
+      <view class="attach-link-info" bindtap="onOpenLink" data-url="{{item.url}}">
+        <view class="attach-link-title">{{item.title || item.url}}</view>
+        <view class="attach-link-url">{{item.url}}</view>
+      </view>
+      <view class="attach-link-del" catchtap="onRemove" data-id="{{item.id}}">×</view>
+    </view>
+  </view>
+  <view class="attach-add-row" bindtap="onPickLink" wx:if="{{links.length < maxLinks}}">
+    <text>+ 添加链接</text>
+  </view>
+</view>

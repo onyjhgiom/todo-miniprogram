@@ -1,0 +1,178 @@
+<!-- pages/love/profile/profile.wxml -->
+<view class="ay" data-skin="{{skin.key}}" style="{{skin.style}}">
+  <!-- 在一起 -->
+  <view class="ay-card ay-anim">
+    <view class="ay-card__hd">
+      <text class="ay-card__title">💞 我们</text>
+      <text class="ay-card__more" wx:if="{{together}}">{{together.text}}</text>
+    </view>
+    <view class="ay-field">
+      <text class="ay-field__label">在一起那天</text>
+      <picker mode="date" value="{{togetherDate}}" bindchange="onPickTogether">
+        <view class="ay-field__input {{togetherDate?'':'ay-field__ph'}}">{{togetherDate || '选择那一天'}}</view>
+      </picker>
+    </view>
+    <view class="ay-faint" wx:if="{{together && together.anniversaryText}}">{{together.anniversaryText}}</view>
+    <view class="ay-faint" wx:if="{{together && together.nextMilestone}}">
+      距{{together.nextMilestone.label}}还有 {{together.nextMilestone.left}} 天
+    </view>
+    <view class="ay-card__hd" style="margin-top:16rpx"><text class="ay-card__title">结缘故事</text></view>
+    <textarea class="ay-field__input ay-story" placeholder="你们是因为什么认识的？怎么在一起的？"
+              value="{{story}}" data-f="story" bindinput="onInput" bindblur="onBlur" maxlength="-1" />
+  </view>
+
+  <!-- 他 -->
+  <view class="ay-card ay-anim">
+    <view class="ay-card__hd"><text class="ay-card__title">🧑 他</text></view>
+    <view class="ay-field">
+      <text class="ay-field__label">昵称</text>
+      <input class="ay-field__input" placeholder="怎么叫他" value="{{him.nickname}}"
+             data-who="him" data-f="nickname" bindinput="onInput" bindblur="onBlur" />
+    </view>
+    <view class="ay-field">
+      <text class="ay-field__label">生日</text>
+      <picker mode="date" value="{{him.birthday}}" data-who="him" bindchange="onPickBirthday">
+        <view class="ay-field__input {{him.birthday?'':'ay-field__ph'}}">{{him.birthday || '选日期，自动算星座'}}</view>
+      </picker>
+    </view>
+    <view class="ay-field">
+      <text class="ay-field__label">所在城市</text>
+      <input class="ay-field__input {{focusCity?'ay-field__hl':''}}" placeholder="用于距离与天气" value="{{him.city}}"
+             data-who="him" data-f="city" bindinput="onInput" bindblur="onBlur" />
+    </view>
+    <view class="ay-field">
+      <text class="ay-field__label">星座</text>
+      <picker mode="selector" range="{{zodiacs}}" value="{{zodiacs.indexOf(him.zodiac)}}" data-who="him" bindchange="onZodiac">
+        <view class="ay-field__input {{him.zodiac?'':'ay-field__ph'}}">{{him.zodiac || '填生日会自动算'}}</view>
+      </picker>
+    </view>
+    <view class="ay-card__hd"><text class="ay-card__title">MBTI</text></view>
+    <view class="ay-chips">
+      <view class="ay-chip {{him.mbti===item?'ay-chip--on':''}}" wx:for="{{mbtiList}}" wx:key="*this"
+            data-who="him" data-v="{{item}}" bindtap="onMbti">{{item}}</view>
+    </view>
+    <view class="ay-card__hd"><text class="ay-card__title">兴趣爱好（最多 6 个）</text></view>
+    <view class="ay-chips">
+      <view class="ay-chip {{him.hobbies.indexOf(item)>=0?'ay-chip--on':''}}" wx:for="{{hobbies}}" wx:key="*this"
+            data-who="him" data-v="{{item}}" bindtap="onHobby">{{item}}</view>
+    </view>
+    <view class="ay-field">
+      <text class="ay-field__label">一句话形容他</text>
+      <input class="ay-field__input" placeholder="如：很会讲冷笑话" value="{{him.words}}"
+             data-who="him" data-f="words" bindinput="onInput" bindblur="onBlur" />
+    </view>
+  </view>
+
+  <!-- 我 -->
+  <view class="ay-card ay-anim">
+    <view class="ay-card__hd"><text class="ay-card__title">👧 我</text></view>
+    <view class="ay-field">
+      <text class="ay-field__label">昵称</text>
+      <input class="ay-field__input" placeholder="他怎么叫你" value="{{me.nickname}}"
+             data-who="me" data-f="nickname" bindinput="onInput" bindblur="onBlur" />
+    </view>
+    <view class="ay-field">
+      <text class="ay-field__label">生日</text>
+      <picker mode="date" value="{{me.birthday}}" data-who="me" bindchange="onPickBirthday">
+        <view class="ay-field__input {{me.birthday?'':'ay-field__ph'}}">{{me.birthday || '选日期'}}</view>
+      </picker>
+    </view>
+    <view class="ay-field">
+      <text class="ay-field__label">所在城市</text>
+      <input class="ay-field__input {{focusCity?'ay-field__hl':''}}" placeholder="你的城市" value="{{me.city}}"
+             data-who="me" data-f="city" bindinput="onInput" bindblur="onBlur" />
+    </view>
+    <view class="ay-field">
+      <text class="ay-field__label">星座</text>
+      <picker mode="selector" range="{{zodiacs}}" value="{{zodiacs.indexOf(me.zodiac)}}" data-who="me" bindchange="onZodiac">
+        <view class="ay-field__input {{me.zodiac?'':'ay-field__ph'}}">{{me.zodiac || '填生日会自动算'}}</view>
+      </picker>
+    </view>
+    <view class="ay-card__hd"><text class="ay-card__title">MBTI</text></view>
+    <view class="ay-chips">
+      <view class="ay-chip {{me.mbti===item?'ay-chip--on':''}}" wx:for="{{mbtiList}}" wx:key="*this"
+            data-who="me" data-v="{{item}}" bindtap="onMbti">{{item}}</view>
+    </view>
+    <view class="ay-card__hd"><text class="ay-card__title">兴趣爱好</text></view>
+    <view class="ay-chips">
+      <view class="ay-chip {{me.hobbies.indexOf(item)>=0?'ay-chip--on':''}}" wx:for="{{hobbies}}" wx:key="*this"
+            data-who="me" data-v="{{item}}" bindtap="onHobby">{{item}}</view>
+    </view>
+  </view>
+
+  <!-- 生日与送礼 -->
+  <view class="ay-card ay-anim" wx:if="{{bday}}">
+    <view class="ay-card__hd">
+      <text class="ay-card__title">🎂 {{him.nickname || '他'}}的生日</text>
+      <text class="ay-card__more">{{bday.text}}</text>
+    </view>
+    <view class="ay-t">{{bday.prepText}}</view>
+    <view class="ay-hr"></view>
+    <view class="ay-card__title" style="font-size:25rpx">现在该做什么</view>
+    <view class="ay-step__li" wx:for="{{actions}}" wx:key="*this" style="padding-left:0">{{item}}</view>
+    <view class="ay-hr"></view>
+    <view class="ay-card__title" style="font-size:25rpx">可以送这些</view>
+    <view class="ay-step" wx:for="{{gifts2}}" wx:key="name">
+      <view class="ay-step__hd">{{item.emoji}} {{item.name}} · {{item.price}}</view>
+      <view class="ay-step__li" style="padding-left:0">{{item.reason}}</view>
+      <view class="ay-step__li" style="padding-left:0">{{item.how}}</view>
+    </view>
+    <view class="ay-faint ay-mt" wx:if="{{!gifts2.length}}">
+      填上他的 MBTI 或兴趣爱好，这里会给出更贴合的礼物建议。
+    </view>
+  </view>
+
+  <!-- 互赠礼物 -->
+  <view class="ay-card ay-anim">
+    <view class="ay-between">
+      <view>
+        <view class="ay-card__title">🎁 互赠的礼物（{{giftList.length}}）</view>
+        <view class="ay-faint">每一份都值得被记住</view>
+      </view>
+      <view class="ay-btn ay-btn--sm" bindtap="onToggleGift">{{showGift ? '收起' : '+ 记一份'}}</view>
+    </view>
+
+    <block wx:if="{{showGift}}">
+      <view class="ay-hr"></view>
+      <view class="ay-chips">
+        <view class="ay-chip {{gFrom==='me'?'ay-chip--on':''}}" data-v="me" bindtap="onGFrom">我送他</view>
+        <view class="ay-chip {{gFrom==='him'?'ay-chip--on':''}}" data-v="him" bindtap="onGFrom">他送我</view>
+      </view>
+      <view class="ay-field">
+        <text class="ay-field__label">礼物</text>
+        <input class="ay-field__input" placeholder="如：刻字手链" value="{{gTitle}}" bindinput="onGTitle" />
+      </view>
+      <view class="ay-field">
+        <text class="ay-field__label">日期</text>
+        <picker mode="date" value="{{gDate}}" bindchange="onGDate">
+          <view class="ay-field__input">{{gDate}}</view>
+        </picker>
+      </view>
+      <view class="ay-field">
+        <text class="ay-field__label">价位</text>
+        <input class="ay-field__input" placeholder="如：300 元左右" value="{{gPrice}}" bindinput="onGPrice" />
+      </view>
+      <view class="ay-field">
+        <text class="ay-field__label">场合</text>
+        <input class="ay-field__input" placeholder="生日 / 纪念日 / 没理由" value="{{gOccasion}}" bindinput="onGOccasion" />
+      </view>
+      <view class="ay-field">
+        <text class="ay-field__label">备注</text>
+        <input class="ay-field__input" placeholder="他收到时的反应…" value="{{gNote}}" bindinput="onGNote" />
+      </view>
+      <view class="ay-btn ay-btn--block ay-mt" bindtap="onSaveGift">记下这份礼物</view>
+    </block>
+
+    <view class="ay-hr" wx:if="{{giftList.length}}"></view>
+    <view class="ay-row" wx:for="{{giftList}}" wx:key="id">
+      <text class="ay-row__ico">{{item.from==='me'?'💝':'🎁'}}</text>
+      <view class="ay-row__main">
+        <view class="ay-row__t">{{item.title}}</view>
+        <view class="ay-row__d">{{item.date}} · {{item.from==='me'?'我送他':'他送我'}}{{item.price ? ' · ' + item.price : ''}}</view>
+        <view class="ay-row__d" wx:if="{{item.occasion}}">{{item.occasion}}</view>
+        <view class="ay-row__d" wx:if="{{item.note}}">{{item.note}}</view>
+      </view>
+      <view class="ay-row__extra" data-id="{{item.id}}" bindtap="onDelGift">删除</view>
+    </view>
+  </view>
+</view>

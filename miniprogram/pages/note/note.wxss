@@ -1,0 +1,1164 @@
+/* pages/note/note.wxss */
+/* 便签 · 手账风格：奶油白纸张 + 樱花粉辅助 + 手绘文具感
+   比例：70% 奶油白/米白 · 15% 樱花粉 · 8% 奶油黄 · 5% 浅绿 · 2% 深棕文字 */
+
+.note-page {
+  position: relative;
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 0 28rpx 180rpx;
+  color: #5b4b4d;
+  /* 少女手账风底色：右上角淡粉晕 + 粉白渐变（对齐参考稿） */
+  background:
+    radial-gradient(circle at 90% 8%, rgba(255, 231, 235, 0.9) 0, transparent 18%),
+    linear-gradient(180deg, #fff9f7 0%, #fffdfb 58%, #fff7f4 100%);
+}
+
+/* ===== 装饰层（弱于内容，不拦截点击） ===== */
+.deco {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.deco__item {
+  position: absolute;
+  font-size: 30rpx;
+  opacity: 0.4;
+}
+.deco__item--tl { left: 20rpx; top: 220rpx; color: #e9aab8; transform: rotate(-12deg); }
+.deco__item--tr { right: 26rpx; top: 300rpx; color: #c9dcae; transform: rotate(10deg); }
+.deco__item--bl { left: 30rpx; bottom: 300rpx; color: #e9aab8; opacity: 0.3; }
+.deco__item--br { right: 30rpx; bottom: 240rpx; color: #c9b6dd; transform: rotate(14deg); opacity: 0.3; }
+.deco__wave {
+  position: absolute;
+  right: 24rpx;
+  top: 168rpx;
+  font-size: 20rpx;
+  letter-spacing: 4rpx;
+  color: #e6c9a8;
+  opacity: 0.4;
+}
+
+/* 右上：花瓶与雏菊 */
+.deco-vase {
+  position: absolute;
+  right: 178rpx;
+  top: 118rpx;
+  width: 44rpx;
+  height: 84rpx;
+  opacity: 0.85;
+}
+.deco-vase__flower {
+  position: absolute;
+  top: -6rpx;
+  left: 8rpx;
+  font-size: 30rpx;
+  color: #f3c9d4;
+  line-height: 1;
+}
+.deco-vase__cup {
+  position: absolute;
+  bottom: 0;
+  left: 4rpx;
+  width: 36rpx;
+  height: 52rpx;
+  background: linear-gradient(180deg, #fdfaf4 0%, #f1e7dc 100%);
+  border-radius: 8rpx 8rpx 16rpx 16rpx;
+  box-shadow: 0 4rpx 10rpx rgba(160, 130, 110, 0.18);
+}
+
+/* 右上：探头小猫（简笔） */
+.deco-cat {
+  position: absolute;
+  right: 44rpx;
+  top: 128rpx;
+  width: 92rpx;
+  height: 76rpx;
+  opacity: 0.9;
+}
+.deco-cat__ear {
+  position: absolute;
+  top: 0;
+  width: 0;
+  height: 0;
+  border-left: 14rpx solid transparent;
+  border-right: 14rpx solid transparent;
+  border-bottom: 20rpx solid #fff;
+}
+.deco-cat__ear--l { left: 12rpx; transform: rotate(-14deg); }
+.deco-cat__ear--r { right: 12rpx; transform: rotate(14deg); }
+.deco-cat__face {
+  position: absolute;
+  top: 12rpx;
+  left: 0;
+  right: 0;
+  height: 60rpx;
+  background: linear-gradient(180deg, #ffffff 0%, #fdf3ef 100%);
+  border-radius: 46% 46% 50% 50%;
+  box-shadow: 0 6rpx 14rpx rgba(170, 130, 120, 0.16);
+}
+.deco-cat__eye {
+  display: inline-block;
+  width: 8rpx;
+  height: 8rpx;
+  margin: 20rpx 0 0 22rpx;
+  border-radius: 50%;
+  background: #8a6f66;
+}
+.deco-cat__eye + .deco-cat__eye { margin-left: 26rpx; }
+.deco-cat__mouth {
+  position: absolute;
+  left: 50%;
+  top: 34rpx;
+  width: 16rpx;
+  height: 9rpx;
+  margin-left: -8rpx;
+  border-bottom: 3rpx solid #c99a92;
+  border-radius: 0 0 16rpx 16rpx;
+}
+.deco-cat__paw {
+  position: absolute;
+  bottom: 2rpx;
+  left: 50%;
+  width: 26rpx;
+  height: 14rpx;
+  margin-left: -13rpx;
+  background: #ffe3e0;
+  border-radius: 10rpx;
+}
+
+/* 左下：Good Things Ahead 便利贴 + 书堆 */
+.deco-sticky {
+  position: absolute;
+  left: 26rpx;
+  bottom: 120rpx;
+  width: 132rpx;
+  height: 132rpx;
+  background: linear-gradient(160deg, #fffdf6 0%, #fdf3e3 100%);
+  border-radius: 10rpx;
+  box-shadow: 0 8rpx 18rpx rgba(170, 140, 110, 0.2);
+  transform: rotate(-6deg);
+  padding: 16rpx 14rpx;
+  box-sizing: border-box;
+  opacity: 0.9;
+}
+.deco-sticky__l1,
+.deco-sticky__l2,
+.deco-sticky__l3 {
+  display: block;
+  font-size: 20rpx;
+  line-height: 1.5;
+  color: #a08a72;
+  letter-spacing: 0.5rpx;
+}
+.deco-sticky__heart {
+  position: absolute;
+  right: 12rpx;
+  bottom: 10rpx;
+  font-size: 20rpx;
+  color: #eda5ae;
+}
+.deco-books {
+  position: absolute;
+  left: 20rpx;
+  bottom: 44rpx;
+  width: 170rpx;
+  height: 70rpx;
+  opacity: 0.9;
+}
+.deco-books__b {
+  position: absolute;
+  border-radius: 6rpx;
+}
+.deco-books__b1 {
+  left: 0;
+  bottom: 0;
+  width: 150rpx;
+  height: 26rpx;
+  background: linear-gradient(180deg, #f6c9cf 0%, #eeb3bd 100%);
+}
+.deco-books__b2 {
+  left: 10rpx;
+  bottom: 24rpx;
+  width: 132rpx;
+  height: 22rpx;
+  background: linear-gradient(180deg, #fdf6ec 0%, #f3e6d2 100%);
+}
+.deco-books__b3 {
+  left: 22rpx;
+  bottom: 44rpx;
+  width: 110rpx;
+  height: 20rpx;
+  background: linear-gradient(180deg, #f9d7de 0%, #f2bfca 100%);
+  transform: rotate(-2deg);
+}
+/* 让内容层压在装饰层之上。
+   ⚠ 必须排除两个固定定位的浮层（悬浮按钮 / 弹窗蒙层）：
+   本规则权重(0,2,1)高于它们的 `position: fixed`，若不排除会被强制改成 relative，
+   导致悬浮按钮跑到内容流最左侧、弹窗蒙层失去全屏遮罩。 */
+.note-page > view:not(.deco):not(.note-fab-wrap):not(.note-modal-mask) {
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== 顶部标题区 ===== */
+.note-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 40rpx 4rpx 26rpx;
+}
+.note-header-left {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+}
+/* 手绘线圈本图标（纯 CSS，无图片资源） */
+.note-notebook {
+  position: relative;
+  width: 72rpx;
+  height: 76rpx;
+  border-radius: 14rpx;
+  background: linear-gradient(160deg, #fff 0%, #ffeef2 100%);
+  box-shadow: 0 6rpx 16rpx rgba(190, 140, 150, 0.18);
+  flex-shrink: 0;
+}
+.note-notebook__rings {
+  position: absolute;
+  left: -6rpx;
+  top: 10rpx;
+  width: 14rpx;
+  height: 56rpx;
+  border-left: 4rpx solid #e2b7c2;
+  border-radius: 8rpx;
+}
+.note-notebook__face {
+  position: absolute;
+  left: 14rpx;
+  top: 16rpx;
+  right: 8rpx;
+  height: 44rpx;
+}
+.note-notebook__eye {
+  display: inline-block;
+  width: 7rpx;
+  height: 7rpx;
+  margin-right: 22rpx;
+  border-radius: 50%;
+  background: #7a6464;
+}
+.note-notebook__mouth {
+  position: absolute;
+  left: 8rpx;
+  top: 20rpx;
+  width: 26rpx;
+  height: 13rpx;
+  border-bottom: 3rpx solid #7a6464;
+  border-radius: 0 0 26rpx 26rpx;
+}
+.note-header-text {
+  display: flex;
+  flex-direction: column;
+}
+.note-header-title {
+  font-size: 38rpx;
+  font-weight: 600;
+  color: #594747;
+  letter-spacing: 1rpx;
+  line-height: 1.2;
+}
+.note-header-heart {
+  color: #ed9cab;
+  margin-left: 6rpx;
+}
+.note-header-sub {
+  margin-top: 8rpx;
+  font-size: 21rpx;
+  color: #a99a9a;
+}
+.note-header-right {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+.note-icon-btn {
+  width: 62rpx;
+  height: 62rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1rpx solid #f1e4e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  color: #8d7d7d;
+  box-shadow: 0 6rpx 18rpx rgba(100, 80, 70, 0.06);
+}
+.note-icon-btn:active { transform: scale(0.92); }
+
+/* ===== 搜索（手账纸张） ===== */
+.note-search {
+  display: flex;
+  align-items: center;
+  height: 88rpx;
+  padding: 0 26rpx;
+  box-sizing: border-box;
+  gap: 12rpx;
+  background: #fffdf9;
+  border: 1rpx solid #f1e5e2;
+  border-radius: 44rpx;
+  box-shadow: 0 8rpx 24rpx rgba(130, 100, 90, 0.06);
+}
+.note-search-icon {
+  font-size: 26rpx;
+  color: #a99b9b;
+}
+.note-search-input {
+  flex: 1;
+  font-size: 27rpx;
+  color: #594b4b;
+}
+.note-search-ph {
+  color: #b9abab;
+}
+.note-search-clear {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background: #f6efe9;
+  color: #b0a2a2;
+  font-size: 22rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.note-search-filter {
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: 50%;
+  background: #fdf1f4;
+  font-size: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.75;
+}
+.note-search-filter.is-on {
+  background: #ffe4e8;
+  opacity: 1;
+}
+
+/* ===== 分类筛选 ===== */
+.note-cats {
+  white-space: nowrap;
+  margin-top: 24rpx;
+}
+.note-cats-inner {
+  display: inline-flex;
+  gap: 16rpx;
+  padding: 4rpx 4rpx 8rpx;
+}
+.note-cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  height: 68rpx;
+  padding: 0 28rpx;
+  border-radius: 34rpx;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.9);
+  color: #817474;
+  font-size: 25rpx;
+  box-shadow: 0 6rpx 18rpx rgba(100, 80, 70, 0.05);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+.note-cat.is-active {
+  background: #ffe4e8;
+  color: #9d5e68;
+  font-weight: 600;
+  transform: translateY(-2rpx);
+}
+.note-cat__icon {
+  font-size: 22rpx;
+}
+/* 彩色圆点（呼应参考图的黄/绿/蓝/粉小圆点） */
+.note-cat__dot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1rpx rgba(0, 0, 0, 0.05);
+}
+.note-cat__label { line-height: 1; }
+.note-cat__count {
+  font-size: 19rpx;
+  opacity: 0.55;
+}
+
+/* ===== 手账纸张区（左侧螺旋装订） ===== */
+.note-paper {
+  position: relative;
+  margin-top: 26rpx;
+  padding: 30rpx 20rpx;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 250, 0.92) 0%, rgba(255, 250, 246, 0.88) 100%);
+  border-radius: 26rpx;
+  box-shadow: 0 10rpx 30rpx rgba(170, 130, 125, 0.08);
+}
+/* 螺旋装订：改为「顶部三环 + 一条虚线缝线」。
+   原因：原先 8 个圆环用 space-between 撑满整张纸高度，便签少时底部会留下
+   3~4 个孤立圆点，视觉杂乱。现在只在纸张顶部保留 3 环表达装订，
+   下方用极淡的竖向虚线代替点阵，纵向延展但不喧宾夺主。 */
+.note-paper__rings {
+  position: absolute;
+  left: -4rpx;
+  top: 30rpx;
+  bottom: 30rpx;
+  width: 18rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20rpx;
+  pointer-events: none;
+}
+/* 缝线：上下淡出的虚线，替代密集点阵 */
+.note-paper__rings::after {
+  content: '';
+  position: absolute;
+  left: 8rpx;
+  top: 92rpx;
+  bottom: 0;
+  width: 0;
+  border-left: 2rpx dashed rgba(226, 183, 194, 0.55);
+}
+.note-paper__ring {
+  position: relative;
+  z-index: 1;
+  width: 16rpx;
+  height: 16rpx;
+  border: 3rpx solid #f2b9c6;
+  border-radius: 50%;
+  background: rgba(255, 253, 250, 0.9);
+  box-shadow: none;
+}
+.note-paper__body {
+  position: relative;
+}
+
+/* ===== 颜色筛选（折叠） ===== */
+.note-filter {
+  white-space: nowrap;
+  margin-top: 14rpx;
+  animation: fadeUp 0.24s ease-out;
+}
+.note-filter-inner {
+  display: inline-flex;
+  gap: 14rpx;
+  padding: 4rpx 4rpx 8rpx;
+}
+.note-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 10rpx 20rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.85);
+  font-size: 23rpx;
+  color: #817474;
+  border: 1rpx solid transparent;
+}
+.note-filter-chip.is-active {
+  border-color: #f3a6b4;
+  color: #9d5e68;
+  background: #fff4f6;
+}
+.note-filter-dot {
+  width: 22rpx;
+  height: 22rpx;
+  border-radius: 50%;
+  border: 1rpx solid rgba(0, 0, 0, 0.06);
+}
+
+/* ===== 便签墙（两列手账纸片） ===== */
+.note-wall {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 20rpx;
+  padding: 8rpx 0 0;
+}
+.note-card {
+  position: relative;
+  width: calc(50% - 10rpx);
+  margin-bottom: 24rpx;
+  padding: 30rpx 24rpx 20rpx;
+  min-height: 288rpx;
+  border-radius: 28rpx;
+  box-sizing: border-box;
+  /* 统一米白纸卡（参考稿：便签本体同色，靠彩色胶带区分） */
+  background: #FFFDF9;
+  border: 2rpx solid #F0E2DF;
+  box-shadow: 0 14rpx 34rpx rgba(128, 101, 101, 0.09);
+  animation: fadeUp 0.28s ease-out;
+  transition: transform 0.2s ease;
+}
+/* 手账纸片随机微旋转（-1° ~ +1°） */
+.note-card--0 { transform: rotate(-0.5deg); }
+.note-card--1 { transform: rotate(0.5deg); }
+.note-card--2 { transform: rotate(-0.3deg); }
+.note-card--3 { transform: rotate(0.3deg); }
+.note-card.is-pinned {
+  box-shadow: 0 16rpx 38rpx rgba(190, 130, 140, 0.18);
+}
+.note-card:active {
+  transform: scale(0.98);
+}
+/* 顶部胶带：四色循环（粉/黄/绿/紫），压在卡片上边缘外侧 */
+.note-card-tape {
+  position: absolute;
+  top: -12rpx;
+  left: 50%;
+  margin-left: -58rpx;
+  width: 116rpx;
+  height: 30rpx;
+  transform: rotate(-2deg);
+  border-radius: 6rpx;
+  opacity: 0.9;
+}
+/* 右上角图钉符号 */
+.note-card-pinmark {
+  position: absolute;
+  right: 22rpx;
+  top: 22rpx;
+  font-size: 30rpx;
+  line-height: 1;
+  opacity: 0.75;
+}
+.note-card-cat {
+  display: inline-block;
+  font-size: 18rpx;
+  padding: 5rpx 14rpx;
+  border-radius: 16rpx;
+  margin-bottom: 18rpx;
+}
+/* 标题（参考稿每条便签有短标题） */
+.note-card-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #5B4B4D;
+  line-height: 1.35;
+  margin-bottom: 12rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.note-card-content {
+  font-size: 22rpx;
+  line-height: 1.65;
+  color: #9C8B8C;
+  word-break: break-all;
+  white-space: pre-wrap;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+}
+.note-card-foot {
+  margin-top: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.note-card-date {
+  font-size: 19rpx;
+  color: #B1A2A2;
+}
+.note-card-figure {
+  font-size: 24rpx;
+  opacity: 0.6;
+}
+
+/* ===== 章节标题「我的小记录 ♡ · N 张便签」 ===== */
+.note-sec-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 4rpx 4rpx 22rpx;
+}
+.note-sec-title-main {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #5B4B4D;
+}
+.note-sec-count {
+  font-size: 20rpx;
+  color: #B39D9E;
+}
+
+/* ===== 空状态（手账插画：小熊 + 线圈本 + 笔筒 + 钢笔） ===== */
+.note-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60rpx 0 20rpx;
+}
+.note-empty-art {
+  position: relative;
+  width: 420rpx;
+  height: 330rpx;
+  margin-bottom: 16rpx;
+}
+.note-empty-star {
+  position: absolute;
+  top: 6rpx;
+  right: 60rpx;
+  font-size: 32rpx;
+  color: #f0c9a8;
+  transform: rotate(12deg);
+}
+.note-empty-heart {
+  position: absolute;
+  top: 60rpx;
+  right: 18rpx;
+  font-size: 30rpx;
+  color: #f0aab8;
+  transform: rotate(10deg);
+}
+/* 小熊趴在本子顶上 */
+.note-empty-bear {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 96rpx;
+  height: 64rpx;
+  margin-left: -66rpx;
+  z-index: 3;
+}
+.note-empty-bear__ear {
+  position: absolute;
+  top: 2rpx;
+  width: 22rpx;
+  height: 22rpx;
+  border-radius: 50%;
+  background: #d9a86e;
+}
+.note-empty-bear__ear--l { left: 8rpx; }
+.note-empty-bear__ear--r { right: 8rpx; }
+.note-empty-bear__head {
+  position: absolute;
+  top: 10rpx;
+  left: 6rpx;
+  right: 6rpx;
+  height: 52rpx;
+  background: linear-gradient(180deg, #e7bd85 0%, #dba96f 100%);
+  border-radius: 46% 46% 44% 44%;
+  box-shadow: 0 4rpx 10rpx rgba(160, 120, 70, 0.18);
+}
+.note-empty-bear__eyes {
+  display: flex;
+  justify-content: center;
+  gap: 18rpx;
+  padding-top: 18rpx;
+}
+.note-empty-bear__eyes text {
+  width: 7rpx;
+  height: 7rpx;
+  border-radius: 50%;
+  background: #5d4632;
+}
+.note-empty-bear__muzzle {
+  width: 22rpx;
+  height: 14rpx;
+  margin: 4rpx auto 0;
+  background: #f6e3c8;
+  border-radius: 50%;
+}
+/* 笑脸本子 */
+.note-empty-book {
+  position: absolute;
+  left: 50%;
+  top: 44rpx;
+  width: 210rpx;
+  height: 230rpx;
+  margin-left: -122rpx;
+  border-radius: 14rpx;
+  background: linear-gradient(165deg, #fffefb 0%, #fff3ef 100%);
+  border: 2rpx solid #f3ddd8;
+  box-shadow: 0 14rpx 28rpx rgba(190, 150, 145, 0.18);
+  transform: rotate(-4deg);
+  z-index: 2;
+  box-sizing: border-box;
+}
+.note-empty-book__spiral {
+  position: absolute;
+  left: -8rpx;
+  top: 22rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+}
+.note-empty-book__coil {
+  width: 16rpx;
+  height: 16rpx;
+  border: 4rpx solid #e8a8b8;
+  border-radius: 50%;
+  background: transparent;
+}
+.note-empty-book__smile {
+  display: flex;
+  gap: 34rpx;
+  justify-content: center;
+  padding-top: 56rpx;
+}
+.note-empty-book__smile text {
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background: #a8878d;
+}
+.note-empty-book__mouth {
+  width: 30rpx;
+  height: 15rpx;
+  margin: 8rpx auto 0;
+  border-bottom: 4rpx solid #a8878d;
+  border-radius: 0 0 30rpx 30rpx;
+}
+.note-empty-book__heart {
+  position: absolute;
+  right: 30rpx;
+  top: 118rpx;
+  font-size: 32rpx;
+  color: #f2a9bc;
+  transform: rotate(-8deg);
+}
+.note-empty-book__lines {
+  position: absolute;
+  left: 34rpx;
+  bottom: 26rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+.note-empty-book__lines view {
+  width: 110rpx;
+  height: 6rpx;
+  border-radius: 4rpx;
+  background: #f6e4e0;
+}
+.note-empty-book__lines view:last-child { width: 72rpx; }
+/* 笔筒（三支笔 + 杯身） */
+.note-empty-cup {
+  position: absolute;
+  left: 16rpx;
+  bottom: 6rpx;
+  width: 110rpx;
+  height: 130rpx;
+  z-index: 1;
+}
+.note-empty-cup__pen {
+  position: absolute;
+  bottom: 62rpx;
+  width: 12rpx;
+  border-radius: 6rpx;
+}
+.note-empty-cup__pen--1 {
+  left: 18rpx;
+  height: 74rpx;
+  background: linear-gradient(180deg, #f2b7c6 0%, #eda0b4 100%);
+  transform: rotate(-8deg);
+}
+.note-empty-cup__pen--2 {
+  left: 42rpx;
+  height: 88rpx;
+  background: linear-gradient(180deg, #cfd8ee 0%, #aebde0 100%);
+  transform: rotate(3deg);
+}
+.note-empty-cup__pen--3 {
+  left: 66rpx;
+  height: 68rpx;
+  background: linear-gradient(180deg, #f6d9a0 0%, #eec884 100%);
+  transform: rotate(9deg);
+}
+.note-empty-cup__body {
+  position: absolute;
+  bottom: 0;
+  left: 6rpx;
+  width: 92rpx;
+  height: 78rpx;
+  background: linear-gradient(180deg, #fffdf9 0%, #f4e9de 100%);
+  border-radius: 12rpx 12rpx 22rpx 22rpx;
+  box-shadow: 0 8rpx 16rpx rgba(170, 140, 110, 0.18);
+}
+.note-empty-cup__body::after {
+  content: '♡';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 26rpx;
+  color: #eda5b4;
+}
+/* 粉色钢笔 */
+.note-empty-fountain {
+  position: absolute;
+  right: 44rpx;
+  bottom: 10rpx;
+  width: 26rpx;
+  height: 170rpx;
+  transform: rotate(16deg);
+  z-index: 3;
+}
+.note-empty-fountain__nip {
+  width: 14rpx;
+  height: 26rpx;
+  margin: 0 auto;
+  background: #e894a8;
+  clip-path: polygon(50% 100%, 0 0, 100% 0);
+  border-radius: 4rpx;
+}
+.note-empty-fountain__barrel {
+  width: 22rpx;
+  height: 140rpx;
+  margin: 0 auto;
+  border-radius: 10rpx;
+  background: linear-gradient(180deg, #f6b7c6 0%, #ef9fb4 100%);
+  box-shadow: 0 6rpx 12rpx rgba(200, 130, 150, 0.24);
+}
+.note-empty-tulip {
+  position: absolute;
+  right: 8rpx;
+  bottom: 0;
+  font-size: 40rpx;
+  opacity: 0.9;
+}
+.note-empty-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #675454;
+}
+.note-empty-desc {
+  margin-top: 12rpx;
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  font-size: 23rpx;
+  color: #a99a9a;
+}
+/* 虚线贴纸感主按钮（呼应参考图） */
+.note-empty-btn {
+  position: relative;
+  width: 360rpx;
+  height: 96rpx;
+  margin-top: 40rpx;
+  border-radius: 48rpx;
+  background: #f3a6b4;
+  color: #fff;
+  font-size: 30rpx;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12rpx 30rpx rgba(238, 145, 163, 0.22);
+}
+.note-empty-btn__ring {
+  position: absolute;
+  left: 7rpx;
+  right: 7rpx;
+  top: 7rpx;
+  bottom: 7rpx;
+  border-radius: 44rpx;
+  border: 3rpx dashed rgba(255, 255, 255, 0.7);
+}
+.note-empty-btn:active { transform: scale(0.97); }
+
+/* ===== 悬浮贴纸按钮（右下角，避开安全区与内容） ===== */
+.note-fab-wrap {
+  position: fixed;
+  right: 40rpx;
+  bottom: calc(56rpx + env(safe-area-inset-bottom));
+  width: 112rpx;
+  height: 112rpx;
+  z-index: 20;
+}
+.note-fab {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 50%;
+  background: #f3a6b4;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 14rpx 34rpx rgba(238, 145, 163, 0.28);
+}
+.note-fab__ring {
+  position: absolute;
+  left: 8rpx;
+  right: 8rpx;
+  top: 8rpx;
+  bottom: 8rpx;
+  border-radius: 50%;
+  border: 4rpx dashed rgba(255, 255, 255, 0.75);
+}
+.note-fab__plus {
+  font-size: 52rpx;
+  line-height: 1;
+}
+.note-fab-wrap:active .note-fab { transform: scale(0.92); }
+/* FAB 闪光贴纸 */
+.note-fab-spark {
+  position: absolute;
+  font-size: 26rpx;
+  color: #f3b8c6;
+  z-index: 21;
+  pointer-events: none;
+}
+.note-fab-spark--1 {
+  top: -14rpx;
+  right: -6rpx;
+  transform: rotate(14deg);
+}
+.note-fab-spark--2 {
+  bottom: -4rpx;
+  left: -16rpx;
+  font-size: 18rpx;
+  transform: rotate(-10deg);
+  opacity: 0.8;
+}
+
+/* ===== 弹窗 ===== */
+.note-modal-mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(89, 75, 75, 0.32);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.note-modal {
+  width: 100%;
+  max-height: 86vh;
+  background: #fffaf8;
+  border-radius: 32rpx 32rpx 0 0;
+  padding: 32rpx 36rpx 48rpx;
+  box-sizing: border-box;
+  position: relative;
+  overflow-y: auto;
+}
+.note-modal-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #594747;
+  margin-bottom: 20rpx;
+}
+.note-modal-close {
+  position: absolute;
+  top: 30rpx;
+  right: 32rpx;
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b0a2a2;
+  font-size: 30rpx;
+}
+
+.note-title-input {
+  width: 100%;
+  margin-bottom: 12rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #5b4b4d;
+  border-bottom: 2rpx solid #f0e2df;
+  padding-bottom: 14rpx;
+}
+.note-textarea {
+  width: 100%;
+  min-height: 160rpx;
+  font-size: 30rpx;
+  line-height: 1.6;
+  color: #594b4b;
+  background: transparent;
+}
+.note-textarea-ph { color: #c3b3b3; }
+.note-count {
+  text-align: right;
+  font-size: 22rpx;
+  color: #bcaeae;
+  margin-top: 6rpx;
+}
+.note-settings-hint {
+  font-size: 23rpx;
+  color: #a99a9a;
+  margin-bottom: 14rpx;
+}
+
+.note-preview {
+  position: relative;
+  border-radius: 20rpx;
+  padding: 26rpx;
+  margin: 6rpx 0 24rpx;
+  min-height: 130rpx;
+  overflow: hidden;
+  box-shadow: 0 8rpx 20rpx rgba(150, 110, 115, 0.1);
+}
+.note-preview-figure {
+  position: absolute;
+  right: 10rpx;
+  bottom: 6rpx;
+  font-size: 88rpx;
+  line-height: 1;
+  opacity: 0.28;
+}
+.note-preview-content {
+  font-size: 29rpx;
+  line-height: 1.6;
+  word-break: break-all;
+  white-space: pre-wrap;
+  position: relative;
+  z-index: 1;
+}
+
+/* 分区标题 */
+.note-sec-title {
+  font-size: 25rpx;
+  font-weight: 600;
+  color: #7d6a6a;
+  margin: 22rpx 0 14rpx;
+}
+
+/* 分类选择 */
+.note-cat-row {
+  display: flex;
+  gap: 14rpx;
+  flex-wrap: wrap;
+}
+.note-cat-pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 22rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1rpx solid #f1e4e1;
+  color: #817474;
+  font-size: 24rpx;
+}
+.note-cat-pick.is-active {
+  font-weight: 600;
+  border-color: transparent;
+  box-shadow: 0 4rpx 12rpx rgba(150, 110, 115, 0.12);
+}
+.note-cat-pick__icon { font-size: 20rpx; }
+
+/* 颜色色板 */
+.note-swatch-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+}
+.note-swatch {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 18rpx;
+  box-shadow: inset 0 0 0 1rpx rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.note-swatch.is-active {
+  box-shadow: inset 0 0 0 4rpx #f3a6b4, 0 4rpx 12rpx rgba(238, 145, 163, 0.24);
+}
+.note-swatch-check {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #4b4b5a;
+}
+
+/* 样式/图样 chips */
+.note-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+}
+.note-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 20rpx;
+  border-radius: 16rpx;
+  background: #fff;
+  border: 2rpx solid #f3e9e6;
+  color: #817474;
+}
+.note-chip.is-active {
+  border-color: #f3a6b4;
+  background: #fff4f6;
+}
+.note-chip-emoji { font-size: 26rpx; }
+.note-chip-label { font-size: 23rpx; }
+.note-chip.is-active .note-chip-label { color: #9d5e68; font-weight: 600; }
+.note-chip-row-fig { gap: 12rpx; }
+.note-chip-fig {
+  flex-direction: column;
+  padding: 12rpx 18rpx;
+  gap: 6rpx;
+}
+.note-chip-fig-emoji {
+  font-size: 38rpx;
+  line-height: 1;
+}
+
+/* 置顶 switch */
+.note-switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 26rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #f3e9e6;
+  font-size: 27rpx;
+  color: #594b4b;
+}
+
+/* 操作按钮 */
+.note-modal-actions {
+  display: flex;
+  gap: 18rpx;
+  margin-top: 34rpx;
+}
+.note-btn {
+  flex: 1;
+  height: 88rpx;
+  border-radius: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+.note-btn-cancel {
+  background: #f6efe9;
+  color: #8d7d7d;
+}
+.note-btn-save {
+  background: #f3a6b4;
+  color: #fff;
+  box-shadow: 0 10rpx 24rpx rgba(238, 145, 163, 0.24);
+}
+.note-btn:active { transform: scale(0.97); }
+
+/* ===== 轻动画 ===== */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}

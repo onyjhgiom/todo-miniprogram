@@ -1,0 +1,22 @@
+.pz { display: flex; flex-direction: column; align-items: center; gap: 24rpx; }
+.pz__bar { gap: 16rpx; }
+.pz__board {
+  width: 100%; max-width: 600rpx; display: grid; gap: 12rpx;
+  background: var(--card-2); padding: 12rpx; border-radius: var(--r-lg); border: 2rpx solid var(--line);
+}
+.pz__cell {
+  aspect-ratio: 1 / 1; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--sd-1); transition: transform .12s ease;
+}
+.pz__cell:active { transform: scale(.95); }
+.pz__cell--sel { box-shadow: inset 0 0 0 5rpx var(--mint); }
+.pz__num { font-size: 44rpx; color: #fff; font-weight: 700; opacity: .85; }
+/* 用色相渐变拼出“画” */
+.pz__cell--v1 { background: #F2C9A0; } .pz__cell--v2 { background: #EFB98A; }
+.pz__cell--v3 { background: #E9A774; } .pz__cell--v4 { background: #E2955E; }
+.pz__cell--v5 { background: #D98A52; } .pz__cell--v6 { background: #C9A25E; }
+.pz__cell--v7 { background: #A6C9B5; } .pz__cell--v8 { background: #8FB89E; }
+.pz__cell--v9 { background: #6F9E86; } .pz__cell--v10 { background: #5C8C77; }
+.pz__cell--v11 { background: #BE6F44; } .pz__cell--v12 { background: #A85F38; }
+.pz__cell--v13 { background: #C8A468; } .pz__cell--v14 { background: #B8915A; }
+.pz__cell--v15 { background: #9FB89E; } .pz__cell--v16 { background: #7FA68C; }

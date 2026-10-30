@@ -1,0 +1,8 @@
+.fl { display: flex; flex-direction: column; align-items: center; gap: 24rpx; }
+.fl__board { width: 100%; max-width: 560rpx; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16rpx; }
+.fl__cell {
+  aspect-ratio: 1 / 1; border-radius: var(--r-md); background: var(--card-3);
+  border: 2rpx solid var(--line); transition: background .12s ease, transform .12s ease;
+}
+.fl__cell--on { background: linear-gradient(135deg, #A6C9B5, #6F9E86); border-color: var(--mint-deep); }
+.fl__cell--tap:active { transform: scale(.92); }

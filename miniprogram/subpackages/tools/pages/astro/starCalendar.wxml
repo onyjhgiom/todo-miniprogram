@@ -1,0 +1,87 @@
+<!--pages/astro/starCalendar.wxml
+  星象日历：今日月相头条 + 当月日历网格 + 天象事件倒计时 + 选中日简报 + 笔记
+-->
+<view class="astro-page">
+  <view class="astro-statusbar"></view>
+
+  <view class="astro-card astro-card--major" hover-class="astro-card--hover" hover-stay-time="60">
+    <view style="display:flex;align-items:center;gap:24rpx;">
+      <image class="moon-hero" src="{{todayMoon.image}}" mode="aspectFit"
+        binderror="onImgErr"></image>
+      <view style="flex:1;min-width:0;">
+        <text class="astro-tag">今日月相</text>
+        <text class="astro-title" style="font-size:36rpx;display:block;margin:6rpx 0;">{{todayMoon.name}}</text>
+        <text class="astro-muted">月龄 {{todayMoon.ageDays}} 天 · 照度 {{todayMoon.illumination}}%</text>
+        <text class="astro-body" style="display:block;margin-top:6rpx;">{{todayMoon.tip}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="astro-card">
+    <view class="cal-head">
+      <view class="astro-btn astro-btn--ghost" hover-class="astro-btn--hover" hover-stay-time="50"
+        bindtap="onPrevMonth">‹</view>
+      <text class="astro-title">{{year}} 年 {{month}} 月</text>
+      <view class="astro-btn astro-btn--ghost" hover-class="astro-btn--hover" hover-stay-time="50"
+        bindtap="onNextMonth">›</view>
+    </view>
+    <view class="cal-week">
+      <view wx:for="{{weekdayLabels}}" wx:key="*this" class="cal-week__cell {{item === '日' || item === '六' ? 'is-rest' : ''}}">{{item}}</view>
+    </view>
+    <view class="cal-grid">
+      <view wx:for="{{days}}" wx:key="ymd" class="cal-cell {{item.inMonth ? '' : 'is-out'}} {{item.ymd === selectedYMD ? 'is-selected' : ''}} {{item.hasEvent ? 'has-event' : ''}}"
+        hover-class="cal-cell--hover" hover-stay-time="50"
+        bindtap="onSelectDate" data-ymd="{{item.ymd}}">
+        <text class="cal-cell__num">{{item.date}}</text>
+        <text class="cal-cell__lunar">{{item.lunar}}</text>
+        <text wx:if="{{item.hasEvent}}" class="cal-cell__dot"></text>
+      </view>
+    </view>
+  </view>
+
+  <view class="astro-card">
+    <text class="astro-tag" style="margin-bottom:14rpx;">天象倒计时</text>
+    <block wx:for="{{upcoming}}" wx:key="id">
+      <view class="astro-row" hover-class="astro-row--hover" hover-stay-time="50">
+        <text class="astro-tag">{{item.label}}</text>
+        <view style="flex:1;">
+          <text class="astro-body">{{item.name}}</text>
+          <text class="astro-muted">{{item.date}} · {{item.desc}}</text>
+        </view>
+        <text class="astro-body">剩 {{item.left}}</text>
+      </view>
+    </block>
+  </view>
+
+  <view class="astro-card">
+    <text class="astro-tag" style="margin-bottom:14rpx;">{{selectedYMD}} 简报</text>
+    <text class="astro-body">月相：{{selectedMoon.name}}（{{selectedMoon.tip}}）</text>
+    <block wx:if="{{dayEvents.length > 0}}">
+      <view class="astro-divider"></view>
+      <text class="astro-body">事件：{{dayEvents[0].name}} · {{dayEvents[0].desc}}</text>
+    </block>
+    <view class="astro-divider"></view>
+    <text class="astro-tag" style="margin-bottom:10rpx;display:inline-block;">星象笔记</text>
+    <textarea class="astro-textarea" placeholder="为这天写下一些观感或心情" placeholder-class="astro-input--placeholder"
+      value="{{noteDraft}}" bindinput="onNoteInput" style="margin-bottom:12rpx;"></textarea>
+    <view class="astro-btn" style="margin-top:6rpx;" hover-class="astro-btn--hover" hover-stay-time="50"
+      bindtap="onSaveNote">保存笔记</view>
+  </view>
+
+  <view class="astro-card">
+    <text class="astro-tag" style="margin-bottom:14rpx;">笔记历史</text>
+    <view wx:if="{{notes.length === 0}}" class="astro-empty">还没有笔记</view>
+    <view wx:else style="display:flex;flex-direction:column;gap:12rpx;">
+      <view wx:for="{{notes}}" wx:key="id" class="astro-row"
+        hover-class="astro-row--hover" hover-stay-time="50">
+        <view style="flex:1;">
+          <text class="astro-body">{{item.ymd}}</text>
+          <text class="astro-muted" style="display:block;margin-top:4rpx;">{{item.content}}</text>
+        </view>
+        <text class="astro-tag" data-id="{{item.id}}" bindtap="onDeleteNote">×</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="astro-statusbar"></view>
+</view>

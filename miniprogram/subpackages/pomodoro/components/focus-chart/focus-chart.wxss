@@ -1,0 +1,6 @@
+/* components/focus-chart/focus-chart.wxss */
+/* 组件只负责画布占位与横向铺满，配色/圆角都在调用方的卡片里，避免样式越界。 */
+.fc__cv {
+  display: block;
+  width: 100%;
+}

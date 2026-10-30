@@ -1,0 +1,250 @@
+<!--subpackages/travel/pages/index：旅行模式 · 沉浸式旅行驾驶舱
+  结构：
+    tv（根）
+    ├── tv__bg        五层背景：目的地照片(Ken Burns) + 压暗渐变 + 空气感 + 光斑×2 + 星尘
+    ├── tv__nav       透明导航（自定义导航栏：返回 + 标题）
+    └── tv__body
+        ├── tv__hd       行李箱徽章 + 「旅行模式 Travel」+ 副标题
+        ├── tv__acts     ＋新行程 / 云端同步（避开右上胶囊，放标题行下）
+        ├── tv__slogan   去看看更大的世界 ♡（手写感斜体）
+        ├── tv__hero     视觉中心：CSS 旅行箱 + 轨道环 + 登机牌/相机/定位/拍立得漂浮物
+        ├── 空状态 / 行程卡片（玻璃拟态，业务逻辑不变）
+        ├── tv__stat     概览条（玻璃）
+        ├── tv__qa       快捷入口：行李清单 / 行程规划 / 旅行预算
+        ├── tv__insp     旅行灵感横滑卡（京都 / 冰岛 / 海岛）
+        ├── tv__foot     手写标语 + 灵感入口
+        └── 历史行程（归档，玻璃）
+-->
+<view class="tv">
+
+  <!-- ============ 五层沉浸式背景 ============ -->
+  <view class="tv__bg" aria-hidden="true">
+    <image class="tv__photo" src="/subpackages/travel/assets/bg-coast.jpg" mode="aspectFill" />
+    <view class="tv__shade"></view>
+    <view class="tv__air"></view>
+    <view class="tv__leak tv__leak--1"></view>
+    <view class="tv__leak tv__leak--2"></view>
+    <view class="tv__dust tv__dust--1"></view>
+    <view class="tv__dust tv__dust--2"></view>
+    <view class="tv__dust tv__dust--3"></view>
+    <view class="tv__dust tv__dust--4"></view>
+    <view class="tv__dust tv__dust--5"></view>
+    <view class="tv__dust tv__dust--6"></view>
+    <view class="tv__dust tv__dust--7"></view>
+    <view class="tv__dust tv__dust--8"></view>
+    <view class="tv__dust tv__dust--9"></view>
+    <view class="tv__dust tv__dust--10"></view>
+  </view>
+
+  <!-- ============ 透明导航（自定义导航栏） ============ -->
+  <view class="tv__nav" style="padding-top:{{statusBarH}}px">
+    <view class="tv__back" hover-class="press" bindtap="onBack">
+      <view class="tv__backico"></view>
+    </view>
+    <view class="tv__navtitle">
+      <text class="tv__navcn">旅行模式</text>
+      <text class="tv__naven">Travel</text>
+    </view>
+  </view>
+
+  <view class="tv__body" style="padding-top:{{bodyPad}}px">
+
+    <!-- ============ 标题区 ============ -->
+    <view class="tv__hd">
+      <view class="tv__badge">
+        <view class="tv__badge__case"></view>
+      </view>
+      <view class="tv__hdt">
+        <view class="tv__t1">
+          <text class="tv__t1cn">旅行模式</text>
+          <text class="tv__t1en">Travel</text>
+        </view>
+        <view class="tv__t2">行程 · 行李 · 预算，一趟旅行一站管</view>
+      </view>
+    </view>
+
+    <!-- 顶部动作（真机右上被胶囊占据，这里放在标题行下方，右对齐） -->
+    <view class="tv__acts">
+      <view class="tv__pill" hover-class="press" bindtap="onSync">
+        <view class="tv__pilldot {{cloudSynced ? 'on' : ''}}"></view>
+        <text>{{cloudSynced ? '云端同步' : '本地模式 · 同步'}}</text>
+      </view>
+      <view class="tv__pill tv__pill--hi" hover-class="press" bindtap="onCreate">
+        <text class="tv__pillplus">＋</text>
+        <text>新行程</text>
+      </view>
+    </view>
+
+    <view class="tv__slogan">去看看更大的世界 ♡</view>
+
+    <!-- ============ 视觉中心：CSS 旅行箱 + 轨道漂浮物 ============ -->
+    <view class="tv__hero">
+      <view class="tv__halo"></view>
+      <view class="tv__orbit tv__orbit--1"></view>
+      <view class="tv__orbit tv__orbit--2"></view>
+
+      <!-- 漂浮物：登机牌 / 相机 / 定位 Pin / 拍立得 ×2 -->
+      <view class="tv__chip tv__chip--plane">
+        <view class="tv__plane"></view>
+      </view>
+      <view class="tv__chip tv__chip--cam">
+        <view class="tv__cam"><view class="tv__cam__lens"></view><view class="tv__cam__dot"></view></view>
+      </view>
+      <view class="tv__chip tv__chip--pin">
+        <view class="tv__pin"><view class="tv__pin__hole"></view></view>
+      </view>
+      <view class="tv__chip tv__chip--photo1">
+        <view class="tv__photo-card"><view class="tv__photo-card__img tv__photo-card__img--a"></view></view>
+      </view>
+      <view class="tv__chip tv__chip--photo2">
+        <view class="tv__photo-card"><view class="tv__photo-card__img tv__photo-card__img--b"></view></view>
+      </view>
+
+      <!-- 旅行箱本体（外层上下浮动 5s，内层左右摇摆 8s） -->
+      <view class="tv__case">
+        <view class="tv__case__sway">
+          <view class="tv__hat"><view class="tv__hat__crown"></view></view>
+          <view class="tv__casebody">
+            <view class="tv__casebody__handle"></view>
+            <view class="tv__casebody__ribs"></view>
+            <view class="tv__casebody__wheel tv__casebody__wheel--l"></view>
+            <view class="tv__casebody__wheel tv__casebody__wheel--r"></view>
+          </view>
+        </view>
+      </view>
+
+      <view class="tv__ground"></view>
+    </view>
+
+    <!-- ============ 空状态 ============ -->
+    <view wx:if="{{cards.length === 0}}" class="tv__empty">
+      <view class="tv__empty__t">还没有行程</view>
+      <view class="tv__empty__s">点击上方「＋ 新行程」，选择目的地，模板会自动帮你规划行程和行李清单</view>
+      <view class="tv__cta" hover-class="press" bindtap="onCreate">
+        <text>✈ 创建第一个行程</text>
+        <text class="tv__cta__arrow">→</text>
+      </view>
+    </view>
+
+    <!-- ============ 概览条（有行程时） ============ -->
+    <view wx:if="{{statTrips > 0}}" class="tv__card tv__stat">
+      <view class="tv__stat__cell">
+        <view class="tv__stat__num">{{statTrips}}</view>
+        <view class="tv__stat__label">行程</view>
+      </view>
+      <view class="tv__stat__line"></view>
+      <view class="tv__stat__cell">
+        <view class="tv__stat__num">{{statPackingPercent}}%</view>
+        <view class="tv__stat__label">行李完成度</view>
+      </view>
+      <view class="tv__stat__line"></view>
+      <view class="tv__stat__cell">
+        <view class="tv__stat__num tv__stat__num--sm">{{statPackingText}}</view>
+        <view class="tv__stat__label">已打包 / 总数</view>
+      </view>
+    </view>
+
+    <!-- ============ 行程卡片（玻璃拟态，业务逻辑不变） ============ -->
+    <view wx:for="{{cards}}" wx:key="_id" class="tv__card tv__trip" data-id="{{item._id}}"
+      bindtap="onOpenCard" bindlongpress="onCardLongPress" hover-class="press">
+      <view class="tv__trip__cover" style="{{item.coverStyle}}">
+        <image wx:if="{{item.coverIsImage}}" class="tv__trip__coverimg" src="{{item.cover}}" mode="aspectFill" />
+        <text wx:else class="tv__trip__coveremo">{{item.coverEmoji}}</text>
+        <view class="tv__trip__cd tv__trip__cd--{{item.countdownKey}}">{{item.countdownText}}</view>
+      </view>
+      <view class="tv__trip__body">
+        <view class="tv__trip__title">{{item.title}}</view>
+        <view class="tv__trip__meta">📍 {{item.destination}} · {{item.dateText}} · {{item.totalDays}} 天</view>
+        <view class="tv__trip__meta tv__trip__meta--mute">👥 {{item.memberText}}</view>
+        <view class="tv__trip__row">
+          <text class="tv__trip__rowk">🧳 行李</text>
+          <view class="tv__trip__bar"><view class="tv__trip__barfill" style="width:{{item.packingPercent}}%"></view></view>
+          <text class="tv__trip__rowv">{{item.packedCount}}/{{item.packingTotal}}</text>
+        </view>
+        <view wx:if="{{item.budget > 0}}" class="tv__trip__row">
+          <text class="tv__trip__rowk">💰 预算</text>
+          <view class="tv__trip__bar">
+            <view class="tv__trip__barfill tv__trip__barfill--{{item.overBudget ? 'over' : 'ok'}}"
+              style="width:{{item.budgetPercent}}%"></view>
+          </view>
+          <text class="tv__trip__rowv {{item.overBudget ? 'is-over' : ''}}">¥{{item.spentCost}}/{{item.budget}}</text>
+        </view>
+        <view class="tv__trip__foot">📌 行程 {{item.doneItemCount}}/{{item.itemCount}} 已完成</view>
+      </view>
+    </view>
+
+    <!-- ============ 快捷入口 ============ -->
+    <view class="tv__qa">
+      <view class="tv__qacard" hover-class="press" bindtap="onQuick" data-act="packing">
+        <view class="tv__qaico">🧳</view>
+        <view class="tv__qaname">行李清单</view>
+        <view class="tv__qadesc">精简打包 · 轻松出发</view>
+        <view class="tv__qaarrow">›</view>
+      </view>
+      <view class="tv__qacard" hover-class="press" bindtap="onQuick" data-act="plan">
+        <view class="tv__qaico">🗺️</view>
+        <view class="tv__qaname">行程规划</view>
+        <view class="tv__qadesc">智能推荐 · 最优路线</view>
+        <view class="tv__qaarrow">›</view>
+      </view>
+      <view class="tv__qacard" hover-class="press" bindtap="onQuick" data-act="budget">
+        <view class="tv__qaico">💰</view>
+        <view class="tv__qaname">旅行预算</view>
+        <view class="tv__qadesc">花得值 · 享受更多</view>
+        <view class="tv__qaarrow">›</view>
+      </view>
+    </view>
+
+    <!-- ============ 旅行灵感 ============ -->
+    <view class="tv__insp">
+      <view class="tv__insp__hd">
+        <view class="tv__insp__bar"></view>
+        <text class="tv__insp__t">去看看更大的世界</text>
+      </view>
+      <scroll-view class="tv__insp__scroll" scroll-x="true" enhanced="true" show-scrollbar="{{false}}">
+        <view class="tv__insp__row">
+          <view class="tv__insp__card" wx:for="{{inspire}}" wx:key="name"
+            hover-class="press" bindtap="onInspire" data-name="{{item.name}}">
+            <image class="tv__insp__img" src="{{item.img}}" mode="aspectFill" />
+            <view class="tv__insp__mask"></view>
+            <view class="tv__insp__info">
+              <view class="tv__insp__name">{{item.name}}</view>
+              <view class="tv__insp__season">{{item.season}}</view>
+              <view class="tv__insp__budget">{{item.budget}}</view>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- ============ 底部：手写标语 + 灵感入口 ============ -->
+    <view class="tv__foot">
+      <view class="tv__motto">
+        <view class="tv__motto__l1">旅行的意义</view>
+        <view class="tv__motto__l2">是遇见更好的自己 ♡</view>
+      </view>
+      <view class="tv__pill tv__pill--big" hover-class="press" bindtap="onInspire">
+        <text>发现更多旅行灵感</text>
+        <text class="tv__pill__arrow">›</text>
+      </view>
+    </view>
+
+    <!-- ============ 历史行程 ============ -->
+    <view wx:if="{{archived.length > 0}}" class="tv__card tv__arch" bindtap="onToggleArchived" hover-class="press">
+      <view class="tv__arch__head">
+        <text>🗄️ 历史行程</text>
+        <text class="tv__arch__arrow">{{showArchived ? '收起' : '展开'}}</text>
+      </view>
+    </view>
+    <view wx:if="{{showArchived}}" wx:for="{{archived}}" wx:key="_id" class="tv__card tv__trip tv__trip--arch"
+      data-id="{{item._id}}" bindtap="onOpenCard" bindlongpress="onCardLongPress" hover-class="press">
+      <view class="tv__trip__rowline">
+        <text class="tv__trip__archtitle">{{item.title}}</text>
+        <text class="tv__trip__archdate">{{item.dateText}}</text>
+      </view>
+      <view class="tv__trip__meta tv__trip__meta--mute">📍 {{item.destination}} · {{item.totalDays}} 天 · 花费 ¥{{item.spentCost}}</view>
+    </view>
+
+    <view class="tv__footnote">所有数据只存在你的手机里 · 愿你随时出发</view>
+  </view>
+</view>

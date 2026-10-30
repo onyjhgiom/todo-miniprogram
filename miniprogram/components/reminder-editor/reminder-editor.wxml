@@ -1,0 +1,55 @@
+<view class="reminder-editor">
+  <view class="reminder-list" wx:if="{{list.length > 0}}">
+    <view wx:for="{{list}}" wx:key="id" class="reminder-item">
+      <view class="reminder-row">
+        <view class="reminder-icon">⏰</view>
+        <picker mode="multiSelector" range="{{dateRange}}" value="{{dateValueOf(item)}}" bindchange="onItemChange" data-index="{{index}}" class="reminder-picker">
+          <view class="reminder-time">{{item.label}}</view>
+        </picker>
+        <view wx:if="{{item.sent}}" class="reminder-sent">已发送</view>
+        <view class="reminder-del" catchtap="onItemRemove" data-index="{{index}}">×</view>
+      </view>
+      <view class="reminder-config">
+        <picker mode="selector" range="{{repeatLabels}}" value="{{item.repeatIndex}}" bindchange="onRepeatChange" data-index="{{index}}" class="reminder-config__picker">
+          <view class="reminder-config__value">
+            <text class="reminder-config__label">重复</text>
+            <text class="reminder-config__text">{{item.repeatIndex > 0 ? repeatLabels[item.repeatIndex] : '不重复'}}</text>
+            <text class="reminder-config__arrow">›</text>
+          </view>
+        </picker>
+        <view class="reminder-config__divider"></view>
+        <picker mode="selector" range="{{methodLabels}}" value="{{item.methodIndex}}" bindchange="onMethodChange" data-index="{{index}}" class="reminder-config__picker">
+          <view class="reminder-config__value">
+            <text class="reminder-config__label">方式</text>
+            <text class="reminder-config__text">{{methodLabels[item.methodIndex]}}</text>
+            <text class="reminder-config__arrow">›</text>
+          </view>
+        </picker>
+      </view>
+    </view>
+  </view>
+  <view class="reminder-empty" wx:if="{{list.length === 0}}">
+    <text>暂无提醒，添加后到期将自动通知</text>
+  </view>
+
+  <!-- 微信通知授权开关：授权后到期由服务端推送订阅消息（未授权仅本机提醒） -->
+  <view
+    class="reminder-sub {{subOn ? 'is-on' : ''}} {{subBusy ? 'is-busy' : ''}}"
+    wx:if="{{list.length > 0}}"
+    bindtap="onToggleSubscribe"
+  >
+    <view class="reminder-sub__icon">📮</view>
+    <view class="reminder-sub__body">
+      <text class="reminder-sub__title">微信通知</text>
+      <text class="reminder-sub__desc">{{subOn ? '已开启 · 到期推送微信服务通知' : '关闭中 · 仅本机提醒'}}</text>
+    </view>
+    <view class="reminder-sub__switch">
+      <view class="reminder-sub__knob"></view>
+    </view>
+  </view>
+
+  <view class="reminder-add" bindtap="onAdd">
+    <text class="reminder-add-icon">+</text>
+    <text>添加提醒</text>
+  </view>
+</view>

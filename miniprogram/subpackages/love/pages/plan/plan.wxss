@@ -1,0 +1,6 @@
+/* pages/love/plan/plan.wxss */
+@import "../../styles/love-common.wxss";
+@import "../../styles/love-duo.wxss";
+
+/* slider 默认带较大的上下边距，贴着清单排版会显得松散，这里收紧 */
+slider { margin: 6rpx 0 0; }

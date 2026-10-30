@@ -1,0 +1,367 @@
+<view class="my-page themed fs-{{fontSize}}" data-theme="{{theme}}" style="{{themeStyle}}; font-family: {{fontFamilyCss}};;{{bgStyle}}">
+  <!-- 电影级舞台背景：随主题切换场景图/场景动画（src 为空时走 CSS 场景） -->
+  <fx-stage mode="{{fxMode}}" src="{{fxSrc}}" full="{{fxFull}}" rays="{{true}}" dust="{{false}}" topglow="{{true}}" level="{{fxLevel}}" />
+
+  <!-- 头部：头像 + 昵称 + 编辑 -->
+  <view class="my-header" bindtap="onOpenProfile">
+    <view class="my-avatar">
+      <image wx:if="{{avatarKind === 'file' && avatarPath}}" class="my-avatar__img" src="{{avatarPath}}" mode="aspectFill" />
+      <view wx:else class="my-avatar__emoji">{{avatarEmoji}}</view>
+      <view class="my-avatar__dot" wx:if="{{profileReady}}"></view>
+    </view>
+    <view class="my-info">
+      <view class="my-info__name">{{profileName || '点击完善个人资料'}}</view>
+      <view class="my-info__sub">
+        <text wx:if="{{profileJob}}">{{profileJob}}</text>
+        <text wx:if="{{profileJob && profileLocation}}"> · </text>
+        <text wx:if="{{profileLocation}}">{{profileLocation}}</text>
+        <text wx:if="{{!profileJob && !profileLocation}}">头像 · 生日 · 联系方式 · 职业 · 经历等</text>
+      </view>
+      <view wx:if="{{profileReady}}" class="my-info__tag">已完善</view>
+      <view wx:else class="my-info__tag my-info__tag--todo">待完善</view>
+    </view>
+    <view class="my-edit-btn" catchtap="onOpenProfile">编辑</view>
+  </view>
+
+  <!-- 菜单组 1：核心设置 -->
+  <view class="my-menu">
+    <view class="my-row" bindtap="onToggleThemePanel" hover-class="my-row--press" hover-stay-time="60">
+      <view class="my-row-icon my-row-icon--theme">🎨</view>
+      <view class="my-row-body">
+        <view class="my-row-title">模板调换</view>
+        <view class="my-row-sub">主题配色 · 主页风格 · 背景氛围</view>
+      </view>
+      <view class="my-row-extra">{{themeName}}</view>
+      <view class="my-row-arrow">›</view>
+    </view>
+    <view class="my-row" bindtap="onOpenFontPanel" hover-class="my-row--press" hover-stay-time="60">
+      <view class="my-row-icon my-row-icon--font">🔤</view>
+      <view class="my-row-body">
+        <view class="my-row-title">字体调整</view>
+        <view class="my-row-sub">字号与字体样式</view>
+      </view>
+      <view class="my-row-extra">{{fontSizeLabel}} · {{fontStyleLabel}}</view>
+      <view class="my-row-arrow">›</view>
+    </view>
+    <view class="my-row" bindtap="onScrollToStats" hover-class="my-row--press" hover-stay-time="60">
+      <view class="my-row-icon my-row-icon--chart">📊</view>
+      <view class="my-row-body">
+        <view class="my-row-title">统计报表</view>
+        <view class="my-row-sub">总任务、进行中、已完成、已归档</view>
+      </view>
+      <view class="my-row-arrow">›</view>
+    </view>
+    <view class="my-row" bindtap="onOpenGeneralPanel" hover-class="my-row--press" hover-stay-time="60">
+      <view class="my-row-icon my-row-icon--bell">🔔</view>
+      <view class="my-row-body">
+        <view class="my-row-title">提醒设置</view>
+      </view>
+      <view class="my-row-arrow">›</view>
+    </view>
+    <view class="my-row" bindtap="onPassword" hover-class="my-row--press" hover-stay-time="60">
+      <view class="my-row-icon my-row-icon--lock">🔒</view>
+      <view class="my-row-body">
+        <view class="my-row-title">密码保护</view>
+      </view>
+      <view class="my-row-extra">{{passwordEnabled ? '已开启' : '未开启'}}</view>
+      <switch class="my-switch" checked="{{passwordEnabled}}" color="var(--color-primary)" catchtap="onPasswordSwitch" bindchange="onPasswordSwitch" />
+    </view>
+  </view>
+
+  <!-- 菜单组 2：辅助 -->
+  <view class="my-menu">
+    <view class="my-row" bindtap="onTips" hover-class="my-row--press" hover-stay-time="60">
+      <view class="my-row-icon my-row-icon--tip">💡</view>
+      <view class="my-row-body">
+        <view class="my-row-title">使用技巧</view>
+      </view>
+      <view class="my-row-arrow">›</view>
+    </view>
+    <view class="my-row" bindtap="onOpenDesktopPanel" hover-class="my-row--press" hover-stay-time="60">
+      <view class="my-row-icon my-row-icon--desktop">📱</view>
+      <view class="my-row-body">
+        <view class="my-row-title">添加到桌面</view>
+        <view class="my-row-sub">{{desktopSubLabel}}</view>
+      </view>
+      <view class="my-row-extra">{{desktopStatusLabel}}</view>
+      <view class="my-row-arrow">›</view>
+    </view>
+    <view class="my-row" bindtap="onShare" hover-class="my-row--press" hover-stay-time="60" open-type="share">
+      <button class="my-share-btn" open-type="share"></button>
+      <view class="my-row-icon my-row-icon--share">🤝</view>
+      <view class="my-row-body">
+        <view class="my-row-title">分享好友</view>
+      </view>
+      <view class="my-row-arrow">›</view>
+    </view>
+    <view class="my-row" bindtap="onFeedback" hover-class="my-row--press" hover-stay-time="60">
+      <view class="my-row-icon my-row-icon--mail">✉️</view>
+      <view class="my-row-body">
+        <view class="my-row-title">优化建议</view>
+      </view>
+      <view class="my-row-arrow">›</view>
+    </view>
+    <!-- 联系客服：透明 button 覆盖整行（与「分享好友」同一套写法），点开即进入
+         小程序原生客服会话；后台「功能 → 客服」添加客服人员后即可用。
+         bindcontact 只在进不去会话时兜底，正常进入时不做打扰。 -->
+    <view class="my-row" hover-class="my-row--press" hover-stay-time="60">
+      <button
+        class="my-share-btn"
+        open-type="contact"
+        session-from="settings"
+        bindcontact="onContactCallback"
+      ></button>
+      <view class="my-row-icon my-row-icon--headset">🎧</view>
+      <view class="my-row-body">
+        <view class="my-row-title">联系客服</view>
+      </view>
+      <view class="my-row-extra">{{supportHours}}</view>
+      <view class="my-row-arrow">›</view>
+    </view>
+    <!-- 客服邮箱：邮箱直出行尾，点整行复制。后台客服人员没配好时，这是始终可用的出口；
+         SUPPORT.email 留空则整行不渲染（wx:if），不会留一个点了没反应的空行。 -->
+    <view wx:if="{{supportEmail}}" class="my-row" bindtap="onCopySupportEmail" hover-class="my-row--press" hover-stay-time="60">
+      <view class="my-row-icon my-row-icon--mail">✉️</view>
+      <view class="my-row-body">
+        <view class="my-row-title">客服邮箱</view>
+      </view>
+      <view class="my-row-extra my-row-extra--email">{{supportEmail}}</view>
+      <view class="my-row-act">复制</view>
+    </view>
+  </view>
+
+  <!-- 任务统计 -->
+  <view class="my-section" id="stats-section">
+    <view class="my-section-title">任务统计</view>
+    <view class="my-stats">
+      <view class="my-stat">
+        <view class="my-stat-value">{{stats.total}}</view>
+        <view class="my-stat-label">总任务</view>
+      </view>
+      <view class="my-stat">
+        <view class="my-stat-value">{{stats.active}}</view>
+        <view class="my-stat-label">进行中</view>
+      </view>
+      <view class="my-stat">
+        <view class="my-stat-value">{{stats.done}}</view>
+        <view class="my-stat-label">已完成</view>
+      </view>
+      <view class="my-stat">
+        <view class="my-stat-value">{{stats.archived}}</view>
+        <view class="my-stat-label">已归档</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 数据管理 -->
+  <view class="my-section">
+    <view class="my-section-title">数据管理</view>
+    <view class="my-tip-banner">⚠️ 数据默认存于本机，清缓存或删除小程序会丢失。建议定期导出备份，或将云函数部署到云端实现自动同步。</view>
+    <view class="my-menu">
+      <view class="my-row" bindtap="onExportJson" hover-class="my-row--press" hover-stay-time="60">
+        <view class="my-row-icon my-row-icon--export">📥</view>
+        <view class="my-row-body">
+          <view class="my-row-title">导出为 JSON</view>
+          <view class="my-row-sub">含全部任务与子任务，结构化备份</view>
+        </view>
+        <view class="my-row-arrow">›</view>
+      </view>
+      <view class="my-row" bindtap="onExportCsv" hover-class="my-row--press" hover-stay-time="60">
+        <view class="my-row-icon my-row-icon--export">📊</view>
+        <view class="my-row-body">
+          <view class="my-row-title">导出为 CSV</view>
+          <view class="my-row-sub">扁平表格，便于在 Excel 中分析</view>
+        </view>
+        <view class="my-row-arrow">›</view>
+      </view>
+      <view class="my-row" bindtap="onOpenArchived" hover-class="my-row--press" hover-stay-time="60">
+        <view class="my-row-icon my-row-icon--archive">🗄️</view>
+        <view class="my-row-body">
+          <view class="my-row-title">查看已归档任务</view>
+          <view class="my-row-sub">历史任务仍保留在此处</view>
+        </view>
+        <view class="my-row-arrow">›</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 关于 -->
+  <view class="my-foot">Todo 小程序 · Phase 2 · 玻璃拟态 · 沉浸换肤 · 多视图 · 子任务</view>
+
+  <!-- 主题选择弹层 -->
+  <view wx:if="{{showThemePanel}}" class="my-mask" catchtap="onCloseThemePanel">
+    <view class="my-sheet" catchtap="onSheetStop">
+      <view class="my-sheet__handle"></view>
+      <view class="my-sheet__title">模板调换 · 主题外观</view>
+      <theme-switcher current="{{theme}}" bind:change="onThemeChange" />
+      <view wx:if="{{theme === 'custom'}}" class="my-sheet__section">
+        <view class="my-sheet__subtitle">自定义颜色（当前：{{themeName}}）</view>
+        <custom-theme-picker custom="{{custom}}" bind:change="onCustomChange" />
+      </view>
+
+      <!-- 主页两维度：风格（工艺）与背景（氛围），与主题正交、可自由组合 -->
+      <view class="my-sheet__hr"></view>
+      <view class="my-sheet__subtitle">主页风格 · 工艺（当前：{{homeStyleLabel}}）</view>
+      <view class="my-chipwrap">
+        <view
+          wx:for="{{homeStyleChips}}"
+          wx:key="key"
+          class="my-chip {{homeStyle === item.key ? 'is-active' : ''}}"
+          data-key="{{item.key}}"
+          hover-class="tap-press"
+          hover-stay-time="60"
+          bindtap="onHomeStyleSelect"
+        >
+          <view class="my-chip__dot" style="background: {{item.dot}};"></view>
+          <text class="my-chip__name">{{item.name}}</text>
+        </view>
+      </view>
+
+      <view class="my-sheet__subtitle">主页背景 · 氛围（当前：{{homeBgLabel}}）</view>
+      <view class="my-chipwrap">
+        <view
+          wx:for="{{homeBgChips}}"
+          wx:key="key"
+          class="my-chip {{homeBg === item.key ? 'is-active' : ''}}"
+          data-key="{{item.key}}"
+          hover-class="tap-press"
+          hover-stay-time="60"
+          bindtap="onHomeBgSelect"
+        >
+          <view class="my-chip__dot" style="background: {{item.dot}};"></view>
+          <text class="my-chip__name">{{item.name}}</text>
+        </view>
+      </view>
+      <view class="my-sheet__hint">风格决定工艺（圆角 / 描边 / 阴影 / 玻璃质感），背景决定氛围装饰；二者与主题配色相互独立，可任意组合。返回首页即可看到效果。</view>
+    </view>
+  </view>
+
+  <!-- 字体调整弹层 -->
+  <view wx:if="{{showFontPanel}}" class="my-mask" catchtap="onCloseFontPanel">
+    <view class="my-sheet" catchtap="onSheetStop">
+      <view class="my-sheet__handle"></view>
+      <view class="my-sheet__title">字体调整</view>
+
+      <view class="my-sheet__subtitle">字号</view>
+      <view class="my-options">
+        <view wx:for="{{fontSizeOptions}}" wx:key="key" class="my-option {{fontSize === item.key ? 'is-active' : ''}}" data-key="{{item.key}}" bindtap="onFontSizeSelect">
+          <view class="my-option__label">{{item.label}}</view>
+          <view wx:if="{{fontSize === item.key}}" class="my-option__check">✓</view>
+        </view>
+      </view>
+
+      <view class="my-sheet__subtitle">字体样式</view>
+      <view class="my-options">
+        <view wx:for="{{fontStyleOptions}}" wx:key="key" class="my-option my-style-option {{fontStyle === item.key ? 'is-active' : ''}}" data-key="{{item.key}}" bindtap="onFontStyleSelect">
+          <view class="my-style-preview" style="font-family: {{item.css}};">
+            <view class="my-style-preview__name">{{item.label}}</view>
+            <view class="my-style-preview__sample">永和九年岁在癸丑 Aa</view>
+          </view>
+          <view wx:if="{{fontStyle === item.key}}" class="my-option__check">✓</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 通用设置弹层 -->
+  <view wx:if="{{showGeneralPanel}}" class="my-mask" catchtap="onCloseGeneralPanel">
+    <view class="my-sheet my-sheet--compact" catchtap="onSheetStop">
+      <view class="my-sheet__handle"></view>
+      <view class="my-sheet__title">通用设置</view>
+      <view class="my-menu my-menu--in-sheet">
+        <view class="my-row" bindtap="onOpenArchived">
+          <view class="my-row-icon">🗄️</view>
+          <view class="my-row-body"><view class="my-row-title">查看已归档任务</view></view>
+          <view class="my-row-arrow">›</view>
+        </view>
+        <view class="my-row" bindtap="onToggleSound">
+          <view class="my-row-icon">🔔</view>
+          <view class="my-row-body"><view class="my-row-title">完成音效</view></view>
+          <switch class="my-switch" checked="{{soundEnabled}}" color="var(--color-primary)" catchtap="onSoundSwitch" bindchange="onSoundSwitch" />
+        </view>
+        <view class="my-row" bindtap="onClearDone">
+          <view class="my-row-icon">🧹</view>
+          <view class="my-row-body"><view class="my-row-title">清空已完成任务</view></view>
+          <view class="my-row-arrow">›</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 反馈输入弹层 -->
+  <view wx:if="{{showFeedbackPanel}}" class="my-mask" catchtap="onCloseFeedbackPanel">
+    <view class="my-sheet my-sheet--compact" catchtap="onSheetStop">
+      <view class="my-sheet__handle"></view>
+      <view class="my-sheet__title">优化建议</view>
+      <textarea class="my-textarea" placeholder="请输入你的建议…" value="{{feedbackText}}" bindinput="onFeedbackInput" maxlength="200" auto-height />
+      <view class="my-btn" bindtap="onFeedbackSubmit">提交建议</view>
+    </view>
+  </view>
+
+  <!-- 使用技巧弹层 -->
+  <view wx:if="{{showTipsPanel}}" class="my-mask" catchtap="onCloseTipsPanel">
+    <view class="my-sheet my-sheet--tips" catchtap="onSheetStop">
+      <view class="my-sheet__handle"></view>
+      <view class="my-sheet__title">使用技巧</view>
+      <view class="my-tips">
+        <view wx:for="{{tipsList}}" wx:key="title" class="my-tip">
+          <view class="my-tip__icon">{{item.icon}}</view>
+          <view class="my-tip__body">
+            <view class="my-tip__title">{{item.title}}</view>
+            <view class="my-tip__desc">{{item.desc}}</view>
+          </view>
+        </view>
+      </view>
+      <view class="my-btn" bindtap="onCloseTipsPanel">我知道了</view>
+    </view>
+  </view>
+
+  <!-- 添加到桌面：Android 三步手动引导 / iOS 等效替代路径 -->
+  <view wx:if="{{showDesktopPanel}}" class="my-mask" catchtap="onCloseDesktopPanel">
+    <view class="my-sheet my-sheet--desk" catchtap="onSheetStop">
+      <view class="my-sheet__handle"></view>
+      <view class="my-sheet__title">添加到桌面</view>
+
+      <!-- 已从桌面打开过：唯一能证明「真的添加成功」的信号（scene 1023） -->
+      <view wx:if="{{desktopOpenCount > 0}}" class="desk-badge">
+        🎉 已从桌面直接打开过 {{desktopOpenCount}} 次
+      </view>
+
+      <!-- 安卓：微信原生支持，手动添加入口 -->
+      <block wx:if="{{desktopAddable}}">
+        <view class="desk-lead">安卓手机可以把本小程序放到桌面，之后点图标直接进，不用再翻微信。只是个快捷方式，不占内存。</view>
+        <view class="desk-steps">
+          <view wx:for="{{desktopSteps}}" wx:key="title" class="desk-step">
+            <view class="desk-step__no">{{index + 1}}</view>
+            <view class="desk-step__body">
+              <view class="desk-step__title">{{item.icon}} {{item.title}}</view>
+              <view class="desk-step__desc">{{item.desc}}</view>
+            </view>
+          </view>
+        </view>
+        <view class="desk-help" bindtap="onDesktopHelp">菜单里没有「添加到桌面」？点这里看机型授权路径</view>
+        <button class="desk-btn desk-btn--main" bindtap="onDesktopConfirmed">我已添加好了</button>
+        <button class="desk-btn" bindtap="onCloseDesktopPanel">稍后再说</button>
+      </block>
+
+      <!-- iOS：微信未开放该系统接口，只能走「我的小程序」+ 下拉 -->
+      <block wx:else>
+        <view class="desk-lead desk-lead--ios">
+          iPhone 上微信暂不支持把小程序放到桌面（系统没开放这个接口），下面这条路径一样是一步直达：
+        </view>
+        <view class="desk-steps">
+          <view wx:for="{{desktopSteps}}" wx:key="title" class="desk-step">
+            <view class="desk-step__no">{{index + 1}}</view>
+            <view class="desk-step__body">
+              <view class="desk-step__title">{{item.icon}} {{item.title}}</view>
+              <view class="desk-step__desc">{{item.desc}}</view>
+            </view>
+          </view>
+        </view>
+        <view class="desk-help desk-help--plain">把这条路径跑一次，之后打开本小程序只需要「下拉 + 一点」。</view>
+        <button class="desk-btn desk-btn--main" bindtap="onCloseDesktopPanel">我明白了</button>
+      </block>
+    </view>
+  </view>
+
+</view>

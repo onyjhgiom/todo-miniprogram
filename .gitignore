@@ -1,0 +1,43 @@
+# ===== WeChat 开发者工具：临时 / 备份 / 预览目录 =====
+.cp4/
+.preview-keep/
+.tmp-*/
+_tmp-*/
+_preview/
+preview/
+_backup-tmp-dirs/
+_backups/
+.backups/
+*.cp4
+
+# ===== 依赖 =====
+node_modules/
+**/node_modules/
+
+# ===== 日志 =====
+*.log
+
+# ===== 密钥 / 环境变量 / 私钥 =====
+.env
+.env.*
+*.pem
+*.key
+private.key
+*.pfx
+*.p12
+
+# ===== 构建产物 =====
+dist/
+build/
+release/
+
+# ===== 系统 / 编辑器 =====
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# ===== 编辑器自动备份（非源码，勿入库） =====
+*.bak
+*.bak.*
+.bak-*

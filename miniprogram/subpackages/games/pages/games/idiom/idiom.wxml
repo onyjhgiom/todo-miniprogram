@@ -1,0 +1,31 @@
+<game-shell title="{{title}}" timeText="{{timeText}}" statText="{{'连击 ' + score}}" paused="{{paused}}"
+  bind:back="onBack" bind:reset="onReset" bind:home="onHome" bind:pause="onPause">
+  <view class="idm">
+    <view class="row row--between idm__top">
+      <text class="t-sm muted-2">最长连击 {{best}}</text>
+      <view class="row idm__switch">
+        <text class="t-xs muted-2">同音宽松</text>
+        <switch checked="{{loose}}" bindchange="onToggleLoose" color="#BE6F44" />
+      </view>
+    </view>
+
+    <view class="idm__cur card--flat">
+      <text class="t-sm muted-2">当前成语</text>
+      <text class="idm__word serif heavy">{{current}}</text>
+      <text class="t-sm muted-2">尾字：{{tail}}</text>
+    </view>
+
+    <view wx:if="{{botSay}}" class="idm__bot">电脑接：{{botSay}}</view>
+
+    <view class="idm__msg idm__msg--{{msgType}}">{{message}}</view>
+
+    <view class="idm__input">
+      <input class="idm__field" value="{{input}}" bindinput="onInput" maxlength="4" placeholder="输入四字成语" placeholder-class="muted-3" confirm-type="done" bindconfirm="submit" />
+      <view class="idm__go" bindtap="submit">接龙</view>
+    </view>
+
+    <view class="t-xs muted-2 idm__tips">
+      接住上一个成语的最后一个字开头；开启「同音宽松」可用同音字（如 心→新）。题库可继续扩充。
+    </view>
+  </view>
+</game-shell>

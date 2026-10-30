@@ -1,0 +1,11 @@
+{
+  "navigationBarTitleText": "模板库",
+  "navigationBarBackgroundColor": "#15110D",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#15110D",
+  "usingComponents": {
+    "template-picker": "/components/template-picker/template-picker",
+    "empty-state": "/components/empty-state/empty-state",
+    "fx-stage": "/components/fx-stage/fx-stage"
+  }
+}

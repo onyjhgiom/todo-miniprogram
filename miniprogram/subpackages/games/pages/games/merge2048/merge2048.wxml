@@ -1,0 +1,22 @@
+<game-shell title="{{title}}" timeText="{{timeText}}" statText="{{statText}}" paused="{{paused}}"
+  bind:back="onBack" bind:reset="onReset" bind:hint="onHint" bind:home="onHome" bind:pause="onPause">
+  <view class="t2">
+    <view class="t2__head row row--between">
+      <text class="t-sm muted-2">最高 {{best}}</text>
+      <text class="t-sm muted-2">滑动或点方向键</text>
+    </view>
+    <view class="t2__board" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
+      <view wx:for="{{cells}}" wx:key="index" class="t2__cell {{item.cls}}">
+        <text wx:if="{{item.val}}" class="t2__num serif">{{item.val}}</text>
+      </view>
+    </view>
+    <view class="t2__dir">
+      <view class="t2__d" data-dir="up" bindtap="onDir">↑</view>
+      <view class="row">
+        <view class="t2__d" data-dir="left" bindtap="onDir">←</view>
+        <view class="t2__d" data-dir="down" bindtap="onDir">↓</view>
+        <view class="t2__d" data-dir="right" bindtap="onDir">→</view>
+      </view>
+    </view>
+  </view>
+</game-shell>

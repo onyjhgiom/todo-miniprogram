@@ -1,0 +1,264 @@
+<!-- subpackages/tools/pages/civil/plan.wxml -->
+<view class="cp themed" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <!-- ===== 顶部 ===== -->
+  <view class="cp__hero" style="background:{{heroGradient}}">
+    <view class="cp__hero-title">🤖 AI 上岸规划</view>
+    <view class="cp__hero-sub">赛道测评 · 备考计划 · 面试模拟，全部按体制内真实规则给建议</view>
+  </view>
+
+  <!-- ===== tabs ===== -->
+  <view class="cp__tabs">
+    <view class="cp__tab {{tab === item.key ? 'cp__tab--on' : ''}}"
+      wx:for="{{tabs}}" wx:key="key" data-key="{{item.key}}" bindtap="onTab">
+      <text class="cp__tab-i">{{item.icon}}</text>
+      <text class="cp__tab-t">{{item.label}}</text>
+    </view>
+  </view>
+
+  <!-- ===== AI 状态条 ===== -->
+  <view class="cp__ai cp__ai--{{aiState}}" wx:if="{{aiState !== 'idle'}}">
+    <text class="cp__ai-icon">{{aiState === 'loading' ? '⏳' : (aiState === 'ai' ? '✨' : '📐')}}</text>
+    <text class="cp__ai-t">{{aiNote}}</text>
+  </view>
+
+  <!-- ================================================================ -->
+  <!-- Tab1：赛道测评 -->
+  <!-- ================================================================ -->
+  <block wx:if="{{tab === 'assess'}}">
+    <view class="cp__card">
+      <view class="cp__label">专业 / 方向</view>
+      <input class="cp__input" placeholder="如 会计学 / 计算机科学与技术" value="{{major}}"
+        bindinput="onMajorInput" confirm-type="done" cursor-spacing="24" />
+      <view class="cp__chips">
+        <view class="cp__chip {{major === item ? 'cp__chip--on' : ''}}"
+          wx:for="{{majors}}" wx:key="*this" data-v="{{item}}" bindtap="onMajorPick">{{item}}</view>
+      </view>
+
+      <view class="cp__label cp__label--gap">学历</view>
+      <picker mode="selector" range="{{educations}}" value="{{eduIdx}}" bindchange="onEduChange">
+        <view class="cp__picker">
+          <text class="cp__picker-t">{{educations[eduIdx]}}</text>
+          <text class="cp__picker-a">▾</text>
+        </view>
+      </picker>
+
+      <view class="cp__label cp__label--gap">身份条件</view>
+      <view class="cp__switches">
+        <view class="cp__sw {{party ? 'cp__sw--on' : ''}}" bindtap="onToggleParty">
+          {{party ? '✓ ' : ''}}中共党员（含预备）
+        </view>
+        <view class="cp__sw {{fresh ? 'cp__sw--on' : ''}}" bindtap="onToggleFresh">
+          {{fresh ? '✓ ' : ''}}应届（含择业期内）
+        </view>
+      </view>
+
+      <view class="cp__label cp__label--gap">你最看重什么</view>
+      <view class="cp__chips">
+        <view class="cp__chip {{prefer === item.key ? 'cp__chip--on' : ''}}"
+          wx:for="{{prefers}}" wx:key="key" data-key="{{item.key}}" bindtap="onPrefer">{{item.label}}</view>
+      </view>
+
+      <view class="cp__btn {{aiState === 'loading' ? 'cp__btn--busy' : ''}}" bindtap="onAssess">
+        {{aiState === 'loading' ? 'AI 评估中…' : '开始测评 →'}}
+      </view>
+    </view>
+
+    <!-- 结果 -->
+    <block wx:if="{{aItems.length}}">
+      <view class="cp__sec">四赛道适配度</view>
+      <view class="cp__card">
+        <view class="cp__bar" wx:for="{{aItems}}" wx:key="key">
+          <view class="cp__bar-head">
+            <text class="cp__bar-name">{{item.icon}} {{item.name}}</text>
+            <text class="cp__bar-level" style="color:{{item.barColor}}">{{item.level}}</text>
+            <text class="cp__bar-score" style="color:{{item.barColor}}">{{item.score}}</text>
+          </view>
+          <view class="cp__bar-track">
+            <view class="cp__bar-fill" style="width:{{item.score}}%;background:{{item.barColor}}"></view>
+          </view>
+          <text class="cp__bar-reason">{{item.reason}}</text>
+          <view class="cp__bar-go" data-key="{{item.key}}" bindtap="onAssessJobs"
+            hover-class="cp__press" hover-stay-time="50">看该赛道岗位 ›</view>
+        </view>
+      </view>
+
+      <block wx:if="{{aResult.combo.length}}">
+        <view class="cp__sec">你的报考组合建议</view>
+        <view class="cp__card">
+          <view class="cp__combo" wx:for="{{aResult.combo}}" wx:key="role">
+            <text class="cp__combo-role">{{item.role}}</text>
+            <text class="cp__combo-t">{{item.text}}</text>
+          </view>
+        </view>
+      </block>
+
+      <block wx:if="{{aResult.priority.length}}">
+        <view class="cp__sec">备考优先级（先做这些）</view>
+        <view class="cp__card">
+          <view class="cp__li" wx:for="{{aResult.priority}}" wx:key="*this">
+            <text class="cp__li-no">{{index + 1}}</text>
+            <text class="cp__li-t">{{item}}</text>
+          </view>
+        </view>
+      </block>
+
+      <block wx:if="{{aResult.avoid.length}}">
+        <view class="cp__sec">建议避开的岗位类型</view>
+        <view class="cp__card cp__card--warn">
+          <view class="cp__li" wx:for="{{aResult.avoid}}" wx:key="*this">
+            <text class="cp__li-warn">⚠</text>
+            <text class="cp__li-t">{{item}}</text>
+          </view>
+        </view>
+      </block>
+
+      <view class="cp__note" wx:if="{{aResult.note}}">{{aResult.note}}</view>
+
+      <view class="cp__btn cp__btn--ghost" bindtap="onCopyAssess">📋 复制测评结论</view>
+    </block>
+  </block>
+
+  <!-- ================================================================ -->
+  <!-- Tab2：备考计划 -->
+  <!-- ================================================================ -->
+  <block wx:if="{{tab === 'plan'}}">
+    <view class="cp__card">
+      <view class="cp__label">目标赛道</view>
+      <picker mode="selector" range="{{trackOpts}}" range-key="name" value="{{trackIdx}}" bindchange="onTrackChange">
+        <view class="cp__picker">
+          <text class="cp__picker-t">{{trackOpts[trackIdx].icon}} {{trackOpts[trackIdx].name}}</text>
+          <text class="cp__picker-a">▾</text>
+        </view>
+      </picker>
+
+      <view class="cp__label cp__label--gap">目标岗位（选填，填了计划更具体）</view>
+      <input class="cp__input" placeholder="如 某省税务局行政执法岗" value="{{target}}"
+        bindinput="onTargetInput" confirm-type="done" cursor-spacing="24" />
+
+      <view class="cp__label cp__label--gap">每周可投入时间</view>
+      <view class="cp__hours">
+        <text class="cp__hours-v">{{hours}}</text>
+        <text class="cp__hours-u">小时 / 周</text>
+        <text class="cp__hours-d">≈ 每天 {{perDay}} 小时</text>
+      </view>
+      <slider min="5" max="60" step="5" value="{{hours}}" bindchange="onHoursChange"
+        activeColor="#6d28d9" block-size="24" />
+
+      <view class="cp__btn {{aiState === 'loading' ? 'cp__btn--busy' : ''}}" bindtap="onPlan">
+        {{aiState === 'loading' ? '生成中…' : '生成备考计划 →'}}
+      </view>
+    </view>
+
+    <block wx:if="{{pResult}}">
+      <view class="cp__card cp__card--focus">
+        <text class="cp__plan-title">{{pResult.title}}</text>
+        <text class="cp__plan-sum">{{pResult.summary}}</text>
+      </view>
+
+      <view class="cp__sec">4 周执行计划</view>
+      <view class="cp__card" wx:for="{{pWeeks}}" wx:key="week">
+        <view class="cp__week-head">
+          <text class="cp__week-n">{{item.week}}</text>
+          <text class="cp__week-f">{{item.focus}}</text>
+        </view>
+        <view class="cp__li" wx:for="{{item.items}}" wx:for-item="x" wx:key="*this">
+          <text class="cp__li-dot">·</text>
+          <text class="cp__li-t">{{x}}</text>
+        </view>
+      </view>
+
+      <block wx:if="{{pResult.monthly.length}}">
+        <view class="cp__sec">阶段目标</view>
+        <view class="cp__card">
+          <view class="cp__month" wx:for="{{pResult.monthly}}" wx:key="month">
+            <text class="cp__month-k">{{item.month}}</text>
+            <text class="cp__month-v">{{item.goal}}</text>
+          </view>
+        </view>
+      </block>
+
+      <block wx:if="{{pResult.tips.length}}">
+        <view class="cp__sec">执行提醒</view>
+        <view class="cp__card cp__card--focus">
+          <view class="cp__li" wx:for="{{pResult.tips}}" wx:key="*this">
+            <text class="cp__li-dot">·</text>
+            <text class="cp__li-t">{{item}}</text>
+          </view>
+        </view>
+      </block>
+
+      <view class="cp__btn cp__btn--ghost" bindtap="onCopyPlan">📋 复制计划（贴进待办按周执行）</view>
+    </block>
+  </block>
+
+  <!-- ================================================================ -->
+  <!-- Tab3：面试模拟 -->
+  <!-- ================================================================ -->
+  <block wx:if="{{tab === 'interview'}}">
+    <view class="cp__card">
+      <view class="cp__label">面试形式</view>
+      <view class="cp__kinds">
+        <view class="cp__kind {{kind === item.key ? 'cp__kind--on' : ''}}"
+          wx:for="{{kinds}}" wx:key="key" data-key="{{item.key}}" bindtap="onKind">
+          <text class="cp__kind-l">{{item.label}}</text>
+          <text class="cp__kind-d">{{item.desc}}</text>
+        </view>
+      </view>
+
+      <view class="cp__label cp__label--gap">题目（选填，留空按该赛道高频题型点评）</view>
+      <input class="cp__input" placeholder="如：请谈谈你对基层工作的理解" value="{{question}}"
+        bindinput="onQuestion" confirm-type="done" cursor-spacing="24" />
+
+      <view class="cp__label cp__label--gap">你的作答（写完整一点，点评才准）</view>
+      <textarea class="cp__area" placeholder="按你真实会怎么说写下来，AI 会按体制内评分标准逐条点评，并给一段示范作答"
+        value="{{answer}}" bindinput="onAnswer" maxlength="2000" auto-height cursor-spacing="24"></textarea>
+      <view class="cp__count">{{answer.length}} 字（建议 200 字以上）</view>
+
+      <view class="cp__btn {{aiState === 'loading' ? 'cp__btn--busy' : ''}}" bindtap="onInterview">
+        {{aiState === 'loading' ? '点评中…' : '请 AI 点评 →'}}
+      </view>
+    </view>
+
+    <block wx:if="{{iResult}}">
+      <view class="cp__card cp__card--focus cp__score">
+        <text class="cp__score-n">{{iResult.score}}</text>
+        <view class="cp__score-m">
+          <text class="cp__score-l">{{iResult.level}}</text>
+          <text class="cp__score-s">按体制内面试评分维度综合</text>
+        </view>
+      </view>
+
+      <block wx:if="{{iResult.good.length}}">
+        <view class="cp__sec">答得好的地方</view>
+        <view class="cp__card">
+          <view class="cp__li" wx:for="{{iResult.good}}" wx:key="*this">
+            <text class="cp__li-good">✓</text>
+            <text class="cp__li-t">{{item}}</text>
+          </view>
+        </view>
+      </block>
+
+      <block wx:if="{{iResult.improve.length}}">
+        <view class="cp__sec">要改进的地方（照做就能提分）</view>
+        <view class="cp__card cp__card--warn">
+          <view class="cp__li" wx:for="{{iResult.improve}}" wx:key="*this">
+            <text class="cp__li-warn">⚠</text>
+            <text class="cp__li-t">{{item}}</text>
+          </view>
+        </view>
+      </block>
+
+      <block wx:if="{{iResult.sample}}">
+        <view class="cp__sec">示范作答（对照模仿）</view>
+        <view class="cp__card cp__card--sample">
+          <text class="cp__sample-t">{{iResult.sample}}</text>
+        </view>
+      </block>
+
+      <view class="cp__btn cp__btn--ghost" bindtap="onCopyInterview">📋 复制点评</view>
+    </block>
+  </block>
+
+  <view class="cp__pad"></view>
+</view>

@@ -1,0 +1,27 @@
+.p24 { display: flex; flex-direction: column; }
+.p24__top { margin-bottom: 6rpx; }
+.p24__cards { gap: 18rpx; justify-content: center; margin-top: 8rpx; }
+.p24__card {
+  width: 132rpx; height: 184rpx; border-radius: 20rpx; background: var(--card);
+  border: 2rpx solid var(--line-2); box-shadow: var(--sd-1);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6rpx;
+}
+.p24__card--red .p24__rank, .p24__card--red .p24__suit { color: #C0584E; }
+.p24__rank { font-size: 60rpx; font-weight: 700; color: var(--ink); }
+.p24__suit { font-size: 44rpx; color: var(--ink-2); }
+
+.p24__msg { margin-top: 24rpx; min-height: 40rpx; text-align: center; font-size: 26rpx; color: var(--ink-2); }
+.p24__msg--ok { color: var(--mint-deep); font-weight: 600; }
+.p24__msg--warn { color: var(--clay); }
+
+.p24__input { margin-top: 20rpx; display: flex; gap: 16rpx; }
+.p24__field {
+  flex: 1; height: 84rpx; background: var(--card); border: 2rpx solid var(--line);
+  border-radius: var(--r-md); padding: 0 24rpx; font-size: 30rpx; color: var(--ink);
+}
+.p24__go {
+  width: 160rpx; height: 84rpx; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #8C6444, #BB8C5C); color: #FFF8EC; font-weight: 600; font-size: 28rpx;
+}
+.p24__go:active { transform: scale(.97); }
+.p24__tips { margin-top: 24rpx; line-height: 1.7; }

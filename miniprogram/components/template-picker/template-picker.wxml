@@ -1,0 +1,10 @@
+<view class="template-picker">
+  <scroll-view class="tpl-scroll" scroll-x="true" enhanced="true" show-scrollbar="false">
+    <view wx:for="{{templates}}" wx:key="_id" class="tpl-card" hover-class="tpl-press" hover-stay-time="60" bindtap="onApply" data-id="{{item._id}}">
+      <view class="tpl-icon">{{item.icon || '📌'}}</view>
+      <view class="tpl-name">{{item.name}}</view>
+      <view class="tpl-count">{{item.items.length}} 项</view>
+      <view wx:if="{{!item.isSystem}}" class="tpl-del" hover-class="tpl-press" hover-stay-time="60" catchtap="onDelete" data-id="{{item._id}}">×</view>
+    </view>
+  </scroll-view>
+</view>

@@ -1,0 +1,48 @@
+<!--pages/folklore/module.wxml-->
+<view class="page themed" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <view class="head">
+    <view class="head__bar" style="background:{{heroGradient}}">
+      <text class="head__title">{{module.title}}</text>
+    </view>
+  </view>
+
+  <scroll-view class="body" scroll-y enhanced show-scrollbar="{{false}}">
+
+    <!-- 模块说明 -->
+    <view class="intro">{{module.intro}}</view>
+
+    <!-- 通用模块选项 -->
+    <!-- 扁平选项（生肖/家居/易理） -->
+    <block wx:if="{{module.options}}">
+      <view class="chips">
+        <view
+          class="chip {{selected['__flat__'] === opt.key ? 'is-on' : ''}}"
+          wx:for="{{module.options}}" wx:key="key" wx:for-item="opt"
+          hover-class="press" hover-stay-time="60"
+          bindtap="onPick" data-group="__flat__" data-key="{{opt.key}}"
+        >{{opt.label}}</view>
+      </view>
+    </block>
+
+    <!-- 生成按钮 -->
+    <view class="gen" hover-class="press" hover-stay-time="60" bindtap="onGenerate">生成民俗解读</view>
+
+    <!-- 结果区 -->
+    <block wx:if="{{hasResult}}">
+      <view class="result" wx:for="{{results}}" wx:key="label" wx:for-item="b">
+        <text class="result__label" wx:if="{{b.label}}">{{b.label}}</text>
+        <text class="result__text">{{b.text}}</text>
+        <text class="result__quote" wx:if="{{b.quote}}">{{b.quote}}</text>
+      </view>
+
+      <view class="result__tip">{{disclaimerShort}}</view>
+      <view class="copy" hover-class="press" hover-stay-time="60" bindtap="onCopy">复制全部解读</view>
+    </block>
+
+    <view class="safe-bottom" />
+  </scroll-view>
+
+  <!-- 底部永久免责 -->
+  <view class="disclaimer">{{disclaimerFull}}</view>
+</view>

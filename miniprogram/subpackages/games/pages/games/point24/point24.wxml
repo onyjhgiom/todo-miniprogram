@@ -1,0 +1,27 @@
+<game-shell title="{{title}}" timeText="{{timeText}}" statText="{{'积分 ' + points}}" paused="{{paused}}"
+  bind:back="onBack" bind:reset="onReset" bind:hint="onHint" bind:home="onHome" bind:pause="onPause">
+  <view class="p24">
+    <view class="row row--between p24__top">
+      <text class="t-sm muted-2">已解出 {{solved}}</text>
+      <text class="t-sm muted-2">每日 3 次免费提示</text>
+    </view>
+
+    <view class="row p24__cards">
+      <view wx:for="{{cards}}" wx:key="index" class="p24__card {{item.red ? 'p24__card--red' : ''}}">
+        <text class="p24__rank serif">{{item.label}}</text>
+        <text class="p24__suit">{{item.suit}}</text>
+      </view>
+    </view>
+
+    <view class="p24__msg p24__msg--{{msgType}}">{{message}}</view>
+
+    <view class="p24__input">
+      <input class="p24__field" value="{{expr}}" bindinput="onExprInput" placeholder="如 (A+K)*(Q-J)" placeholder-class="muted-3" confirm-type="done" bindconfirm="check" />
+      <view class="p24__go" bindtap="check">验证</view>
+    </view>
+
+    <view class="p24__tips t-xs muted-2">
+      可用 + - * / 与括号，J=11 Q=12 K=13 A=1。点「提示」看参考答案。
+    </view>
+  </view>
+</game-shell>

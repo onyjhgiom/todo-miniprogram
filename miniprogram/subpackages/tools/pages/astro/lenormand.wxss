@@ -1,0 +1,59 @@
+/* pages/astro/lenormand.wxss */
+@import "../../styles/astro-common.wxss";
+
+.layout-row { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 14rpx; }
+.layout-item {
+  flex: 1 0 calc(50% - 6rpx);
+  padding: 16rpx 14rpx;
+  border-radius: 16rpx;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1rpx solid rgba(255, 255, 255, 0.06);
+  display: flex; flex-direction: column; gap: 4rpx;
+  transition: all 200ms ease;
+}
+.layout-item.is-active {
+  background: linear-gradient(135deg, #96573A, #C08468);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 6rpx 16rpx rgba(99, 102, 241, 0.4);
+}
+.layout-item--hover { transform: scale(0.97); }
+.layout-item__name { font-size: 24rpx; font-weight: 600; }
+.layout-item__desc { font-size: 20rpx; color: rgba(200, 210, 240, 0.65); }
+.layout-item.is-active .layout-item__desc { color: rgba(255, 255, 255, 0.85); }
+
+.lnr-stage {
+  display: flex; flex-wrap: wrap; gap: 16rpx;
+  justify-content: space-around;
+  margin-top: 18rpx;
+}
+.lnr-card {
+  flex: 0 0 calc(33.33% - 12rpx);
+  box-sizing: border-box;
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding: 16rpx 8rpx;
+  border-radius: 18rpx;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1rpx solid rgba(255, 255, 255, 0.08);
+  transition: all 200ms ease;
+}
+.lnr-card--hover { transform: scale(0.96); background: rgba(255, 255, 255, 0.12); }
+.lnr-card__img { width: 110rpx; height: 110rpx; border-radius: 10rpx; }
+.lnr-card__name { font-size: 22rpx; color: #f1f5ff; font-weight: 600; margin-top: 6rpx; }
+.lnr-card__symbol { font-size: 30rpx; margin-top: 4rpx; }
+
+.lnr-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12rpx; }
+.lnr-gallery__item {
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding: 14rpx 6rpx 10rpx;
+  border-radius: 14rpx;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1rpx solid rgba(255, 255, 255, 0.05);
+  transition: all 200ms ease;
+}
+.lnr-gallery__item--hover { transform: scale(0.95); background: rgba(255, 255, 255, 0.08); }
+.lnr-gallery__img { width: 100rpx; height: 100rpx; border-radius: 8rpx; }
+.lnr-gallery__name { font-size: 22rpx; color: rgba(220, 225, 245, 0.9); margin-top: 6rpx; }
+.lnr-gallery__symbol { font-size: 28rpx; margin-top: 4rpx; }

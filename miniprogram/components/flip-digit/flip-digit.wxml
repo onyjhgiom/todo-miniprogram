@@ -1,0 +1,31 @@
+<!--components/flip-digit/flip-digit.wxml-->
+<!--四层结构：上半静止层(新值) + 下半静止层(翻页中显示旧值) + 上翻动层(旧值,向下翻落) + 下翻动层(新值,向上翻起)-->
+<view class="fd-card">
+  <!-- 静止层：上半页（新数字的上半部分，翻动层落下时被逐渐揭开） -->
+  <view class="fd-half fd-half--top">
+    <view class="fd-num fd-num--top"><text class="fd-txt">{{value}}</text></view>
+  </view>
+
+  <!-- 静止层：下半页（翻页期间仍显示旧数字下半部分） -->
+  <view class="fd-half fd-half--bottom">
+    <view class="fd-num fd-num--bottom"><text class="fd-txt">{{animating ? prev : value}}</text></view>
+  </view>
+
+  <!-- 翻动层：仅动画期间渲染 -->
+  <block wx:if="{{animating}}">
+    <!-- 上翻动片：旧数字上半，绕底边铰链向下翻落 -->
+    <view class="fd-flap fd-flap--top">
+      <view class="fd-num fd-num--top"><text class="fd-txt">{{prev}}</text></view>
+      <view class="fd-shade fd-shade--top"></view>
+    </view>
+    <!-- 下翻动片：新数字下半，绕顶边铰链从 90° 翻落回位 -->
+    <view class="fd-flap fd-flap--bottom">
+      <view class="fd-num fd-num--bottom"><text class="fd-txt">{{value}}</text></view>
+      <view class="fd-shade fd-shade--bottom"></view>
+    </view>
+  </block>
+
+  <!-- 立体装饰：中缝阴影线 + 顶部高光 -->
+  <view class="fd-line"></view>
+  <view class="fd-shine"></view>
+</view>

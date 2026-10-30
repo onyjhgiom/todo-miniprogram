@@ -1,0 +1,93 @@
+/* 照片墙 · 作品详情 */
+.pd {
+  min-height: 100vh;
+  padding: 24rpx 24rpx 60rpx;
+  background: var(--color-bg);
+  color: var(--color-text);
+  box-sizing: border-box;
+}
+
+.pd-stage {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-bg-soft);
+  box-shadow: var(--shadow-md);
+}
+.pd-img { width: 100%; display: block; }
+.pd-stage-ph { padding: 140rpx 0; text-align: center; }
+.pd-stage-ic { font-size: 90rpx; opacity: 0.35; }
+.pd-stage-t { margin-top: 14rpx; font-size: 24rpx; color: var(--color-text-mute); }
+
+.pd-card {
+  margin-top: 24rpx;
+  padding: 24rpx;
+  border-radius: var(--radius-lg);
+  background: var(--color-card);
+  border: 1rpx solid var(--color-border);
+}
+.pd-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.pd-draft {
+  display: inline-block;
+  margin-top: 10rpx;
+  padding: 4rpx 16rpx;
+  border-radius: 999rpx;
+  font-size: 20rpx;
+  color: var(--color-warning);
+  background: var(--color-bg-soft);
+}
+.pd-rows { margin-top: 18rpx; }
+.pd-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 14rpx 0;
+  border-bottom: 1rpx solid var(--color-border);
+}
+.pd-k { font-size: 25rpx; color: var(--color-text-mute); }
+.pd-v { font-size: 25rpx; color: var(--color-text); }
+
+.pd-note {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 20rpx;
+  padding: 18rpx;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-soft);
+}
+.pd-note-k { flex-shrink: 0; font-size: 24rpx; color: var(--color-text-mute); margin-right: 18rpx; }
+.pd-note-v { flex: 1; font-size: 24rpx; color: var(--color-text); line-height: 1.6; word-break: break-all; }
+
+.pd-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-top: 30rpx;
+}
+.pd-act {
+  width: calc(33.33% - 11rpx);
+  padding: 22rpx 0;
+  border-radius: var(--radius-md);
+  text-align: center;
+  font-size: 26rpx;
+  color: var(--color-text-soft);
+  background: var(--color-card);
+  border: 1rpx solid var(--color-border);
+}
+.pd-act.main {
+  color: #fff;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  font-weight: 600;
+}
+.pd-act.danger { color: var(--color-danger); border-color: var(--color-danger); }
+
+.pd-tip {
+  margin-top: 24rpx;
+  font-size: 21rpx;
+  line-height: 1.6;
+  color: var(--color-text-mute);
+  text-align: center;
+}

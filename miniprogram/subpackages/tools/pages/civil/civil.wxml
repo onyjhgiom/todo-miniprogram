@@ -1,0 +1,124 @@
+<!-- subpackages/tools/pages/civil/civil.wxml -->
+<view class="cx themed" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <!-- ===== 欢迎横幅（醒目） ===== -->
+  <view class="cx__hero" style="background:{{heroGradient}}">
+    <view class="cx__hero-brand">
+      <text class="cx__hero-name">{{meta.name}}</text>
+      <text class="cx__hero-tag">{{meta.subtag}}</text>
+    </view>
+    <view class="cx__hero-welcome">{{meta.welcome}}</view>
+    <view class="cx__hero-line"></view>
+    <view class="cx__hero-sub">{{meta.welcomeSub}}</view>
+    <view class="cx__hero-desc">{{meta.desc}}</view>
+    <view class="cx__hero-stats">
+      <view class="cx__hs"><text class="cx__hs-n">{{stats.jobs}}</text><text class="cx__hs-l">岗位</text></view>
+      <view class="cx__hs"><text class="cx__hs-n">{{stats.bian}}</text><text class="cx__hs-l">带编岗位</text></view>
+      <view class="cx__hs"><text class="cx__hs-n">{{stats.compile}}</text><text class="cx__hs-l">编制类型</text></view>
+      <view class="cx__hs"><text class="cx__hs-n">{{stats.fresh}}</text><text class="cx__hs-l">应届可报</text></view>
+    </view>
+  </view>
+
+  <!-- ===== 四大赛道（两列，从左往右依次铺满；策略中心单独占整行） ===== -->
+  <view class="cx__sec-title">四大赛道 · 全职通覆盖</view>
+  <view class="cx__tracks">
+    <view class="cx__track {{item.isStrategy ? 'cx__track--wide' : ''}}"
+      wx:for="{{tracks}}" wx:key="key"
+      data-key="{{item.key}}" bindtap="onTrack" hover-class="cx__press" hover-stay-time="50">
+      <view class="cx__track-head">
+        <view class="cx__track-icon" style="background:{{item.soft}}">{{item.icon}}</view>
+        <text class="cx__track-count" style="color:{{item.color}}">{{item.count}}</text>
+      </view>
+      <view class="cx__track-name">{{item.name}}</view>
+      <view class="cx__track-tag">{{item.tagline}}</view>
+      <view class="cx__track-bian">
+        <text class="cx__dot" style="background:{{item.color}}"></text>
+        <text class="cx__track-bian-t">{{item.bian}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 编制速查 ===== -->
+  <view class="cx__sec-head">
+    <text class="cx__sec-title cx__sec-title--inline">编制速查 · 有没有编一眼看清</text>
+    <text class="cx__sec-more" bindtap="onEntry" data-key="compare">科普对比 ›</text>
+  </view>
+  <scroll-view class="cx__chips" scroll-x show-scrollbar="{{false}}">
+    <view class="cx__chip" wx:for="{{compiles}}" wx:key="key"
+      data-key="{{item.key}}" bindtap="onCompile" hover-class="cx__press" hover-stay-time="50">
+      <view class="cx__chip-tag cx-tag cx-tag--{{item.tone}}">{{item.short}}</view>
+      <text class="cx__chip-full">{{item.full}}</text>
+      <text class="cx__chip-count">{{item.count}} 个岗位</text>
+    </view>
+  </scroll-view>
+
+  <!-- ===== 近期关键节点 ===== -->
+  <view class="cx__sec-head">
+    <text class="cx__sec-title cx__sec-title--inline">近期关键节点</text>
+    <text class="cx__sec-more" bindtap="onEntry" data-key="timeline">全年时间轴 ›</text>
+  </view>
+  <view class="cx__months">
+    <view class="cx__month" wx:for="{{months}}" wx:key="month"
+      data-month="{{item.month}}" bindtap="onMonth" hover-class="cx__press" hover-stay-time="50">
+      <view class="cx__month-head">
+        <text class="cx__month-label">{{item.label}}</text>
+        <text class="cx__month-now" wx:if="{{item.isNow}}">本月</text>
+      </view>
+      <text class="cx__month-theme">{{item.theme}}</text>
+      <view class="cx__mev" wx:for="{{item.events}}" wx:for-item="ev" wx:key="title">
+        <text class="cx__mev-bar" style="background:{{ev.color}}"></text>
+        <view class="cx__mev-main">
+          <text class="cx__mev-title">{{ev.major ? '★ ' : ''}}{{ev.title}}</text>
+          <text class="cx__mev-desc">{{ev.desc}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 精选岗位 ===== -->
+  <view class="cx__sec-head">
+    <text class="cx__sec-title cx__sec-title--inline">精选岗位 · 全库 {{total}} 条</text>
+    <text class="cx__sec-more" bindtap="onAllJobs">查看全部 ›</text>
+  </view>
+  <view class="cx__jobs">
+    <view class="cx__job" wx:for="{{hotJobs}}" wx:key="id"
+      data-id="{{item.id}}" bindtap="onJob" hover-class="cx__press" hover-stay-time="50">
+      <view class="cx__job-head">
+        <text class="cx__job-title">{{item.title}}</text>
+        <text class="cx-tag cx-tag--{{item.tone}}">{{item.hasBian ? '有编' : '无编'}} · {{item.compileShort}}</text>
+      </view>
+      <text class="cx__job-unit">{{item.unit}}</text>
+      <view class="cx__job-meta">
+        <text class="cx__jm" style="color:{{item.color}}">{{item.trackShort}}</text>
+        <text class="cx__jm">难度 {{item.stars}}</text>
+        <text class="cx__jm">{{item.freshText}}</text>
+      </view>
+      <text class="cx__job-salary">💰 {{item.salary}}</text>
+      <view class="cx__job-apply" wx:if="{{item.applyUrl}}">
+        <text class="cx__apply-badge">官方报名</text>
+        <text class="cx__apply-name">{{item.applyName}}</text>
+        <text class="cx__apply-host">{{item.applyHost}}</text>
+        <text class="cx__apply-copy" catchtap="onCopyApply" data-url="{{item.applyUrl}}"
+          hover-class="cx__press" hover-stay-time="50">复制链接</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 工具入口 ===== -->
+  <view class="cx__sec-title">更多工具</view>
+  <view class="cx__entries">
+    <view class="cx__entry" wx:for="{{entries}}" wx:key="key"
+      data-key="{{item.key}}" bindtap="onEntry" hover-class="cx__press" hover-stay-time="50">
+      <view class="cx__entry-icon">{{item.icon}}</view>
+      <view class="cx__entry-main">
+        <view class="cx__entry-title">{{item.title}}</view>
+        <view class="cx__entry-desc">{{item.desc}}</view>
+      </view>
+      <text class="cx__entry-arrow">›</text>
+    </view>
+  </view>
+
+  <view class="cx__foot">
+    数据为人工整理的参考信息 · 版本 {{meta.version}} · 招录节奏每年变化，一切以官方公告为准
+  </view>
+</view>

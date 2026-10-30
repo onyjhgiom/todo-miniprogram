@@ -1,0 +1,46 @@
+.dm-overlay-root {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  pointer-events: none;
+}
+.dm-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+.dm-toggle {
+  position: absolute;
+  right: 20rpx;
+  bottom: 140rpx;
+  /* 横屏/全面屏下避开挖孔与底部指示条（不支持 env() 的机型自动回退到上面的字面值） */
+  right: calc(20rpx + env(safe-area-inset-right));
+  bottom: calc(140rpx + env(safe-area-inset-bottom));
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.25);
+}
+.dm-toggle-icon {
+  font-size: 32rpx;
+  line-height: 1;
+  font-weight: 700;
+}
+.dm-toggle-text {
+  font-size: 20rpx;
+  margin-top: 4rpx;
+  transform: scale(0.92);
+}

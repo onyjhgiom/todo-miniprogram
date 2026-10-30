@@ -1,0 +1,272 @@
+/* pages/recruit/calendar.wxss */
+@import "../../interaction.wxss";
+.cal {
+  min-height: 100vh;
+  padding-bottom: 60rpx;
+  background: var(--color-bg, var(--color-card));
+}
+.cal__hero {
+  padding: 32rpx 32rpx 20rpx;
+  color: #fff;
+  position: relative;
+}
+.cal__hero-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.cal__title { font-size: 34rpx; font-weight: 700; }
+.cal__view { display: flex; border-radius: 999rpx; overflow: hidden; background: rgba(255,255,255,0.2); }
+.cal__view-i { font-size: 24rpx; padding: 8rpx 24rpx; color: #fff; }
+.cal__view-i--on { background: var(--color-card); color: #2563eb; font-weight: 600; }
+.cal__nav {
+  position: absolute;
+  right: 32rpx; bottom: 20rpx;
+  display: flex; gap: 12rpx;
+}
+.cal__nav-btn {
+  width: 56rpx; height: 56rpx;
+  line-height: 56rpx; text-align: center;
+  font-size: 40rpx;
+  background: rgba(255,255,255,0.22);
+  border-radius: 50%;
+}
+.cal__nav-btn--right { margin-left: 8rpx; }
+
+.cal__weekbar {
+  display: flex;
+  padding: 20rpx 16rpx 8rpx;
+}
+.cal__wd {
+  flex: 1; text-align: center;
+  font-size: 24rpx; color: #94a3b8;
+}
+
+.cal__grid {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0 16rpx;
+}
+.cal__cell {
+  width: 14.28%;
+  height: 92rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-sizing: border-box;
+}
+.cal__day { font-size: 28rpx; color: var(--color-text); }
+.cal__cell--muted .cal__day { color: #cbd5e1; }
+.cal__cell--today .cal__day { color: #2563eb; font-weight: 700; }
+.cal__cell--sel {
+  background: #2563eb;
+  border-radius: 14rpx;
+}
+.cal__cell--sel .cal__day { color: #fff; }
+.cal__dot {
+  width: 10rpx; height: 10rpx;
+  border-radius: 50%;
+  background: #C09A5E;
+  margin-top: 6rpx;
+}
+.cal__cell--sel .cal__dot { background: var(--color-card); }
+
+/* 周视图 */
+.cal__week { white-space: nowrap; padding: 16rpx; }
+.cal__wcell {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  width: 96rpx;
+  padding: 14rpx 0;
+  margin-right: 12rpx;
+  background: var(--color-bg-card, var(--color-card));
+  border-radius: 14rpx;
+}
+.cal__wcell--sel { background: #2563eb; }
+.cal__wcell-wd { font-size: 22rpx; color: #94a3b8; }
+.cal__wcell--sel .cal__wcell-wd { color: #dbeafe; }
+.cal__wcell-day { font-size: 30rpx; font-weight: 600; color: var(--color-text); margin: 4rpx 0; }
+.cal__wcell--sel .cal__wcell-day { color: #fff; }
+
+/* 事件面板 */
+.cal__panel { padding: 24rpx; }
+.cal__panel-title { font-size: 28rpx; font-weight: 700; color: var(--color-text); margin-bottom: 14rpx; }
+.cal__empty { font-size: 25rpx; color: #94a3b8; padding: 30rpx 0; text-align: center; }
+
+.cal__event {
+  display: flex;
+  align-items: center;
+  background: var(--color-bg-card, var(--color-card));
+  border-radius: 16rpx;
+  padding: 18rpx 22rpx;
+  margin-bottom: 14rpx;
+  box-shadow: 0 3rpx 14rpx rgba(15,23,42,0.05);
+}
+.cal__event-time { font-size: 30rpx; font-weight: 700; width: 110rpx; }
+.cal__event-main { flex: 1; display: flex; align-items: center; justify-content: space-between; }
+.cal__event-co { font-size: 26rpx; color: var(--color-text); }
+.cal__event-status { font-size: 22rpx; color: #fff; padding: 4rpx 14rpx; border-radius: 999rpx; }
+
+.cal__timeline {
+  margin-top: 20rpx;
+  background: var(--color-bg-card, var(--color-card));
+  border-radius: 18rpx;
+  padding: 22rpx;
+  box-shadow: 0 3rpx 14rpx rgba(15,23,42,0.05);
+}
+.cal__tl-title { font-size: 27rpx; font-weight: 700; color: #C09A5E; margin-bottom: 14rpx; }
+.cal__tl { display: flex; align-items: flex-start; padding: 8rpx 0; }
+.cal__tl-node {
+  width: 16rpx; height: 16rpx;
+  border-radius: 50%;
+  background: #C09A5E;
+  margin-top: 8rpx;
+  margin-right: 18rpx;
+  flex-shrink: 0;
+}
+.cal__tl-text { font-size: 25rpx; color: var(--color-text-soft); line-height: 1.5; }
+.cal__tl-tip { font-size: 21rpx; color: #94a3b8; display: block; margin-top: 12rpx; }
+
+/* ---------- 新增：页头副标题 / 回到今天 / 面试上色 ---------- */
+.cal__hero-sub {
+  font-size: 23rpx;
+  opacity: 0.9;
+  display: block;
+  margin: 10rpx 0 46rpx;
+  line-height: 1.4;
+}
+.cal__nav-today {
+  font-size: 24rpx;
+  padding: 0 22rpx;
+  height: 56rpx;
+  line-height: 56rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+.cal__nav-today:active { opacity: 0.75; }
+/* 面试场次用主色点，和截止（暖金）区分开 */
+.cal__dot--iv { background: #B5714C; }
+.cal__cell--sel .cal__dot--iv { background: var(--color-card); }
+
+.cal__panel-title { display: flex; align-items: center; gap: 14rpx; }
+.cal__panel-sub { font-size: 22rpx; font-weight: 400; color: #94a3b8; }
+
+.cal__event-main { flex-direction: column; align-items: flex-start; }
+.cal__event-tags {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 8rpx;
+}
+.cal__event-place { font-size: 21rpx; color: var(--color-text-mute); }
+.cal__event-done { font-size: 21rpx; color: #5C7A5C; }
+.cal__event-act {
+  font-size: 22rpx;
+  padding: 10rpx 18rpx;
+  border-radius: 999rpx;
+  background: var(--color-bg-soft);
+  color: var(--color-text-soft);
+  flex: none;
+  margin-left: 12rpx;
+}
+.cal__event-act:active { opacity: 0.7; }
+
+/* 时间轴节点按语义分色 */
+.cal__tl-time {
+  font-size: 24rpx;
+  font-weight: 600;
+  width: 88rpx;
+  flex: none;
+  color: var(--color-text-mute);
+}
+.cal__tl-time--go { color: #B5714C; }
+.cal__tl-time--warn { color: #ea580c; }
+.cal__tl-node--normal { background: #94a3b8; }
+.cal__tl-node--go { background: #B5714C; }
+.cal__tl-node--warn { background: #ea580c; }
+
+/* ---------- 深色 / 自定义主题适配 ----------
+   本页此前把 themeStyle 当成 class 名用（它其实是 CSS 变量文本），
+   且根节点没有 data-theme，导致整套主题变量都读不到、页面永远是浅色。
+   这里把硬编码的浅色值在深色主题下逐条覆盖。 */
+.themed[data-theme='dark'] .cal__day,
+.themed[data-theme='rose'] .cal__day,
+.themed[data-theme='forest'] .cal__day,
+.themed[data-theme='twilight'] .cal__day,
+.themed[data-theme='scarlet'] .cal__day,
+.themed[data-theme='jade'] .cal__day,
+.themed[data-theme='indigo'] .cal__day,
+.themed[data-theme='custom'] .cal__day { color: var(--color-text); }
+.themed[data-theme='dark'] .cal__cell--muted .cal__day,
+.themed[data-theme='rose'] .cal__cell--muted .cal__day { color: var(--color-text-mute); }
+.themed[data-theme='dark'] .cal__panel-title,
+.themed[data-theme='rose'] .cal__panel-title,
+.themed[data-theme='dark'] .cal__event-co,
+.themed[data-theme='rose'] .cal__event-co,
+.themed[data-theme='dark'] .cal__wcell-day,
+.themed[data-theme='rose'] .cal__wcell-day { color: var(--color-text); }
+.themed[data-theme='dark'] .cal__tl-text,
+.themed[data-theme='rose'] .cal__tl-text { color: var(--color-text-soft); }
+.themed[data-theme='dark'] .cal__event-place,
+.themed[data-theme='rose'] .cal__event-place { color: var(--color-text-mute); }
+.themed[data-theme='dark'] .cal__event-act,
+.themed[data-theme='rose'] .cal__event-act {
+  background: var(--color-bg-soft);
+  color: var(--color-text-soft);
+}
+.themed[data-theme='dark'] .cal__event,
+.themed[data-theme='rose'] .cal__event,
+.themed[data-theme='dark'] .cal__timeline,
+.themed[data-theme='rose'] .cal__timeline,
+.themed[data-theme='dark'] .cal__wcell,
+.themed[data-theme='rose'] .cal__wcell {
+  background: var(--color-card);
+  box-shadow: none;
+  border: 1rpx solid var(--color-border);
+}
+
+/* ============================================================
+ * 交互反馈层（按压 / 悬停 / 弹层过渡 / 校验态）
+ * 只补充反馈，不改变任何布局、尺寸与配色。
+ * ============================================================ */
+
+/* 按压反馈：小控件 / 按钮 */
+.cal__view-i, .cal__nav-btn, .cal__nav-today, .cal__cell, .cal__wcell, .cal__event-act {
+  transition: transform 150ms ease, opacity 150ms ease, box-shadow 150ms ease;
+}
+.cal__view-i:active, .cal__nav-btn:active, .cal__nav-today:active, .cal__cell:active, .cal__wcell:active, .cal__event-act:active {
+  transform: scale(0.955);
+  opacity: 0.74;
+}
+
+/* 按压反馈：卡片 / 列表行（幅度更轻，避免整块跳动） */
+.cal__event {
+  transition: background-color 150ms ease, opacity 150ms ease;
+}
+.cal__event:active {
+  opacity: 0.88;
+}
+
+/* 桌面端悬停：仅对真正有鼠标的设备生效，触屏不受影响 */
+@media (hover: hover) and (pointer: fine) {
+  .cal__cell:hover, .cal__wcell:hover, .cal__event:hover, .cal__nav-btn:hover, .cal__view-i:hover {
+    box-shadow: 0 10rpx 28rpx rgba(15, 23, 42, 0.12);
+    transform: translateY(-2rpx);
+  }
+}
+
+
+/* 日期格子：按压时保留选中态可读性，只做轻微缩放 */
+.cal__cell, .cal__wcell { transition: transform 150ms ease, opacity 150ms ease; }
+.cal__cell:active, .cal__wcell:active { transform: scale(0.94); opacity: 0.82; }
+
+/* 选中态过渡（标签 / 分段控件） */
+.cal__view-i {
+  transition: background-color 160ms ease, color 160ms ease,
+              transform 160ms ease, opacity 160ms ease, box-shadow 160ms ease;
+}

@@ -1,0 +1,1714 @@
+/**
+ * app.wxss
+ * 全局样式：5 套主题（通过 page 根元素 data-theme 属性切换）+ 设计 token
+ *
+ * ★ 中古 / 侘寂改版（对齐「拾光待办」设计语言）：
+ *  - 基调：暖灰宣纸底 + 深炭墨 + 低饱和四彩（奶油黄/鼠尾草绿/陶土粉/燕麦米）
+ *  - 主强调色由紫色 #6366f1 改为陶土棕 #B5714C（沿用 --color-primary 变量名，
+ *    所有页面/组件无需改动即可整体换肤）
+ *  - 玻璃拟态 token 保留变量名，值调整为侘寂暖白半透明（毛玻璃 → 暖纸半透）
+ *  - 圆角整体加大一档（16/24/32rpx），家具般的圆润感
+ *
+ * 引入链说明：
+ *  - styles/common.wxss 提供「侘寂」体系变量（--paper/--ink/--clay/--r-md/--sd-1…）
+ *    与公共类库（.page / .card--flat / .grain / .serif / .tape / .muted-2 / .t-xxl…），
+ *    游戏分包（subpackages/games）与 pages/tool 均依赖它。
+ *  - 注意：WXSS 的 @import 必须位于文件最顶部且为顶层语句。
+ */
+
+@import "/styles/common.wxss";
+
+page {
+  /* ===== 暮金夜色 · 基础色板（默认 light 槽位，已整体改造为深色）=====
+   * 参照用户效果图：暗夜棕黑底 + 琥珀金强调 + 玻璃卡片。
+   * 变量名保持不变，全站页面/组件零改动级联。 */
+  --color-bg: #15110D;
+  --color-bg-elevated: #221B14;
+  --color-bg-soft: #2C2318;
+  --color-card: rgba(40, 31, 22, 0.72);
+  --color-text: #F3EAD9;
+  --color-text-soft: #DCD1BA;
+  --color-text-mute: #B3A78E;
+  --color-border: rgba(226, 178, 115, 0.16);
+  --color-input-line: rgba(226, 178, 115, 0.3);
+  --color-primary: #E2B273;
+  --color-primary-deep: #C9955C;
+  --color-primary-ink: #3A2A16;
+  --color-primary-ink-2: #57401f;
+  --color-primary-soft: rgba(226, 178, 115, 0.16);
+  --color-primary-shadow: rgba(0, 0, 0, 0.5);
+  --color-accent: #D9B36C;
+  --color-success: #8FBA8F;
+  --color-warning: #E0A06A;
+  --color-danger: #E07A5C;
+  --color-overlay: rgba(8, 6, 4, 0.66);
+
+  /* ===== 夜色玻璃 token（原玻璃拟态变量名，暮金值）===== */
+  --glass-bg: rgba(38, 30, 22, 0.55);
+  --glass-bg-strong: rgba(38, 30, 22, 0.82);
+  --glass-bg-soft: rgba(38, 30, 22, 0.4);
+  --glass-border: rgba(226, 178, 115, 0.22);
+  --glass-highlight: rgba(255, 233, 198, 0.22);
+  --glass-blur: blur(20rpx) saturate(120%);
+  --glass-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.42), inset 0 1rpx 0 rgba(255, 233, 198, 0.14);
+
+  /* ===== 主题氛围光斑（暮金晖光）===== */
+  --ambient-1: rgba(226, 168, 92, 0.16);
+  --ambient-2: rgba(217, 179, 108, 0.1);
+  --ambient-3: rgba(120, 96, 66, 0.12);
+
+  /* ===== 主页「风格」维度 · 工艺 token =====
+   * 与主题正交：主题给颜色，风格给工艺（圆角 / 描边宽度 / 阴影形状 / 玻璃质感）。
+   * 这里的默认值 = 现有侘寂工艺，因此不选风格时主页观感与改版前完全一致。
+   * 各风格在 pages/index/index.wxss 的 .themed.home-style-X 里整体覆盖。
+   * 组件（stats-card / todo-card / bottom-tab）通过 var() 消费这些 token，
+   * 所以换风格不需要改动组件逻辑 —— CSS 变量会级联进自定义组件。 */
+  --home-card-r: 34rpx;            /* 待办卡片圆角 */
+  --home-card-edge: 1rpx;          /* 待办卡片描边宽度 */
+  --home-card-shadow: 0 1rpx 0 rgba(255, 233, 198, 0.12) inset, 0 8rpx 24rpx rgba(0, 0, 0, 0.38);
+  --home-hero-r: 44rpx;            /* 顶部 hero 面板圆角 */
+  --home-hero-edge-w: 0rpx;        /* hero 描边宽度 */
+  --home-hero-edge-c: transparent; /* hero 描边颜色 */
+  --home-hero-shadow: 0 16rpx 40rpx rgba(0, 0, 0, 0.5);
+  --home-bar-r: 999rpx;            /* 底部 dock 圆角 */
+  --home-bar-shadow: 0 16rpx 40rpx rgba(0, 0, 0, 0.55), 0 1rpx 0 rgba(255, 233, 198, 0.14) inset;
+
+  --gradient-hero: linear-gradient(135deg, #2A1D10 0%, #3D2C18 50%, #6B4A26 100%);
+  --gradient-primary: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-deep) 100%);
+  --gradient-success: linear-gradient(135deg, #6E8E6E 0%, #8FAE8F 100%);
+  --gradient-danger: linear-gradient(135deg, #C0522F 0%, #D06B49 100%);
+
+  /* 阴影：深色系 */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.36), 0 1px 2px rgba(0, 0, 0, 0.22);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --shadow-press: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+
+  /* 圆角：整体加大一档 */
+  --radius-xs: 6rpx;
+  --radius-sm: 12rpx;
+  --radius-md: 18rpx;
+  --radius-lg: 24rpx;
+  --radius-xl: 32rpx;
+  --radius-pill: 999rpx;
+
+  --duration-fast: 160ms;
+  --duration-base: 240ms;
+  --duration-slow: 320ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+  font-size: 28rpx;
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+/* ========== 5 套主题切换（侘寂化） ==========
+ * 说明：小程序无法在 <page> 根元素上绑定自定义属性（data-theme 挂不到 page 上），
+ * 因此各页面在根 wrapper view 上绑定 data-theme + themed 类，
+ * 主题变量通过 .themed[data-theme='X'] 生效并向下级联。
+ */
+.themed {
+  min-height: 100vh;
+  box-sizing: border-box;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+/* 暖陶（原 dark 槽位 → 深炭墨侘寂） */
+.themed[data-theme='dark'] {
+  --color-bg: #2C2823;
+  --color-bg-elevated: #38332C;
+  --color-bg-soft: #45403A;
+  --color-card: #3A352E;
+  --color-text: #F2EDE4;
+  --color-text-soft: #BFB5A5;
+  --color-text-mute: #8F8574;
+  --color-border: #4A443C;
+  --color-input-line: #5C554B;
+  --color-primary: #D89A6A;
+  --color-primary-deep: #C08468;
+  --color-primary-ink: #865F42;
+  --color-primary-ink-2: #9C6F4C;
+  --color-primary-soft: rgba(216, 154, 106, 0.18);
+  --color-primary-shadow: rgba(0, 0, 0, 0.4);
+  --color-accent: #C9A25E;
+  --color-overlay: rgba(0, 0, 0, 0.65);
+  --gradient-hero: linear-gradient(135deg, #3B362F 0%, #4A4038 50%, #96573A 100%);
+  --gradient-primary: linear-gradient(135deg, #D89A6A 0%, #C08468 100%);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --glass-bg: rgba(58, 53, 46, 0.6);
+  --glass-bg-strong: rgba(58, 53, 46, 0.85);
+  --glass-bg-soft: rgba(58, 53, 46, 0.45);
+  --glass-border: rgba(191, 181, 165, 0.22);
+  --glass-highlight: rgba(191, 181, 165, 0.3);
+  --glass-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.4), inset 0 1rpx 0 rgba(255, 255, 255, 0.08);
+  --ambient-1: rgba(216, 160, 92, 0.14);
+  --ambient-2: rgba(192, 154, 94, 0.1);
+  --ambient-3: rgba(126, 158, 126, 0.08);
+  /* 深色底：主页工艺 token 必须一并压暗 —— 否则 hero / 卡片会是「暖纸亮面板」贴在深底上 */
+  --home-card-shadow: 0 1rpx 0 rgba(255, 255, 255, 0.06) inset, 0 8rpx 24rpx rgba(0, 0, 0, 0.3);
+  --home-hero-shadow: 0 16rpx 40rpx rgba(0, 0, 0, 0.4);
+  --home-bar-shadow: 0 16rpx 40rpx rgba(0, 0, 0, 0.45), 0 1rpx 0 rgba(255, 255, 255, 0.08) inset;
+}
+/* 深邃暗夜（原 rose 槽位 → 深蓝夜空 · 冷调深色）
+ * 深色主题必须把「暖纸玻璃 token」与阴影一并覆盖：
+ * page 默认值是浅色系（glass-bg 接近白、阴影是暖灰），
+ * 只改 --color-bg / --color-text 会让浮层、卡片仍是白玻璃块，深色下非常刺眼。
+ * 变量清单与 data-theme='dark' 保持一致，避免出现漏改的浅色残留。 */
+.themed[data-theme='rose'] {
+  --color-bg: #0C1017;
+  --color-bg-elevated: #18202C;
+  --color-bg-soft: #212A38;
+  --color-card: #18202C;
+  --color-text: #E9EEF7;
+  --color-text-soft: #A6B2C6;
+  --color-text-mute: #7C8A9E;
+  --color-border: #262F3E;
+  --color-input-line: #364154;
+  --color-primary: #6F84CE;
+  --color-primary-deep: #55679F;
+  --color-primary-ink: #2A3150;
+  --color-primary-ink-2: #3A4468;
+  --color-primary-soft: rgba(111, 132, 206, 0.2);
+  --color-primary-shadow: rgba(0, 0, 0, 0.45);
+  --color-accent: #9FB6E8;
+  --color-overlay: rgba(0, 0, 0, 0.68);
+  --gradient-hero: linear-gradient(135deg, #101828 0%, #1B2743 50%, #3B4A7E 100%);
+  --gradient-primary: linear-gradient(135deg, #6F84CE 0%, #55679F 100%);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.35);
+  --glass-bg: rgba(24, 32, 44, 0.6);
+  --glass-bg-strong: rgba(24, 32, 44, 0.85);
+  --glass-bg-soft: rgba(24, 32, 44, 0.45);
+  --glass-border: rgba(166, 178, 198, 0.2);
+  --glass-highlight: rgba(166, 178, 198, 0.28);
+  --glass-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.45), inset 0 1rpx 0 rgba(255, 255, 255, 0.06);
+  --ambient-1: rgba(111, 132, 206, 0.16);
+  --ambient-2: rgba(159, 182, 232, 0.1);
+  --ambient-3: rgba(92, 110, 160, 0.1);
+  /* 深色底：主页工艺 token 同 dark 档（rose 槽位也是深色主题） */
+  --home-card-shadow: 0 1rpx 0 rgba(255, 255, 255, 0.06) inset, 0 8rpx 24rpx rgba(0, 0, 0, 0.32);
+  --home-hero-shadow: 0 16rpx 40rpx rgba(0, 0, 0, 0.42);
+  --home-bar-shadow: 0 16rpx 40rpx rgba(0, 0, 0, 0.48), 0 1rpx 0 rgba(255, 255, 255, 0.08) inset;
+}
+/* ⑪ 自然森系·Forest Calm：森林绿 / 苔藓绿 / 米白 / 木棕 / 雾蓝 +
+ * 半透玻璃 + 自然纹理 + 大圆角 + 柔和阴影，像漂浮在森林里的信息面板（专注、放松） */
+.themed[data-theme='forest'] {
+  --color-bg: #EAF1E9;
+  --color-bg-elevated: #FBFDFA;
+  --color-bg-soft: #DCE8DB;
+  --color-card: #FBFDFA;
+  --color-text: #25352B;
+  --color-text-soft: #4F6655;
+  --color-text-mute: #8AA294;
+  --color-border: #D5E2D4;
+  --color-input-line: #B6CDB8;
+  --color-primary: #3F7A52;
+  --color-primary-deep: #2C5E3E;
+  --color-primary-ink: #1E3D28;
+  --color-primary-ink-2: #274A33;
+  --color-primary-soft: rgba(63, 122, 82, 0.14);
+  --color-primary-shadow: rgba(44, 94, 62, 0.24);
+  --color-accent: #7FA8C9;
+  --color-overlay: rgba(37, 53, 43, 0.42);
+  --gradient-hero: linear-gradient(135deg, #3F7A52 0%, #6B9E74 50%, #AECDB0 100%);
+  --gradient-primary: linear-gradient(135deg, #3F7A52 0%, #2C5E3E 100%);
+  --shadow-md: 0 4px 14px rgba(37, 53, 43, 0.1), 0 1px 3px rgba(37, 53, 43, 0.06);
+  --shadow-lg: 0 12px 30px rgba(37, 53, 43, 0.14), 0 2px 8px rgba(37, 53, 43, 0.08);
+  --glass-bg: rgba(251, 253, 250, 0.72);
+  --glass-bg-strong: rgba(251, 253, 250, 0.9);
+  --glass-bg-soft: rgba(251, 253, 250, 0.52);
+  --glass-border: rgba(176, 205, 184, 0.4);
+  --glass-highlight: rgba(255, 255, 255, 0.9);
+  --glass-shadow: 0 8rpx 28rpx rgba(37, 53, 43, 0.1);
+  --metal-1: #3F7A52;
+  --metal-2: #AEBBA9;
+  --metal-3: #2C5E3E;
+  --ambient-1: rgba(111, 158, 116, 0.16);
+  --ambient-2: rgba(174, 205, 176, 0.16);
+  --ambient-3: rgba(127, 168, 201, 0.1);
+  /* 森系工艺：标准大圆角 + 极轻绿影 */
+  --home-card-r: 36rpx;
+  --home-card-shadow: 0 1rpx 0 rgba(255, 255, 255, 0.85) inset, 0 8rpx 22rpx rgba(37, 53, 43, 0.08);
+  --home-hero-r: 44rpx;
+  --home-hero-shadow: 0 14rpx 34rpx rgba(63, 122, 82, 0.2);
+  --home-bar-r: 999rpx;
+  --home-bar-shadow: 0 12rpx 30rpx rgba(37, 53, 43, 0.12);
+}
+/* 暮金（原 twilight 槽位 → 旧金侘寂） */
+.themed[data-theme='twilight'] {
+  --color-bg: #F1EDE2;
+  --color-bg-elevated: #FCFBF6;
+  --color-bg-soft: #EAE4D4;
+  --color-card: #FCFBF6;
+  --color-text: #342F26;
+  --color-text-soft: #6B6250;
+  --color-text-mute: #A0957F;
+  --color-border: #E2DAC6;
+  --color-input-line: #D0C5A9;
+  --color-primary: #A98743;
+  --color-primary-deep: #8C6E30;
+  --color-primary-ink: #5D4A25;
+  --color-primary-ink-2: #735C2E;
+  --color-primary-soft: rgba(169, 135, 67, 0.12);
+  --color-primary-shadow: rgba(140, 110, 48, 0.26);
+  --color-accent: #C09A5E;
+  --gradient-hero: linear-gradient(135deg, #8C6E30 0%, #A98743 50%, #D8BC85 100%);
+  --gradient-primary: linear-gradient(135deg, #A98743 0%, #8C6E30 100%);
+  --glass-border: rgba(252, 250, 242, 0.9);
+  --ambient-1: rgba(192, 154, 94, 0.14);
+  --ambient-2: rgba(216, 160, 92, 0.12);
+  --ambient-3: rgba(126, 158, 126, 0.08);
+}
+/* 艳红绯纸（scarlet）：绯红陶土调 */
+.themed[data-theme='scarlet'] {
+  --color-bg: #F4E9E2;
+  --color-bg-elevated: #FCF8F4;
+  --color-bg-soft: #EBDDD2;
+  --color-card: #FCF8F4;
+  --color-text: #3A2C26;
+  --color-text-soft: #7A5A4C;
+  --color-text-mute: #AC8776;
+  --color-border: #E8D5C8;
+  --color-input-line: #D6B8A5;
+  --color-primary: #B5502F;
+  --color-primary-deep: #96401F;
+  --color-primary-ink: #642C1A;
+  --color-primary-ink-2: #7B3620;
+  --color-primary-soft: rgba(181, 80, 47, 0.12);
+  --color-primary-shadow: rgba(150, 64, 31, 0.26);
+  --color-accent: #C08468;
+  --gradient-hero: linear-gradient(135deg, #8C2F2F 0%, #C0522F 50%, #E3A084 100%);
+  --gradient-primary: linear-gradient(135deg, #B5502F 0%, #96401F 100%);
+  --glass-border: rgba(252, 248, 244, 0.9);
+  --ambient-1: rgba(192, 82, 47, 0.13);
+  --ambient-2: rgba(224, 160, 106, 0.11);
+  --ambient-3: rgba(192, 154, 94, 0.08);
+}
+/* 翠玉青瓷（jade）：青瓷玉绿调 */
+.themed[data-theme='jade'] {
+  --color-bg: #E8EFE9;
+  --color-bg-elevated: #FAFCF9;
+  --color-bg-soft: #DCE7DE;
+  --color-card: #FAFCF9;
+  --color-text: #2C362E;
+  --color-text-soft: #5C7263;
+  --color-text-mute: #8FA396;
+  --color-border: #D5E2D7;
+  --color-input-line: #B8CCBC;
+  --color-primary: #3E6B52;
+  --color-primary-deep: #2E5540;
+  --color-primary-ink: #223B2D;
+  --color-primary-ink-2: #2A4938;
+  --color-primary-soft: rgba(62, 107, 82, 0.12);
+  --color-primary-shadow: rgba(46, 85, 64, 0.26);
+  --color-accent: #749C84;
+  --gradient-hero: linear-gradient(135deg, #3E6B52 0%, #5C8E6E 50%, #A8CBB2 100%);
+  --gradient-primary: linear-gradient(135deg, #3E6B52 0%, #2E5540 100%);
+  --glass-border: rgba(250, 252, 249, 0.9);
+  --ambient-1: rgba(92, 142, 110, 0.14);
+  --ambient-2: rgba(168, 203, 178, 0.11);
+  --ambient-3: rgba(192, 154, 94, 0.07);
+}
+/* 靛蓝夜航（indigo）：靛蓝青金调 */
+.themed[data-theme='indigo'] {
+  --color-bg: #E9EBF2;
+  --color-bg-elevated: #FAFBFD;
+  --color-bg-soft: #DDE1EC;
+  --color-card: #FAFBFD;
+  --color-text: #2A3040;
+  --color-text-soft: #5A6478;
+  --color-text-mute: #8E96AB;
+  --color-border: #D8DCE8;
+  --color-input-line: #BCC2D4;
+  --color-primary: #4A5A8C;
+  --color-primary-deep: #384670;
+  --color-primary-ink: #29324D;
+  --color-primary-ink-2: #323D5F;
+  --color-primary-soft: rgba(74, 90, 140, 0.12);
+  --color-primary-shadow: rgba(56, 70, 112, 0.26);
+  --color-accent: #7C8CBA;
+  --gradient-hero: linear-gradient(135deg, #3A4A7C 0%, #5C6E9E 50%, #A8B4D8 100%);
+  --gradient-primary: linear-gradient(135deg, #4A5A8C 0%, #384670 100%);
+  --glass-border: rgba(250, 251, 253, 0.9);
+  --ambient-1: rgba(92, 110, 158, 0.14);
+  --ambient-2: rgba(168, 180, 216, 0.11);
+  --ambient-3: rgba(216, 160, 92, 0.07);
+}
+/* ===== 十大风格槽位（对齐效果图，每套自带差异化首页工艺） ===== */
+
+/* ① 极简白·Clean Minimal：纯白 / 暖白 / 浅灰 + 少量深灰与蓝色强调 + 大量留白 +
+ * 纤细线性图标 + 细腻圆角 + 极轻阴影 + 清晰信息层级 */
+.themed[data-theme='minimal'] {
+  --color-bg: #FFFFFF;
+  --color-bg-elevated: #FFFFFF;
+  --color-bg-soft: #F4F6F9;
+  --color-card: #FFFFFF;
+  --color-text: #1C2230;
+  --color-text-soft: #5B6573;
+  --color-text-mute: #9AA3AF;
+  --color-border: #ECEFF3;
+  --color-input-line: #DCE1E8;
+  --color-primary: #2F6BFF;
+  --color-primary-deep: #1E54E8;
+  --color-primary-ink: #16307F;
+  --color-primary-ink-2: #20408F;
+  --color-primary-soft: rgba(47, 107, 255, 0.1);
+  --color-primary-shadow: rgba(30, 84, 232, 0.16);
+  --color-accent: #38BDF8;
+  --color-overlay: rgba(15, 23, 42, 0.38);
+  --gradient-hero: linear-gradient(135deg, #5B8DEF 0%, #2F6BFF 50%, #7FA8FF 100%);
+  --gradient-primary: linear-gradient(135deg, #2F6BFF 0%, #1E54E8 100%);
+  --shadow-md: 0 2px 10px rgba(20, 28, 46, 0.05), 0 1px 2px rgba(20, 28, 46, 0.03);
+  --shadow-lg: 0 8px 28px rgba(20, 28, 46, 0.09), 0 2px 6px rgba(20, 28, 46, 0.05);
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-bg-strong: rgba(255, 255, 255, 0.92);
+  --glass-bg-soft: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(20, 28, 46, 0.07);
+  --glass-highlight: rgba(255, 255, 255, 0.95);
+  --glass-shadow: 0 6rpx 20rpx rgba(20, 28, 46, 0.05);
+  --metal-1: #2F6BFF;
+  --metal-2: #7FA8FF;
+  --metal-3: #1E54E8;
+  --ambient-1: rgba(47, 107, 255, 0.06);
+  --ambient-2: rgba(127, 168, 255, 0.08);
+  --ambient-3: rgba(148, 163, 184, 0.06);
+  /* 极简工艺：收敛圆角 + 细实线 + 近无影 + 充足留白 */
+  --home-card-r: 18rpx;
+  --home-card-edge: 1rpx;
+  --home-card-shadow: 0 2rpx 10rpx rgba(20, 28, 46, 0.04);
+  --home-hero-r: 24rpx;
+  --home-hero-shadow: 0 8rpx 24rpx rgba(47, 107, 255, 0.14);
+  --home-bar-r: 24rpx;
+  --home-bar-shadow: 0 6rpx 20rpx rgba(20, 28, 46, 0.08);
+}
+
+/* ② 深空科技·Deep Space：深黑 / 深蓝 / 午夜蓝 + 电光蓝 + 蓝紫 + 少量青色 +
+ * 星空粒子 / 宇宙光晕 / 渐变光源 + 半透玻璃 + 轻微发光边缘（克制，不廉价赛博） */
+.themed[data-theme='tech'] {
+  --color-bg: #060A14;
+  --color-bg-elevated: #0E1626;
+  --color-bg-soft: #141F33;
+  --color-card: rgba(16, 26, 44, 0.72);
+  --color-text: #E8EEFB;
+  --color-text-soft: #9DB0CC;
+  --color-text-mute: #64789A;
+  --color-border: rgba(99, 140, 255, 0.18);
+  --color-input-line: rgba(99, 140, 255, 0.32);
+  --color-primary: #4D7CFF;
+  --color-primary-deep: #6A5CFF;
+  --color-primary-ink: #0B1A3A;
+  --color-primary-ink-2: #11244E;
+  --color-primary-soft: rgba(99, 140, 255, 0.18);
+  --color-primary-shadow: rgba(0, 0, 0, 0.5);
+  --color-accent: #22D3EE;
+  --color-overlay: rgba(2, 6, 14, 0.72);
+  --gradient-hero: linear-gradient(135deg, #0A1220 0%, #16224A 50%, #2A1E6E 100%);
+  --gradient-primary: linear-gradient(135deg, #4D7CFF 0%, #6A5CFF 100%);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 26px rgba(77, 124, 255, 0.1);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.64), 0 0 44px rgba(99, 140, 255, 0.14);
+  --glass-bg: rgba(16, 26, 44, 0.6);
+  --glass-bg-strong: rgba(16, 26, 44, 0.86);
+  --glass-bg-soft: rgba(16, 26, 44, 0.45);
+  --glass-border: rgba(99, 140, 255, 0.24);
+  --glass-highlight: rgba(140, 170, 255, 0.26);
+  --glass-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.52), inset 0 1rpx 0 rgba(140, 170, 255, 0.14);
+  --metal-1: #4D7CFF;
+  --metal-2: #8FA8FF;
+  --metal-3: #6A5CFF;
+  --ambient-1: rgba(99, 140, 255, 0.16);
+  --ambient-2: rgba(34, 211, 238, 0.1);
+  --ambient-3: rgba(106, 92, 255, 0.12);
+  /* 科技工艺：霓虹辉光描边 + 中等圆角 + 宇宙光晕 */
+  --home-card-shadow: 0 1rpx 0 rgba(140, 170, 255, 0.12) inset, 0 8rpx 24rpx rgba(0, 0, 0, 0.42), 0 0 22rpx rgba(99, 140, 255, 0.12);
+  --home-hero-shadow: 0 16rpx 40rpx rgba(0, 0, 0, 0.5), 0 0 52rpx rgba(99, 140, 255, 0.18);
+  --home-bar-shadow: 0 16rpx 40rpx rgba(0, 0, 0, 0.55), 0 0 26rpx rgba(99, 140, 255, 0.14), 0 1rpx 0 rgba(140, 170, 255, 0.14) inset;
+}
+
+/* ③ 治愈插画·手绘风：奶油暖纸 + 蜜桃橘 + 大圆角，温暖治愈 */
+.themed[data-theme='healing'] {
+  --color-bg: #FDF6EA;
+  --color-bg-elevated: #FFFCF4;
+  --color-bg-soft: #F6ECDA;
+  --color-card: #FFFCF4;
+  --color-text: #4A3B2C;
+  --color-text-soft: #8A7358;
+  --color-text-mute: #B39B7D;
+  --color-border: #EFE2C8;
+  --color-input-line: #DCC9A6;
+  --color-primary: #E8945A;
+  --color-primary-deep: #D0763C;
+  --color-primary-ink: #8C4A22;
+  --color-primary-ink-2: #A85E30;
+  --color-primary-soft: rgba(232, 148, 90, 0.14);
+  --color-primary-shadow: rgba(208, 118, 60, 0.22);
+  --color-accent: #9CC08A;
+  --color-overlay: rgba(74, 59, 44, 0.4);
+  --gradient-hero: linear-gradient(135deg, #F2B879 0%, #E8945A 50%, #F7D9AC 100%);
+  --gradient-primary: linear-gradient(135deg, #E8945A 0%, #D0763C 100%);
+  --shadow-md: 0 4px 14px rgba(140, 106, 60, 0.12), 0 1px 3px rgba(140, 106, 60, 0.08);
+  --shadow-lg: 0 12px 30px rgba(140, 106, 60, 0.16), 0 2px 8px rgba(140, 106, 60, 0.1);
+  --glass-bg: rgba(255, 252, 244, 0.7);
+  --glass-bg-strong: rgba(255, 252, 244, 0.88);
+  --glass-bg-soft: rgba(255, 252, 244, 0.5);
+  --glass-border: rgba(255, 255, 255, 0.85);
+  --glass-highlight: rgba(255, 255, 255, 0.95);
+  --glass-shadow: 0 8rpx 28rpx rgba(140, 106, 60, 0.14);
+  --metal-1: #E8945A;
+  --metal-2: #F7D9AC;
+  --metal-3: #D0763C;
+  --ambient-1: rgba(242, 184, 121, 0.2);
+  --ambient-2: rgba(242, 201, 76, 0.12);
+  --ambient-3: rgba(143, 191, 159, 0.12);
+  /* 手绘工艺：超大圆角 + 奶油软影 */
+  --home-card-r: 40rpx;
+  --home-card-shadow: 0 1rpx 0 rgba(255, 255, 255, 0.9) inset, 0 10rpx 28rpx rgba(140, 106, 60, 0.14);
+  --home-hero-r: 52rpx;
+  --home-hero-shadow: 0 18rpx 44rpx rgba(208, 118, 60, 0.24);
+  --home-bar-r: 44rpx;
+  --home-bar-shadow: 0 14rpx 36rpx rgba(140, 106, 60, 0.2);
+}
+
+/* ④ 暗黑渐变·高级质感：曜石黑 + 香槟金描边，低调奢华 */
+.themed[data-theme='noir'] {
+  --color-bg: #141210;
+  --color-bg-elevated: #1E1B17;
+  --color-bg-soft: #28241E;
+  --color-card: rgba(30, 27, 23, 0.82);
+  --color-text: #EFE9DD;
+  --color-text-soft: #B5AB99;
+  --color-text-mute: #847B69;
+  --color-border: rgba(201, 162, 94, 0.18);
+  --color-input-line: rgba(201, 162, 94, 0.32);
+  --color-primary: #C9A25E;
+  --color-primary-deep: #AD8747;
+  --color-primary-ink: #4A3A1E;
+  --color-primary-ink-2: #5F4C28;
+  --color-primary-soft: rgba(201, 162, 94, 0.16);
+  --color-primary-shadow: rgba(0, 0, 0, 0.55);
+  --color-accent: #E3C98F;
+  --color-overlay: rgba(5, 4, 3, 0.72);
+  --gradient-hero: linear-gradient(135deg, #171310 0%, #241E14 50%, #4A3B22 100%);
+  --gradient-primary: linear-gradient(135deg, #C9A25E 0%, #AD8747 100%);
+  --shadow-md: 0 4px 18px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 14px 36px rgba(0, 0, 0, 0.62), 0 2px 8px rgba(0, 0, 0, 0.4);
+  --glass-bg: rgba(30, 27, 23, 0.66);
+  --glass-bg-strong: rgba(30, 27, 23, 0.88);
+  --glass-bg-soft: rgba(30, 27, 23, 0.5);
+  --glass-border: rgba(201, 162, 94, 0.24);
+  --glass-highlight: rgba(227, 201, 143, 0.22);
+  --glass-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.55), inset 0 1rpx 0 rgba(227, 201, 143, 0.16);
+  --metal-1: #C9A25E;
+  --metal-2: #E3C98F;
+  --metal-3: #AD8747;
+  --ambient-1: rgba(201, 162, 94, 0.14);
+  --ambient-2: rgba(173, 135, 71, 0.1);
+  --ambient-3: rgba(60, 50, 34, 0.16);
+  /* 奢感工艺：金线勾边 + 深邃投影 */
+  --home-card-shadow: 0 1rpx 0 rgba(227, 201, 143, 0.14) inset, 0 0 0 1rpx rgba(201, 162, 94, 0.12), 0 10rpx 28rpx rgba(0, 0, 0, 0.45);
+  --home-hero-shadow: 0 18rpx 44rpx rgba(0, 0, 0, 0.6), 0 0 0 1rpx rgba(201, 162, 94, 0.14);
+  --home-bar-shadow: 0 16rpx 44rpx rgba(0, 0, 0, 0.65), 0 0 0 1rpx rgba(201, 162, 94, 0.16), 0 1rpx 0 rgba(227, 201, 143, 0.16) inset;
+}
+
+/* ⑤ 潮流多彩·Colorful：蓝 / 紫 / 粉 / 橙 / 绿等鲜明颜色 + 干净背景 +
+ * 柔和渐变 + 彩色光晕 + 渐变按钮 + 活泼图标（年轻、轻快、有冲击力，但不幼稚） */
+.themed[data-theme='candy'] {
+  --color-bg: #FFFFFF;
+  --color-bg-elevated: #FFFFFF;
+  --color-bg-soft: #F3F0FB;
+  --color-card: #FFFFFF;
+  --color-text: #211A33;
+  --color-text-soft: #6A5E86;
+  --color-text-mute: #A99CC4;
+  --color-border: #EFE9F8;
+  --color-input-line: #E2D6F2;
+  --color-primary: #7C5CFC;
+  --color-primary-deep: #6D3BFF;
+  --color-primary-ink: #3B1E8F;
+  --color-primary-ink-2: #4A28A8;
+  --color-primary-soft: rgba(124, 92, 252, 0.12);
+  --color-primary-shadow: rgba(124, 92, 252, 0.22);
+  --color-accent: #FF5DA2;
+  --color-overlay: rgba(33, 26, 51, 0.42);
+  --gradient-hero: linear-gradient(135deg, #5B8CFF 0%, #A855F7 35%, #FF5DA2 70%, #FFB020 100%);
+  --gradient-primary: linear-gradient(135deg, #7C5CFC 0%, #FF5DA2 100%);
+  --shadow-md: 0 4px 14px rgba(124, 92, 252, 0.1), 0 1px 3px rgba(255, 93, 162, 0.06);
+  --shadow-lg: 0 12px 30px rgba(124, 92, 252, 0.16), 0 2px 8px rgba(255, 176, 32, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-bg-strong: rgba(255, 255, 255, 0.88);
+  --glass-bg-soft: rgba(255, 255, 255, 0.52);
+  --glass-border: rgba(255, 255, 255, 0.9);
+  --glass-highlight: rgba(255, 255, 255, 0.95);
+  --glass-shadow: 0 8rpx 28rpx rgba(124, 92, 252, 0.12);
+  --metal-1: #7C5CFC;
+  --metal-2: #C4B5FD;
+  --metal-3: #FF5DA2;
+  --ambient-1: rgba(124, 92, 252, 0.14);
+  --ambient-2: rgba(255, 93, 162, 0.12);
+  --ambient-3: rgba(255, 176, 32, 0.1);
+  /* 潮流工艺：胶囊大圆角 + 糖果彩影 */
+  --home-card-r: 44rpx;
+  --home-card-shadow: 0 1rpx 0 rgba(255, 255, 255, 0.9) inset, 0 10rpx 26rpx rgba(124, 92, 252, 0.14);
+  --home-hero-r: 48rpx;
+  --home-hero-shadow: 0 18rpx 44rpx rgba(124, 92, 252, 0.26);
+  --home-bar-r: 999rpx;
+  --home-bar-shadow: 0 14rpx 36rpx rgba(124, 92, 252, 0.22);
+}
+
+/* ⑥ 复古怀旧·质感胶片：牛皮纸 + 咖啡棕 + 颗粒胶片感，时光沉淀 */
+.themed[data-theme='retro'] {
+  --color-bg: #EFE6D4;
+  --color-bg-elevated: #F8F2E4;
+  --color-bg-soft: #E4D7BE;
+  --color-card: #F8F2E4;
+  --color-text: #3E3324;
+  --color-text-soft: #75644B;
+  --color-text-mute: #A08C6C;
+  --color-border: #E0D2B6;
+  --color-input-line: #C9B68F;
+  --color-primary: #8C6239;
+  --color-primary-deep: #6F4B28;
+  --color-primary-ink: #46301A;
+  --color-primary-ink-2: #573C21;
+  --color-primary-soft: rgba(140, 98, 57, 0.13);
+  --color-primary-shadow: rgba(111, 75, 40, 0.24);
+  --color-accent: #B08D57;
+  --color-overlay: rgba(62, 51, 36, 0.45);
+  --gradient-hero: linear-gradient(135deg, #8C6239 0%, #A87F4F 50%, #D6BC8F 100%);
+  --gradient-primary: linear-gradient(135deg, #8C6239 0%, #6F4B28 100%);
+  --shadow-md: 0 4px 14px rgba(70, 48, 26, 0.14), 0 1px 3px rgba(70, 48, 26, 0.1);
+  --shadow-lg: 0 12px 30px rgba(70, 48, 26, 0.2), 0 2px 8px rgba(70, 48, 26, 0.12);
+  --glass-bg: rgba(248, 242, 228, 0.72);
+  --glass-bg-strong: rgba(248, 242, 228, 0.88);
+  --glass-bg-soft: rgba(248, 242, 228, 0.52);
+  --glass-border: rgba(176, 141, 87, 0.28);
+  --glass-highlight: rgba(255, 250, 238, 0.9);
+  --glass-shadow: 0 8rpx 28rpx rgba(70, 48, 26, 0.16);
+  --metal-1: #B08D57;
+  --metal-2: #D6BC8F;
+  --metal-3: #8C6239;
+  --ambient-1: rgba(176, 141, 87, 0.16);
+  --ambient-2: rgba(214, 188, 143, 0.14);
+  --ambient-3: rgba(117, 100, 75, 0.1);
+  /* 胶片工艺：中圆角 + 相纸描边 + 深棕影 */
+  --home-card-r: 24rpx;
+  --home-card-shadow: 0 1rpx 0 rgba(255, 250, 238, 0.8) inset, 0 0 0 1rpx rgba(176, 141, 87, 0.18), 0 8rpx 22rpx rgba(70, 48, 26, 0.16);
+  --home-hero-r: 30rpx;
+  --home-hero-shadow: 0 14rpx 34rpx rgba(70, 48, 26, 0.24);
+  --home-bar-r: 30rpx;
+  --home-bar-shadow: 0 12rpx 30rpx rgba(70, 48, 26, 0.22), 0 0 0 1rpx rgba(176, 141, 87, 0.18);
+}
+
+/* ⑦ 莫兰迪·优雅柔和：低饱和灰绿 + 燕麦米，高级温柔 */
+.themed[data-theme='morandi'] {
+  --color-bg: #EDEBE6;
+  --color-bg-elevated: #F8F7F4;
+  --color-bg-soft: #E2DFD8;
+  --color-card: #F8F7F4;
+  --color-text: #3B3A36;
+  --color-text-soft: #6E6C64;
+  --color-text-mute: #9C998F;
+  --color-border: #DEDBD2;
+  --color-input-line: #C5C1B5;
+  --color-primary: #8A9B8E;
+  --color-primary-deep: #718374;
+  --color-primary-ink: #4A584E;
+  --color-primary-ink-2: #5A6B5E;
+  --color-primary-soft: rgba(138, 155, 142, 0.16);
+  --color-primary-shadow: rgba(113, 131, 116, 0.22);
+  --color-accent: #B5A896;
+  --color-overlay: rgba(59, 58, 54, 0.4);
+  --gradient-hero: linear-gradient(135deg, #8A9B8E 0%, #A8B5A8 50%, #D5CFC2 100%);
+  --gradient-primary: linear-gradient(135deg, #8A9B8E 0%, #718374 100%);
+  --shadow-md: 0 4px 14px rgba(59, 58, 54, 0.08), 0 1px 3px rgba(59, 58, 54, 0.05);
+  --shadow-lg: 0 12px 30px rgba(59, 58, 54, 0.12), 0 2px 8px rgba(59, 58, 54, 0.07);
+  --glass-bg: rgba(248, 247, 244, 0.7);
+  --glass-bg-strong: rgba(248, 247, 244, 0.88);
+  --glass-bg-soft: rgba(248, 247, 244, 0.52);
+  --glass-border: rgba(255, 255, 255, 0.85);
+  --glass-highlight: rgba(255, 255, 255, 0.92);
+  --glass-shadow: 0 8rpx 28rpx rgba(59, 58, 54, 0.1);
+  --metal-1: #8A9B8E;
+  --metal-2: #C2CCC3;
+  --metal-3: #718374;
+  --ambient-1: rgba(138, 155, 142, 0.18);
+  --ambient-2: rgba(196, 170, 178, 0.16);
+  --ambient-3: rgba(150, 158, 180, 0.12);
+  /* 柔和工艺：标准大圆角 + 极轻灰影 */
+  --home-card-r: 36rpx;
+  --home-card-shadow: 0 1rpx 0 rgba(255, 255, 255, 0.85) inset, 0 8rpx 22rpx rgba(59, 58, 54, 0.08);
+  --home-hero-r: 44rpx;
+  --home-hero-shadow: 0 14rpx 34rpx rgba(113, 131, 116, 0.18);
+  --home-bar-r: 999rpx;
+  --home-bar-shadow: 0 12rpx 30rpx rgba(59, 58, 54, 0.12);
+}
+
+/* ⑧ 动态渐变·玻璃拟态：幻彩紫蓝 + 高透玻璃 + 极光氛围，现代梦幻 */
+.themed[data-theme='aurora'] {
+  --color-bg: #F2F0FC;
+  --color-bg-elevated: rgba(255, 255, 255, 0.78);
+  --color-bg-soft: #E9E5F9;
+  --color-card: rgba(255, 255, 255, 0.72);
+  --color-text: #241E3E;
+  --color-text-soft: #5E5680;
+  --color-text-mute: #948CC0;
+  --color-border: rgba(124, 92, 252, 0.16);
+  --color-input-line: rgba(124, 92, 252, 0.3);
+  --color-primary: #7C5CFC;
+  --color-primary-deep: #6438E8;
+  --color-primary-ink: #3A2488;
+  --color-primary-ink-2: #4A30A8;
+  --color-primary-soft: rgba(124, 92, 252, 0.14);
+  --color-primary-shadow: rgba(100, 56, 232, 0.24);
+  --color-accent: #38BDF8;
+  --color-overlay: rgba(36, 30, 62, 0.45);
+  --gradient-hero: linear-gradient(135deg, #7C5CFC 0%, #A855F7 50%, #38BDF8 100%);
+  --gradient-primary: linear-gradient(135deg, #7C5CFC 0%, #6438E8 100%);
+  --shadow-md: 0 4px 16px rgba(100, 56, 232, 0.14), 0 1px 3px rgba(100, 56, 232, 0.08);
+  --shadow-lg: 0 12px 32px rgba(100, 56, 232, 0.2), 0 2px 8px rgba(56, 189, 248, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-bg-strong: rgba(255, 255, 255, 0.78);
+  --glass-bg-soft: rgba(255, 255, 255, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.9);
+  --glass-highlight: rgba(255, 255, 255, 0.95);
+  --glass-shadow: 0 8rpx 32rpx rgba(100, 56, 232, 0.16), inset 0 1rpx 0 rgba(255, 255, 255, 0.9);
+  --metal-1: #7C5CFC;
+  --metal-2: #C4B5FD;
+  --metal-3: #6438E8;
+  --ambient-1: rgba(124, 92, 252, 0.2);
+  --ambient-2: rgba(236, 72, 153, 0.14);
+  --ambient-3: rgba(56, 189, 248, 0.16);
+  /* 玻璃拟态工艺：高透玻璃 + 彩色光晕 */
+  --home-card-r: 38rpx;
+  --home-card-shadow: 0 1rpx 0 rgba(255, 255, 255, 0.95) inset, 0 10rpx 28rpx rgba(100, 56, 232, 0.14), 0 0 0 1rpx rgba(255, 255, 255, 0.6);
+  --home-hero-r: 46rpx;
+  --home-hero-shadow: 0 18rpx 44rpx rgba(100, 56, 232, 0.3);
+  --home-bar-r: 999rpx;
+  --home-bar-shadow: 0 14rpx 38rpx rgba(100, 56, 232, 0.22), 0 0 0 1rpx rgba(255, 255, 255, 0.6);
+}
+
+/* ⑨ 国风水墨·东方美学：宣纸白 + 黛青墨绿 + 印泥红点睛，清雅悠远 */
+.themed[data-theme='ink'] {
+  --color-bg: #F5F2EA;
+  --color-bg-elevated: #FBF9F2;
+  --color-bg-soft: #EAE6D9;
+  --color-card: #FBF9F2;
+  --color-text: #2F3430;
+  --color-text-soft: #5C655E;
+  --color-text-mute: #8C948B;
+  --color-border: #E0DCCB;
+  --color-input-line: #C2BFA9;
+  --color-primary: #4E6157;
+  --color-primary-deep: #3B4C43;
+  --color-primary-ink: #26302B;
+  --color-primary-ink-2: #303C35;
+  --color-primary-soft: rgba(78, 97, 87, 0.12);
+  --color-primary-shadow: rgba(59, 76, 67, 0.2);
+  --color-accent: #B5544A;
+  --color-overlay: rgba(47, 52, 48, 0.42);
+  --gradient-hero: linear-gradient(135deg, #4E6157 0%, #75897C 50%, #C9CDB9 100%);
+  --gradient-primary: linear-gradient(135deg, #4E6157 0%, #3B4C43 100%);
+  --shadow-md: 0 4px 14px rgba(47, 52, 48, 0.08), 0 1px 3px rgba(47, 52, 48, 0.05);
+  --shadow-lg: 0 12px 30px rgba(47, 52, 48, 0.12), 0 2px 8px rgba(47, 52, 48, 0.07);
+  --glass-bg: rgba(251, 249, 242, 0.72);
+  --glass-bg-strong: rgba(251, 249, 242, 0.9);
+  --glass-bg-soft: rgba(251, 249, 242, 0.52);
+  --glass-border: rgba(194, 191, 169, 0.4);
+  --glass-highlight: rgba(255, 255, 255, 0.9);
+  --glass-shadow: 0 8rpx 28rpx rgba(47, 52, 48, 0.1);
+  --metal-1: #4E6157;
+  --metal-2: #AEBBA9;
+  --metal-3: #3B4C43;
+  --ambient-1: rgba(117, 137, 124, 0.14);
+  --ambient-2: rgba(201, 205, 185, 0.16);
+  --ambient-3: rgba(181, 84, 74, 0.06);
+  /* 水墨工艺：小圆角 + 宣纸细边 + 留白呼吸 */
+  --home-card-r: 18rpx;
+  --home-card-shadow: 0 0 0 1rpx rgba(194, 191, 169, 0.35), 0 6rpx 18rpx rgba(47, 52, 48, 0.08);
+  --home-hero-r: 20rpx;
+  --home-hero-shadow: 0 12rpx 30rpx rgba(59, 76, 67, 0.2);
+  --home-bar-r: 22rpx;
+  --home-bar-shadow: 0 10rpx 26rpx rgba(47, 52, 48, 0.14), 0 0 0 1rpx rgba(194, 191, 169, 0.35);
+}
+
+/* ⑩ 游戏像素·趣味互动：像素夜蓝 + 芯片金 + 硬边块面，趣味十足 */
+.themed[data-theme='pixel'] {
+  --color-bg: #191D2B;
+  --color-bg-elevated: #232840;
+  --color-bg-soft: #2D3350;
+  --color-card: #232840;
+  --color-text: #EAEDF7;
+  --color-text-soft: #A9B1CE;
+  --color-text-mute: #757FA3;
+  --color-border: #323A5C;
+  --color-input-line: #434E78;
+  --color-primary: #FFC53D;
+  --color-primary-deep: #E8A825;
+  --color-primary-ink: #5C4310;
+  --color-primary-ink-2: #745517;
+  --color-primary-soft: rgba(255, 197, 61, 0.16);
+  --color-primary-shadow: rgba(0, 0, 0, 0.5);
+  --color-accent: #FF6B9D;
+  --color-overlay: rgba(8, 10, 18, 0.7);
+  --gradient-hero: linear-gradient(135deg, #1A1E2E 0%, #262C48 50%, #3D3468 100%);
+  --gradient-primary: linear-gradient(135deg, #FFC53D 0%, #E8A825 100%);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.28);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.58), 0 2px 6px rgba(0, 0, 0, 0.36);
+  --glass-bg: rgba(35, 40, 64, 0.7);
+  --glass-bg-strong: rgba(35, 40, 64, 0.9);
+  --glass-bg-soft: rgba(35, 40, 64, 0.55);
+  --glass-border: rgba(255, 197, 61, 0.26);
+  --glass-highlight: rgba(255, 197, 61, 0.24);
+  --glass-shadow: 0 8rpx 0 rgba(10, 12, 22, 0.6), inset 0 2rpx 0 rgba(255, 197, 61, 0.2);
+  --metal-1: #FFC53D;
+  --metal-2: #FFE08A;
+  --metal-3: #E8A825;
+  --ambient-1: rgba(255, 197, 61, 0.12);
+  --ambient-2: rgba(255, 107, 157, 0.1);
+  --ambient-3: rgba(74, 222, 128, 0.08);
+  /* 像素工艺：直角 + 粗描边 + 硬投影（复古游戏机质感） */
+  --home-card-r: 6rpx;
+  --home-card-edge: 2rpx;
+  --home-card-shadow: 0 6rpx 0 rgba(10, 12, 22, 0.55), 0 0 0 2rpx #323A5C inset;
+  --home-hero-r: 6rpx;
+  --home-hero-shadow: 0 10rpx 0 rgba(10, 12, 22, 0.6), 0 0 0 2rpx rgba(255, 197, 61, 0.3) inset;
+  --home-bar-r: 6rpx;
+  --home-bar-shadow: 0 8rpx 0 rgba(10, 12, 22, 0.6), 0 0 0 2rpx rgba(255, 197, 61, 0.26) inset;
+}
+
+/* ⑫ 未来极简·Liquid Metal：银灰 / 钛灰 / 黑色 / 冷白 / 蓝色 + 背景极简 +
+ * 液态金属 / 磨砂玻璃 / 镜面反射 + 金属渐变高光边 + 精密 3D 质感（科技、精密、克制） */
+.themed[data-theme='liquid'] {
+  --color-bg: #EEF1F5;
+  --color-bg-elevated: #FFFFFF;
+  --color-bg-soft: #E2E7EE;
+  --color-card: rgba(255, 255, 255, 0.82);
+  --color-text: #23262E;
+  --color-text-soft: #5C636F;
+  --color-text-mute: #98A0AD;
+  --color-border: rgba(120, 134, 156, 0.2);
+  --color-input-line: rgba(120, 134, 156, 0.34);
+  --color-primary: #5B7CC4;
+  --color-primary-deep: #3E5BA0;
+  --color-primary-ink: #1E2A47;
+  --color-primary-ink-2: #28365A;
+  --color-primary-soft: rgba(91, 124, 196, 0.14);
+  --color-primary-shadow: rgba(62, 91, 160, 0.22);
+  --color-accent: #8FA8C9;
+  --color-overlay: rgba(20, 24, 32, 0.42);
+  --gradient-hero: linear-gradient(135deg, #C9D2DE 0%, #9FB0C8 40%, #5B7CC4 100%);
+  --gradient-primary: linear-gradient(135deg, #7E94C0 0%, #3E5BA0 100%);
+  --shadow-md: 0 4px 16px rgba(28, 34, 48, 0.1), 0 1px 2px rgba(28, 34, 48, 0.06);
+  --shadow-lg: 0 12px 32px rgba(28, 34, 48, 0.16), 0 2px 6px rgba(28, 34, 48, 0.1);
+  --glass-bg: rgba(244, 247, 251, 0.66);
+  --glass-bg-strong: rgba(255, 255, 255, 0.86);
+  --glass-bg-soft: rgba(244, 247, 251, 0.5);
+  --glass-border: rgba(160, 176, 200, 0.34);
+  --glass-highlight: rgba(255, 255, 255, 0.95);
+  --glass-shadow: 0 8rpx 28rpx rgba(28, 34, 48, 0.1), inset 0 1rpx 0 rgba(255, 255, 255, 0.9);
+  --metal-1: #AEB9CC;
+  --metal-2: #E4E9F1;
+  --metal-3: #5B7CC4;
+  --gradient-metal: linear-gradient(135deg, #8FA0BC 0%, #DCE3ED 45%, #FFFFFF 55%, #AEB9CC 100%);
+  --ambient-1: rgba(160, 176, 200, 0.14);
+  --ambient-2: rgba(91, 124, 196, 0.1);
+  --ambient-3: rgba(143, 168, 201, 0.1);
+  /* 液态金属工艺：镜面高光边 + 精密中等圆角 + 冷调投影 */
+  --home-card-r: 26rpx;
+  --home-card-edge: 1rpx;
+  --home-card-shadow: 0 1rpx 0 rgba(255, 255, 255, 0.95) inset, 0 0 0 1rpx rgba(160, 176, 200, 0.22), 0 10rpx 26rpx rgba(28, 34, 48, 0.1);
+  --home-hero-r: 32rpx;
+  --home-hero-shadow: 0 16rpx 40rpx rgba(28, 34, 48, 0.16), 0 0 0 1rpx rgba(160, 176, 200, 0.24);
+  --home-bar-r: 999rpx;
+  --home-bar-shadow: 0 14rpx 36rpx rgba(28, 34, 48, 0.14), 0 0 0 1rpx rgba(160, 176, 200, 0.26);
+}
+
+/* ⑬ 深海蓝金 · 上海：深海蓝 / 午夜蓝 / 雾灰 / 暖白 / 香槟金。
+ * 高级、克制、沉浸：深蓝灰底 + 半透明玻璃层 + 细腻描边 + 轻微内发光；
+ * 蓝色只用于主要操作与进度（不太亮、不过度科技蓝），金色只用于核心数据 / 品牌元素。
+ * 环境背景 = 上海陆家嘴天际线与黄浦江（场景图，见 utils/scene-bg.ts）。 */
+.themed[data-theme='deepsea'] {
+  --color-bg: #08111F;
+  --color-bg-elevated: #0E1B2E;
+  --color-bg-soft: #12233B;
+  --color-card: rgba(20, 35, 58, 0.66);
+  --color-text: #EDF2FA;
+  --color-text-soft: #A6B6CC;
+  --color-text-mute: #6E8098;
+  --color-border: rgba(122, 154, 196, 0.16);
+  --color-input-line: rgba(122, 154, 196, 0.28);
+  /* 高级蓝：主操作 / 进度（克制，不刺眼） */
+  --color-primary: #4C7DE0;
+  --color-primary-deep: #3562C4;
+  --color-primary-ink: #0E2244;
+  --color-primary-ink-2: #17345F;
+  --color-primary-soft: rgba(76, 125, 224, 0.16);
+  --color-primary-shadow: rgba(4, 10, 22, 0.55);
+  /* 香槟金：核心数据 / 倒计时 / 品牌元素 */
+  --color-accent: #D3AC74;
+  --color-overlay: rgba(3, 8, 17, 0.68);
+  --gradient-hero: linear-gradient(135deg, #08111F 0%, #16305A 52%, #8A6A3A 100%);
+  --gradient-primary: linear-gradient(135deg, #5E8CEC 0%, #3562C4 100%);
+  --shadow-md: 0 4px 16px rgba(2, 6, 14, 0.45), 0 1px 2px rgba(2, 6, 14, 0.3);
+  --shadow-lg: 0 12px 32px rgba(2, 6, 14, 0.6), 0 2px 8px rgba(2, 6, 14, 0.36);
+  /* 玻璃层：半透明深海蓝 + 城市暖光顶缘 + 细腻金边（让黄浦江畔的暖黄灯火透进卡片） */
+  --glass-bg: rgba(20, 35, 58, 0.56);
+  --glass-bg-strong: rgba(22, 39, 66, 0.84);
+  --glass-bg-soft: rgba(18, 33, 56, 0.44);
+  --glass-border: rgba(211, 172, 116, 0.16);
+  --glass-highlight: rgba(234, 208, 162, 0.22);
+  --glass-shadow: 0 8rpx 32rpx rgba(2, 6, 14, 0.5), inset 0 1rpx 0 rgba(186, 210, 244, 0.14);
+  /* 金属强调（香槟金） */
+  --metal-1: #D3AC74;
+  --metal-2: #EFD9AE;
+  --metal-3: #A9823F;
+  --gradient-metal: linear-gradient(135deg, #A9823F 0%, #D3AC74 42%, #EFD9AE 72%, #D3AC74 100%);
+  --ambient-1: rgba(76, 125, 224, 0.2);
+  --ambient-2: rgba(211, 172, 116, 0.18);
+  --ambient-3: rgba(24, 48, 88, 0.28);
+  /* 工艺：大圆角玻璃卡片 + 金色发丝边 + 柔影（秩序感与留白靠间距，不靠描边堆叠） */
+  --home-card-r: 30rpx;
+  --home-card-edge: 1rpx;
+  --home-card-shadow: 0 1rpx 0 rgba(186, 210, 244, 0.1) inset, 0 0 0 1rpx rgba(211, 172, 116, 0.12), 0 12rpx 30rpx rgba(2, 6, 14, 0.42);
+  --home-hero-r: 36rpx;
+  --home-hero-shadow: 0 22rpx 52rpx rgba(2, 6, 14, 0.55), 0 0 0 1rpx rgba(211, 172, 116, 0.18);
+  --home-bar-r: 999rpx;
+  --home-bar-shadow: 0 16rpx 40rpx rgba(2, 6, 14, 0.55), 0 0 0 1rpx rgba(211, 172, 116, 0.16), inset 0 1rpx 0 rgba(186, 210, 244, 0.12);
+}
+
+/* 求职工作台（秋招助手子包专用）：深蓝 AI Dashboard
+ * 品牌蓝 #2563EB/#3B82F6 + AI 强调青 #22D3EE / 紫 #8B5CF6 + 玻璃拟态卡片。
+ * 不进 THEME_ORDER（不出现在全局主题选择器），由 getCareerState() 固定下发给子包 7 页。 */
+.themed[data-theme='career'] {
+  --color-bg: #07152D;
+  --color-bg-elevated: #0B1B35;
+  --color-bg-soft: #102746;
+  /* 玻璃卡：半透明白 8% + 细蓝边（深蓝底上呈现 Premium 质感） */
+  --color-card: rgba(148, 183, 255, 0.08);
+  --color-text: #F8FAFC;
+  --color-text-soft: #CBD5E1;
+  --color-text-mute: #94A3B8;
+  --color-border: rgba(148, 183, 255, 0.16);
+  --color-input-line: rgba(148, 183, 255, 0.32);
+  /* 品牌蓝：主操作 */
+  --color-primary: #3B82F6;
+  --color-primary-deep: #2563EB;
+  --color-primary-ink: #0B1B35;
+  --color-primary-ink-2: #102746;
+  --color-primary-soft: rgba(59, 130, 246, 0.18);
+  --color-primary-shadow: rgba(2, 8, 20, 0.55);
+  /* AI 青：智能强调 / 数据高亮 */
+  --color-accent: #22D3EE;
+  /* 语义强调（状态色），深蓝底上统一用高饱和亮色，保证可读 */
+  --color-ai: #60A5FA;
+  --color-ai-weak: rgba(96, 165, 250, 0.16);
+  --color-success: #34D399;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-success-soft: rgba(52, 211, 153, 0.14);
+  --color-warning-soft: rgba(245, 158, 11, 0.14);
+  --color-danger-soft: rgba(239, 68, 68, 0.14);
+  --color-overlay: rgba(3, 10, 24, 0.72);
+  --gradient-hero: linear-gradient(165deg, #07152D 0%, #0B1B35 42%, #102746 74%, #123B78 100%);
+  /* 蓝→紫 AI 渐变：主按钮 / Copilot 面板 */
+  --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+  --shadow-md: 0 4px 16px rgba(2, 8, 20, 0.5), 0 1px 2px rgba(2, 8, 20, 0.35);
+  --shadow-lg: 0 12px 32px rgba(2, 8, 20, 0.62), 0 2px 8px rgba(2, 8, 20, 0.4);
+  --glass-bg: rgba(148, 183, 255, 0.08);
+  --glass-bg-strong: rgba(148, 183, 255, 0.14);
+  --glass-bg-soft: rgba(148, 183, 255, 0.05);
+  --glass-border: rgba(148, 183, 255, 0.18);
+  --glass-highlight: rgba(255, 255, 255, 0.22);
+  --glass-shadow: 0 8rpx 32rpx rgba(2, 8, 20, 0.5), inset 0 1rpx 0 rgba(255, 255, 255, 0.12);
+  --ambient-1: rgba(59, 130, 246, 0.2);
+  --ambient-2: rgba(34, 211, 238, 0.14);
+  --ambient-3: rgba(139, 92, 246, 0.16);
+  --home-card-r: 30rpx;
+  --home-card-edge: 1rpx;
+  --home-card-shadow: 0 1rpx 0 rgba(255, 255, 255, 0.1) inset, 0 0 0 1rpx rgba(148, 183, 255, 0.12), 0 12rpx 30rpx rgba(2, 8, 20, 0.45);
+  --home-hero-r: 36rpx;
+  --home-hero-shadow: 0 22rpx 52rpx rgba(2, 8, 20, 0.55), 0 0 0 1rpx rgba(148, 183, 255, 0.16);
+  --home-bar-r: 999rpx;
+  --home-bar-shadow: 0 16rpx 40rpx rgba(2, 8, 20, 0.55), 0 0 0 1rpx rgba(148, 183, 255, 0.14), inset 0 1rpx 0 rgba(255, 255, 255, 0.1);
+}
+
+/* 自定义主题：具体颜色由页面根 wrapper 的 inline style（buildCustomVars 生成）注入，
+ * 此处仅提供浅色回退值，保证无 inline style 时也可正常渲染 */
+.themed[data-theme='custom'] {
+  --color-bg: #F0EDE6;
+  --color-bg-elevated: #FCFBF8;
+  --color-bg-soft: #E9E5DC;
+  --color-card: #FCFBF8;
+  --color-text: #35302A;
+  --color-text-soft: #6E6558;
+  --color-text-mute: #9E9384;
+  --color-border: #E4DED2;
+  --color-overlay: rgba(53, 48, 42, 0.45);
+  --color-primary: #B5714C;
+  --color-primary-deep: #96573A;
+  --color-primary-ink: #643E2A;
+  --color-primary-ink-2: #7B4D34;
+  --color-primary-soft: rgba(181, 113, 76, 0.12);
+  --gradient-primary: linear-gradient(135deg, #B5714C 0%, #96573A 100%);
+}
+
+/* ========== 通用工具类 ========== */
+.row { display: flex; flex-direction: row; align-items: center; }
+.col { display: flex; flex-direction: column; }
+.between { justify-content: space-between; }
+.center { justify-content: center; align-items: center; }
+.gap-xs { gap: 8rpx; }
+.gap-sm { gap: 16rpx; }
+.gap-md { gap: 24rpx; }
+.flex-1 { flex: 1; }
+
+.text-mute { color: var(--color-text-mute); }
+.text-soft { color: var(--color-text-soft); }
+.text-primary { color: var(--color-primary); }
+.text-danger { color: var(--color-danger); }
+.text-success { color: var(--color-success); }
+.text-warn { color: var(--color-warning); }
+
+.font-xs { font-size: 22rpx; }
+.font-sm { font-size: 24rpx; }
+.font-base { font-size: 28rpx; }
+.font-lg { font-size: 32rpx; }
+.font-xl { font-size: 40rpx; }
+.font-2xl { font-size: 56rpx; }
+.font-bold { font-weight: 600; }
+.font-semibold { font-weight: 500; }
+
+.card {
+  background: var(--color-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  padding: 28rpx;
+}
+.card-flat {
+  background: var(--color-card);
+  border-radius: var(--radius-xl);
+  border: 2rpx solid var(--color-border);
+}
+
+.divider {
+  height: 1rpx;
+  background: var(--color-border);
+  margin: 16rpx 0;
+}
+
+.safe-bottom {
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+}
+
+.scroll-hidden::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+  color: transparent;
+}
+
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 按下反馈 */
+.press {
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+.press:active {
+  transform: scale(0.96);
+}
+/* 全局即时按压反馈：任意页面 view 均可 hover-class="tap-press"（view 的 :active 不生效） */
+.tap-press {
+  opacity: 0.74;
+  transform: scale(0.97);
+}
+
+/* ============================================================
+ * 暖纸质感共享层（中古侘寂改版；保留原类名，玻璃→暖纸半透）
+ * ============================================================ */
+
+/* 暖纸面板：半透纸白 + 内高光 + 暖柔影 */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1rpx solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+/* 更实的面板（导航 / dock / 弹层用） */
+.glass-strong {
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1rpx solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+/* 胶囊（搜索 / chips / 分段控件用） */
+.glass-pill {
+  background: var(--glass-bg-soft);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1rpx solid var(--glass-border);
+}
+
+/* 数字排版：等宽数字，统计跳动不抖动 */
+.font-num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+/* ===== 环境氛围层：页面根节点第一子元素，柔和光斑缓慢漂移 ===== */
+.ambient-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.ambient-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90rpx);
+  transform: translateZ(0);
+  animation: ambient-drift 18s ease-in-out infinite alternate;
+}
+.ambient-blob--1 {
+  width: 520rpx;
+  height: 520rpx;
+  top: -160rpx;
+  right: -120rpx;
+  background: radial-gradient(circle, var(--ambient-1), transparent 68%);
+}
+.ambient-blob--2 {
+  width: 420rpx;
+  height: 420rpx;
+  top: 30%;
+  left: -180rpx;
+  background: radial-gradient(circle, var(--ambient-2), transparent 68%);
+  animation-delay: -6s;
+  animation-duration: 22s;
+}
+.ambient-blob--3 {
+  width: 460rpx;
+  height: 460rpx;
+  bottom: -140rpx;
+  right: 12%;
+  background: radial-gradient(circle, var(--ambient-3), transparent 68%);
+  animation-delay: -11s;
+  animation-duration: 26s;
+}
+@keyframes ambient-drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(44rpx, -34rpx, 0) scale(1.08); }
+  100% { transform: translate3d(-36rpx, 30rpx, 0) scale(0.94); }
+}
+
+/* 页面内容层：压在氛围层之上（配合 .ambient-layer 使用） */
+.ambient-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== 通用呼吸光晕（FAB / 强化焦点） ===== */
+@keyframes soft-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.55; }
+  50% { transform: scale(1.18); opacity: 0.2; }
+}
+
+/* ============================================================
+ * 编制色调标签（仕途衡鉴 · 体制内模块）
+ * 全模块 6 个页面共用：把「有没有编制」做成一眼可辨的统一视觉语言。
+ *   有编(bian) 绿 / 无编(unbian) 灰 / 慎选(warn) 红
+ * 深色主题单独给一组高亮值，保证深底上同样可读。
+ * ============================================================ */
+.cx-tag {
+  display: inline-block;
+  font-size: 21rpx;
+  font-weight: 600;
+  padding: 5rpx 14rpx;
+  border-radius: 999rpx;
+  border: 2rpx solid transparent;
+  white-space: nowrap;
+  line-height: 1.5;
+}
+.cx-tag--bian { color: #1f7a4d; background: rgba(34, 160, 95, 0.14); border-color: rgba(34, 160, 95, 0.3); }
+.cx-tag--unbian { color: #556074; background: rgba(100, 116, 139, 0.14); border-color: rgba(100, 116, 139, 0.3); }
+.cx-tag--warn { color: #b3261e; background: rgba(220, 38, 38, 0.13); border-color: rgba(220, 38, 38, 0.3); }
+.themed[data-theme='dark'] .cx-tag--bian,
+.themed[data-theme='rose'] .cx-tag--bian { color: #6ee7a8; background: rgba(34, 160, 95, 0.22); border-color: rgba(110, 231, 168, 0.4); }
+.themed[data-theme='dark'] .cx-tag--unbian,
+.themed[data-theme='rose'] .cx-tag--unbian { color: #c3ccdb; background: rgba(148, 163, 184, 0.24); border-color: rgba(195, 204, 219, 0.4); }
+.themed[data-theme='dark'] .cx-tag--warn,
+.themed[data-theme='rose'] .cx-tag--warn { color: #ff9b91; background: rgba(220, 38, 38, 0.24); border-color: rgba(255, 155, 145, 0.42); }
+
+/* ===== BEGIN recruit-theme（由 scripts/gen-recruit-theme.js 生成，勿手改） ===== */
+/* 秋招模块深色主题覆盖
+ *
+ * 页面 WXSS 大量硬编码浅色，只补 data-theme 会出现「深色页面底色 + 白色卡片」的割裂感。
+ * 这里把主要容器与文字按主题变量统一覆盖；语义色（徽标、进度条、状态点）保持原样不覆盖，
+ * 避免把「进行中 / 已截止」这类颜色语义抹平。
+ * 浅色主题不在此列 —— 必须保证浅色下与改动前逐像素一致。
+ *
+ * 为什么放主包的 app.wxss 而不是 recruit 自己的 wxss：
+ * tools 分包已到 98% 的 2MB 红线，这 12KB 放分包里会挤压余量；
+ * 选择器都以各页专属前缀（rc__ / dt__ / op__ / rs__ / rm__ / an__ / cal__）限定，
+ * 写在全局与写在页面内效果一致，不会误伤其它页面。 */
+
+/* 容器 / 面板 → 卡片色 */
+.themed[data-theme]:not([data-theme='light']) .rc__radar,
+.themed[data-theme]:not([data-theme='light']) .rc__card,
+.themed[data-theme]:not([data-theme='light']) .rc__platforms,
+.themed[data-theme]:not([data-theme='light']) .rc__plat,
+.themed[data-theme]:not([data-theme='light']) .rc__import,
+.themed[data-theme]:not([data-theme='light']) .rc__search-box,
+.themed[data-theme]:not([data-theme='light']) .rc__filter,
+.themed[data-theme]:not([data-theme='light']) .rc__agenda,
+.themed[data-theme]:not([data-theme='light']) .dt__card,
+.themed[data-theme]:not([data-theme='light']) .dt__kb-tab,
+.themed[data-theme]:not([data-theme='light']) .dt__btn-soft,
+.themed[data-theme]:not([data-theme='light']) .dt__footer,
+.themed[data-theme]:not([data-theme='light']) .dt__fbtn--ghost,
+.themed[data-theme]:not([data-theme='light']) .dt__sheet,
+.themed[data-theme]:not([data-theme='light']) .dt__mini--ghost,
+.themed[data-theme]:not([data-theme='light']) .dt__mini,
+.themed[data-theme]:not([data-theme='light']) .dt__iv-note,
+.themed[data-theme]:not([data-theme='light']) .op__item,
+.themed[data-theme]:not([data-theme='light']) .op__note,
+.themed[data-theme]:not([data-theme='light']) .op__act,
+.themed[data-theme]:not([data-theme='light']) .op__sheet,
+.themed[data-theme]:not([data-theme='light']) .op__fbtn--ghost,
+.themed[data-theme]:not([data-theme='light']) .op__group-head,
+.themed[data-theme]:not([data-theme='light']) .op__tl-card,
+.themed[data-theme]:not([data-theme='light']) .op__tl-scroll,
+.themed[data-theme]:not([data-theme='light']) .op__prep,
+.themed[data-theme]:not([data-theme='light']) .op__pact,
+.themed[data-theme]:not([data-theme='light']) .rs__search,
+.themed[data-theme]:not([data-theme='light']) .rs__item,
+.themed[data-theme]:not([data-theme='light']) .rs__sticky,
+.themed[data-theme]:not([data-theme='light']) .rs__group,
+.themed[data-theme]:not([data-theme='light']) .rs__group-head,
+.themed[data-theme]:not([data-theme='light']) .rs__share,
+.themed[data-theme]:not([data-theme='light']) .rs__sheet,
+.themed[data-theme]:not([data-theme='light']) .rs__sum,
+.themed[data-theme]:not([data-theme='light']) .rs__sum-sec,
+.themed[data-theme]:not([data-theme='light']) .rs__sum-tag,
+.themed[data-theme]:not([data-theme='light']) .rs__sum-topic,
+.themed[data-theme]:not([data-theme='light']) .rs__sum-kp,
+.themed[data-theme]:not([data-theme='light']) .rs__rel,
+.themed[data-theme]:not([data-theme='light']) .rs__chip,
+.themed[data-theme]:not([data-theme='light']) .rs__fbtn--ghost,
+.themed[data-theme]:not([data-theme='light']) .rm__card,
+.themed[data-theme]:not([data-theme='light']) .rm__item,
+.themed[data-theme]:not([data-theme='light']) .rm__sheet,
+.themed[data-theme]:not([data-theme='light']) .rm__tpl,
+.themed[data-theme]:not([data-theme='light']) .rm__btn--ghost,
+.themed[data-theme]:not([data-theme='light']) .rm__btn--line,
+.themed[data-theme]:not([data-theme='light']) .an__card,
+.themed[data-theme]:not([data-theme='light']) .an__tip,
+.themed[data-theme]:not([data-theme='light']) .an__jbtn,
+.themed[data-theme]:not([data-theme='light']) .cal__event,
+.themed[data-theme]:not([data-theme='light']) .cal__timeline,
+.themed[data-theme]:not([data-theme='light']) .cal__wcell,
+.themed[data-theme]:not([data-theme='light']) .cal__event-act {
+  background: var(--color-card);
+  box-shadow: none;
+  border-color: var(--color-border);
+}
+
+/* 输入类 → 次级底色 */
+.themed[data-theme]:not([data-theme='light']) .rc__search-input,
+.themed[data-theme]:not([data-theme='light']) .dt__input,
+.themed[data-theme]:not([data-theme='light']) .dt__picker,
+.themed[data-theme]:not([data-theme='light']) .dt__area,
+.themed[data-theme]:not([data-theme='light']) .dt__seg-i,
+.themed[data-theme]:not([data-theme='light']) .op__search-input,
+.themed[data-theme]:not([data-theme='light']) .rs__input,
+.themed[data-theme]:not([data-theme='light']) .rs__area,
+.themed[data-theme]:not([data-theme='light']) .rm__input,
+.themed[data-theme]:not([data-theme='light']) .rm__area {
+  background: var(--color-bg-soft);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+/* 主文字 */
+.themed[data-theme]:not([data-theme='light']) .rc__radar-title,
+.themed[data-theme]:not([data-theme='light']) .rc__card-co-name,
+.themed[data-theme]:not([data-theme='light']) .rc__agenda-title,
+.themed[data-theme]:not([data-theme='light']) .rc__agenda-co,
+.themed[data-theme]:not([data-theme='light']) .dt__card-title,
+.themed[data-theme]:not([data-theme='light']) .dt__label,
+.themed[data-theme]:not([data-theme='light']) .dt__q-q,
+.themed[data-theme]:not([data-theme='light']) .dt__ck-text,
+.themed[data-theme]:not([data-theme='light']) .dt__sheet-title,
+.themed[data-theme]:not([data-theme='light']) .dt__tl-label,
+.themed[data-theme]:not([data-theme='light']) .dt__input,
+.themed[data-theme]:not([data-theme='light']) .dt__picker,
+.themed[data-theme]:not([data-theme='light']) .dt__area,
+.themed[data-theme]:not([data-theme='light']) .dt__iv-date,
+.themed[data-theme]:not([data-theme='light']) .op__co,
+.themed[data-theme]:not([data-theme='light']) .op__k,
+.themed[data-theme]:not([data-theme='light']) .op__v,
+.themed[data-theme]:not([data-theme='light']) .op__group-label,
+.themed[data-theme]:not([data-theme='light']) .op__sheet-title,
+.themed[data-theme]:not([data-theme='light']) .op__prep-title,
+.themed[data-theme]:not([data-theme='light']) .op__tl-title,
+.themed[data-theme]:not([data-theme='light']) .op__tl-side-co,
+.themed[data-theme]:not([data-theme='light']) .op__tl-month,
+.themed[data-theme]:not([data-theme='light']) .op__tl-bar-date,
+.themed[data-theme]:not([data-theme='light']) .op__prep-focus,
+.themed[data-theme]:not([data-theme='light']) .op__prep-li,
+.themed[data-theme]:not([data-theme='light']) .rs__item-title,
+.themed[data-theme]:not([data-theme='light']) .rs__seg,
+.themed[data-theme]:not([data-theme='light']) .rs__gname,
+.themed[data-theme]:not([data-theme='light']) .rs__sum-scope,
+.themed[data-theme]:not([data-theme='light']) .rs__sum-h,
+.themed[data-theme]:not([data-theme='light']) .rs__sum-tname,
+.themed[data-theme]:not([data-theme='light']) .rs__sum-kp-t,
+.themed[data-theme]:not([data-theme='light']) .rs__sheet-title,
+.themed[data-theme]:not([data-theme='light']) .rs__input,
+.themed[data-theme]:not([data-theme='light']) .rs__area,
+.themed[data-theme]:not([data-theme='light']) .rm__card-title,
+.themed[data-theme]:not([data-theme='light']) .rm__label,
+.themed[data-theme]:not([data-theme='light']) .rm__input,
+.themed[data-theme]:not([data-theme='light']) .rm__area,
+.themed[data-theme]:not([data-theme='light']) .rm__sheet-title,
+.themed[data-theme]:not([data-theme='light']) .rm__tpl,
+.themed[data-theme]:not([data-theme='light']) .an__card-title,
+.themed[data-theme]:not([data-theme='light']) .an__ocell,
+.themed[data-theme]:not([data-theme='light']) .an__rco,
+.themed[data-theme]:not([data-theme='light']) .an__tip,
+.themed[data-theme]:not([data-theme='light']) .an__rnum,
+.themed[data-theme]:not([data-theme='light']) .an__frow-label,
+.themed[data-theme]:not([data-theme='light']) .an__ref-label,
+.themed[data-theme]:not([data-theme='light']) .an__plabel,
+.themed[data-theme]:not([data-theme='light']) .cal__day,
+.themed[data-theme]:not([data-theme='light']) .cal__wcell-day,
+.themed[data-theme]:not([data-theme='light']) .cal__panel-title,
+.themed[data-theme]:not([data-theme='light']) .cal__event-co {
+  color: var(--color-text);
+}
+
+/* 次要文字 */
+.themed[data-theme]:not([data-theme='light']) .rc__radar-pos,
+.themed[data-theme]:not([data-theme='light']) .rc__card-co-pos,
+.themed[data-theme]:not([data-theme='light']) .rc__meta,
+.themed[data-theme]:not([data-theme='light']) .rc__plat-desc,
+.themed[data-theme]:not([data-theme='light']) .rc__import,
+.themed[data-theme]:not([data-theme='light']) .rc__sort,
+.themed[data-theme]:not([data-theme='light']) .rc__last,
+.themed[data-theme]:not([data-theme='light']) .rc__empty,
+.themed[data-theme]:not([data-theme='light']) .rc__empty-tip,
+.themed[data-theme]:not([data-theme='light']) .rc__radar-sub,
+.themed[data-theme]:not([data-theme='light']) .rc__plats-title,
+.themed[data-theme]:not([data-theme='light']) .rc__agenda-day,
+.themed[data-theme]:not([data-theme='light']) .rc__agenda-meta,
+.themed[data-theme]:not([data-theme='light']) .dt__hint,
+.themed[data-theme]:not([data-theme='light']) .dt__seg-i,
+.themed[data-theme]:not([data-theme='light']) .dt__kb-tab,
+.themed[data-theme]:not([data-theme='light']) .dt__btn-soft,
+.themed[data-theme]:not([data-theme='light']) .dt__fbtn--ghost,
+.themed[data-theme]:not([data-theme='light']) .dt__q-a,
+.themed[data-theme]:not([data-theme='light']) .dt__sec,
+.themed[data-theme]:not([data-theme='light']) .dt__tl-date,
+.themed[data-theme]:not([data-theme='light']) .dt__tl-ago,
+.themed[data-theme]:not([data-theme='light']) .dt__tl-note,
+.themed[data-theme]:not([data-theme='light']) .dt__ck-text--done,
+.themed[data-theme]:not([data-theme='light']) .dt__q-title,
+.themed[data-theme]:not([data-theme='light']) .dt__iv-mode,
+.themed[data-theme]:not([data-theme='light']) .dt__iv-sub,
+.themed[data-theme]:not([data-theme='light']) .op__type,
+.themed[data-theme]:not([data-theme='light']) .op__date,
+.themed[data-theme]:not([data-theme='light']) .op__due,
+.themed[data-theme]:not([data-theme='light']) .op__note,
+.themed[data-theme]:not([data-theme='light']) .op__act,
+.themed[data-theme]:not([data-theme='light']) .op__sheet-body,
+.themed[data-theme]:not([data-theme='light']) .op__fbtn--ghost,
+.themed[data-theme]:not([data-theme='light']) .op__count,
+.themed[data-theme]:not([data-theme='light']) .op__foot,
+.themed[data-theme]:not([data-theme='light']) .op__tl-sub,
+.themed[data-theme]:not([data-theme='light']) .op__lg,
+.themed[data-theme]:not([data-theme='light']) .op__tl-tip,
+.themed[data-theme]:not([data-theme='light']) .op__tl-d-status,
+.themed[data-theme]:not([data-theme='light']) .op__prep-tag,
+.themed[data-theme]:not([data-theme='light']) .op__prep-when,
+.themed[data-theme]:not([data-theme='light']) .op__prep-bt,
+.themed[data-theme]:not([data-theme='light']) .rs__item-cat,
+.themed[data-theme]:not([data-theme='light']) .rs__count,
+.themed[data-theme]:not([data-theme='light']) .rs__gtab,
+.themed[data-theme]:not([data-theme='light']) .rs__gcount,
+.themed[data-theme]:not([data-theme='light']) .rs__item-content,
+.themed[data-theme]:not([data-theme='light']) .rs__sum-tcount,
+.themed[data-theme]:not([data-theme='light']) .rs__sum-tsample,
+.themed[data-theme]:not([data-theme='light']) .rs__sum-kp-p,
+.themed[data-theme]:not([data-theme='light']) .rs__sum-foot,
+.themed[data-theme]:not([data-theme='light']) .rs__rel-i,
+.themed[data-theme]:not([data-theme='light']) .rs__tab,
+.themed[data-theme]:not([data-theme='light']) .rm__tip,
+.themed[data-theme]:not([data-theme='light']) .rm__item-no,
+.themed[data-theme]:not([data-theme='light']) .rm__btn--ghost,
+.themed[data-theme]:not([data-theme='light']) .rm__sheet-sub,
+.themed[data-theme]:not([data-theme='light']) .rm__sheet-cancel,
+.themed[data-theme]:not([data-theme='light']) .an__card-sub,
+.themed[data-theme]:not([data-theme='light']) .an__note,
+.themed[data-theme]:not([data-theme='light']) .an__frow-sub,
+.themed[data-theme]:not([data-theme='light']) .an__tcol-l,
+.themed[data-theme]:not([data-theme='light']) .an__tcol-n,
+.themed[data-theme]:not([data-theme='light']) .an__ref-val,
+.themed[data-theme]:not([data-theme='light']) .an__pval,
+.themed[data-theme]:not([data-theme='light']) .an__rpos,
+.themed[data-theme]:not([data-theme='light']) .an__rtip,
+.themed[data-theme]:not([data-theme='light']) .an__ocell--lbl,
+.themed[data-theme]:not([data-theme='light']) .cal__tl-text,
+.themed[data-theme]:not([data-theme='light']) .cal__tl-tip,
+.themed[data-theme]:not([data-theme='light']) .cal__panel-sub,
+.themed[data-theme]:not([data-theme='light']) .cal__event-place,
+.themed[data-theme]:not([data-theme='light']) .cal__wd,
+.themed[data-theme]:not([data-theme='light']) .cal__wcell-wd {
+  color: var(--color-text-soft);
+}
+
+/* 弱化文字 */
+.themed[data-theme]:not([data-theme='light']) .rs__empty-t,
+.themed[data-theme]:not([data-theme='light']) .rs__empty-s,
+.themed[data-theme]:not([data-theme='light']) .an__empty-tip,
+.themed[data-theme]:not([data-theme='light']) .an__empty-sub,
+.themed[data-theme]:not([data-theme='light']) .op__empty,
+.themed[data-theme]:not([data-theme='light']) .cal__empty {
+  color: var(--color-text-mute);
+}
+/* ===== END recruit-theme ===== */
+
+/* ============================================================
+ * 【光影剧场】全局电影级视觉基座
+ * ------------------------------------------------------------
+ * 设计目标：在既有「侘寂」低饱和美学之上，叠加电影级的「光、影、材质、动势」，
+ * 让任意页面一打开就有纵深与呼吸感，而不是一块平涂的底色。
+ *
+ * 为什么放在全局 / app.wxss：
+ *   • 47 个页面的根 wrapper 都是 .themed，改它的背景即可零改动级联全站；
+ *   • 小程序无法给 <page> 绑 data-theme，所有主题分支仍需靠 .themed[data-theme] ;
+ *   • 分包体积吃紧，本段以「变量 + 通用类」提供能力，不增加任何图片资源。
+ *
+ * 性能约束（务必遵守）：
+ *   • 动画只允许动 transform / opacity（走合成层，不触发 layout / paint）；
+ *   • 不用 backdrop-filter 铺大面（低端机掉帧），毛玻璃只留给小面积 dock / pill；
+ *   • 同屏常驻动画元素 ≤ 3，其余用一次性入场动画。
+ * ============================================================ */
+
+page {
+  /* ===== 景深：多段阴影（暮金夜色版：黑影 + 金调缘线） ===== */
+  --elev-1: 0 2rpx 8rpx rgba(0, 0, 0, .3), 0 1rpx 2rpx rgba(0, 0, 0, .2);
+  --elev-2: 0 8rpx 24rpx rgba(0, 0, 0, .38), 0 2rpx 6rpx rgba(0, 0, 0, .24);
+  --elev-3: 0 18rpx 48rpx rgba(0, 0, 0, .5), 0 6rpx 16rpx rgba(0, 0, 0, .3);
+  --elev-4: 0 32rpx 72rpx rgba(0, 0, 0, .6), 0 10rpx 26rpx rgba(0, 0, 0, .36);
+  /* 顶缘反光：让卡片像有厚度的实体而非贴纸 */
+  --edge-top: inset 0 1rpx 0 rgba(255, 233, 198, .16);
+  --edge-line: 0 0 0 1rpx rgba(226, 178, 115, .16);
+  /* 王冠光：卡片上缘的一道细亮线，营造「被顶光照亮」的剧场感 */
+  --crown-light: inset 0 2rpx 0 rgba(255, 233, 198, .18), inset 0 -1rpx 0 rgba(0, 0, 0, .25);
+
+  /* ===== 金属强调（琥珀金），用于重点数字 / 标题 / 徽标 ===== */
+  --metal-1: #E2B273;
+  --metal-2: #F2D9A8;
+  --metal-3: #B98A4E;
+  --gradient-metal: linear-gradient(135deg, var(--metal-3) 0%, var(--metal-1) 40%, var(--metal-2) 70%, var(--metal-1) 100%);
+
+  /* ===== 体积光 / 光轴：大幅柔和，作为背景顶层高光 ===== */
+  --shaft-1: rgba(255, 232, 190, .14);
+  --shaft-2: rgba(255, 232, 190, .07);
+
+  /* ===== 影片质感叠层：颗粒 + 暗角 ===== */
+  --fx-grain-a: rgba(255, 255, 255, .05);
+  --fx-grain-b: rgba(255, 255, 255, .035);
+  /* 颗粒与暗角都直接由上面两个颜色的 alpha 控制，不再叠加整层 opacity
+     （否则会把暗角一起淡掉，失去电影构图感） */
+  --fx-vignette: radial-gradient(125% 92% at 50% 40%, rgba(0, 0, 0, 0) 46%, rgba(0, 0, 0, .38) 100%);
+
+  /* ===== 缓动曲线（更接近电影感的「先快后缓」） ===== */
+  --ease-cinema: cubic-bezier(.16, .84, .28, 1);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+}
+
+/* 深色主题槽位（dark/rose/tech/noir/pixel/deepsea/career 保持各自的深色基座，与暮金默认一致） */
+.themed[data-theme='dark'],
+.themed[data-theme='rose'],
+.themed[data-theme='tech'],
+.themed[data-theme='noir'],
+.themed[data-theme='pixel'],
+.themed[data-theme='deepsea'],
+.themed[data-theme='career'] {
+  --elev-1: 0 2rpx 8rpx rgba(0, 0, 0, .3), 0 1rpx 2rpx rgba(0, 0, 0, .2);
+  --elev-2: 0 8rpx 24rpx rgba(0, 0, 0, .38), 0 2rpx 6rpx rgba(0, 0, 0, .24);
+  --elev-3: 0 18rpx 48rpx rgba(0, 0, 0, .5), 0 6rpx 16rpx rgba(0, 0, 0, .3);
+  --elev-4: 0 32rpx 72rpx rgba(0, 0, 0, .6), 0 10rpx 26rpx rgba(0, 0, 0, .36);
+  --edge-top: inset 0 1rpx 0 rgba(255, 255, 255, .1);
+  --edge-line: 0 0 0 1rpx rgba(255, 255, 255, .07);
+  --crown-light: inset 0 2rpx 0 rgba(255, 255, 255, .12), inset 0 -1rpx 0 rgba(0, 0, 0, .2);
+  --shaft-1: rgba(255, 255, 255, .09);
+  --shaft-2: rgba(255, 255, 255, .05);
+  --fx-grain-a: rgba(255, 255, 255, .05);
+  --fx-grain-b: rgba(255, 255, 255, .035);
+  --fx-vignette: radial-gradient(125% 92% at 50% 40%, rgba(0, 0, 0, 0) 46%, rgba(0, 0, 0, .36) 100%);
+}
+
+/* 深海蓝金：把「白缘线」换成「香槟金缘线」，让卡片边缘自带品牌识别 */
+.themed[data-theme='deepsea'] {
+  --edge-top: inset 0 1rpx 0 rgba(186, 210, 244, .12);
+  --edge-line: 0 0 0 1rpx rgba(211, 172, 116, .16);
+  --crown-light: inset 0 2rpx 0 rgba(186, 210, 244, .14), inset 0 -1rpx 0 rgba(0, 0, 0, .3);
+  --shaft-1: rgba(186, 210, 244, .1);
+  --shaft-2: rgba(211, 172, 116, .06);
+  --fx-vignette: radial-gradient(125% 92% at 50% 38%, rgba(0, 0, 0, 0) 44%, rgba(2, 6, 14, .46) 100%);
+}
+
+/* 深海蓝金：悬浮新增按钮 = 蓝色玻璃材质 + 微弱金色边缘光（品牌元素） */
+.themed[data-theme='deepsea'] .fab {
+  background:
+    radial-gradient(120% 120% at 30% 22%, rgba(186, 210, 244, .28) 0%, rgba(186, 210, 244, 0) 58%),
+    linear-gradient(140deg, rgba(76, 125, 224, .92) 0%, rgba(53, 98, 196, .92) 100%);
+  box-shadow:
+    0 14rpx 34rpx rgba(2, 6, 14, .55),
+    0 4rpx 10rpx rgba(2, 6, 14, .3),
+    0 0 0 8rpx rgba(17, 32, 54, .5),
+    0 0 0 2rpx rgba(211, 172, 116, .5),
+    inset 0 2rpx 0 rgba(255, 255, 255, .24);
+}
+.themed[data-theme='deepsea'] .fab__halo {
+  background: radial-gradient(circle, rgba(211, 172, 116, .5) 0%, rgba(211, 172, 116, 0) 70%);
+}
+
+/* 浅色主题槽位：电影级光影 token 需换成「日光版」——
+ * 柔和灰影 + 白色冠光 + 极淡暗角，避免沿用暮金深影导致浅色页面发脏 */
+.themed[data-theme='forest'],
+.themed[data-theme='twilight'],
+.themed[data-theme='scarlet'],
+.themed[data-theme='jade'],
+.themed[data-theme='indigo'],
+.themed[data-theme='minimal'],
+.themed[data-theme='healing'],
+.themed[data-theme='candy'],
+.themed[data-theme='retro'],
+.themed[data-theme='morandi'],
+.themed[data-theme='aurora'],
+.themed[data-theme='ink'],
+.themed[data-theme='liquid'] {
+  --elev-1: 0 2rpx 8rpx rgba(23, 20, 14, .07), 0 1rpx 2rpx rgba(23, 20, 14, .04);
+  --elev-2: 0 8rpx 24rpx rgba(23, 20, 14, .1), 0 2rpx 6rpx rgba(23, 20, 14, .06);
+  --elev-3: 0 18rpx 48rpx rgba(23, 20, 14, .14), 0 6rpx 16rpx rgba(23, 20, 14, .08);
+  --elev-4: 0 32rpx 72rpx rgba(23, 20, 14, .18), 0 10rpx 26rpx rgba(23, 20, 14, .1);
+  --edge-top: inset 0 1rpx 0 rgba(255, 255, 255, .85);
+  --edge-line: 0 0 0 1rpx rgba(23, 20, 14, .06);
+  --crown-light: inset 0 2rpx 0 rgba(255, 255, 255, .9), inset 0 -1rpx 0 rgba(23, 20, 14, .04);
+  --shaft-1: rgba(255, 255, 255, .5);
+  --shaft-2: rgba(255, 255, 255, .28);
+  --fx-grain-a: rgba(23, 20, 14, .026);
+  --fx-grain-b: rgba(23, 20, 14, .018);
+  --fx-vignette: radial-gradient(125% 92% at 50% 40%, rgba(0, 0, 0, 0) 54%, rgba(23, 20, 14, .09) 100%);
+}
+
+/* ============================================================
+ * 一、大气底：让 .themed 从「一块平色」变成有光有纵深的空间
+ * 三段环境晕（左上暖光 / 右上金光 / 底部回照）+ 一道斜向光轴，
+ * 全部用既有 --ambient-* 变量，因此换主题自动联动。
+ * ============================================================ */
+.themed {
+  background:
+    linear-gradient(115deg, var(--shaft-2) 0%, rgba(0, 0, 0, 0) 34%),
+    radial-gradient(88% 46% at 6% -8%, var(--ambient-1) 0%, rgba(0, 0, 0, 0) 62%),
+    radial-gradient(72% 40% at 98% 2%, var(--ambient-2) 0%, rgba(0, 0, 0, 0) 60%),
+    radial-gradient(92% 44% at 46% 104%, var(--ambient-3) 0%, rgba(0, 0, 0, 0) 64%),
+    linear-gradient(180deg, var(--color-bg-elevated) 0%, var(--color-bg) 22%, var(--color-bg) 100%);
+  background-repeat: no-repeat;
+}
+
+/* ============================================================
+ * 二、影片质感：全局噪点 + 暗角（page::after，浮于内容之上）
+ * pointer-events:none 保证不挡交互；极低的 alpha 保证不影响可读性。
+ * 若某些真机不支持 page 伪元素，退化结果 = 没有这层加成，不会出错。
+ * ============================================================ */
+page::after {
+  content: '';
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9998;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(0deg, var(--fx-grain-a) 0 1rpx, rgba(0, 0, 0, 0) 1rpx 3rpx),
+    repeating-linear-gradient(90deg, var(--fx-grain-b) 0 1rpx, rgba(0, 0, 0, 0) 1rpx 3rpx),
+    var(--fx-vignette);
+  background-repeat: repeat, repeat, no-repeat;
+}
+/* 备注：这一层挂在 page 伪元素上，无法由后代 class 关掉（CSS 不能反向选祖先）。
+ * 若某个页面确实需要纯净底（如图片编辑器画布），在该页 wxss 里写
+ *   `page::after { display: none }` 局部覆盖即可。 */
+
+/* ============================================================
+ * 三、材质基类：让「面子」有厚度、有光泽、有巴掌感
+ * ============================================================ */
+
+/* 剧场卡片：顶缘冠光 + 两层投影 + 细描边 */
+.fx-card {
+  position: relative;
+  border-radius: var(--radius-xl);
+  background: var(--color-card);
+  box-shadow: var(--crown-light), var(--elev-2), var(--edge-line);
+  transition: transform var(--duration-fast) var(--ease-cinema), box-shadow var(--duration-base) var(--ease-cinema);
+}
+/* 高亮态 / 按下态：抬升 + 加深投影，形成明确的三维反馈 */
+.fx-card--lift { box-shadow: var(--crown-light), var(--elev-3), var(--edge-line); }
+.fx-card--press { transform: translate3d(0, 2rpx, 0) scale(.992); box-shadow: var(--crown-light), var(--elev-1), var(--edge-line); }
+
+/* 英雄面板：更大圆角 + 渐变底色 + 内阴影，撑起首屏气势 */
+.fx-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 44rpx;
+  background: var(--gradient-hero);
+  box-shadow: var(--home-hero-shadow, var(--elev-4)), inset 0 2rpx 0 rgba(255, 255, 255, .28);
+}
+
+/* 强调描边环（不依赖 mask 合成，兼容性优先） */
+.fx-ring { box-shadow: var(--edge-line), var(--elev-2); }
+.fx-ring--gold { box-shadow: 0 0 0 2rpx rgba(192, 154, 94, .38), var(--elev-2); }
+
+/* 金属渐变文字：用于大数字 / 重要标题 */
+.fx-metal-text {
+  background: var(--gradient-metal);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* 一道极细的底部渐隐分割线，替代生硬的 1rpx 实线 */
+.fx-hairline {
+  height: 2rpx;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0), var(--color-border) 18%, var(--color-border) 82%, rgba(0, 0, 0, 0));
+  border: 0;
+}
+
+/* ============================================================
+ * 四、动效原语（全部只动 transform / opacity）
+ * ============================================================ */
+@keyframes fx-rise {
+  from { opacity: 0; transform: translate3d(0, 26rpx, 0) scale(.985); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes fx-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fx-pop {
+  0% { opacity: 0; transform: scale(.9); }
+  60% { opacity: 1; transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+@keyframes fx-float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -10rpx, 0); }
+}
+@keyframes fx-breathe {
+  0%, 100% { opacity: .5; transform: scale(1); }
+  50% { opacity: .16; transform: scale(1.22); }
+}
+@keyframes fx-sweep {
+  0% { left: -65%; }
+  55%, 100% { left: 135%; }
+}
+@keyframes fx-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes fx-drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(36rpx, -28rpx, 0) scale(1.07); }
+  100% { transform: translate3d(-28rpx, 24rpx, 0) scale(.95); }
+}
+
+/* 入场：单个元素 */
+.fx-rise { animation: fx-rise .52s var(--ease-cinema) both; }
+.fx-fade { animation: fx-fade .5s linear both; }
+.fx-pop { animation: fx-pop .46s var(--ease-spring) both; }
+
+/* 入场：子元素逐个错落浮现（列表 / 宫格首选，最多铺 10 个）
+   ⚠ WXSS 不支持 `*` 通配选择器（会直接编译报错：`error at token *`），
+     因此这里显式枚举小程序内置标签。若子元素是自定义组件标签，
+     给它加上 .fx-stagger__i 即可同样参与错落。 */
+.fx-stagger > view,
+.fx-stagger > text,
+.fx-stagger > navigator,
+.fx-stagger > button,
+.fx-stagger .fx-stagger__i { animation: fx-rise .5s var(--ease-cinema) both; }
+
+.fx-stagger > view:nth-child(1), .fx-stagger .fx-stagger__i:nth-child(1) { animation-delay: 0s; }
+.fx-stagger > view:nth-child(2), .fx-stagger .fx-stagger__i:nth-child(2) { animation-delay: .05s; }
+.fx-stagger > view:nth-child(3), .fx-stagger .fx-stagger__i:nth-child(3) { animation-delay: .1s; }
+.fx-stagger > view:nth-child(4), .fx-stagger .fx-stagger__i:nth-child(4) { animation-delay: .15s; }
+.fx-stagger > view:nth-child(5), .fx-stagger .fx-stagger__i:nth-child(5) { animation-delay: .2s; }
+.fx-stagger > view:nth-child(6), .fx-stagger .fx-stagger__i:nth-child(6) { animation-delay: .25s; }
+.fx-stagger > view:nth-child(7), .fx-stagger .fx-stagger__i:nth-child(7) { animation-delay: .3s; }
+.fx-stagger > view:nth-child(8), .fx-stagger .fx-stagger__i:nth-child(8) { animation-delay: .34s; }
+.fx-stagger > view:nth-child(9), .fx-stagger .fx-stagger__i:nth-child(9) { animation-delay: .38s; }
+.fx-stagger > view:nth-child(n + 10), .fx-stagger .fx-stagger__i:nth-child(n + 10) { animation-delay: .42s; }
+
+/* 常驻轻轻呼吸 / 漂浮（每个页面控制在 3 个以内） */
+.fx-float { animation: fx-float 5.2s ease-in-out infinite; }
+.fx-float--slow { animation-duration: 8s; }
+
+/* 扫光：给重点按钮 / hero 加一道周期性划过的亮线 */
+.fx-shine { position: relative; overflow: hidden; }
+.fx-shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -65%;
+  width: 42%;
+  height: 100%;
+  background: linear-gradient(100deg, rgba(255, 255, 255, 0), var(--shaft-1), rgba(255, 255, 255, 0));
+  transform: skewX(-18deg);
+  animation: fx-sweep 4.4s ease-in-out infinite;
+  pointer-events: none;
+}
+.fx-shine--once::after { animation: fx-sweep 1.6s ease-out 1 both; }
+
+/* 光晕底座（放在 FAB / 重点图标下方，营造发光体） */
+.fx-halo { position: relative; }
+.fx-halo::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 200%;
+  height: 200%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--color-primary-soft), rgba(0, 0, 0, 0) 68%);
+  animation: fx-breathe 3.4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+/* ⚠ 同样不能用 `*`，显式枚举标签把内容抬到光晕之上 */
+.fx-halo > view,
+.fx-halo > text,
+.fx-halo > image,
+.fx-halo > button,
+.fx-halo > navigator { position: relative; z-index: 1; }
+
+/* 升级既有 .ambient-layer：更大更柔的光斑 + 更慢的漂移，剧院追光感 */
+.themed .ambient-blob,
+.ambient-blob { filter: blur(110rpx); }
+.ambient-blob--1 { width: 620rpx; height: 620rpx; animation-duration: 26s; }
+.ambient-blob--2 { width: 520rpx; height: 520rpx; animation-duration: 32s; }
+.ambient-blob--3 { width: 560rpx; height: 560rpx; animation-duration: 38s; }
+
+/* ============================================================
+ * 五、通用Presses / 反馈增强
+ * ============================================================ */
+/* 卡片级按压：下沉而非单纯缩放，更符合「有厚度的实体」 */
+.fx-tap { transition: transform var(--duration-fast) var(--ease-cinema), box-shadow var(--duration-fast) var(--ease-cinema); }
+.fx-tap:active { transform: translate3d(0, 3rpx, 0) scale(.985); }
+.tap-press { transform: scale(.97) translate3d(0, 2rpx, 0); opacity: .76; }

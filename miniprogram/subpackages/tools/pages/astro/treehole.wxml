@@ -1,0 +1,83 @@
+<!--pages/astro/treehole.wxml
+  树洞：私密心事 · 遗憾/委屈/迷茫 记录，仅本地存储
+  封存状态默认折叠遮罩，点击解锁查看（CSS 模糊 + 蒙层）
+-->
+<view class="astro-page">
+  <view class="astro-statusbar"></view>
+
+  <view class="astro-card">
+    <view style="display:flex;align-items:center;gap:18rpx;">
+      <text style="font-size:60rpx;">🌳</text>
+      <view style="flex:1;">
+        <text class="astro-title">树洞</text>
+        <text class="astro-muted">这里只有你，没有人会知道。放心说吧 🌱</text>
+      </view>
+    </view>
+    <view class="astro-btn" style="margin-top:18rpx;" hover-class="astro-btn--hover" hover-stay-time="50"
+      bindtap="onNew">＋ 写入心事</view>
+  </view>
+
+  <view class="astro-card">
+    <view class="layout-row">
+      <view wx:for="{{moodFilters}}" wx:key="key" class="filter-chip {{moodFilter === item.key ? 'is-active' : ''}}"
+        hover-class="filter-chip--hover" hover-stay-time="50"
+        bindtap="onPickFilter" data-key="{{item.key}}">{{item.emoji}} {{item.label}}</view>
+    </view>
+  </view>
+
+  <view wx:if="{{filtered.length === 0}}">
+    <view class="astro-card">
+      <text class="astro-empty">还没有任何记录。如果你愿意，先写一句试试。</text>
+    </view>
+  </view>
+  <view wx:else>
+    <!-- 分页渲染：wx:for 用 visible（前 shown 条），触底自动加载下一页 -->
+    <view wx:for="{{visible}}" wx:key="id" class="astro-card tree-card {{item.sealed ? 'is-sealed' : ''}}">
+      <view wx:if="{{item.sealed}}" class="tree-mask" bindtap="onUnseal" data-id="{{item.id}}">
+        <text class="tree-mask__lock">🔒</text>
+        <text class="tree-mask__text">已封存 · 点击解锁查看</text>
+      </view>
+      <view class="tree-card__head">
+        <text class="astro-tag" style="background:linear-gradient(135deg,#7c6f5a,#5b4f3a);border:none;">{{item.moodLabel}}</text>
+        <text class="astro-muted" style="flex:1;text-align:right;">{{item.createAt}}</text>
+      </view>
+      <text wx:if="{{item.title}}" class="astro-title tree-card__title">{{item.title}}</text>
+      <text class="astro-body tree-card__body">{{item.content}}</text>
+      <view class="tree-card__foot">
+        <text class="astro-tag" data-id="{{item.id}}" bindtap="onToggleSeal">{{item.sealed ? '重新封存' : '封存'}}</text>
+        <text class="astro-tag" data-id="{{item.id}}" bindtap="onEdit">编辑</text>
+        <text class="astro-tag" data-id="{{item.id}}" bindtap="onDelete">删除</text>
+      </view>
+    </view>
+    <!-- 触底加载提示 -->
+    <view wx:if="{{visible.length < filtered.length}}" class="astro-load-more">上拉加载更多心事…</view>
+    <view wx:else class="astro-load-more astro-load-more--end">—— 全部 {{filtered.length}} 条 ——</view>
+  </view>
+
+  <!-- 编辑弹层 -->
+  <block wx:if="{{editorOpen}}">
+    <view class="astro-modal-mask" catchtap="onCloseEditor">
+      <view class="astro-modal" catchtap="noop">
+        <text class="astro-title" style="display:block;margin-bottom:14rpx;">{{editor.id ? '修改记录' : '写入心事'}}</text>
+        <input class="astro-input" placeholder="标题（可选）" placeholder-class="astro-input--placeholder"
+          value="{{editor.title}}" bindinput="onEditTitle" style="margin-bottom:12rpx;"></input>
+        <textarea class="astro-textarea" placeholder="把你想说的写下来吧…这里没有评价" placeholder-class="astro-input--placeholder"
+          value="{{editor.content}}" bindinput="onEditContent" style="min-height:240rpx;margin-bottom:14rpx;"></textarea>
+        <text class="astro-muted" style="display:block;margin-bottom:6rpx;">情绪</text>
+        <view class="layout-row" style="margin-bottom:14rpx;">
+          <view wx:for="{{moods}}" wx:key="key" class="filter-chip {{editor.mood === item.key ? 'is-active' : ''}}"
+            hover-class="filter-chip--hover" hover-stay-time="50"
+            bindtap="onPickEditMood" data-key="{{item.key}}">{{item.emoji}} {{item.label}}</view>
+        </view>
+        <view style="display:flex;gap:10rpx;">
+          <view class="astro-btn" hover-class="astro-btn--hover" hover-stay-time="50"
+            bindtap="onSave" style="flex:1;">保存</view>
+          <view class="astro-btn astro-btn--ghost" hover-class="astro-btn--hover" hover-stay-time="50"
+            bindtap="onCloseEditor">取消</view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <view class="astro-statusbar"></view>
+</view>

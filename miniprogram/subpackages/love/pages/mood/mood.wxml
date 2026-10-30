@@ -1,0 +1,82 @@
+<!--pages/love/mood/mood.wxml-->
+<view class="ay" style="{{skin.style}}">
+
+  <!-- 未绑定提示 -->
+  <view class="duo-banner" wx:if="{{!bound}}">
+    <text class="duo-banner__ico">🔒</text>
+    <view class="duo-banner__main">
+      <text class="duo-banner__t">当前未绑定，心情仅自己可见</text>
+      <text class="duo-banner__d">绑定后你和 TA 能互相看到今天的心情</text>
+    </view>
+    <view class="duo-banner__btn" bindtap="onGoBind">去绑定</view>
+  </view>
+
+  <!-- 今日打卡 -->
+  <view class="ay-card ay-glass ay-anim">
+    <view class="ay-card__hd">
+      <text class="ay-card__title">😊 今天（{{todayText}}）</text>
+    </view>
+
+    <view class="duo-moods">
+      <view class="duo-mood {{picked === item.key ? 'is-on' : ''}}"
+            wx:for="{{moods}}" wx:key="key"
+            hover-class="ay-btn--off" bindtap="onPick" data-k="{{item.key}}">
+        <text class="duo-mood__e">{{item.emoji}}</text>
+        <text class="duo-mood__t">{{item.label}}</text>
+      </view>
+    </view>
+
+    <view class="ay-field" style="margin-top:20rpx">
+      <input
+        class="ay-field__input"
+        value="{{note}}"
+        bindinput="onNote"
+        placeholder="想说点什么吗？（可不填）"
+        placeholder-class="ay-field__ph"
+        maxlength="60" />
+    </view>
+
+    <view class="ay-wrap" style="margin-top:24rpx">
+      <view class="ay-btn ay-btn--block" hover-class="ay-btn--off" bindtap="onSave">
+        {{picked ? '打卡' : '选个心情再打卡'}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 今日对照 -->
+  <view class="ay-card ay-glass">
+    <view class="ay-card__hd"><text class="ay-card__title">💞 今天的我们</text></view>
+    <view class="duo-pair">
+      <view class="duo-pair__side {{mine ? '' : 'duo-pair__side--empty'}}">
+        <text class="duo-pair__who">我</text>
+        <text class="duo-pair__emoji">{{mine ? mine.emoji : '❔'}}</text>
+        <text class="duo-pair__label">{{mine ? mine.label : '还没打卡'}}</text>
+      </view>
+      <view class="duo-pair__side {{ta ? '' : 'duo-pair__side--empty'}}">
+        <text class="duo-pair__who">{{partner}}</text>
+        <text class="duo-pair__emoji">{{ta ? ta.emoji : '❔'}}</text>
+        <text class="duo-pair__label">{{ta ? ta.label : '还没打卡'}}</text>
+        <text class="duo-pair__note" wx:if="{{ta && ta.note}}">{{ta.note}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 近两周心情日历 -->
+  <view class="ay-card ay-glass">
+    <view class="ay-card__hd"><text class="ay-card__title">📅 近两周心情</text></view>
+    <view class="duo-cal">
+      <view class="duo-cal__row" wx:for="{{cal}}" wx:key="who">
+        <text class="duo-cal__who">{{item.who}}</text>
+        <view class="duo-cal__cells">
+          <view class="duo-cal__cell {{item2.none ? 'duo-cal__cell--none' : ''}}"
+                wx:for="{{item.cells}}" wx:for-item="item2" wx:key="d">
+            <text>{{item2.e}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+    <text class="duo-hint">一行一天，左边是日期顺序最早的一天。空白表示那天没打卡。</text>
+  </view>
+
+  <view class="duo-safe" />
+</view>

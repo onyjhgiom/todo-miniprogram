@@ -1,0 +1,238 @@
+/* subpackages/tools/pages/civil/civil.wxss */
+
+.cx { min-height: 100vh; padding-bottom: 60rpx; }
+
+/* 编制色调标签见 app.wxss 的 .cx-tag（全模块共用） */
+
+/* ===== 欢迎横幅 ===== */
+.cx__hero {
+  padding: 44rpx 34rpx 34rpx;
+  color: #fff;
+  border-bottom-left-radius: 34rpx;
+  border-bottom-right-radius: 34rpx;
+}
+.cx__hero-brand { display: flex; align-items: baseline; gap: 14rpx; }
+.cx__hero-name { font-size: 34rpx; font-weight: 700; letter-spacing: 4rpx; }
+.cx__hero-tag {
+  font-size: 21rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.22);
+}
+.cx__hero-welcome {
+  font-size: 64rpx;
+  font-weight: 800;
+  letter-spacing: 6rpx;
+  margin-top: 26rpx;
+  line-height: 1.2;
+  text-shadow: 0 4rpx 18rpx rgba(0, 0, 0, 0.22);
+}
+.cx__hero-line {
+  width: 88rpx;
+  height: 6rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.85);
+  margin: 20rpx 0 18rpx;
+}
+.cx__hero-sub { font-size: 28rpx; font-weight: 600; letter-spacing: 1rpx; display: block; }
+.cx__hero-desc { font-size: 23rpx; opacity: 0.9; display: block; margin-top: 10rpx; line-height: 1.6; }
+.cx__hero-stats { display: flex; gap: 12rpx; margin-top: 26rpx; }
+.cx__hs {
+  flex: 1;
+  text-align: center;
+  padding: 14rpx 4rpx;
+  border-radius: 16rpx;
+  background: rgba(255, 255, 255, 0.18);
+}
+.cx__hs-n { font-size: 34rpx; font-weight: 700; display: block; }
+.cx__hs-l { font-size: 20rpx; opacity: 0.9; display: block; margin-top: 4rpx; }
+
+/* ===== 通用小节 ===== */
+.cx__sec-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-text);
+  padding: 34rpx 28rpx 16rpx;
+  display: block;
+}
+.cx__sec-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-right: 28rpx;
+}
+.cx__sec-title--inline { padding-bottom: 8rpx; }
+.cx__sec-more { font-size: 23rpx; color: var(--color-primary); }
+.cx__press { opacity: 0.75; }
+
+/* ===== 赛道卡片（两列，从左往右依次铺满，右侧不留空） =====
+ * ⚠️ 这里刻意**不用** flex 的 gap，也不用 calc(%, rpx) 混合计算：
+ *    两者在部分基础库 / 旧编译产物上解析不一致，会出现「卡片被拉成整行、
+ *    但内容仍只占左半边」的怪相（顶部标题与数字挤在左侧、右边一大片空白）。
+ *    改用 space-between + 固定百分比宽度 + margin-bottom，兼容性最稳。 */
+.cx__tracks { display: flex; flex-wrap: wrap; justify-content: space-between; padding: 0 24rpx; }
+.cx__track {
+  width: 48.6%;
+  box-sizing: border-box;
+  margin-bottom: 18rpx;
+  background: var(--color-card);
+  border: 2rpx solid var(--color-border);
+  border-radius: 22rpx;
+  padding: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(90, 74, 56, 0.06);
+}
+.themed[data-theme='dark'] .cx__track,
+.themed[data-theme='rose'] .cx__track { box-shadow: none; }
+.cx__track--wide { width: 100%; }
+/* 卡片内部自上而下：图标+数字一行 → 名称 → 一句话说明 → 编制标注，
+ * 每一行都占满卡片宽度，不再出现「内容缩在左半边」的空档。 */
+.cx__track-head { display: flex; align-items: center; justify-content: space-between; }
+.cx__track-icon {
+  width: 58rpx;
+  height: 58rpx;
+  border-radius: 18rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  flex-shrink: 0;
+}
+.cx__track-count { font-size: 34rpx; font-weight: 800; line-height: 1; }
+.cx__track-name { font-size: 27rpx; font-weight: 700; color: var(--color-text); margin-top: 14rpx; }
+.cx__track-tag { font-size: 20rpx; color: var(--color-text-mute); margin-top: 6rpx; display: block; line-height: 1.45; }
+.cx__track-bian { display: flex; align-items: flex-start; margin-top: 12rpx; }
+.cx__dot { width: 12rpx; height: 12rpx; border-radius: 999rpx; flex-shrink: 0; margin: 8rpx 10rpx 0 0; }
+.cx__track-bian-t { font-size: 20rpx; color: var(--color-text-soft); line-height: 1.4; flex: 1; min-width: 0; }
+
+/* ===== 编制速查 ===== */
+.cx__chips { white-space: nowrap; padding: 0 24rpx; }
+.cx__chip {
+  display: inline-block;
+  vertical-align: top;
+  width: 250rpx;
+  box-sizing: border-box;
+  margin-right: 16rpx;
+  padding: 20rpx 18rpx;
+  background: var(--color-card);
+  border: 2rpx solid var(--color-border);
+  border-radius: 18rpx;
+  white-space: normal;
+}
+.cx__chip-tag { margin-bottom: 12rpx; }
+.cx__chip-full { font-size: 21rpx; color: var(--color-text-soft); display: block; line-height: 1.5; min-height: 62rpx; }
+.cx__chip-count { font-size: 21rpx; color: var(--color-text-mute); display: block; margin-top: 10rpx; }
+
+/* ===== 月度节点 ===== */
+.cx__months { padding: 0 24rpx; }
+.cx__month {
+  background: var(--color-card);
+  border: 2rpx solid var(--color-border);
+  border-radius: 22rpx;
+  padding: 22rpx 22rpx 10rpx;
+  margin-bottom: 18rpx;
+}
+.cx__month-head { display: flex; align-items: center; gap: 14rpx; }
+.cx__month-label { font-size: 32rpx; font-weight: 800; color: var(--color-text); }
+.cx__month-now {
+  font-size: 19rpx;
+  padding: 3rpx 12rpx;
+  border-radius: 999rpx;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.cx__month-theme { font-size: 23rpx; color: var(--color-text-soft); display: block; margin: 8rpx 0 14rpx; }
+.cx__mev { display: flex; gap: 12rpx; padding-bottom: 16rpx; }
+.cx__mev-bar { width: 6rpx; border-radius: 999rpx; flex-shrink: 0; }
+.cx__mev-main { flex: 1; min-width: 0; }
+.cx__mev-title { font-size: 25rpx; font-weight: 600; color: var(--color-text); display: block; }
+.cx__mev-desc { font-size: 21rpx; color: var(--color-text-mute); display: block; margin-top: 5rpx; line-height: 1.55; }
+
+/* ===== 精选岗位 ===== */
+.cx__jobs { padding: 0 24rpx; }
+.cx__job {
+  background: var(--color-card);
+  border: 2rpx solid var(--color-border);
+  border-radius: 20rpx;
+  padding: 22rpx;
+  margin-bottom: 16rpx;
+}
+.cx__job-head { display: flex; align-items: center; gap: 12rpx; }
+.cx__job-title { font-size: 28rpx; font-weight: 700; color: var(--color-text); flex: 1; min-width: 0; }
+.cx__job-unit { font-size: 22rpx; color: var(--color-text-soft); display: block; margin-top: 8rpx; }
+.cx__job-meta { display: flex; flex-wrap: wrap; gap: 16rpx; margin-top: 12rpx; }
+.cx__jm { font-size: 21rpx; color: var(--color-text-mute); }
+.cx__job-salary { font-size: 22rpx; color: var(--color-text-soft); display: block; margin-top: 10rpx; }
+
+/* ===== 岗位卡上的官方报名入口 ===== */
+.cx__job-apply {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-top: 12rpx;
+  padding-top: 12rpx;
+  border-top: 2rpx solid var(--color-border);
+}
+.cx__apply-badge {
+  flex: none;
+  font-size: 19rpx;
+  font-weight: 700;
+  color: #15803d;
+  background: rgba(21, 128, 61, 0.12);
+  border-radius: 6rpx;
+  padding: 3rpx 10rpx;
+}
+.cx__apply-name {
+  flex: none;
+  max-width: 220rpx;
+  font-size: 21rpx;
+  font-weight: 700;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cx__apply-host {
+  flex: 1;
+  min-width: 0;
+  font-size: 21rpx;
+  color: var(--color-text-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cx__apply-copy {
+  flex: none;
+  font-size: 20rpx;
+  font-weight: 800;
+  color: #15803d;
+  border: 2rpx solid rgba(21, 128, 61, 0.35);
+  border-radius: 999rpx;
+  padding: 4rpx 14rpx;
+}
+
+/* ===== 工具入口 ===== */
+.cx__entries { padding: 0 24rpx; }
+.cx__entry {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  background: var(--color-card);
+  border: 2rpx solid var(--color-border);
+  border-radius: 20rpx;
+  padding: 22rpx;
+  margin-bottom: 16rpx;
+}
+.cx__entry-icon { font-size: 40rpx; flex-shrink: 0; }
+.cx__entry-main { flex: 1; min-width: 0; }
+.cx__entry-title { font-size: 27rpx; font-weight: 700; color: var(--color-text); }
+.cx__entry-desc { font-size: 21rpx; color: var(--color-text-mute); margin-top: 6rpx; display: block; line-height: 1.5; }
+.cx__entry-arrow { font-size: 34rpx; color: var(--color-text-mute); }
+
+.cx__foot {
+  font-size: 20rpx;
+  color: var(--color-text-mute);
+  text-align: center;
+  padding: 34rpx 40rpx 10rpx;
+  line-height: 1.7;
+}

@@ -1,0 +1,543 @@
+/* pages/love/love/love.wxss */
+@import "../../styles/love-common.wxss";
+
+/* ---------- 爱心图鉴 ---------- */
+.ay-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-top: 14rpx;
+}
+.ay-gallery__cell {
+  position: relative;
+  width: calc(50% - 8rpx);
+  box-sizing: border-box;
+  background: var(--ay-card-soft, #FFF1EC);
+  border-radius: 24rpx;
+  padding: 8rpx 6rpx 12rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.ay-gallery__cell--hover {
+  transform: scale(0.965);
+}
+/* 当前所处等级：描一圈主色光环，一眼找到自己在哪一级 */
+.ay-gallery__cell--cur {
+  box-shadow:
+    0 0 0 3rpx var(--ay-primary, #FF7F9C),
+    0 10rpx 26rpx var(--ay-shadow, rgba(255, 127, 156, 0.2));
+}
+.ay-gallery__cell--on {
+  opacity: 1;
+}
+.ay-gallery__flag {
+  position: absolute;
+  top: 8rpx;
+  left: 10rpx;
+  color: #fff !important;
+  background: var(--ay-primary, #FF7F9C);
+  border-radius: 18rpx;
+  padding: 2rpx 12rpx;
+  font-size: 18rpx;
+}
+.ay-gallery__lock {
+  position: absolute;
+  top: 10rpx;
+  right: 10rpx;
+  z-index: 2;
+  font-size: 18rpx;
+  color: #fff;
+  background: rgba(120, 100, 110, 0.55);
+  border-radius: 20rpx;
+  padding: 3rpx 10rpx;
+}
+.ay-gallery__stage {
+  position: relative;
+  width: 100%;
+  height: 170rpx;
+  margin-top: 6rpx;
+}
+/* 缩放交给包裹层：爱心本体的 transform 留给「倾斜呼吸」动画（两者不能同源于一个节点） */
+.ay-gallery__scaler {
+  position: absolute;
+  left: 50%;
+  top: -8rpx;
+  width: 320rpx;
+  height: 300rpx;
+  margin-left: -160rpx;
+  transform: scale(0.56);
+  transform-origin: center top;
+  pointer-events: none;
+}
+/* 缩略图保留呼吸 + 倾斜 + 环绕；心跳放慢并逐格错拍，避免 10 颗同频跳动显得廉价 */
+.ay-gallery__heart .ay-heart__shape,
+.ay-gallery__scaler .ay-heart__shape {
+  animation-duration: 3.4s;
+}
+.ay-gallery__cell:nth-child(2n) .ay-heart__shape { animation-delay: -820ms; }
+.ay-gallery__cell:nth-child(3n) .ay-heart__shape { animation-delay: -1650ms; }
+.ay-gallery__cell:nth-child(5n) .ay-heart__shape { animation-delay: -2380ms; }
+.ay-gallery__cell:nth-child(2n) .ay-heart--t2,
+.ay-gallery__cell:nth-child(2n) .ay-heart--t3 { animation-delay: -4s; }
+.ay-gallery__cell:nth-child(3n) .ay-heart--t2,
+.ay-gallery__cell:nth-child(3n) .ay-heart--t3 { animation-delay: -8s; }
+.ay-gallery__lv {
+  font-size: 22rpx;
+  font-weight: 700;
+  color: var(--ay-primary, #FF7F9C);
+  margin-top: 4rpx;
+}
+.ay-gallery__tag {
+  font-size: 19rpx;
+  color: var(--ay-faint, #B79AA1);
+}
+
+/* ---------- 爱心预览弹层 ---------- */
+.ay-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(60, 40, 50, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 40rpx;
+}
+.ay-prev {
+  width: 100%;
+  max-width: 560rpx;
+  box-sizing: border-box;
+  background: var(--ay-card, #fff);
+  border-radius: 28rpx;
+  padding: 28rpx 24rpx 24rpx;
+}
+.ay-prev__heart {
+  margin: 0 auto;
+}
+.ay-prev__mode {
+  text-align: center;
+  margin-top: 10rpx;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--ay-primary, #FF7F9C);
+}
+.ay-prev__need {
+  text-align: center;
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: var(--ay-faint, #B79AA1);
+}
+.ay-prev__need--ok {
+  color: #5BA36A;
+}
+
+/* ---------- 升温成就·特效预览 ---------- */
+.ay-fx {
+  width: 100%;
+  max-width: 560rpx;
+  box-sizing: border-box;
+  background: var(--ay-card, #fff);
+  border-radius: 28rpx;
+  padding: 28rpx 24rpx 24rpx;
+  text-align: center;
+}
+.ay-fx__stage {
+  position: relative;
+  height: 320rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ay-fx__core {
+  font-size: 96rpx;
+  line-height: 1;
+  filter: drop-shadow(0 6rpx 18rpx rgba(255, 127, 156, 0.35));
+  animation: ay-fx-pulse 1.6s ease-in-out infinite;
+}
+/* 等级越高，核心光环越大越亮 */
+.ay-fx__core--t1 { text-shadow: 0 0 10rpx rgba(255, 200, 220, 0.6); }
+.ay-fx__core--t2 { text-shadow: 0 0 16rpx rgba(255, 170, 200, 0.7); }
+.ay-fx__core--t3 { text-shadow: 0 0 22rpx rgba(255, 150, 190, 0.8); }
+.ay-fx__core--t4 { text-shadow: 0 0 28rpx rgba(255, 130, 180, 0.85); }
+.ay-fx__core--t5 { text-shadow: 0 0 34rpx rgba(255, 120, 175, 0.9); }
+.ay-fx__core--t6 { text-shadow: 0 0 40rpx rgba(255, 110, 170, 0.92); }
+.ay-fx__core--t7 { text-shadow: 0 0 46rpx rgba(255, 100, 165, 0.95); }
+.ay-fx__core--t8 { text-shadow: 0 0 54rpx rgba(255, 90, 160, 0.96); }
+.ay-fx__core--t9 { text-shadow: 0 0 62rpx rgba(255, 80, 155, 0.98); }
+.ay-fx__core--t10 { text-shadow: 0 0 72rpx rgba(255, 70, 150, 1); }
+@keyframes ay-fx-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+.ay-fx__dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 30rpx;
+  opacity: 0;
+  animation: ay-burst 1000ms ease-out forwards;
+}
+@keyframes ay-burst {
+  0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+  25% { opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1); opacity: 0; }
+}
+.ay-fx__name {
+  margin-top: 6rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--ay-primary, #FF7F9C);
+}
+.ay-fx__sub {
+  font-size: 22rpx;
+  color: var(--ay-faint, #B79AA1);
+  margin-top: 4rpx;
+}
+
+/* ---------- 头部按钮组 ---------- */
+.ay-head-acts {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+/* ---------- 双方定位坐标图 ---------- */
+.ay-map {
+  position: relative;
+  width: 100%;
+  height: 360rpx;
+  margin-top: 16rpx;
+  border-radius: 22rpx;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, #EAF3FF 0%, #F3ECFF 100%);
+  border: 1rpx solid var(--ay-border, #F0D9E2);
+}
+.ay-map__grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(150, 130, 170, 0.12) 1rpx, transparent 1rpx),
+    linear-gradient(90deg, rgba(150, 130, 170, 0.12) 1rpx, transparent 1rpx);
+  background-size: 48rpx 48rpx;
+}
+.ay-map__pin {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2;
+}
+.ay-map__dot {
+  font-size: 36rpx;
+  line-height: 1;
+  filter: drop-shadow(0 4rpx 6rpx rgba(120, 90, 120, 0.35));
+}
+.ay-map__pin--him .ay-map__dot {
+  transform: rotate(0deg);
+}
+.ay-map__name {
+  margin-top: 2rpx;
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #5A3A4A;
+  background: rgba(255, 255, 255, 0.78);
+  border-radius: 14rpx;
+  padding: 2rpx 12rpx;
+  white-space: nowrap;
+}
+.ay-map__pin--me .ay-map__name {
+  color: #C2406B;
+}
+.ay-map__pin--him .ay-map__name {
+  color: #3E7BD0;
+}
+.ay-map__coord {
+  font-size: 17rpx;
+  color: #8A6E7A;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 12rpx;
+  padding: 1rpx 8rpx;
+  white-space: nowrap;
+}
+.ay-map__dist {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #5A3A4A;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1rpx solid var(--ay-border, #F0D9E2);
+  border-radius: 20rpx;
+  padding: 8rpx 18rpx;
+  text-align: center;
+  max-width: 80%;
+}
+
+/* 爱情能量球样式已随卡片迁至「回忆」页（memory.wxss 的 .mm-stage 体系） */
+
+/* ============================================================
+ * 深空爱心图鉴（设计稿对标：宇宙星云 + 玻璃收藏卡 + 等级主题光晕）
+ * 容器 ay-cosmos / 卡片 ay-gcell；旧 ay-gallery__cell 系列已由 ay-gcell 取代。
+ * ============================================================ */
+.ay-cosmos {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(168deg,
+    #4A3BC8 0%, #5B3EC9 22%, #7B4FD8 48%,
+    #9B5FD0 72%, #B06FD4 100%);
+  border: 1rpx solid rgba(255, 255, 255, 0.22);
+  box-shadow:
+    0 18rpx 44rpx rgba(74, 59, 200, 0.4),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.3);
+}
+/* 星点层：两层点阵缓慢呼吸 */
+.ay-cosmos__stars {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.75) 2rpx, transparent 2rpx),
+    radial-gradient(circle, rgba(255, 220, 250, 0.5) 1.4rpx, transparent 1.4rpx);
+  background-size: 118rpx 118rpx, 64rpx 64rpx;
+  background-position: 12rpx 8rpx, 30rpx 26rpx;
+  animation: ay-cosmos-twinkle 6s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes ay-cosmos-twinkle {
+  from { opacity: 0.35; }
+  to { opacity: 0.8; }
+}
+/* 星云光晕：左下粉紫 + 右上冰蓝 */
+.ay-cosmos__nebula {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(46% 30% at 78% 12%, rgba(150, 200, 255, 0.35), transparent 70%),
+    radial-gradient(52% 34% at 16% 82%, rgba(255, 170, 230, 0.30), transparent 72%),
+    radial-gradient(38% 26% at 88% 68%, rgba(255, 220, 250, 0.22), transparent 70%);
+  pointer-events: none;
+}
+.ay-cosmos__head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+/* 标题：银白金属渐变字 + 紫蓝霓虹描边光 */
+.ay-cosmos__title {
+  font-size: 36rpx;
+  font-weight: 800;
+  background: linear-gradient(100deg, #FFFFFF 20%, #E8E4FF 55%, #FFD6F2 85%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 18rpx rgba(200, 180, 255, 0.55);
+}
+.ay-cosmos__badge {
+  font-size: 20rpx;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1rpx solid rgba(255, 255, 255, 0.32);
+  border-radius: 999rpx;
+  padding: 6rpx 18rpx;
+  backdrop-filter: blur(10rpx);
+}
+.ay-cosmos__note {
+  position: relative;
+  margin-top: 8rpx;
+  font-size: 21rpx;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.72);
+}
+/* ---- 英雄区：终极形态大爱心 + 手写标语 ---- */
+.ay-cosmos__hero {
+  position: relative;
+  height: 320rpx;
+  margin: 8rpx 0 4rpx;
+}
+.ay-cosmos__hero-stage {
+  position: absolute;
+  left: 44%;
+  top: -30rpx;
+  width: 340rpx;
+  height: 320rpx;
+  margin-left: -170rpx;
+}
+/* 英雄爱心：缓慢悬浮（倾斜呼吸沿用 ay-heart 体系） */
+.ay-cosmos__hero-heart {
+  animation: ay-cosmos-levitate 5s ease-in-out infinite alternate;
+}
+@keyframes ay-cosmos-levitate {
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(0, -16rpx, 0); }
+}
+.ay-cosmos__slogan {
+  position: absolute;
+  right: 12rpx;
+  top: 52rpx;
+  text-align: left;
+  font-size: 27rpx;
+  font-weight: 600;
+  line-height: 1.7;
+  transform: rotate(-4deg);
+  background: linear-gradient(100deg, #FFE0F2 10%, #FFB8E8 50%, #D8C8FF 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2rpx 12rpx rgba(255, 170, 230, 0.4);
+}
+
+/* ---- 图鉴卡片（玻璃收藏卡） ---- */
+.ay-gcell {
+  position: relative;
+  width: calc(50% - 8rpx);
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1rpx solid rgba(255, 255, 255, 0.22);
+  border-radius: 26rpx;
+  padding: 10rpx 6rpx 14rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  backdrop-filter: blur(14rpx);
+  box-shadow:
+    0 10rpx 26rpx rgba(40, 25, 120, 0.3),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.24);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.ay-gcell--hover {
+  transform: scale(0.965);
+}
+/* 已解锁：玻璃更透亮 */
+.ay-gcell--on {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.34);
+}
+/* 当前所处等级：白紫光环描边 */
+.ay-gcell--cur {
+  box-shadow:
+    0 0 0 3rpx rgba(255, 230, 250, 0.85),
+    0 12rpx 30rpx rgba(255, 170, 230, 0.35);
+}
+/* 等级主题光晕（--ga-aura 由数据注入） */
+.ay-gcell__aura {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(60% 46% at 50% 30%, var(--ga-aura, rgba(255, 170, 210, 0.4)), transparent 72%);
+  pointer-events: none;
+}
+/* 未解锁锁徽章（设计稿右上角深色胶囊） */
+.ay-gcell__lock {
+  position: absolute;
+  top: 10rpx;
+  right: 10rpx;
+  z-index: 3;
+  font-size: 17rpx;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(30, 22, 80, 0.6);
+  border: 1rpx solid rgba(255, 255, 255, 0.24);
+  border-radius: 20rpx;
+  padding: 3rpx 12rpx;
+  backdrop-filter: blur(8rpx);
+}
+.ay-gcell__flag {
+  position: absolute;
+  top: 10rpx;
+  left: 10rpx;
+  z-index: 3;
+  font-size: 17rpx;
+  color: #fff;
+  background: linear-gradient(135deg, #FF8FC8, #C77FF0);
+  border-radius: 20rpx;
+  padding: 3rpx 12rpx;
+}
+/* 装饰元素：四角散布 */
+.ay-gcell__deco {
+  position: absolute;
+  z-index: 2;
+  font-size: 30rpx;
+  opacity: 0.9;
+  filter: drop-shadow(0 2rpx 6rpx rgba(255, 255, 255, 0.35));
+  animation: ay-gcell-deco-bob 3.6s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+.ay-gcell__deco--0 { left: 14rpx; top: 34rpx; }
+.ay-gcell__deco--1 { right: 14rpx; top: 60rpx; animation-delay: -1.2s; }
+.ay-gcell__deco--2 { left: 20rpx; top: 130rpx; animation-delay: -2.4s; }
+@keyframes ay-gcell-deco-bob {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(0, -8rpx, 0) scale(1.1); }
+}
+/* 舞台区高度与旧版一致 */
+.ay-gcell__stage {
+  position: relative;
+  width: 100%;
+  height: 170rpx;
+  margin-top: 6rpx;
+  z-index: 1;
+}
+/* 魔法阵底座：椭圆发光环缓慢旋转 */
+.ay-gcell__base {
+  position: absolute;
+  left: 50%;
+  bottom: 4rpx;
+  width: 210rpx;
+  height: 52rpx;
+  margin-left: -105rpx;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse 50% 50% at 50% 50%,
+      transparent 46%,
+      var(--ga-aura, rgba(255, 190, 230, 0.5)) 58%,
+      rgba(255, 255, 255, 0.5) 66%,
+      transparent 76%);
+  filter: blur(1rpx);
+  animation: ay-gcell-base-spin 8s linear infinite;
+  pointer-events: none;
+}
+@keyframes ay-gcell-base-spin {
+  from { transform: scaleX(1) rotate(0deg); opacity: 0.7; }
+  50%  { opacity: 1; }
+  to   { transform: scaleX(1) rotate(360deg); opacity: 0.7; }
+}
+/* Lv 渐变胶囊标签（tagStyle 由数据注入渐变色） */
+.ay-gcell__lv {
+  position: relative;
+  z-index: 1;
+  margin-top: 8rpx;
+  font-size: 21rpx;
+  font-weight: 800;
+  color: #fff;
+  border-radius: 999rpx;
+  padding: 5rpx 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(40, 25, 120, 0.35);
+}
+.ay-gcell__tag {
+  position: relative;
+  z-index: 1;
+  font-size: 19rpx;
+  color: rgba(255, 255, 255, 0.72);
+  margin-top: 3rpx;
+}
+.ay-gcell__tag--ok {
+  color: rgba(190, 255, 220, 0.95);
+}
+/* 深空版图鉴卡片的心跳错拍（替换旧 ay-gallery__cell 选择器） */
+.ay-gcell:nth-child(2n) .ay-heart__shape { animation-delay: -820ms; }
+.ay-gcell:nth-child(3n) .ay-heart__shape { animation-delay: -1650ms; }
+.ay-gcell:nth-child(5n) .ay-heart__shape { animation-delay: -2380ms; }
+.ay-gcell:nth-child(2n) .ay-heart--t2,
+.ay-gcell:nth-child(2n) .ay-heart--t3 { animation-delay: -4s; }
+.ay-gcell:nth-child(3n) .ay-heart--t2,
+.ay-gcell:nth-child(3n) .ay-heart--t3 { animation-delay: -8s; }

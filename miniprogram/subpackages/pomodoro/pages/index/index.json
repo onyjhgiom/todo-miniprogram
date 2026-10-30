@@ -1,0 +1,10 @@
+{
+  "navigationStyle": "custom",
+  "navigationBarTitleText": "番茄时钟",
+  "usingComponents": {
+    "focus-ring": "../../components/focus-ring/focus-ring",
+    "focus-mode-tabs": "../../components/focus-mode-tabs/focus-mode-tabs",
+    "focus-chart": "../../components/focus-chart/focus-chart",
+    "task-card": "../../components/task-card/task-card"
+  }
+}

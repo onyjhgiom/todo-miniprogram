@@ -1,0 +1,32 @@
+<game-shell title="{{title}}" timeText="{{timeText}}" statText="{{'最佳 ' + bestText}}" paused="{{paused}}"
+  bind:back="onBack" bind:reset="onReset" bind:home="onHome" bind:pause="onPause">
+  <view class="sc">
+    <text class="t-sm muted-2 center">按顺序点击 1 → 25，越快越专注</text>
+
+    <view class="sc__grid">
+      <view
+        wx:for="{{grid}}" wx:key="index"
+        class="sc__cell {{item.done ? 'sc__cell--done' : ''}} {{item.wrong ? 'sc__cell--wrong' : ''}}"
+        data-index="{{index}}" bindtap="onTap"
+      >
+        <text class="sc__num serif {{item.done ? 'sc__num--done' : ''}}">{{item.n}}</text>
+      </view>
+    </view>
+
+    <view class="row row--between t-sm muted-2 mt-16">
+      <text>下一个：{{next > 25 ? '完成' : next}}</text>
+      <text>用时 {{timeText}}</text>
+    </view>
+
+    <!-- 训练报告 -->
+    <view wx:if="{{report}}" class="sc__report card--tint grain">
+      <view class="tape tape--mint"></view>
+      <text class="t-lg serif heavy">训练报告</text>
+      <view class="row row--between mt-16"><text class="t-sm muted-2">总用时</text><text class="t-md serif heavy">{{report.time}}</text></view>
+      <view class="row row--between mt-8"><text class="t-sm muted-2">平均/格</text><text class="t-md serif heavy">{{report.per}} 秒</text></view>
+      <view class="row row--between mt-8"><text class="t-sm muted-2">评级</text><text class="t-md serif heavy" style="color:var(--clay)">{{report.rating}}</text></view>
+      <view class="row row--between mt-8"><text class="t-sm muted-2">历史最佳</text><text class="t-md serif heavy">{{report.best}}</text></view>
+      <view class="sc__again" bindtap="onReset">再来一次</view>
+    </view>
+  </view>
+</game-shell>

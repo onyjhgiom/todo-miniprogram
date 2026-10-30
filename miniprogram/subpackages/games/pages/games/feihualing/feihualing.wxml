@@ -1,0 +1,48 @@
+<game-shell title="{{title}}" timeText="{{timeText}}" statText="{{'连击 ' + combo}}" paused="{{paused}}"
+  win="{{win}}" winSub="{{winSub}}" winStats="{{winStats}}" winNewBest="{{winNewBest}}" winQuote="{{winQuote}}"
+  bind:back="onBack" bind:reset="onReset" bind:hint="onHint" bind:home="onHome" bind:pause="onPause"
+  bind:again="onAgain" bind:winhome="onWinHome">
+  <view class="fh">
+
+    <view class="fh__theme card--mint">
+      <text class="t-xs muted-2">飞花令 · 令字</text>
+      <text class="fh__kw serif">{{theme}}</text>
+      <text class="t-xs muted-2">写一句含「{{theme}}」字的诗词</text>
+    </view>
+
+    <view class="row row--between fh__prog">
+      <text class="t-xs muted-2">进度 {{solved}} / {{total}}</text>
+      <view class="fh__wrong" bindtap="toggleWrong">错题本 ({{wrongBook.length}})</view>
+    </view>
+
+    <view class="fh__answer {{locked ? (correct ? 'fh__answer--ok' : 'fh__answer--no') : ''}}">
+      <input class="fh__input" value="{{input}}" focus="{{focusInput}}" disabled="{{locked}}"
+        placeholder="例如：床前明月光…" placeholder-class="muted-3"
+        confirm-type="done" bindinput="onInput" bindconfirm="submit" />
+      <view wx:if="{{input && !locked}}" class="fh__clr" bindtap="onClear">×</view>
+    </view>
+
+    <view wx:if="{{locked && refAnswer}}" class="fh__ref">
+      <text class="t-xs muted-2">示范名句 · {{src}}</text>
+      <text class="t-md serif">「{{refAnswer}}」</text>
+    </view>
+
+    <view class="row fh__acts">
+      <view class="fh__btn fh__btn--ghost {{locked ? 'fh__btn--dim' : ''}}" bindtap="giveUp">看示范</view>
+      <view class="fh__btn fh__btn--primary {{locked ? 'fh__btn--dim' : ''}}" bindtap="submit">落笔</view>
+    </view>
+
+    <view class="fh__msg fh__msg--{{msgType}}">{{message}}</view>
+
+    <view wx:if="{{showWrong}}" class="fh__wb card--tint grain">
+      <text class="t-lg serif heavy">未答出的令字</text>
+      <view wx:if="{{wrongBook.length === 0}}" class="t-sm muted-2 mt-16">还没有记下的令字，继续加油！</view>
+      <view wx:for="{{wrongBook}}" wx:key="qid" class="fh__wbitem mt-16">
+        <text class="t-sm">{{item.q}}</text>
+        <text class="t-xs muted-2 mt-8">示范：{{item.a}}</text>
+      </view>
+      <view wx:if="{{wrongBook.length}}" class="fh__wbclear" bindtap="clearWrong">清空</view>
+    </view>
+
+  </view>
+</game-shell>

@@ -1,0 +1,73 @@
+<!--pages/love/anniv/anniv.wxml-->
+<view class="ay" style="{{skin.style}}">
+
+  <!-- 未绑定提示 -->
+  <view class="duo-banner" wx:if="{{!bound}}">
+    <text class="duo-banner__ico">🔒</text>
+    <view class="duo-banner__main">
+      <text class="duo-banner__t">当前未绑定，纪念日仅自己可见</text>
+      <text class="duo-banner__d">绑定后双方共同维护，一起倒数</text>
+    </view>
+    <view class="duo-banner__btn" bindtap="onGoBind">去绑定</view>
+  </view>
+
+  <!-- 添加 -->
+  <view class="ay-card ay-glass ay-anim">
+    <view class="ay-card__hd"><text class="ay-card__title">🎂 添加一个纪念日</text></view>
+
+    <view class="ay-field">
+      <text class="ay-field__label">名称</text>
+      <input class="ay-field__input" value="{{title}}" bindinput="onTitle"
+             placeholder="如：在一起纪念日" placeholder-class="ay-field__ph" maxlength="20" />
+    </view>
+
+    <view class="ay-field">
+      <text class="ay-field__label">日期</text>
+      <picker mode="date" value="{{date}}" bindchange="onDate">
+        <view class="ay-field__input">{{date}}</view>
+      </picker>
+    </view>
+
+    <view class="ay-field">
+      <text class="ay-field__label">每年重复</text>
+      <switch checked="{{yearly}}" bindchange="onYearly" color="#FF7F9C" />
+    </view>
+
+    <view class="ay-field">
+      <text class="ay-field__label">备注</text>
+      <input class="ay-field__input" value="{{note}}" bindinput="onNote"
+             placeholder="可不填" placeholder-class="ay-field__ph" maxlength="40" />
+    </view>
+
+    <view class="ay-wrap" style="margin-top:24rpx">
+      <view class="ay-btn ay-btn--block" hover-class="ay-btn--off" bindtap="onAdd">添加</view>
+    </view>
+  </view>
+
+  <!-- 列表 -->
+  <view class="ay-card ay-glass">
+    <view class="ay-card__hd"><text class="ay-card__title">⏳ 倒计时</text></view>
+
+    <block wx:if="{{list.length}}">
+      <view class="duo-anniv" wx:for="{{list}}" wx:key="id">
+        <view class="duo-anniv__days">
+          <text class="duo-anniv__n">{{item.daysText}}</text>
+          <text class="duo-anniv__u">{{item.days === 0 ? '就是今天' : (item.days > 0 ? '天后' : (item.yearly ? '已过' : '已结束'))}}</text>
+        </view>
+        <view class="duo-anniv__main">
+          <text class="duo-anniv__t">{{item.title}}</text>
+          <text class="duo-anniv__d">{{item.date}}{{item.yearly ? ' · 每年' : ' · 一次性'}}</text>
+        </view>
+        <text class="duo-anniv__del" bindtap="onDel" data-id="{{item.id}}">✕</text>
+      </view>
+    </block>
+
+    <view class="ay-empty" wx:else>
+      <view class="ay-empty__ico">🎂</view>
+      <view class="ay-empty__t">还没有纪念日</view>
+      <view class="ay-empty__t" style="margin-top:8rpx">把「在一起那天」加进来，每天都能看到又走过了多久</view>
+    </view>
+  </view>
+
+  <view class="duo-safe" />
+</view>

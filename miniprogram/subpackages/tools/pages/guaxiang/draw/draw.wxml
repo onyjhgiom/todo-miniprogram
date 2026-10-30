@@ -1,0 +1,179 @@
+<!--pages/guaxiang/draw/draw.wxml-->
+<view class="page themed gx" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <!-- 电影级舞台层：墨韵模式 -->
+  <fx-stage mode="ink" rays="{{true}}" dust="{{true}}" topglow="{{true}}" level="7" />
+
+  <!-- ===== 头部 ===== -->
+  <view class="head">
+    <view class="head__bar" style="background:{{heroGradient}}">
+      <view class="gx-seal" aria-hidden="true">爻</view>
+      <view class="head__decor">
+        <text class="head__line"></text>
+        <text class="head__dot"></text>
+        <text class="head__line"></text>
+      </view>
+      <text class="head__title">六爻涂爻 · 自画成卦</text>
+      <text class="head__sub">点按六爻切换阴阳，实时成卦 · 标记动爻推演变卦</text>
+    </view>
+  </view>
+
+  <scroll-view class="body" scroll-y enhanced show-scrollbar="{{false}}">
+
+    <!-- ===== 涂画编辑器 ===== -->
+    <view class="sec">
+      <view class="sec__header">
+        <text class="sec__title">涂画六爻</text>
+        <text class="sec__badge">{{benName || '—'}}</text>
+      </view>
+      <text class="sec__hint">从上爻（六）到初爻（一），点爻身切换阴阳，点右侧「动」标记动爻。</text>
+
+      <view class="draw-board">
+        <view class="draw-row" wx:for="{{editRows}}" wx:key="pos">
+          <text class="draw-row__idx">{{item.pos}}</text>
+          <view class="gua__bars draw-bars" hover-class="press" hover-stay-time="60"
+                bindtap="onToggleLine" data-pos="{{item.pos}}">
+            <block wx:if="{{item.value === 1}}">
+              <view class="gua__bar gua__bar--yang"></view>
+            </block>
+            <block wx:else>
+              <view class="gua__bar gua__bar--yin"></view>
+              <view class="gua__bar gua__bar--gap"></view>
+              <view class="gua__bar gua__bar--yin"></view>
+            </block>
+          </view>
+          <view class="draw-row__move {{item.moving ? 'is-on' : ''}}" hover-class="press" hover-stay-time="60"
+                bindtap="onToggleMoving" data-pos="{{item.pos}}">
+            <text>{{item.moving ? '动' : '—'}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="draw-acts">
+        <view class="draw-act" hover-class="press" hover-stay-time="60" bindtap="onRandom">
+          <text>🎲 随机成卦</text>
+        </view>
+        <view class="draw-act" hover-class="press" hover-stay-time="60" bindtap="onReset">
+          <text>↺ 重置乾卦</text>
+        </view>
+        <view class="draw-act {{hasMoving ? '' : 'is-dim'}}" hover-class="press" hover-stay-time="60" bindtap="onClearMoving">
+          <text>✕ 清除动爻</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- ===== 结果 ===== -->
+    <block wx:if="{{reading}}">
+      <view class="card result">
+
+        <view class="res__head">
+          <view class="res__name-wrap">
+            <text class="res__name">{{reading.ben.fullName}}</text>
+          </view>
+          <text class="res__num">第 {{reading.ben.num}} 卦</text>
+        </view>
+
+        <!-- 本卦卦画 -->
+        <view class="gua-section">
+          <text class="gua-section__title">本卦</text>
+          <view class="gua">
+            <view class="gua__row" wx:for="{{reading.benLines}}" wx:key="index">
+              <view class="gua__bars">
+                <block wx:if="{{item.type === 'yang'}}">
+                  <view class="gua__bar gua__bar--yang {{item.moving ? 'is-moving' : ''}}"></view>
+                </block>
+                <block wx:else>
+                  <view class="gua__bar gua__bar--yin {{item.moving ? 'is-moving' : ''}}"></view>
+                  <view class="gua__bar gua__bar--gap"></view>
+                  <view class="gua__bar gua__bar--yin {{item.moving ? 'is-moving' : ''}}"></view>
+                </block>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view class="blk blk--cite">
+          <view class="blk__header">
+            <text class="blk__tag">卦辞</text>
+            <text class="blk__tag-sub">古籍原文</text>
+          </view>
+          <text class="blk__cite">{{reading.benCi}}</text>
+        </view>
+
+        <view class="blk blk--cite">
+          <view class="blk__header">
+            <text class="blk__tag">象传</text>
+            <text class="blk__tag-sub">古籍原文</text>
+          </view>
+          <text class="blk__cite">{{reading.benXiang}}</text>
+        </view>
+
+        <view class="blk">
+          <view class="blk__header">
+            <text class="blk__tag">卦意今解</text>
+          </view>
+          <text class="blk__text">{{reading.benPhilosophy}}</text>
+        </view>
+
+        <!-- 变卦 -->
+        <view class="blk" wx:if="{{reading.bian}}">
+          <view class="blk__header">
+            <text class="blk__tag">变卦 · {{reading.bian.fullName}}</text>
+          </view>
+          <view class="gua gua--sm">
+            <view class="gua__row" wx:for="{{reading.bianLines}}" wx:key="index">
+              <view class="gua__bars">
+                <block wx:if="{{item.type === 'yang'}}">
+                  <view class="gua__bar gua__bar--yang"></view>
+                </block>
+                <block wx:else>
+                  <view class="gua__bar gua__bar--yin"></view>
+                  <view class="gua__bar gua__bar--gap"></view>
+                  <view class="gua__bar gua__bar--yin"></view>
+                </block>
+              </view>
+            </view>
+          </view>
+          <text class="blk__text">{{reading.bianPhilosophy}}</text>
+        </view>
+
+        <view class="blk blk--guide">
+          <view class="blk__header">
+            <text class="blk__tag blk__tag--primary">人生疏导</text>
+          </view>
+          <text class="blk__text">{{reading.guide}}</text>
+        </view>
+
+        <view class="blk">
+          <view class="blk__header">
+            <text class="blk__tag">可行之法</text>
+          </view>
+          <text class="blk__text">{{reading.advice}}</text>
+        </view>
+
+        <view class="kw-row" wx:if="{{reading.keywords.length}}">
+          <text class="kw" wx:for="{{reading.keywords}}" wx:key="*this">{{item}}</text>
+        </view>
+
+        <view class="res__tip-wrap">
+          <text class="res__tip">{{disclaimerShort}}</text>
+        </view>
+
+        <view class="acts">
+          <view class="act act--primary" hover-class="press" hover-stay-time="60" bindtap="onCopy">
+            <text class="act__icon">📋</text>
+            <text class="act__text">复制解读</text>
+          </view>
+          <view class="act" hover-class="press" hover-stay-time="60" bindtap="onViewLibrary">
+            <text class="act__icon">📖</text>
+            <text class="act__text">六十四卦</text>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <view class="safe-bottom" />
+  </scroll-view>
+
+  <view class="disclaimer">{{disclaimer}}</view>
+</view>

@@ -1,0 +1,285 @@
+<!-- pages/recruit/resume.wxml -->
+<view class="rm themed" data-theme="{{theme}}" style="{{themeStyle}}">
+  <view class="rm__hero" style="background:{{heroGradient}}">
+    <text class="rm__hero-title">📄 我的简历</text>
+    <text class="rm__hero-sub">填经历 → 按岗位智能提炼 → 一键生成 PDF，可预览 / 转发 / 保存</text>
+  </view>
+
+  <view class="rm__tip">{{tip}}</view>
+
+  <!-- 简历诊断：结构 + 内容打分，每条扣分给「怎么补」 -->
+  <view class="rm__card rm__diag" wx:if="{{diagReady && diag}}">
+    <view class="rm__card-title">
+      简历诊断
+      <text class="rm__diag-score rm__diag-score--{{diag.levelKey}}">{{diag.score}} 分 · {{diag.level}}</text>
+    </view>
+
+    <view class="rm__sub">结构完整性</view>
+    <view class="rm__checks">
+      <view class="rm__chk {{item.ok ? 'rm__chk--ok' : 'rm__chk--no'}}" wx:for="{{diag.checks}}" wx:key="key">
+        <text class="rm__chk-dot">{{item.ok ? '✓' : '!'}}</text>
+        <text class="rm__chk-label">{{item.label}}</text>
+      </view>
+    </view>
+
+    <view class="rm__sub">关键指标</view>
+    <view class="rm__metrics">
+      <view class="rm__metric {{item.good ? 'rm__metric--ok' : 'rm__metric--no'}}" wx:for="{{diag.metrics}}" wx:key="label">
+        <text class="rm__metric-v">{{item.value}}</text>
+        <text class="rm__metric-l">{{item.label}}</text>
+      </view>
+    </view>
+
+    <block wx:if="{{diag.strengths.length}}">
+      <view class="rm__sub">亮点</view>
+      <view class="rm__pills">
+        <text class="rm__pill rm__pill--ok" wx:for="{{diag.strengths}}" wx:key="*this">{{item}}</text>
+      </view>
+    </block>
+
+    <block wx:if="{{diag.issues.length}}">
+      <view class="rm__sub">待补强（按优先级）</view>
+      <view class="rm__issue" wx:for="{{diag.issues}}" wx:key="title">
+        <text class="rm__issue-badge rm__issue-badge--{{item.level}}">{{item.level === 'high' ? '优先' : item.level === 'mid' ? '建议' : '可选'}}</text>
+        <text class="rm__issue-title">{{item.title}}</text>
+        <text class="rm__issue-fix">{{item.fix}}</text>
+      </view>
+    </block>
+
+    <view class="rm__sub">下一步</view>
+    <view class="rm__next" wx:for="{{diag.nextActions}}" wx:key="*this">👉 {{item}}</view>
+  </view>
+
+  <!-- 岗位匹配 · 智能提炼：按目标岗位 / JD 关键词突出相关经历（本地算，离线可用） -->
+  <view class="rm__card rm__smart">
+    <view class="rm__card-title">
+      岗位匹配 · 智能提炼
+      <text class="rm__tag" wx:if="{{match && !match.noContext}}">覆盖率 {{match.coverage}}%</text>
+    </view>
+
+    <view class="rm__field">
+      <text class="rm__label">目标岗位（决定突出哪段经历）</text>
+      <input class="rm__input" placeholder="如 后端开发 / 数据分析（留空则取求职意向或最近投递）"
+        value="{{jobTarget}}" data-field="jobTarget" bindinput="onJobField" confirm-type="next" cursor-spacing="24" adjust-position />
+    </view>
+    <view class="rm__field">
+      <text class="rm__label">粘贴 JD（可选，自动抽关键词）</text>
+      <textarea class="rm__area rm__area--jd" placeholder="把招聘 JD 粘进来，系统会抽出关键词并据此匹配、重排"
+        value="{{jdText}}" data-field="jdText" bindinput="onJobField" cursor-spacing="24" adjust-position></textarea>
+    </view>
+
+    <block wx:if="{{match && !match.noContext}}">
+      <view class="rm__sub">已命中关键词</view>
+      <view class="rm__pills" wx:if="{{match.hits.length}}">
+        <text class="rm__pill rm__pill--ok" wx:for="{{match.hits}}" wx:key="word">{{item.word}} ×{{item.count}}</text>
+      </view>
+      <view class="rm__smart-empty" wx:else>一个都还没命中 —— 确认目标岗位，或把 JD 粘进来重新抽词。</view>
+
+      <block wx:if="{{match.gaps.length}}">
+        <view class="rm__sub">还没出现的关键词</view>
+        <view class="rm__pills">
+          <text class="rm__pill rm__pill--gap" wx:for="{{match.gaps}}" wx:key="*this">{{item}}</text>
+        </view>
+      </block>
+
+      <block wx:if="{{match.highlights.length}}">
+        <view class="rm__sub">最值得突出的经历</view>
+        <view class="rm__hit" wx:for="{{match.highlights}}" wx:key="id">
+          <view class="rm__hit-main">
+            <text class="rm__hit-name">{{item.primary}}</text>
+            <text class="rm__hit-sub" wx:if="{{item.secondary}}">{{item.secondary}}</text>
+          </view>
+          <text class="rm__hit-lv rm__hit-lv--{{item.level}}">{{item.levelText}}</text>
+        </view>
+      </block>
+
+      <block wx:if="{{match.tips.length}}">
+        <view class="rm__sub">怎么补</view>
+        <view class="rm__next" wx:for="{{match.tips}}" wx:key="*this">👉 {{item}}</view>
+      </block>
+
+      <view class="rm__btn rm__btn--smart {{polishing ? 'rm__btn--busy' : ''}}" bindtap="onPolish">
+        {{polishing ? '整理中…' : '🎯 按岗位突出经历（重排要点 · 可再编辑）'}}
+      </view>
+      <view class="rm__hint">只调整顺序与标点，不会改写你的原话；想让措辞更专业请用下面的 AI 提炼润色。</view>
+    </block>
+    <view class="rm__smart-empty" wx:else>
+      填写目标岗位或粘贴一段 JD 后，这里会算出「命中了什么、缺什么、哪段该往前排」。
+    </view>
+  </view>
+
+  <!-- 目标匹配：简历 vs 已有投递的 JD，按匹配度排序 -->
+  <block wx:if="{{goal.has}}">
+    <view class="rm__card" wx:if="{{matchList.length}}">
+      <view class="rm__card-title">
+        目标匹配
+        <text class="rm__tag">按「{{goal.target}}」</text>
+      </view>
+      <view class="rm__goal-src">{{goal.source}}</view>
+      <view class="rm__match" wx:for="{{matchList}}" wx:key="appId" data-id="{{item.appId}}" bindtap="onMatchTap">
+        <view class="rm__match-main">
+          <text class="rm__match-co">{{item.company}}</text>
+          <text class="rm__match-pos">{{item.position}}</text>
+        </view>
+        <view class="rm__match-score">
+          <text class="rm__match-num">{{item.score}}</text>
+          <text class="rm__match-tag">命中 {{item.hit}}/{{item.total}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="rm__card rm__card--plain" wx:else>
+      <view class="rm__goal-empty-title">还没有可匹配的投递</view>
+      <view class="rm__goal-empty">去首页粘贴 JD 建卡，或在投递里「提取关键词」后，这里会列出你简历最匹配的岗位。</view>
+    </view>
+  </block>
+  <view class="rm__card rm__card--plain" wx:else>
+    <view class="rm__goal-empty-title">先定一个求职意向</view>
+    <view class="rm__goal-empty">在上方填写「求职意向」（如 后端开发 / 数据分析），诊断会按它算匹配度，推荐也会更准。也可不填——系统会按你最近投递的岗位反推。</view>
+  </view>
+
+  <!-- 基本信息 -->
+  <view class="rm__card">
+    <view class="rm__card-title">基本信息</view>
+    <view class="rm__field">
+      <text class="rm__label">姓名</text>
+      <input class="rm__input {{nameErr ? 'rm__input--err' : ''}}" placeholder="你的名字" value="{{name}}" data-field="name" bindinput="onField" confirm-type="next" cursor-spacing="24" adjust-position />
+      <text class="rm__err ix-shake" wx:if="{{nameErr}}">请先填写姓名，它会印在简历页眉</text>
+    </view>
+    <view class="rm__field">
+      <text class="rm__label">求职意向</text>
+      <input class="rm__input" placeholder="如 前后端工程师 / 互联网 IT" value="{{headline}}" data-field="headline" bindinput="onField" confirm-type="next" cursor-spacing="24" adjust-position />
+    </view>
+    <view class="rm__row2">
+      <view class="rm__field rm__field--half">
+        <text class="rm__label">期望薪资</text>
+        <input class="rm__input" placeholder="如 4K-12K" value="{{salary}}" data-field="salary" bindinput="onField" confirm-type="next" cursor-spacing="24" adjust-position />
+      </view>
+      <view class="rm__field rm__field--half">
+        <text class="rm__label">期望城市</text>
+        <input class="rm__input" placeholder="如 上海" value="{{city}}" data-field="city" bindinput="onField" confirm-type="next" cursor-spacing="24" adjust-position />
+      </view>
+    </view>
+    <view class="rm__field">
+      <text class="rm__label">联系方式</text>
+      <textarea class="rm__area" placeholder="每行一个，如：&#10;138-0000-0000&#10;name@example.com&#10;上海" value="{{contacts}}" data-field="contacts" bindinput="onField" cursor-spacing="24" adjust-position></textarea>
+    </view>
+    <view class="rm__sub2">证件照（可选，显示在页眉右上角）</view>
+    <view class="rm__photo" wx:if="{{photo}}">
+      <image class="rm__photo-thumb" src="{{photo.path}}" mode="aspectFill" />
+      <view class="rm__photo-del" bindtap="removePhoto">×</view>
+    </view>
+    <view class="rm__img-add" bindtap="pickPhoto">＋ 上传证件照</view>
+  </view>
+
+  <!-- 经历 -->
+  <view class="rm__card" wx:for="{{sections}}" wx:for-item="sec" wx:for-index="si" wx:key="key">
+    <view class="rm__card-title">{{sec.title}}</view>
+    <view class="rm__item" wx:for="{{sec.items}}" wx:for-item="it" wx:for-index="ii" wx:key="index">
+      <view class="rm__item-head">
+        <text class="rm__item-no">#{{ii + 1}}</text>
+        <view class="rm__item-del" data-si="{{si}}" data-ii="{{ii}}" bindtap="removeItem">删除</view>
+      </view>
+      <input class="rm__input" placeholder="公司 / 学校 / 项目名" value="{{it.primary}}"
+        data-si="{{si}}" data-ii="{{ii}}" data-field="primary" bindinput="onItem" confirm-type="next" cursor-spacing="24" adjust-position />
+      <input class="rm__input" placeholder="岗位 / 专业 / 角色" value="{{it.secondary}}"
+        data-si="{{si}}" data-ii="{{ii}}" data-field="secondary" bindinput="onItem" confirm-type="next" cursor-spacing="24" adjust-position />
+      <input class="rm__input" placeholder="时间，如 2026.03 - 2026.08" value="{{it.meta}}"
+        data-si="{{si}}" data-ii="{{ii}}" data-field="meta" bindinput="onItem" confirm-type="next" cursor-spacing="24" adjust-position />
+      <textarea class="rm__area" placeholder="要点，每行一条。建议用 STAR：背景 / 动作 / 量化结果"
+        value="{{it.bullets}}" auto-height
+        data-si="{{si}}" data-ii="{{ii}}" data-field="bullets" bindinput="onItem" cursor-spacing="24" adjust-position></textarea>
+    </view>
+    <view class="rm__imgs" wx:if="{{sec.images && sec.images.length}}">
+      <view class="rm__img" wx:for="{{sec.images}}" wx:for-item="im" wx:for-index="ii" wx:key="id">
+        <image class="rm__img-thumb" src="{{im.path}}" mode="aspectFill" />
+        <input class="rm__img-cap" placeholder="图注（可选）" value="{{im.caption}}"
+          data-si="{{si}}" data-ii="{{ii}}" bindinput="onImgCaption" confirm-type="done" cursor-spacing="24" adjust-position />
+        <view class="rm__img-del" data-si="{{si}}" data-ii="{{ii}}" bindtap="removeImg">×</view>
+      </view>
+    </view>
+    <view class="rm__img-add" data-si="{{si}}" bindtap="pickImages">＋ 上传图片（证书 / 作品 / 截图）</view>
+    <view class="rm__add" data-si="{{si}}" bindtap="addItem">＋ 添加一段{{sec.title}}</view>
+  </view>
+
+  <!-- 技能与自我评价 -->
+  <view class="rm__card">
+    <view class="rm__card-title">技能与证书</view>
+    <textarea class="rm__area" placeholder="如 Excel（SUMIFS/透视表）· SQL · CPA 已过 2 科 · CET-6 580"
+      value="{{skills}}" data-field="skills" bindinput="onField" auto-height cursor-spacing="24" adjust-position></textarea>
+  </view>
+  <view class="rm__card">
+    <view class="rm__card-title">自我评价</view>
+    <textarea class="rm__area" placeholder="用 STAR 写一段能讲 3 分钟的经历，比形容词更有说服力"
+      value="{{summary}}" data-field="summary" bindinput="onField" auto-height cursor-spacing="24" adjust-position></textarea>
+  </view>
+
+  <!-- 简历语言 -->
+  <view class="rm__card">
+    <view class="rm__card-title">简历语言</view>
+    <view class="rm__themes">
+      <view class="rm__theme {{lang === item.key ? 'rm__theme--on' : ''}}"
+        wx:for="{{langList}}" wx:key="key" data-key="{{item.key}}" bindtap="onLang"
+        style="background:{{item.color}}">{{item.name}}</view>
+    </view>
+    <view class="rm__hint">{{lang === 'en' ? 'English：AI 补充润色将输出英文简历' : '中文：AI 补充润色输出中文简历（默认）'}}</view>
+  </view>
+
+  <!-- PDF 版式（样式层：切换只改排版，不动任何已填内容） -->
+  <view class="rm__card">
+    <view class="rm__card-title">
+      PDF 版式
+      <block wx:for="{{layoutList}}" wx:key="key">
+        <text class="rm__tag" wx:if="{{layout === item.key}}">{{item.style}}</text>
+      </block>
+    </view>
+    <view class="rm__layouts">
+      <view class="rm__layout {{layout === item.key ? 'rm__layout--on' : ''}}"
+        wx:for="{{layoutList}}" wx:key="key" data-key="{{item.key}}" bindtap="onLayout">
+        <text class="rm__layout-name">{{item.name}}</text>
+        <text class="rm__layout-desc">{{item.desc}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- PDF 配色（样式层：与内容解耦，选择会被记住） -->
+  <view class="rm__card">
+    <view class="rm__card-title">PDF 配色</view>
+    <view class="rm__themes">
+      <view class="rm__theme {{themeIdx === index ? 'rm__theme--on' : ''}}"
+        wx:for="{{themeList}}" wx:key="name" data-idx="{{index}}" bindtap="onTheme"
+        style="background:{{item.accent}}">{{item.name}}</view>
+    </view>
+  </view>
+
+  <!-- 操作 -->
+  <!-- 忙碌态：按钮置灰并锁住点击，避免重复提交生成两个 PDF -->
+  <view class="rm__btn rm__btn--ai {{enhancing ? 'rm__btn--busy' : ''}}" bindtap="enhance">
+    {{enhancing ? '✨ AI 提炼中…' : '✨ AI 提炼润色（按目标岗位润色并扩充为完整简历）'}}
+  </view>
+  <view class="rm__actions">
+    <view class="rm__btn rm__btn--ghost" bindtap="openTemplates">套用模板</view>
+    <view class="rm__btn rm__btn--primary {{generating ? 'rm__btn--busy' : ''}}" bindtap="generate">
+      {{generating ? '排版中…' : '生成 PDF'}}
+    </view>
+  </view>
+  <view class="rm__btn rm__btn--line" wx:if="{{pdfFileId || pdfPath}}" bindtap="onOpenPdf">打开已生成的 PDF</view>
+
+  <!-- 离屏 canvas：仅用于渲染，不展示 -->
+  <canvas type="2d" id="resumeCv" class="rm__canvas"></canvas>
+
+  <!-- 模板选择 -->
+  <view class="rm__mask" wx:if="{{showTemplates}}" bindtap="closeTemplates">
+    <view class="rm__sheet" catchtap="">
+      <text class="rm__sheet-title">选择简历模板</text>
+      <text class="rm__sheet-sub">一键切换内容骨架，版式与配色保持不变；已填内容会先问你要不要保留</text>
+      <block wx:for="{{templateGroups}}" wx:for-item="g" wx:key="key">
+        <view class="rm__tpl-group">{{g.name}}</view>
+        <view class="rm__tpl" wx:for="{{g.items}}" wx:for-item="t" wx:key="idx" data-idx="{{t.idx}}" bindtap="useTemplate">
+          <text class="rm__tpl-name">{{t.title}}</text>
+          <text class="rm__tpl-desc" wx:if="{{t.desc}}">{{t.desc}}</text>
+        </view>
+      </block>
+      <view class="rm__sheet-cancel" bindtap="closeTemplates">取消</view>
+    </view>
+  </view>
+</view>

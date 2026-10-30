@@ -1,0 +1,21 @@
+<game-shell title="{{title}}" timeText="{{timeText}}" statText="{{done + '/' + total}}" paused="{{paused}}"
+  bind:back="onBack" bind:reset="onReset" bind:hint="onHint" bind:home="onHome" bind:pause="onPause">
+  <view class="os">
+    <view class="row row--between os__nav">
+      <view class="os__navbtn" bindtap="prevLevel">‹ 上一关</view>
+      <text class="t-md serif heavy">第 {{level}} 关</text>
+      <view class="os__navbtn" bindtap="nextLevel">下一关 ›</view>
+    </view>
+    <text class="t-xs muted-2 center">已解锁至第 {{unlocked}} 关 · 点节点沿未画连线一笔走完</text>
+
+    <view class="os__board">
+      <canvas type="2d" id="cv" class="os__cv" disable-scroll bindtouchstart="onTouch"></canvas>
+    </view>
+
+    <view class="os__msg os__msg--{{msgType}}">{{message}}</view>
+    <view class="row row--between t-sm muted-2">
+      <text>积分 {{points}}</text>
+      <text>已完成 {{done}}/{{total}}</text>
+    </view>
+  </view>
+</game-shell>

@@ -1,0 +1,335 @@
+/* pages/group-reminder/group-reminder.wxss */
+/* 多人提醒 · 参照 multi_person_reminder_optimized.html 的暖调高级视觉：
+   奶油暖底 + 淡紫蓝主色 + 樱花粉点缀 + 紧凑记录行。
+   注意：本页 ts-card / ts-btn 仍走 tool-shell 的 CSS 变量（跟随全局主题），
+   而本页自有组件用固定暖色，保证与参考图观感一致。 */
+@import "../../styles/tool-shell.wxss";
+
+.gr {
+  padding-bottom: calc(190rpx + env(safe-area-inset-bottom));
+}
+
+/* ============================ 顶部概览 ============================ */
+.gr__top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 26rpx;
+}
+.gr__sum { display: flex; align-items: baseline; gap: 18rpx; }
+.gr__num {
+  font-size: 92rpx; font-weight: 700; line-height: 1;
+  letter-spacing: -4rpx;
+  background: linear-gradient(135deg, #6F84C8, #9C83C6);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.gr__sum-lab { font-size: 26rpx; color: #8B8583; }
+.gr__acts { display: flex; gap: 18rpx; }
+.gr__round {
+  width: 104rpx; height: 104rpx; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 44rpx; color: #6E6767;
+  background: rgba(255, 255, 255, 0.85);
+  border: 2rpx solid #FFFFFF;
+  box-shadow: 0 18rpx 48rpx rgba(102, 82, 72, 0.11);
+}
+.gr__round--tap { transform: scale(0.94); }
+
+/* ============================ 引导卡 ============================ */
+.gr__intro {
+  position: relative; overflow: hidden;
+  padding: 34rpx 30rpx 30rpx;
+  margin-bottom: 24rpx;
+  border-radius: 44rpx;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 250, 247, 0.91));
+  border: 2rpx solid #FFFFFF;
+  box-shadow: 0 26rpx 64rpx rgba(105, 80, 71, 0.09);
+}
+.gr__intro-b {
+  display: block;
+  font-size: 30rpx; font-weight: 700; color: #625B5B; line-height: 1.5;
+}
+.gr__intro-t {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 28rpx; color: #817A79; line-height: 1.65;
+}
+.gr__intro-mini {
+  display: flex; align-items: center; gap: 10rpx;
+  margin-top: 18rpx;
+  font-size: 22rpx; color: #A39A98;
+}
+.gr__dot {
+  width: 12rpx; height: 12rpx; border-radius: 50%;
+  background: #EF9EAB; flex-shrink: 0;
+}
+.gr__intro-heart {
+  position: absolute; right: 28rpx; top: 10rpx;
+  font-size: 76rpx; color: #F3D2D6;
+  transform: rotate(12deg);
+}
+
+/* ============================ 三指标数据条 ============================ */
+.gr__strip {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16rpx;
+  margin-bottom: 8rpx;
+}
+.gr__metric {
+  padding: 20rpx 22rpx;
+  border-radius: 32rpx;
+  background: rgba(255, 255, 255, 0.62);
+  border: 2rpx solid #FFFFFF;
+  box-shadow: 0 14rpx 40rpx rgba(106, 85, 73, 0.05);
+}
+.gr__metric-num {
+  display: block;
+  font-size: 38rpx; font-weight: 700; color: #6E80BD; line-height: 1.1;
+}
+.gr__metric-lab {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 20rpx; color: #9A9090;
+}
+.gr__metric--green .gr__metric-num { color: #71A48A; }
+.gr__metric--gold .gr__metric-num { color: #C9984B; }
+
+/* ============================ 空态（双人插画） ============================ */
+.gr__empty {
+  position: relative;
+  height: 430rpx;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+}
+.gr__people {
+  position: relative;
+  width: 144rpx; height: 110rpx;
+  margin-bottom: 24rpx;
+  filter: drop-shadow(0 18rpx 18rpx rgba(91, 74, 130, 0.19));
+}
+.gr__person {
+  position: absolute; bottom: 0;
+  width: 62rpx; height: 62rpx;
+  border-radius: 50% 50% 43% 43%;
+  background: linear-gradient(180deg, #7863A9, #56448C);
+}
+.gr__person::before {
+  content: '';
+  position: absolute; left: 14rpx; top: -26rpx;
+  width: 36rpx; height: 36rpx;
+  border-radius: 50%;
+  background: #705B9F;
+}
+.gr__person--l { left: 12rpx; }
+.gr__person--r { right: 12rpx; transform: scale(0.92); }
+.gr__empty-t {
+  font-size: 38rpx; color: #81797B; margin-bottom: 14rpx;
+}
+.gr__empty-d {
+  font-size: 24rpx; line-height: 1.8; color: #9D9698;
+  white-space: pre-line;
+}
+.gr__empty-hint {
+  margin-top: 22rpx;
+  padding: 14rpx 24rpx;
+  border-radius: 30rpx;
+  font-size: 24rpx; color: #827CA2;
+  background: rgba(255, 255, 255, 0.44);
+}
+.gr__spark {
+  position: absolute;
+  font-size: 34rpx; color: #EFB4BD;
+}
+.gr__spark--l { left: 64rpx; top: 110rpx; transform: rotate(-15deg); }
+.gr__spark--r { right: 74rpx; top: 152rpx; color: #D5C69B; transform: rotate(12deg); }
+
+/* ============================ 场景快捷入口 ============================ */
+.gr__scenes {
+  display: flex; gap: 16rpx; flex-wrap: wrap;
+  justify-content: center;
+  margin: -6rpx 0 24rpx;
+}
+.gr__scene {
+  padding: 12rpx 20rpx;
+  border-radius: 28rpx;
+  font-size: 22rpx; color: #8C7C7D;
+  background: rgba(255, 255, 255, 0.56);
+  border: 2rpx solid #FFFFFF;
+  box-shadow: 0 10rpx 24rpx rgba(106, 85, 73, 0.04);
+}
+.gr__scene-b { font-weight: 500; }
+.gr__scene--tap { transform: scale(0.96); }
+
+/* ============================ 提醒记录卡 ============================ */
+.gr__section {
+  margin-top: 8rpx;
+  border-radius: 44rpx;
+  background: rgba(255, 255, 255, 0.94);
+  border: 2rpx solid #FFFFFF;
+  box-shadow: 0 26rpx 64rpx rgba(105, 80, 71, 0.09);
+  overflow: hidden;
+}
+.gr__sec-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 34rpx;
+  height: 124rpx;
+}
+.gr__sec-head--tap { opacity: 0.7; }
+.gr__sec-name {
+  position: relative;
+  font-size: 36rpx; font-weight: 700; color: #51494A;
+  padding-left: 20rpx;
+}
+/* 标题左侧粉色短竖条（参考图细节） */
+.gr__sec-name::before {
+  content: '';
+  position: absolute; left: 0; top: 50%;
+  width: 8rpx; height: 40rpx;
+  margin-top: -20rpx;
+  border-radius: 8rpx;
+  background: #EDA2AE;
+}
+.gr__sec-right { display: flex; align-items: center; }
+.gr__sec-count {
+  font-size: 22rpx; color: #8F969E;
+  padding: 8rpx 20rpx; border-radius: 30rpx;
+  background: #F0F1F4;
+}
+.gr__sec-arrow { margin-left: 14rpx; font-size: 22rpx; color: #7787C1; }
+
+.gr__records { padding: 0 26rpx 26rpx; }
+.gr__record { border-top: 2rpx solid #F0E9E5; }
+.gr__rec-row {
+  display: flex; align-items: center; gap: 20rpx;
+  padding: 26rpx 12rpx;
+}
+.gr__record--tap { opacity: 0.7; }
+.gr__rec-avatar {
+  width: 84rpx; height: 84rpx; border-radius: 28rpx;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40rpx;
+  background: #FFE5E9;
+  box-shadow: 0 10rpx 24rpx rgba(118, 82, 76, 0.08);
+  flex-shrink: 0;
+}
+.gr__rec-main { flex: 1; min-width: 0; }
+.gr__rec-t {
+  display: block;
+  font-size: 28rpx; font-weight: 600; color: #51494A;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.gr__rec-meta {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx; color: #A69C9C;
+}
+.gr__rec-status {
+  flex-shrink: 0;
+  font-size: 20rpx; padding: 8rpx 16rpx; border-radius: 24rpx;
+  background: #E9F5ED; color: #6B9F82;
+}
+.gr__rec-status.is-off { background: #F0F1F4; color: #8F969E; }
+.gr__rec-more {
+  flex-shrink: 0;
+  width: 52rpx; height: 52rpx;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  font-size: 30rpx; color: #A69C9C;
+  background: #F7F3F1;
+}
+
+/* 行内展开的操作区 */
+.gr__rec-acts { padding: 0 12rpx 26rpx; }
+.gr__rec-note {
+  font-size: 24rpx; color: #8B8583; line-height: 1.6;
+  padding: 16rpx 20rpx; margin-bottom: 16rpx;
+  border-radius: 20rpx;
+  background: #FBF7F5;
+}
+.gr__rec-members { display: flex; flex-wrap: wrap; gap: 16rpx; }
+.gr__mchip { display: flex; align-items: center; gap: 10rpx; }
+.gr__mchip-av {
+  width: 44rpx; height: 44rpx; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24rpx; color: #FFFFFF;
+}
+.gr__mchip-nm { font-size: 22rpx; color: #8B8583; }
+.gr__rec-status2 {
+  margin-top: 16rpx;
+  font-size: 22rpx; color: #A69C9C;
+}
+.gr__rec-btns { display: flex; flex-wrap: wrap; gap: 14rpx; margin-top: 18rpx; }
+.gr__mini {
+  font-size: 22rpx; color: #817A79;
+  padding: 10rpx 22rpx; border-radius: 30rpx;
+  background: #F7F3F1;
+  line-height: 1.5;
+}
+/* button 元素需重置默认样式 */
+.gr__mini--share {
+  margin: 0; border: none; display: inline-block;
+  color: #7787C1; background: #EEF1F9;
+}
+.gr__mini--share::after { border: none; }
+.gr__mini--primary { color: #FFFFFF; background: linear-gradient(135deg, #8E9FD4, #7E8CC4); }
+.gr__mini--danger { color: #C97B84; background: #FCEDEF; }
+.gr__mini--tap { transform: scale(0.95); opacity: 0.85; }
+
+/* 分享深链高亮 */
+.gr__record.is-highlight { background: #FFF6F7; }
+
+/* ============================ 触发记录 ============================ */
+.gr__logs { margin-top: 24rpx; }
+.logs__head { display: flex; align-items: center; gap: 12rpx; }
+.logs__title { flex: 1; font-size: 30rpx; font-weight: 600; }
+.logs__count {
+  font-size: 22rpx; color: var(--color-text-mute);
+  background: var(--color-bg-soft); padding: 4rpx 14rpx; border-radius: 999rpx;
+}
+.logs__arrow { font-size: 22rpx; color: var(--color-primary); }
+.logs__empty { font-size: 24rpx; color: var(--color-text-mute); margin-top: 16rpx; }
+.log {
+  padding: 16rpx 0;
+  border-top: 1rpx solid var(--color-border);
+  margin-top: 12rpx;
+}
+.log__main { display: flex; align-items: center; gap: 12rpx; }
+.log__title { flex: 1; font-size: 28rpx; font-weight: 500; }
+.log__chan, .log__status {
+  font-size: 20rpx; padding: 4rpx 12rpx; border-radius: 999rpx;
+  background: var(--color-bg-soft); color: var(--color-text-soft);
+}
+.log__chan--subscribe { background: var(--color-primary-soft); color: var(--color-primary); }
+.log__status--shown { background: var(--color-primary-soft); color: var(--color-primary); }
+.log__status--pushed { background: rgba(16, 185, 129, 0.12); color: var(--color-success); }
+.log__status--failed { background: rgba(239, 68, 68, 0.12); color: var(--color-danger); }
+.log__sub { font-size: 22rpx; color: var(--color-text-mute); margin-top: 8rpx; }
+.logs__clear {
+  margin-top: 20rpx; text-align: center;
+  font-size: 24rpx; color: var(--color-danger);
+  padding: 14rpx 0; border-radius: 999rpx;
+  background: rgba(239, 68, 68, 0.08);
+}
+.gr__tip {
+  margin-top: 34rpx;
+  text-align: center;
+  font-size: 22rpx; color: #AAA09E;
+}
+.gr__tip text { color: #D9909E; }
+
+/* ============================ 悬浮按钮（圆角方形） ============================ */
+.gr__fab {
+  position: fixed;
+  right: 32rpx;
+  bottom: calc(46rpx + env(safe-area-inset-bottom));
+  width: 128rpx; height: 128rpx;
+  border-radius: 44rpx;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 62rpx; color: #FFFFFF;
+  background: linear-gradient(145deg, #F6B0B9, #DF8797);
+  border: 8rpx solid #FFFFFF;
+  box-shadow: 0 26rpx 56rpx rgba(212, 119, 133, 0.32);
+  z-index: 20;
+}
+.gr__fab--tap { transform: translateY(-6rpx); }
+
+/* ============================ 弹层微调 ============================ */
+.sheet__heart { color: #EDA2AE; }
+.field__input--sm { min-height: 88rpx; }

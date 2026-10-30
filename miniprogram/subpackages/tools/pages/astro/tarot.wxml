@@ -1,0 +1,130 @@
+<!--pages/astro/tarot.wxml
+  塔罗占卜：模式 Tab（图鉴 / 占卜）+ 占卜三步骤（输入问题 → 选牌阵 → 翻牌）
+  CSS3D 翻牌：card class 添加 is-flipped 切换 transform rotateY 180deg
+-->
+<view class="astro-page">
+  <view class="astro-statusbar"></view>
+
+  <!-- 顶部模式 Tab -->
+  <view class="astro-card">
+    <view class="horo-tab">
+      <view class="horo-tab__item {{mode === 'draw' ? 'is-active' : ''}}"
+        hover-class="horo-tab__item--hover" hover-stay-time="50"
+        bindtap="onSwitchMode" data-mode="draw">抽牌占卜</view>
+      <view class="horo-tab__item {{mode === 'gallery' ? 'is-active' : ''}}"
+        hover-class="horo-tab__item--hover" hover-stay-time="50"
+        bindtap="onSwitchMode" data-mode="gallery">卡牌图鉴</view>
+    </view>
+  </view>
+
+  <!-- 占卜模式 -->
+  <block wx:if="{{mode === 'draw'}}">
+    <!-- 输入问题 -->
+    <view class="astro-card">
+      <text class="astro-tag">你想问什么？</text>
+      <textarea class="astro-textarea" maxlength="100"
+        placeholder="例：最近的工作该如何抉择？" placeholder-class="astro-input--placeholder"
+        value="{{question}}" bindinput="onInputQ" style="margin-top:14rpx;"></textarea>
+    </view>
+
+    <!-- 选择牌阵 -->
+    <view class="astro-card">
+      <text class="astro-tag">选择牌阵</text>
+      <view class="layout-row">
+        <view wx:for="{{layouts}}" wx:key="key" class="layout-item {{layout === item.key ? 'is-active' : ''}}"
+          hover-class="layout-item--hover" hover-stay-time="50"
+          bindtap="onPickLayout" data-key="{{item.key}}">
+          <text class="layout-item__name">{{item.name}}</text>
+          <text class="layout-item__desc">{{item.desc}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 抽牌区 -->
+    <view wx:if="{{drawn.length > 0}}" class="astro-card">
+      <text class="astro-tag">抽到 · 共 {{drawn.length}} 张</text>
+      <view class="card-stage">
+        <view wx:for="{{drawn}}" wx:key="cid" class="card3d {{item.flipped ? 'is-flipped' : ''}}"
+          hover-class="card3d--hover" hover-stay-time="60"
+          bindtap="onFlipCard" data-index="{{index}}">
+          <view class="card3d__face card3d__face--front">
+            <image class="card3d__img" src="/subpackages/tools/assets/astro/card_back.png" mode="aspectFit"
+              binderror="onImgErr"></image>
+          </view>
+          <view class="card3d__face card3d__face--back">
+            <image class="card3d__img" src="{{item.image}}" mode="aspectFit"
+              binderror="onImgErr"></image>
+            <text class="card3d__name">{{item.name}}</text>
+            <text class="card3d__pos">{{item.position}}</text>
+          </view>
+        </view>
+      </view>
+      <!-- 解读 -->
+      <view wx:if="{{allFlipped}}" style="margin-top:24rpx;">
+        <text class="astro-tag" style="margin-bottom:14rpx;">解读</text>
+        <block wx:for="{{drawn}}" wx:key="cid">
+          <view style="margin-bottom:14rpx;">
+            <text class="astro-tag">{{item.position}} · {{item.name}}（{{item.orientation}}）</text>
+            <text class="astro-body" style="display:block;margin-top:8rpx;">{{item.interpretation}}</text>
+          </view>
+        </block>
+        <view style="display:flex;gap:14rpx;margin-top:20rpx;">
+          <view class="astro-btn" hover-class="astro-btn--hover" hover-stay-time="50"
+            bindtap="onSaveDraw">保存占卜</view>
+          <view class="astro-btn astro-btn--ghost" hover-class="astro-btn--hover" hover-stay-time="50"
+            bindtap="onRedraw">重新抽牌</view>
+        </view>
+      </view>
+    </view>
+    <view wx:else class="astro-card">
+      <text class="astro-tag">抽牌</text>
+      <view style="margin-top:14rpx;">
+        <text class="astro-body">占卜仪式：请在心中默念你的问题，然后点击下方「抽牌」按钮。</text>
+      </view>
+      <view class="astro-btn" style="margin-top:24rpx;" hover-class="astro-btn--hover" hover-stay-time="50"
+        bindtap="onDraw">抽 牌</view>
+    </view>
+
+    <!-- 占卜历史 -->
+    <view class="astro-card">
+      <text class="astro-tag" style="margin-bottom:14rpx;">占卜历史</text>
+      <view wx:if="{{history.length === 0}}" class="astro-empty">还没有占卜记录</view>
+      <view wx:else style="display:flex;flex-direction:column;gap:12rpx;">
+        <view wx:for="{{history}}" wx:key="id" class="astro-row"
+          hover-class="astro-row--hover" hover-stay-time="50"
+          data-id="{{item.id}}" bindtap="onDeleteHis">
+          <view style="flex:1;min-width:0;">
+            <text class="astro-body">{{item.title}}</text>
+            <text class="astro-muted">{{item.layoutLabel}} · {{item.timeLabel}}</text>
+          </view>
+          <text class="astro-tag">×</text>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 图鉴模式 -->
+  <block wx:else>
+    <view class="astro-card">
+      <input class="astro-input" placeholder="搜索牌名 / 关键词" placeholder-class="astro-input--placeholder"
+        value="{{galleryKw}}" bindinput="onGalleryInput"></input>
+    </view>
+    <view wx:for="{{galleryGroups}}" wx:key="suit" wx:for-item="g">
+      <view class="astro-card">
+        <text class="astro-tag">{{g.suitLabel}} · {{g.items.length}} 张</text>
+        <view class="gallery-row">
+          <view wx:for="{{g.items}}" wx:key="id" class="gallery-cell"
+            hover-class="gallery-cell--hover" hover-stay-time="50"
+            data-id="{{item.id}}" bindtap="onCardInfo">
+            <image class="gallery-cell__img" src="{{item.image}}" mode="aspectFit"
+              binderror="onImgErr"></image>
+            <text class="gallery-cell__name">{{item.name}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <view class="astro-statusbar"></view>
+  <view style="padding:20rpx 32rpx calc(20rpx + env(safe-area-inset-bottom));font-size:22rpx;line-height:1.6;color:#94a3b8;text-align:center;">纯属娱乐，请勿过度相信 · 内容不构成任何人生建议</view>
+</view>

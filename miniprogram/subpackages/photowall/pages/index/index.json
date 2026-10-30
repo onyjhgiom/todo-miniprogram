@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "照片墙",
+  "navigationBarBackgroundColor": "#2E3B44",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#2E3B44",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "light",
+  "usingComponents": {}
+}

@@ -1,0 +1,14 @@
+<game-shell title="{{title}}" timeText="{{timeText}}" statText="{{statText}}" paused="{{paused}}"
+  bind:back="onBack" bind:reset="onReset" bind:hint="onHint" bind:home="onHome" bind:pause="onPause">
+  <view class="m3">
+    <view class="row row--between m3__head">
+      <text class="t-sm muted-2">最高 {{best}}</text>
+      <text class="t-sm muted-2">交换相邻三连消除</text>
+    </view>
+    <view class="m3__board">
+      <view wx:for="{{grid}}" wx:key="index"
+        class="m3__cell m3__c{{item}} {{first===index?'m3__cell--sel':''}}"
+        data-index="{{index}}" bindtap="onTap"></view>
+    </view>
+  </view>
+</game-shell>

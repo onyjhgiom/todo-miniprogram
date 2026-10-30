@@ -1,0 +1,433 @@
+<!--pages/ledger/ledger.wxml-->
+<!--记账本 · 高级商务金融仪表盘：珍珠白底 + 深海军蓝 + 香槟金-->
+<view class="page">
+
+  <!-- ===== 顶部 Header ===== -->
+  <view class="lg__head">
+    <view class="lg__head-main">
+      <view class="lg__brand">
+        <view class="lg__brand-icon">⛁</view>
+        <text class="lg__title">记账本</text>
+      </view>
+      <text class="lg__subtitle">理性规划 · 让每一笔开支都有价值</text>
+    </view>
+    <view class="lg__actions">
+      <view class="lg__icon-btn" bindtap="onExport" hover-class="press" hover-stay-time="60">⇪</view>
+      <view class="lg__icon-btn" bindtap="onSettingsOpen" hover-class="press" hover-stay-time="60">⚙</view>
+    </view>
+  </view>
+
+  <!-- ===== 月份选择器（胶囊） ===== -->
+  <view class="lg__month">
+    <view class="lg__month-btn" bindtap="onPrevMonth" hover-class="press" hover-stay-time="60">‹</view>
+    <picker mode="date" fields="month" value="{{monthValue}}" bindchange="onMonthPick">
+      <view class="lg__month-text">{{monthLabel}}</view>
+    </picker>
+    <view class="lg__month-btn" bindtap="onNextMonth" hover-class="press" hover-stay-time="60">›</view>
+  </view>
+
+  <!-- ===== 核心金融数据卡 ===== -->
+  <view class="hero">
+    <view class="hero__deco hero__deco--ring"></view>
+    <view class="hero__deco hero__deco--line"></view>
+    <view class="hero__top">
+      <view>
+        <text class="hero__label">本月总支出</text>
+        <view class="hero__amount">
+          <text class="hero__symbol">¥</text>
+          <text class="hero__num">{{heroExpense}}</text>
+        </view>
+      </view>
+      <view class="hero__delta hero__delta--{{expenseDelta.dir}}">
+        <text>{{expenseDelta.text}} {{expenseDelta.arrow}}</text>
+      </view>
+    </view>
+    <view class="hero__divider"></view>
+    <view class="hero__grid">
+      <view class="hero__cell">
+        <text class="hero__cell-label">本月总收入</text>
+        <view class="hero__cell-num">¥{{heroIncome}}</view>
+        <view class="hero__cell-delta hero__cell-delta--{{incomeDelta.dir}}">{{incomeDelta.arrow}} {{incomeDelta.text}}</view>
+      </view>
+      <view class="hero__cell">
+        <text class="hero__cell-label">本月结余</text>
+        <view class="hero__cell-num">¥{{heroBalance}}</view>
+        <view class="hero__cell-delta hero__cell-delta--{{balanceDelta.dir}}">{{balanceDelta.arrow}} {{balanceDelta.text}}</view>
+      </view>
+      <view class="hero__cell">
+        <text class="hero__cell-label">储蓄率</text>
+        <view class="hero__cell-num hero__cell-num--gold">{{heroSaving}}</view>
+        <view class="hero__cell-delta hero__cell-delta--flat">结余 ÷ 收入</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 账户切换（图标卡） ===== -->
+  <scroll-view class="lg__accounts" scroll-x enhanced show-scrollbar="{{false}}" id="accountCard">
+    <view class="lg__accounts-track">
+      <view class="acc {{activeAccount === 'all' ? 'is-active' : ''}}" data-id="all" bindtap="onAccountSwitch" hover-class="press" hover-stay-time="60">
+        <view class="acc__icon acc__icon--all">◈</view>
+        <text class="acc__name">全部账户</text>
+      </view>
+      <view
+        wx:for="{{accounts}}"
+        wx:key="id"
+        class="acc {{activeAccount === item.id ? 'is-active' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="onAccountSwitch"
+        hover-class="press"
+        hover-stay-time="60"
+      >
+        <view class="acc__icon">{{item.icon}}</view>
+        <text class="acc__name">{{item.name}}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- ===== 预算 ===== -->
+  <view class="card" wx:if="{{budgets.length}}">
+    <view class="card__hd">
+      <text class="card__title">▥ 预算执行</text>
+    </view>
+    <view wx:for="{{budgets}}" wx:key="index" class="bg">
+      <view class="bg__top">
+        <text class="bg__name">{{item.name}}</text>
+        <text class="bg__num">{{item.pct}}%</text>
+      </view>
+      <view class="bg__bar">
+        <view class="bg__fill bg__fill--lv{{item.level}}" style="width: {{item.pct > 100 ? 100 : item.pct}}%;"></view>
+      </view>
+      <text class="bg__hint">{{item.left >= 0 ? '剩余' : '超支'}} {{item.left >= 0 ? item.left : -item.left}}</text>
+    </view>
+  </view>
+
+  <!-- ===== 收支趋势（柱状 + 结余折线） ===== -->
+  <view class="card" id="trendCard">
+    <view class="card__hd">
+      <text class="card__title">▥ 收支趋势</text>
+      <view class="range">
+        <view
+          wx:for="{{['7d','30d','6m','1y']}}"
+          wx:key="*this"
+          class="range__item {{trendRange === item ? 'is-active' : ''}}"
+          data-v="{{item}}"
+          bindtap="onTrendRange"
+        >{{item === '7d' ? '近7天' : item === '30d' ? '近30天' : item === '6m' ? '近6个月' : '近1年'}}</view>
+      </view>
+    </view>
+    <view class="legend">
+      <view class="legend__item"><view class="legend__dot" style="background:#3568B8"></view><text>收入</text></view>
+      <view class="legend__item"><view class="legend__dot" style="background:#D7B985"></view><text>支出</text></view>
+      <view class="legend__item"><view class="legend__dot legend__dot--line"></view><text>结余</text></view>
+    </view>
+    <canvas id="trendCanvas" type="2d" class="trend-canvas"></canvas>
+  </view>
+
+  <!-- ===== 支出分类（环形 + 排行榜） ===== -->
+  <view class="card">
+    <view class="card__hd">
+      <text class="card__title">◕ 支出分类</text>
+      <view class="card__hd-note">本月支出总计 <text class="card__hd-num">{{catTotalText}}</text></view>
+    </view>
+    <view class="cat">
+      <view class="cat__left">
+        <canvas id="donutCanvas" type="2d" class="donut-canvas"></canvas>
+        <view class="donut-center">
+          <text class="donut-center__label">支出占比</text>
+          <text class="donut-center__num">{{donutEmpty ? '—' : '100%'}}</text>
+        </view>
+      </view>
+      <view class="cat__right">
+        <view wx:for="{{catRows}}" wx:key="id" class="cr">
+          <view class="cr__head">
+            <view class="cr__icon" style="background: {{item.color}}1a; color: {{item.color}};">{{item.icon}}</view>
+            <text class="cr__name">{{item.name}}</text>
+            <text class="cr__amount">{{item.amountText}}</text>
+            <text class="cr__pct">{{item.pctText}}</text>
+          </view>
+          <view class="cr__bar">
+            <view class="cr__fill" style="width: {{item.pct}}%; background: {{item.color}};"></view>
+          </view>
+        </view>
+        <view wx:if="{{!catRows.length}}" class="cat__empty">暂无支出数据\n开始记账后这里会生成分类分析</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 近期记账 + 本月统计卡 ===== -->
+  <view class="card" wx:if="{{recentItems.length}}">
+    <view class="card__hd">
+      <text class="card__title">▤ 近期记账</text>
+      <view class="card__more" bindtap="onToggleAll">{{showAllRecords ? '收起' : '查看全部 ›'}}</view>
+    </view>
+    <view class="recent">
+      <view class="recent__list">
+        <view
+          wx:for="{{recentItems}}"
+          wx:key="_id"
+          class="rc"
+          data-id="{{item._id}}"
+          bindlongpress="onTxLongPress"
+          hover-class="press"
+          hover-stay-time="60"
+        >
+          <view class="rc__icon" style="background: {{item.color}}1a;">{{item.icon}}</view>
+          <view class="rc__main">
+            <text class="rc__cat">{{item.catDesc}}</text>
+            <text class="rc__time">{{item.dateText}} {{item.timeText}}</text>
+          </view>
+          <text class="rc__amount rc__amount--{{item.type}}">{{item.sign}} {{item.amountText}}</text>
+        </view>
+      </view>
+      <view class="stat">
+        <view class="stat__bars">
+          <view wx:for="{{miniBars}}" wx:key="index" class="stat__bar" style="height: {{item.h}}%;"></view>
+        </view>
+        <text class="stat__label">本月已记账</text>
+        <view class="stat__num">{{monthTxCount}} <text class="stat__unit">笔</text></view>
+        <text class="stat__hint">记账让生活更清晰</text>
+        <view class="stat__go" bindtap="onToggleAll">→</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 全部流水（搜索 / 筛选 / 分组列表） ===== -->
+  <block wx:if="{{showAllRecords}}">
+    <view class="lg__filter">
+      <view class="lg__search">
+        <text class="lg__search-icon">⌕</text>
+        <input
+          class="lg__search-input"
+          value="{{searchKeyword}}"
+          placeholder="搜索分类、商户或备注"
+          placeholder-class="lg__search-ph"
+          bindinput="onSearch"
+          confirm-type="search"
+        />
+        <view wx:if="{{searchKeyword}}" class="lg__search-clear" catchtap="onClearSearch">✕</view>
+      </view>
+      <view class="lg__ftabs">
+        <text class="lg__ftab {{filterType === 'all' ? 'is-active' : ''}}" data-v="all" catchtap="onFilterType">全部</text>
+        <text class="lg__ftab {{filterType === 'income' ? 'is-active' : ''}}" data-v="income" catchtap="onFilterType">收入</text>
+        <text class="lg__ftab {{filterType === 'expense' ? 'is-active' : ''}}" data-v="expense" catchtap="onFilterType">支出</text>
+      </view>
+    </view>
+
+    <view class="lg__list" wx:if="{{groups.length}}">
+      <view wx:for="{{groups}}" wx:key="date" class="day">
+        <view class="day__head">
+          <text class="day__date">{{item.date}} {{item.weekday}}</text>
+          <text class="day__sum">支出 {{item.expenseText}}</text>
+        </view>
+        <view
+          wx:for="{{item.items}}"
+          wx:for-item="tx"
+          wx:key="_id"
+          class="tx"
+          data-id="{{tx._id}}"
+          bindlongpress="onTxLongPress"
+          hover-class="tx--hover"
+          hover-stay-time="60"
+        >
+          <view class="tx__icon" style="background: {{tx.catColor}}1a;">{{tx.catIcon}}</view>
+          <view class="tx__main">
+            <text class="tx__cat">{{tx.catPath}}</text>
+            <text class="tx__meta">{{tx.timeText}}{{tx.accName ? ' · ' + tx.accName : ''}}{{tx.merchant ? ' · ' + tx.merchant : ''}}{{tx.note ? ' · ' + tx.note : ''}}{{tx.splitMode !== 'none' ? ' · 分账' : ''}}</text>
+          </view>
+          <view wx:if="{{tx.hasImage}}" class="tx__bill" catchtap="onPreviewTxImage" data-urls="{{tx.images}}" data-current="{{tx.images[0]}}">🧾</view>
+          <text class="tx__amount tx__amount--{{tx.type}}">{{tx.sign}}{{tx.amountText}}</text>
+        </view>
+      </view>
+    </view>
+    <view wx:else class="lg__list-empty">没有符合条件的流水</view>
+  </block>
+
+  <!-- ===== 空状态 ===== -->
+  <view class="lg__empty" wx:if="{{!recentItems.length && !showAllRecords}}">
+    <empty-state icon="⛁" title="本月还没有记账" subtitle="开始记录你的第一笔账单" actionText="＋ 记一笔" bind:action="onFab" />
+  </view>
+
+  <!-- ===== 底部导航 ===== -->
+  <view class="tabbar">
+    <view class="tabbar__item is-active" bindtap="onTabHome">
+      <view class="tabbar__icon">⛁</view>
+      <text class="tabbar__label">记账本</text>
+    </view>
+    <view class="tabbar__item" bindtap="onTabAssets">
+      <view class="tabbar__icon">◍</view>
+      <text class="tabbar__label">资产</text>
+    </view>
+    <view class="tabbar__plus" bindtap="onFab">＋</view>
+    <view class="tabbar__item" bindtap="onTabReport">
+      <view class="tabbar__icon">▥</view>
+      <text class="tabbar__label">报表</text>
+    </view>
+    <view class="tabbar__item" bindtap="onTabMine">
+      <view class="tabbar__icon">◉</view>
+      <text class="tabbar__label">我的</text>
+    </view>
+  </view>
+</view>
+
+<!-- ===== 记账面板 ===== -->
+<view class="mask" wx:if="{{editorOpen}}" bindtap="onEditorClose">
+  <view class="sheet" catchtap="onSheetStop">
+    <view class="sheet__head">
+      <text class="sheet__close" catchtap="onEditorClose">✕</text>
+      <text class="sheet__title">记一笔</text>
+      <text class="sheet__save" catchtap="onSave">保存</text>
+    </view>
+
+    <scroll-view class="sheet__scroll" scroll-y enhanced show-scrollbar="{{false}}">
+      <view class="seg">
+        <text class="seg__item {{draft.type === 'expense' ? 'is-active' : ''}}" data-v="expense" catchtap="onDraftType">支出</text>
+        <text class="seg__item {{draft.type === 'income' ? 'is-active' : ''}}" data-v="income" catchtap="onDraftType">收入</text>
+      </view>
+
+      <view class="amt">
+        <text class="amt__symbol">¥</text>
+        <input class="amt__input" type="digit" value="{{draft.amountText}}" placeholder="0.00" data-key="amountText" bindinput="onDraftInput" />
+        <view class="amt__voice" catchtap="onVoiceInput">🎤 说一句</view>
+      </view>
+
+      <view class="ed__label">分类</view>
+      <view class="ed__cats">
+        <view
+          wx:for="{{categories}}"
+          wx:key="id"
+          class="ed__cat {{draft.categoryId === item.id ? 'is-active' : ''}}"
+          data-id="{{item.id}}"
+          catchtap="onCategoryPick"
+        >
+          <text class="ed__cat-icon">{{item.icon}}</text>
+          <text class="ed__cat-name">{{item.name}}</text>
+        </view>
+      </view>
+      <view class="ed__subs" wx:if="{{subCategories.length}}">
+        <view
+          wx:for="{{subCategories}}"
+          wx:key="id"
+          class="ed__sub {{draft.subCategoryId === item.id ? 'is-active' : ''}}"
+          data-id="{{item.id}}"
+          catchtap="onSubPick"
+        >{{item.name}}</view>
+      </view>
+
+      <view class="ed__label">账户</view>
+      <view class="ed__wrap">
+        <view
+          wx:for="{{accounts}}"
+          wx:key="id"
+          class="ed__chip {{draft.accountId === item.id ? 'is-active' : ''}}"
+          data-id="{{item.id}}"
+          catchtap="onAccountPick"
+        >{{item.icon}} {{item.name}}</view>
+      </view>
+
+      <view class="ed__row">
+        <text class="ed__row-label">日期</text>
+        <picker mode="date" value="{{draft.dateText}}" bindchange="onDatePick">
+          <text class="ed__row-value">{{draft.dateText}}</text>
+        </picker>
+      </view>
+      <view class="ed__row">
+        <text class="ed__row-label">商户</text>
+        <input class="ed__row-input" value="{{draft.merchant}}" placeholder="选填，如星巴克" data-key="merchant" bindinput="onDraftInput" />
+      </view>
+      <view class="ed__row">
+        <text class="ed__row-label">备注</text>
+        <input class="ed__row-input" value="{{draft.note}}" placeholder="选填" data-key="note" bindinput="onDraftInput" />
+      </view>
+      <view class="ed__row">
+        <text class="ed__row-label">标签</text>
+        <input class="ed__row-input" value="{{draft.tagsText}}" placeholder="空格分隔" data-key="tagsText" bindinput="onDraftInput" />
+      </view>
+      <view class="ed__row">
+        <text class="ed__row-label">可报销</text>
+        <switch checked="{{draft.reimburse}}" bindchange="onDraftSwitch" />
+      </view>
+
+      <view class="ed__label">分账
+        <text class="ed__label-tip" wx:if="{{draft.splitMembers.length < 2}}">（2 人及以上可用）</text>
+      </view>
+      <view class="ed__wrap ed__wrap--seg">
+        <text class="ed__chip {{draft.splitMode === 'none' ? 'is-active' : ''}}" data-v="none" catchtap="onSplitMode">不分账</text>
+        <text class="ed__chip {{draft.splitMode === 'average' ? 'is-active' : ''}}" data-v="average" catchtap="onSplitMode">均摊</text>
+        <text class="ed__chip {{draft.splitMode === 'amount' ? 'is-active' : ''}}" data-v="amount" catchtap="onSplitMode">各付各的</text>
+      </view>
+      <view class="split" wx:if="{{draft.splitMode !== 'none'}}">
+        <view wx:for="{{draft.splitMembers}}" wx:key="id" class="split__row">
+          <input class="split__name" value="{{item.name}}" placeholder="姓名" data-index="{{index}}" bindinput="onMemberName" />
+          <input wx:if="{{draft.splitMode === 'amount'}}" class="split__amt" type="digit" value="{{item.amountText}}" placeholder="金额" data-index="{{index}}" bindinput="onMemberAmount" />
+          <text class="split__del" catchtap="onRemoveMember" data-index="{{index}}">✕</text>
+        </view>
+        <view class="split__add" catchtap="onAddMember">＋ 添加成员</view>
+      </view>
+
+      <view class="ed__label">票据（选填，报销留证）</view>
+      <view class="bills">
+        <view wx:for="{{draft.images}}" wx:key="index" class="bills__item">
+          <image class="bills__img" src="{{item}}" mode="aspectFill" catchtap="onPreviewBill" data-index="{{index}}" />
+          <text class="bills__del" catchtap="onRemoveBill" data-index="{{index}}">✕</text>
+        </view>
+        <view wx:if="{{draft.images.length < 9}}" class="bills__add" catchtap="onPickBill">＋</view>
+      </view>
+
+      <view class="ed__continue" catchtap="onSaveContinue">保存并继续记一笔</view>
+      <view class="ed__continue-tip">保存本笔记账后不关闭，可连续记录多笔</view>
+    </scroll-view>
+  </view>
+</view>
+
+<!-- ===== 设置 ===== -->
+<view class="mask" wx:if="{{settingsOpen}}" bindtap="onSettingsClose">
+  <view class="sheet" catchtap="onSheetStop">
+    <view class="sheet__head">
+      <text class="sheet__title">账本设置</text>
+      <text class="sheet__close" catchtap="onSettingsClose">✕</text>
+    </view>
+    <view class="seg">
+      <text class="seg__item {{settingsTab === 'budget' ? 'is-active' : ''}}" data-tab="budget" catchtap="onSettingsTab">预算</text>
+      <text class="seg__item {{settingsTab === 'category' ? 'is-active' : ''}}" data-tab="category" catchtap="onSettingsTab">分类</text>
+      <text class="seg__item {{settingsTab === 'account' ? 'is-active' : ''}}" data-tab="account" catchtap="onSettingsTab">账户</text>
+    </view>
+
+    <scroll-view class="sheet__body" scroll-y>
+      <block wx:if="{{settingsTab === 'budget'}}">
+        <view wx:for="{{budgets}}" wx:key="index" class="cfg">
+          <view class="cfg__main">
+            <text class="cfg__name">{{item.name}}</text>
+            <text class="cfg__desc">已用 {{item.pct}}%</text>
+          </view>
+          <view class="cfg__act" data-id="{{item.budget.id}}" catchtap="onRemoveBudget">✕</view>
+        </view>
+        <view class="sheet__add" catchtap="onAddBudget">＋ 新建总预算</view>
+      </block>
+
+      <block wx:elif="{{settingsTab === 'category'}}">
+        <view class="seg seg--sm">
+          <text class="seg__item {{categoryType === 'expense' ? 'is-active' : ''}}" data-v="expense" catchtap="onCatTypeSwitch">支出</text>
+          <text class="seg__item {{categoryType === 'income' ? 'is-active' : ''}}" data-v="income" catchtap="onCatTypeSwitch">收入</text>
+        </view>
+        <view wx:for="{{categories}}" wx:key="id" class="cfg">
+          <text class="cfg__icon">{{item.icon}}</text>
+          <view class="cfg__main">
+            <text class="cfg__name">{{item.name}}</text>
+          </view>
+        </view>
+        <view class="sheet__add" catchtap="onAddCategory">＋ 新建{{categoryType === 'expense' ? '支出' : '收入'}}分类</view>
+      </block>
+
+      <block wx:else>
+        <view wx:for="{{accounts}}" wx:key="id" class="cfg">
+          <text class="cfg__icon">{{item.icon}}</text>
+          <view class="cfg__main">
+            <text class="cfg__name">{{item.name}}</text>
+            <text class="cfg__desc">{{item.type === 'shared' ? '共享账本' : '个人账户'}}</text>
+          </view>
+        </view>
+        <view class="sheet__hint">共享账本与成员权限将在多人提醒模块打通后开放</view>
+      </block>
+    </scroll-view>
+  </view>
+</view>

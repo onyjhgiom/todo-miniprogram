@@ -1,0 +1,237 @@
+<!--pages/travel/trip-detail：行程详情-->
+<view class="tshell themed" data-theme="{{theme}}" style="{{themeStyle}}"
+  bindtouchmove="onPageTouchMove" bindtouchend="onPageTouchEnd">
+  <view class="tshell__wrap" wx:if="{{trip}}">
+
+    <!-- 封面 + 目的地 -->
+    <view class="hero" style="{{coverStyle}}">
+      <image wx:if="{{coverIsImage}}" class="hero__img" src="{{trip.cover}}" mode="aspectFill" />
+      <text wx:else class="hero__emo">{{coverEmoji}}</text>
+      <view class="hero__mask">
+        <view class="hero__title">{{trip.title}}</view>
+        <view class="hero__sub">📍 {{trip.destination || '未设目的地'}} · {{dateText}} · {{dayCount}} 天</view>
+        <view class="hero__tags">
+          <text class="hero__tag">{{countdownText}}</text>
+          <text class="hero__tag">👥 {{memberText}}</text>
+          <text class="hero__tag">🎯 {{sceneText}}</text>
+        </view>
+      </view>
+      <view class="hero__ops">
+        <view class="hero__op" bindtap="onEditTrip" hover-class="press">编辑</view>
+        <view class="hero__op" bindtap="onToggleMode" hover-class="press">{{mode === 'timeline' ? '地图' : '时间线'}}</view>
+      </view>
+    </view>
+
+    <!-- 天气 + 预算 + 行李 -->
+    <view class="ts-card board">
+      <view class="board__cell">
+        <text class="board__emo">{{weatherIcon}}</text>
+        <text class="board__val">{{weatherTemp}}</text>
+        <text class="board__key">{{weatherText || '天气'}}</text>
+      </view>
+      <view class="board__line"></view>
+      <view class="board__cell">
+        <canvas type="2d" id="budgetRing" class="board__ring"></canvas>
+        <text class="board__key">¥{{spent}}/{{budget}}</text>
+      </view>
+      <view class="board__line"></view>
+      <view class="board__cell" bindtap="onOpenPacking" hover-class="press">
+        <text class="board__emo">📦</text>
+        <text class="board__val">{{packingPercent}}%</text>
+        <text class="board__key">行李 {{packingText}}</text>
+      </view>
+    </view>
+
+    <view wx:if="{{weatherTip}}" class="ts-card tip">
+      <text class="tip__emo">👕</text>
+      <text class="tip__text">{{weatherTip}}</text>
+    </view>
+    <view wx:if="{{weatherWarning}}" class="ts-card tip tip--warn">
+      <text class="tip__emo">⚠️</text>
+      <text class="tip__text">{{weatherWarning}}</text>
+    </view>
+    <view wx:if="{{overBudget}}" class="ts-card tip tip--warn">
+      <text class="tip__emo">💸</text>
+      <text class="tip__text">已超出总预算 ¥{{spent - budget}}，注意控制后续开销</text>
+    </view>
+
+    <!-- 清单联动 -->
+    <view wx:if="{{suggestions.length > 0}}" class="ts-card sugg">
+      <view class="sugg__text">行程里有「{{suggestions[0]}}」等项目，行李清单可以补 {{suggestions.length}} 件物品</view>
+      <view class="sugg__btn" bindtap="onApplySuggest" hover-class="press">一键补充</view>
+    </view>
+
+    <!-- 顶部固定入口：行李 + 复盘 + 提醒 -->
+    <view class="ts-card entries">
+      <view class="entry" bindtap="onOpenPacking" hover-class="press">
+        <text class="entry__emo">📦</text>
+        <text class="entry__name">行李清单</text>
+        <text class="entry__val">{{packingText}}</text>
+      </view>
+      <view class="entry" bindtap="onOpenSummary" hover-class="press">
+        <text class="entry__emo">📖</text>
+        <text class="entry__name">复盘总结</text>
+        <text class="entry__val">{{dayCount}} 天</text>
+      </view>
+      <view class="entry" bindtap="onSubscribe" hover-class="press">
+        <text class="entry__emo">🔔</text>
+        <text class="entry__name">行程提醒</text>
+        <text class="entry__val">订阅</text>
+      </view>
+      <view class="entry" bindtap="onSharePoster" hover-class="press">
+        <text class="entry__emo">🖼️</text>
+        <text class="entry__name">分享海报</text>
+        <text class="entry__val">生成</text>
+      </view>
+      <view class="entry" bindtap="onSyncToTodo" hover-class="press">
+        <text class="entry__emo">🗓️</text>
+        <text class="entry__name">同步到待办</text>
+        <text class="entry__val">去首页</text>
+      </view>
+    </view>
+
+    <!-- 地图模式 -->
+    <view wx:if="{{mode === 'map'}}" class="ts-card mapcard">
+      <map wx:if="{{markers.length > 0}}" class="map" latitude="{{markers[0].latitude}}"
+        longitude="{{markers[0].longitude}}" markers="{{markers}}" scale="12"
+        bindmarkertap="onMarkerTap" show-location="{{true}}" enable-poi="{{true}}"></map>
+      <view wx:else class="ts-empty ts-empty--sm">
+        <text class="emo">🗺️</text>
+        <view>还没有带坐标的地点</view>
+        <view class="sub">在条目里点「选点」获取坐标后，这里会自动打点</view>
+      </view>
+    </view>
+
+    <!-- 时间线模式 -->
+    <view wx:else class="tl">
+      <view wx:for="{{days}}" wx:key="day" class="tl__day">
+        <!-- 天头 -->
+        <view class="tl__head" data-day="{{item.day}}" bindtap="onToggleCollapse" hover-class="press">
+          <view class="tl__dot"></view>
+          <text class="tl__daytitle">Day {{item.day}}</text>
+          <text class="tl__daydate">{{item.dateText}} {{item.weekdayText}}</text>
+          <text class="tl__daycost" wx:if="{{item.cost > 0}}">¥{{item.cost}}</text>
+          <text class="tl__fold">{{collapsedDays.indexOf(item.day) >= 0 ? '展开' : '收起'}}</text>
+        </view>
+
+        <view wx:if="{{collapsedDays.indexOf(item.day) < 0}}" class="tl__body">
+          <view wx:for="{{item.items}}" wx:for-item="it" wx:key="_id"
+            class="tl__rowwrap {{draggingId === it._id ? 'is-drag' : ''}} {{dragTargetId === it._id ? 'is-target' : ''}}">
+            <view class="tl__row tl-row" data-id="{{it._id}}"
+              style="transform:translateX({{swipeId === it._id ? swipeOffset : 0}}px);"
+              bindtap="onTapItem" bindlongpress="onItemLongPress"
+              bindtouchstart="onItemTouchStart" bindtouchmove="onItemTouchMove" bindtouchend="onItemTouchEnd">
+              <view class="tl__time">{{it.timeText}}</view>
+              <view class="tl__axis"><view class="tl__axisdot"></view></view>
+              <view class="tl__card {{it.completed ? 'is-done' : ''}}">
+                <view class="tl__line1">
+                  <text class="tl__icon">{{it.icon}}</text>
+                  <text class="tl__content">{{it.content}}</text>
+                  <text wx:if="{{it.costText}}" class="tl__cost">{{it.costText}}</text>
+                </view>
+                <view class="tl__line2">
+                  <text wx:if="{{it.durationText}}" class="tl__meta">⏱ {{it.durationText}}</text>
+                  <text wx:if="{{it.locationText}}" class="tl__meta">📍 {{it.locationText}}</text>
+                  <text wx:if="{{it.noteText}}" class="tl__meta tl__meta--note">{{it.noteText}}</text>
+                </view>
+              </view>
+            </view>
+            <!-- 左滑操作区 -->
+            <view class="tl__swipe">
+              <view class="tl__swbtn tl__swbtn--done" data-id="{{it._id}}" catchtap="onSwipeDone">完成</view>
+              <view class="tl__swbtn tl__swbtn--copy" data-id="{{it._id}}" catchtap="onSwipeCopy">复制</view>
+              <view class="tl__swbtn tl__swbtn--del" data-id="{{it._id}}" catchtap="onSwipeDelete">删除</view>
+            </view>
+          </view>
+
+          <view class="tl__add" data-day="{{item.day}}" bindtap="onAddItem" hover-class="press">
+            ＋ 添加安排
+          </view>
+        </view>
+      </view>
+    </view>
+
+  </view>
+
+  <!-- 拖拽浮层 -->
+  <view wx:if="{{dragVisible}}" class="ghost" style="top:{{dragY}}px">
+    <text class="ghost__emo">✋</text>
+    <text class="ghost__text">{{draggingText}}</text>
+  </view>
+
+  <!-- 底部新增按钮 -->
+  <view wx:if="{{trip && mode === 'timeline'}}" class="fab" bindtap="onAddQuick" hover-class="press">＋</view>
+
+  <!-- 编辑弹层 -->
+  <view wx:if="{{showSheet}}" class="mask" bindtap="onCloseSheet">
+    <view class="sheet" catchtap="onNoop">
+      <view class="sheet__title">{{isNew ? '添加安排' : '编辑安排'}}</view>
+
+      <view class="sheet__field">
+        <text class="sheet__label">标题</text>
+        <input class="sheet__input" placeholder="例如：亚龙湾潜水" placeholder-class="sheet__ph" value="{{draft.content}}"
+          data-key="content" bindinput="onDraftInput" maxlength="30" cursor-spacing="24" />
+      </view>
+
+      <view class="sheet__label">类型</view>
+      <view class="sheet__types">
+        <view wx:for="{{typeTabs}}" wx:key="key" class="sheet__type {{draft.itemType === item.key ? 'is-on' : ''}}"
+          data-key="{{item.key}}" bindtap="onDraftType" hover-class="press">
+          <text class="sheet__typeico">{{item.icon}}</text>
+          <text class="sheet__typename">{{item.name}}</text>
+        </view>
+      </view>
+
+      <view class="sheet__row">
+        <view class="sheet__col">
+          <text class="sheet__label">第几天</text>
+          <picker mode="selector" range="{{dayTabs}}" value="{{draft.day - 1}}" bindchange="onDraftDay">
+            <view class="sheet__picker">第 {{draft.day}} 天</view>
+          </picker>
+        </view>
+        <view class="sheet__col">
+          <text class="sheet__label">开始时间</text>
+          <picker mode="time" value="{{draft.startTime}}" bindchange="onDraftTime">
+            <view class="sheet__picker">{{draft.startTime}}</view>
+          </picker>
+        </view>
+      </view>
+
+      <view class="sheet__row">
+        <view class="sheet__col">
+          <text class="sheet__label">时长（分钟）</text>
+          <input class="sheet__input" type="number" placeholder="60" placeholder-class="sheet__ph"
+            value="{{draft.duration}}" data-key="duration" bindinput="onDraftInput" maxlength="5" cursor-spacing="24" />
+        </view>
+        <view class="sheet__col">
+          <text class="sheet__label">花费（元）</text>
+          <input class="sheet__input" type="digit" placeholder="0" placeholder-class="sheet__ph"
+            value="{{draft.cost}}" data-key="cost" bindinput="onDraftInput" maxlength="7" cursor-spacing="24" />
+        </view>
+      </view>
+
+      <view class="sheet__field">
+        <text class="sheet__label">地点</text>
+        <view class="sheet__locrow">
+          <input class="sheet__input sheet__input--flex" placeholder="地点名称" placeholder-class="sheet__ph"
+            value="{{draft.locationText}}" data-key="locationText" bindinput="onDraftInput" maxlength="40" cursor-spacing="24" />
+          <view class="sheet__pick" bindtap="onDraftLocation" hover-class="press">选点</view>
+        </view>
+      </view>
+
+      <view class="sheet__field">
+        <text class="sheet__label">备注</text>
+        <textarea class="sheet__area" placeholder="备注 / 门票信息 / 订单号" placeholder-class="sheet__ph" value="{{draft.note}}"
+          data-key="note" bindinput="onDraftInput" maxlength="200" auto-height="{{false}}" cursor-spacing="24" />
+      </view>
+
+      <view class="sheet__ops">
+        <view wx:if="{{!isNew}}" class="ts-btn ts-btn--ghost" bindtap="onDeleteDraft" hover-class="press">删除</view>
+        <view class="ts-btn ts-btn--primary" bindtap="onSaveDraft" hover-class="press">保存</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 海报绘制画布（离屏，不展示） -->
+  <canvas type="2d" id="poster" class="poster"></canvas>
+</view>

@@ -1,0 +1,45 @@
+/* pages/astro/wish.wxss */
+@import "../../styles/astro-common.wxss";
+
+.layout-row { display: flex; flex-wrap: wrap; gap: 8rpx; }
+
+.filter-chip {
+  font-size: 22rpx; padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1rpx solid rgba(255, 255, 255, 0.08);
+  color: rgba(220, 225, 245, 0.8);
+  transition: all 200ms ease;
+}
+.filter-chip.is-active {
+  background: linear-gradient(135deg, #96573A, #C08468);
+  color: #fff;
+  border-color: transparent;
+}
+.filter-chip--hover { transform: scale(0.97); }
+
+.mood-row { display: flex; flex-wrap: wrap; gap: 8rpx; }
+.mood-chip {
+  font-size: 22rpx; padding: 8rpx 14rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1rpx solid rgba(255, 255, 255, 0.08);
+  color: rgba(220, 225, 245, 0.8);
+  transition: all 200ms ease;
+}
+.mood-chip.is-active {
+  background: linear-gradient(135deg, #C08468, #B5714C);
+  color: #fff;
+  border-color: transparent;
+}
+.mood-chip--hover { transform: scale(0.97); }
+
+.wish-card.is-pinned {
+  background: linear-gradient(165deg, rgba(168, 145, 247, 0.16), rgba(99, 102, 241, 0.08));
+  border-color: rgba(168, 145, 247, 0.4);
+}
+.wish-card__head { display: flex; align-items: center; margin-bottom: 14rpx; }
+.wish-card__title { display: block; margin-bottom: 10rpx; }
+.wish-card__body { display: block; margin-bottom: 14rpx; }
+.wish-card__foot { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10rpx; }
+.wish-card__foot .astro-muted { flex: 1; min-width: 0; font-size: 20rpx; }

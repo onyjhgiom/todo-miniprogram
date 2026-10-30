@@ -1,0 +1,218 @@
+/* components/filter-bar/filter-bar.wxss
+ * Phase 2：全面玻璃化 + 主题 token 化（修复深色主题下硬编码白底问题）
+ */
+
+.filter {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  margin-bottom: 8rpx;
+}
+
+/* ============ 状态分段（玻璃分段） ============ */
+.status-segment {
+  display: flex;
+  gap: 8rpx;
+  background: var(--glass-bg-soft);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1rpx solid var(--glass-border);
+  padding: 8rpx;
+  border-radius: 999rpx;
+  box-shadow: var(--shadow-sm);
+}
+.status-segment__item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 14rpx 0;
+  border-radius: 14rpx;
+  font-size: 26rpx;
+  color: var(--color-text-soft);
+  font-weight: 500;
+  transition: all 0.18s ease;
+  /* 照片背景上的小字加一层深色描边影，避免被亮部吃掉 */
+  text-shadow: 0 1rpx 3rpx rgba(0, 0, 0, 0.45);
+}
+.status-segment__item--active {
+  background: var(--gradient-primary);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 4rpx 12rpx var(--color-primary-shadow);
+}
+.status-segment__count {
+  font-size: 22rpx;
+  background: var(--color-primary-soft);
+  padding: 2rpx 10rpx;
+  border-radius: 999rpx;
+  font-weight: 600;
+  color: inherit;
+  opacity: 0.86;
+}
+.status-segment__item--active .status-segment__count {
+  background: rgba(255, 255, 255, 0.22);
+  opacity: 1;
+}
+
+/* ============ 搜索（玻璃输入条） ============ */
+.search {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1rpx solid var(--glass-border);
+  border-radius: 999rpx;
+  padding: 12rpx 20rpx;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.search:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 4rpx 20rpx var(--color-primary-soft);
+}
+.search__icon {
+  width: 32rpx;
+  height: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-mute);
+}
+.search__glyph {
+  font-size: 32rpx;
+  font-weight: 600;
+}
+.search__input {
+  flex: 1;
+  font-size: 26rpx;
+  color: var(--color-text);
+  text-shadow: 0 1rpx 2rpx rgba(0, 0, 0, 0.4);
+  height: 48rpx;
+  line-height: 48rpx;
+  min-width: 0;
+}
+.search__placeholder {
+  color: var(--color-text-mute);
+}
+.search__clear {
+  width: 40rpx;
+  height: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-bg-soft);
+  color: var(--color-text-soft);
+  font-size: 28rpx;
+  line-height: 1;
+}
+
+/* ============ 筛选 chips（玻璃胶囊） ============ */
+.chips {
+  white-space: nowrap;
+}
+.chips__inner {
+  display: inline-flex;
+  gap: 12rpx;
+  padding: 4rpx 0 8rpx;
+}
+
+.chip-filter {
+  display: inline-flex;
+  text-shadow: 0 1rpx 3rpx rgba(0, 0, 0, 0.45);
+  align-items: center;
+  gap: 6rpx;
+  padding: 10rpx 18rpx;
+  border-radius: 999rpx;
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1rpx solid var(--glass-border);
+  font-size: 24rpx;
+  color: var(--color-text-soft);
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.18s ease;
+  max-width: 360rpx;
+  white-space: nowrap;
+}
+.chip-filter__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200rpx;
+}
+.chip-filter__icon {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+.chip-filter__caret {
+  color: var(--color-text-mute);
+  font-size: 20rpx;
+  margin-left: 2rpx;
+}
+.chip-filter:active {
+  transform: scale(0.97);
+}
+
+.chip-filter--active {
+  background: var(--gradient-primary);
+  border-color: transparent;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 4rpx 12rpx var(--color-primary-shadow);
+}
+.chip-filter--active.chip-filter--high {
+  background: linear-gradient(135deg, #D08A6A, #C0522F);
+  box-shadow: 0 4rpx 12rpx rgba(192, 82, 47, 0.3);
+}
+.chip-filter--active.chip-filter--medium {
+  background: linear-gradient(135deg, #E3B999, #C09A5E);
+  box-shadow: 0 4rpx 12rpx rgba(192, 154, 94, 0.32);
+}
+.chip-filter--active.chip-filter--low {
+  background: linear-gradient(135deg, #8FAE8F, #6E8E6E);
+  box-shadow: 0 4rpx 12rpx rgba(110, 142, 110, 0.3);
+}
+.chip-filter--active .chip-filter__caret {
+  color: rgba(255, 255, 255, 0.7);
+}
+.chip-filter--active .chip-filter__icon {
+  color: #ffffff;
+}
+
+.chip-filter__x {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28rpx;
+  height: 28rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  font-size: 20rpx;
+  line-height: 1;
+  font-weight: 700;
+  margin-left: 2rpx;
+}
+
+.chip-filter--reset {
+  background: var(--color-primary-soft);
+  border-color: transparent;
+  color: var(--color-danger);
+  font-weight: 600;
+}
+.chip-filter--reset:active {
+  background: var(--color-danger);
+  color: #ffffff;
+}
+
+/* 即时按压反馈：view 需 hover-class 触发（CSS :active 在 view 上不生效） */
+.fbar-press {
+  opacity: 0.7;
+  transform: scale(0.97);
+}

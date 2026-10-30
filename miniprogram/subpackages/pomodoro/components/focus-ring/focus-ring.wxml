@@ -1,0 +1,16 @@
+<!--components/focus-ring/focus-ring.wxml-->
+<!-- FocusRing：成长进度环（Canvas 2D）
+     为什么用 canvas 而不是需求里建议的 SVG Circle：
+       小程序 WXML **不支持内联 <svg>**（<image> 只能加载 svg 文件，不能内联渲染），
+       而 CSS 画圆环只能用 border / conic-gradient：
+         · border 只能画「整圆」，做不了按角度填充的进度弧；
+         · conic-gradient 在 Skyline 渲染器下不支持（本项目 WebView 可用，但不可移植）。
+       Canvas 2D 能精确控制 stroke-dasharray / dashoffset / lineCap / 渐变，
+       是小程序里等价且更可控的方案。本项目 love-core、astro-sphere 同为 Canvas 2D。
+     结构（由外到内）：进度环（外）→ 刻度带 → 环内山峰剪影（随进度显现）→ 中心文字（原生 WXML 叠加） -->
+<view class="ring {{running ? 'is-running' : ''}} {{reduced ? 'is-reduced' : ''}}" style="width:calc({{size}} * var(--u, 1rpx));height:calc({{size}} * var(--u, 1rpx))">
+  <canvas type="2d" id="ringCv" class="ring__cv"></canvas>
+
+  <!-- 完成一轮：一次性光环扩散（CSS 做，不占 canvas 每帧开销） -->
+  <view class="ring__halo" wx:if="{{pulse}}" ></view>
+</view>

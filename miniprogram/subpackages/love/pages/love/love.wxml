@@ -1,0 +1,306 @@
+<!-- pages/love/love/love.wxml -->
+<view class="ay" data-skin="{{skin.key}}" style="{{skin.style}}">
+  <view class="ay-hero">
+    <view class="ay-hero__row">
+      <view>
+        <view class="ay-hero__title">异地恋能量站</view>
+        <view class="ay-hero__sub">{{together ? together.text : '还没设置在一起的日子'}}</view>
+      </view>
+      <view class="ay-hero__badge" bindtap="onGo" data-k="profile">📇 档案</view>
+    </view>
+    <view class="ay-hero__stats">
+      <view class="ay-hero__stat"><text class="ay-hero__stat-n">{{heart ? heart.lv : 1}}</text><text class="ay-hero__stat-l">等级</text></view>
+      <view class="ay-hero__stat"><text class="ay-hero__stat-n">{{heart ? heart.total : 0}}</text><text class="ay-hero__stat-l">能量</text></view>
+      <view class="ay-hero__stat"><text class="ay-hero__stat-n">{{streak}}</text><text class="ay-hero__stat-l">连续天数</text></view>
+      <view class="ay-hero__stat"><text class="ay-hero__stat-n">{{stat ? stat.count : 0}}</text><text class="ay-hero__stat-l">互动次数</text></view>
+    </view>
+    <view class="ay-faint" style="color:#fff;opacity:.9;margin-top:8rpx" wx:if="{{together && together.anniversaryText}}">{{together.anniversaryText}}</view>
+  </view>
+
+  <!-- 爱情能量球已移至「回忆」页（星球视图）独占展示：能量站只做培育与统计 -->
+  <!-- ==================== 爱心 ==================== -->
+  <view class="ay-card ay-anim">
+    <view class="ay-center">
+      <view class="ay-heart ay-heart--full {{heartTier}} {{heartPop ? 'ay-heart--pop' : ''}}" style="{{heartStyle}}">
+        <view class="ay-heart__halo"></view>
+        <view class="ay-heart__ring" wx:if="{{heartTier === 'ay-heart--t3'}}"></view>
+        <view class="ay-heart__shape"></view>
+        <view class="ay-heart__shine"></view>
+        <view class="ay-heart__orb" wx:for="{{orbits}}" wx:key="delay"
+              style="left:{{item.left}};top:{{item.top}};animation-delay:{{item.delay}}">{{item.emoji}}</view>
+        <view class="ay-heart__spark" wx:for="{{heartSparks}}" wx:for-item="sp" wx:key="delay"
+              style="left:{{sp.left}};top:{{sp.top}};width:{{sp.size}};height:{{sp.size}};animation-delay:{{sp.delay}};animation-duration:{{sp.dur}}"></view>
+        <view class="ay-heart__sweep" wx:if="{{heartTier !== 'ay-heart--t1'}}"></view>
+        <view class="ay-heart__lv">Lv.{{heart.lv}} {{heart.cur.name}}</view>
+      </view>
+      <view class="ay-t ay-mt">{{heart.cur.desc}}</view>
+      <view class="ay-bar ay-mt"><view class="ay-bar__in" style="width:{{heart.percent}}%"></view></view>
+      <view class="ay-faint ay-mt">
+        {{heart.next ? '距 Lv.' + heart.next.lv + ' ' + heart.next.name + ' 还差 ' + heart.toNext + ' 能量' : '已满级 · 永恒挚爱'}}
+      </view>
+    </view>
+
+    <view class="ay-hr"></view>
+    <view class="ay-card__hd"><text class="ay-card__title">🔓 已解锁的模式</text></view>
+    <view class="ay-chips">
+      <view class="ay-chip {{item.unlocked?'ay-chip--on':''}}" wx:for="{{heart.modes}}" wx:key="lv">
+        {{item.unlocked ? item.emoji : ''}}Lv{{item.lv}} {{item.mode}}
+      </view>
+    </view>
+  </view>
+
+  <!-- ==================== 爱心图鉴（深空收藏馆 · 预览，不解锁） ==================== -->
+  <view class="ay-card ay-anim ay-cosmos">
+    <view class="ay-cosmos__stars"></view>
+    <view class="ay-cosmos__nebula"></view>
+    <view class="ay-cosmos__head">
+      <view class="ay-cosmos__title">💖 爱心图鉴</view>
+      <view class="ay-cosmos__badge">✦ 全部 10 级模样</view>
+    </view>
+    <view class="ay-cosmos__note">这是爱心从 Lv.1 到 Lv.10 的全部样子，点开可放大查看。图鉴只是预览——查看不会消耗、也不会解锁任何能量。</view>
+    <!-- 英雄区：终极形态大爱心悬浮 + 手写标语 -->
+    <view class="ay-cosmos__hero">
+      <view class="ay-cosmos__hero-stage">
+        <view class="ay-heart ay-heart--full ay-heart--t3 ay-cosmos__hero-heart" style="{{galleryHero.style}}">
+          <view class="ay-heart__halo"></view>
+          <view class="ay-heart__ring"></view>
+          <view class="ay-heart__shape"></view>
+          <view class="ay-heart__shine"></view>
+          <view class="ay-heart__orb" wx:for="{{galleryHero.orbits}}" wx:for-item="o" wx:key="delay"
+                style="left:{{o.left}};top:{{o.top}};animation-delay:{{o.delay}}">{{o.emoji}}</view>
+          <view class="ay-heart__spark" wx:for="{{galleryHero.sparks}}" wx:for-item="sp" wx:key="delay"
+                style="left:{{sp.left}};top:{{sp.top}};width:{{sp.size}};height:{{sp.size}};animation-delay:{{sp.delay}};animation-duration:{{sp.dur}}"></view>
+          <view class="ay-heart__sweep"></view>
+        </view>
+      </view>
+      <view class="ay-cosmos__slogan">
+        <view>每一颗爱心 ♡</view>
+        <view>都是一次成长的印记</view>
+      </view>
+    </view>
+    <view class="ay-gallery ay-gallery--cosmos">
+      <view class="ay-gallery__cell ay-gcell {{item.cur ? 'ay-gcell--cur' : ''}} {{item.unlocked ? 'ay-gcell--on' : ''}}"
+            wx:for="{{gallery}}" wx:key="lv" bindtap="onOpenPreview" data-lv="{{item.lv}}" hover-class="ay-gcell--hover" hover-stay-time="80"
+            style="--ga-aura:{{item.aura}}">
+        <view class="ay-gcell__aura"></view>
+        <view class="ay-gcell__lock" wx:if="{{!item.unlocked}}">🔒 未解锁</view>
+        <view class="ay-gcell__flag" wx:if="{{item.cur}}">当前</view>
+        <!-- 等级专属装饰元素 -->
+        <view class="ay-gcell__deco ay-gcell__deco--{{di}}" wx:for="{{item.deco}}" wx:for-item="d" wx:for-index="di" wx:key="*this">{{d}}</view>
+        <view class="ay-gcell__stage">
+          <view class="ay-gallery__scaler">
+            <view class="ay-heart {{item.tierCls}}" style="{{item.style}}">
+              <view class="ay-heart__halo"></view>
+              <view class="ay-heart__ring" wx:if="{{item.tier === 3}}"></view>
+              <view class="ay-heart__shape"></view>
+              <view class="ay-heart__shine"></view>
+              <!-- 缩略图按档位限量展示环绕物：t1 少量素雅、t3 满量华丽（完整数量在预览里看） -->
+              <view class="ay-heart__orb" wx:for="{{item.orbits}}" wx:for-item="o" wx:for-index="oi" wx:key="delay"
+                    wx:if="{{oi < (item.tier === 1 ? 2 : (item.tier === 2 ? 6 : 10))}}"
+                    style="left:{{o.left}};top:{{o.top}};animation-delay:{{o.delay}}">{{o.emoji}}</view>
+              <!-- 图鉴里的粒子只给华丽档，避免 10 格同时渲染过多节点 -->
+              <view class="ay-heart__spark" wx:if="{{item.tier === 3}}" wx:for="{{item.sparks}}" wx:for-item="sp" wx:key="delay"
+                    style="left:{{sp.left}};top:{{sp.top}};width:{{sp.size}};height:{{sp.size}};animation-delay:{{sp.delay}};animation-duration:{{sp.dur}}"></view>
+            </view>
+          </view>
+          <!-- 魔法阵底座：椭圆发光环 -->
+          <view class="ay-gcell__base"></view>
+        </view>
+        <view class="ay-gcell__lv" style="{{item.tagStyle}}">Lv.{{item.lv}} {{item.name}}</view>
+        <view class="ay-gcell__tag">✨ 特效：{{item.mode}}</view>
+        <view class="ay-gcell__tag {{item.unlocked ? 'ay-gcell__tag--ok' : ''}}">{{item.unlocked ? '✓ 已解锁' : '💜 需 ' + item.need + ' 能量'}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ==================== 能量构成 ==================== -->
+  <view class="ay-card ay-anim" wx:if="{{stat && stat.count}}">
+    <view class="ay-card__hd">
+      <text class="ay-card__title">⚡ 能量构成</text>
+      <text class="ay-card__more">本周 {{stat.week}} · 今日 {{stat.today}}</text>
+    </view>
+    <view class="ay-row" wx:for="{{stat.byType}}" wx:key="key">
+      <text class="ay-row__ico">{{item.emoji}}</text>
+      <view class="ay-row__main">
+        <view class="ay-row__t">{{item.label}} {{item.energy}} 能量</view>
+        <view class="ay-bar" style="margin-top:8rpx"><view class="ay-bar__in" style="width:{{item.percent}}%"></view></view>
+      </view>
+      <view class="ay-row__extra">{{item.count}} 次</view>
+    </view>
+    <view class="ay-hr"></view>
+    <view class="ay-between">
+      <view class="ay-faint" wx:for="{{chart}}" wx:key="label">{{item.label}}</view>
+    </view>
+    <view class="ay-between" style="align-items:flex-end;height:120rpx">
+      <view wx:for="{{chart}}" wx:key="label" style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center">
+        <view style="width:26rpx;background:var(--ay-primary);border-radius:8rpx 8rpx 0 0;height:{{item.h}}rpx"></view>
+        <view class="ay-faint" style="font-size:19rpx">{{item.energy}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ==================== 连续互动 & 彩蛋 ==================== -->
+  <view class="ay-card ay-anim">
+    <view class="ay-card__hd">
+      <text class="ay-card__title">🔥 连续互动 {{streak}} 天</text>
+      <text class="ay-card__more">最长 {{streakBest}} 天</text>
+    </view>
+    <view class="ay-t">{{streakTip}}</view>
+    <view class="ay-btn ay-btn--block ay-btn--ghost ay-mt" bindtap="onGo" data-k="add">➕ 记一次互动</view>
+
+    <view class="ay-hr"></view>
+    <view class="ay-card__hd"><text class="ay-card__title">🏅 升温成就</text></view>
+    <view class="ay-step" wx:for="{{achs}}" wx:key="days">
+      <view class="ay-step__hd">{{item.emoji}} {{item.name}} · 连续 {{item.days}} 天
+        <text class="ay-step__fx" catchtap="onOpenAch" data-days="{{item.days}}">看特效 ›</text>
+      </view>
+      <view class="ay-step__li" style="padding-left:0" wx:if="{{item.unlocked}}">{{item.egg}}</view>
+      <view class="ay-step__li" style="padding-left:0;color:var(--ay-faint)" wx:else>？？？（连续 {{item.days}} 天自动揭晓）</view>
+    </view>
+    <view class="ay-faint ay-mt" wx:if="{{nextAch}}">下一个：连续 {{nextAch.days}} 天解锁「{{nextAch.name}}」</view>
+  </view>
+
+  <!-- ==================== 距离与天气 ==================== -->
+  <view class="ay-card ay-anim">
+    <view class="ay-card__hd">
+      <text class="ay-card__title">🗺️ 我们之间的距离</text>
+      <view class="ay-head-acts">
+        <view class="ay-btn ay-btn--sm ay-btn--line" bindtap="onRefreshWeather">刷新天气</view>
+        <view class="ay-btn ay-btn--sm ay-btn--line" bindtap="onGoProfile">✎ 填写</view>
+      </view>
+    </view>
+    <view class="ay-t">{{myCity}} ↔ {{hisCity}}</view>
+    <view class="ay-row__t ay-mt" style="font-size:32rpx;color:var(--ay-primary)" bindtap="onGoProfile">{{distText}}</view>
+    <view class="ay-faint">{{fly}}</view>
+
+    <!-- 双方定位坐标图（按真实经纬度比例落点，示意用） -->
+    <view class="ay-map" wx:if="{{mapReady}}">
+      <view class="ay-map__grid"></view>
+      <view class="ay-map__pin ay-map__pin--me" style="left:{{plot.me.left}}%;top:{{plot.me.top}}%" wx:if="{{plot.me}}">
+        <view class="ay-map__dot">📍</view>
+        <view class="ay-map__name">{{myCity}}</view>
+        <view class="ay-map__coord">{{plot.me.lat}}°N · {{plot.me.lng}}°E</view>
+      </view>
+      <view class="ay-map__pin ay-map__pin--him" style="left:{{plot.him.left}}%;top:{{plot.him.top}}%" wx:if="{{plot.him}}">
+        <view class="ay-map__dot">📍</view>
+        <view class="ay-map__name">{{hisCity}}</view>
+        <view class="ay-map__coord">{{plot.him.lat}}°N · {{plot.him.lng}}°E</view>
+      </view>
+      <view class="ay-map__dist">{{distText}}</view>
+    </view>
+    <view class="ay-faint ay-mt" wx:if="{{mapReady}}">点上面的「✎ 填写」可修改双方城市，坐标图会跟着更新</view>
+    <view class="ay-faint ay-mt" wx:if="{{!mapReady && (myCity || hisCity)}}">
+      有一方城市查不到坐标，换一个更常见的城市名（如「北京」「上海」）就能显示定位图
+    </view>
+
+    <block wx:if="{{hisW}}">
+      <view class="ay-hr"></view>
+      <view class="ay-card__hd">
+        <text class="ay-card__title">{{hisW.icon}} {{hisW.city}} · {{hisW.text}} {{hisW.temp}}</text>
+      </view>
+      <view class="ay-faint">{{hisW.source}}</view>
+      <view class="ay-t ay-mt">{{hisW.tip}}</view>
+      <view class="ay-t ay-mt" wx:if="{{hisW.warning}}" style="color:#C0524F">⚠️ {{hisW.warning}}</view>
+      <view class="ay-card__title ay-mt" style="font-size:25rpx">你可以这样关心他</view>
+      <view class="ay-step__li" wx:for="{{hisW.actions}}" wx:key="*this" style="padding-left:0">{{item}}</view>
+      <view class="ay-btn ay-btn--pill ay-mt" bindtap="onCopyCare">📋 复制关心话术发给他</view>
+    </block>
+
+    <block wx:if="{{myW}}">
+      <view class="ay-hr"></view>
+      <view class="ay-card__hd"><text class="ay-card__title">{{myW.icon}} {{myW.city}} · {{myW.text}} {{myW.temp}}</text></view>
+      <view class="ay-faint">{{myW.source}}</view>
+      <view class="ay-t ay-mt">{{myW.tip}}</view>
+    </block>
+
+    <view class="ay-faint ay-mt" wx:if="{{!myW && !hisW}}">
+      在「我们的档案」里填好双方城市，这里会显示两地天气；遇到寒潮、暴雨、台风会直接告诉你该提醒他做什么。
+    </view>
+  </view>
+
+  <!-- ==================== 生日与送礼 ==================== -->
+  <view class="ay-card ay-anim" wx:if="{{bday}}">
+    <view class="ay-card__hd">
+      <text class="ay-card__title">🎂 {{nickname}}的生日</text>
+      <text class="ay-card__more">{{bday.text}}</text>
+    </view>
+    <view class="ay-t">{{bday.prepText}}</view>
+    <view class="ay-hr"></view>
+    <view class="ay-card__title" style="font-size:25rpx">可以送这些（按他的兴趣与你的预算）</view>
+    <view class="ay-step" wx:for="{{gifts}}" wx:key="name">
+      <view class="ay-step__hd">{{item.emoji}} {{item.name}} · {{item.price}}</view>
+      <view class="ay-step__li" style="padding-left:0">{{item.reason}}</view>
+    </view>
+    <view class="ay-btn ay-btn--block ay-btn--ghost ay-mt" bindtap="onGo" data-k="profile">去完善他的档案，推荐更准</view>
+  </view>
+
+  <!-- ==================== 最近互动 ==================== -->
+  <view class="ay-card ay-anim">
+    <view class="ay-card__hd">
+      <text class="ay-card__title">🕰️ 最近的互动</text>
+      <text class="ay-card__more" bindtap="onGo" data-k="memory">全部 ›</text>
+    </view>
+    <view class="ay-row" wx:for="{{recent}}" wx:key="date">
+      <text class="ay-row__ico">{{item.emoji}}</text>
+      <view class="ay-row__main">
+        <view class="ay-row__t">{{item.label}} +{{item.energy}}</view>
+        <view class="ay-row__d">{{item.date}}{{item.title ? ' · ' + item.title : ''}}</view>
+      </view>
+    </view>
+    <view class="ay-empty" wx:if="{{!recent.length}}">
+      <view class="ay-empty__ico">💞</view>
+      <view class="ay-empty__t">还没有互动记录，记一条就能点亮爱心</view>
+      <view class="ay-btn ay-empty__btn" bindtap="onGo" data-k="add">记一次互动</view>
+    </view>
+  </view>
+
+  <view class="ay-card ay-card--soft ay-anim">
+    <view class="ay-faint">
+      天气数据处理：优先取和风天气实时数据（密钥保存在服务端云函数，前端不持有）；
+      取不到时用 6 小时内的缓存；都没有则按城市纬度与月份估算季节气候，并明确标注「离线估算」——
+      绝不把估算伪装成实时天气。
+    </view>
+  </view>
+
+  <!-- ==================== 爱心预览弹层（只看不解锁） ==================== -->
+  <view class="ay-mask" wx:if="{{preview}}" bindtap="onClosePreview">
+    <view class="ay-prev" catchtap="onNoop">
+      <view class="ay-heart ay-heart--full ay-heart--pop ay-prev__heart {{preview.tierCls}}" style="{{preview.style}}">
+        <view class="ay-heart__halo"></view>
+        <view class="ay-heart__ring" wx:if="{{preview.tier === 3}}"></view>
+        <view class="ay-heart__shape"></view>
+        <view class="ay-heart__shine"></view>
+        <view class="ay-heart__orb" wx:for="{{preview.orbits}}" wx:for-item="o" wx:key="delay"
+              style="left:{{o.left}};top:{{o.top}};animation-delay:{{o.delay}}">{{o.emoji}}</view>
+        <view class="ay-heart__spark" wx:for="{{preview.sparks}}" wx:for-item="sp" wx:key="delay"
+              style="left:{{sp.left}};top:{{sp.top}};width:{{sp.size}};height:{{sp.size}};animation-delay:{{sp.delay}};animation-duration:{{sp.dur}}"></view>
+        <view class="ay-heart__sweep" wx:if="{{preview.tier !== 1}}"></view>
+        <view class="ay-heart__lv">Lv.{{preview.lv}} {{preview.name}}</view>
+      </view>
+      <view class="ay-prev__mode">🔓 {{preview.mode}}</view>
+      <view class="ay-t ay-mt">{{preview.desc}}</view>
+      <view class="ay-prev__need {{preview.unlocked ? 'ay-prev__need--ok' : ''}}">
+        {{preview.unlocked ? '✅ 这一级你已经解锁啦' : '🔒 未解锁 · 还差 ' + preview.remain + ' 能量'}}
+      </view>
+      <view class="ay-faint ay-mt" style="text-align:center">这只是预览，查看不会消耗、也不会解锁爱心</view>
+      <view class="ay-btn ay-btn--pill ay-mt" bindtap="onClosePreview">关闭</view>
+    </view>
+  </view>
+
+  <!-- ==================== 升温成就·特效预览（只看不解锁） ==================== -->
+  <view class="ay-mask" wx:if="{{achPreview}}" bindtap="onCloseAch">
+    <view class="ay-fx" catchtap="onNoop">
+      <view class="ay-fx__stage">
+        <view class="ay-fx__core ay-fx__core--t{{achPreview.tier}}">{{achPreview.emoji}}</view>
+        <view class="ay-fx__dot" wx:for="{{achPreview.particles}}" wx:for-item="o" wx:key="delay"
+              style="--dx:{{o.dx}};--dy:{{o.dy}};animation-delay:{{o.delay}}">{{o.emoji}}</view>
+      </view>
+      <view class="ay-fx__name">{{achPreview.emoji}} {{achPreview.name}}</view>
+      <view class="ay-fx__sub">连续 {{achPreview.days}} 天 · 等级 {{achPreview.tier}}/10</view>
+      <view class="ay-t ay-mt" wx:if="{{achPreview.unlocked}}">{{achPreview.egg}}</view>
+      <view class="ay-t ay-mt" wx:else style="color:var(--ay-faint)">？？？（连续 {{achPreview.days}} 天自动揭晓彩蛋文案）</view>
+      <view class="ay-faint ay-mt" style="text-align:center">这只是特效预览，查看不会解锁成就</view>
+      <view class="ay-btn ay-btn--pill ay-mt" bindtap="onCloseAch">关闭</view>
+    </view>
+  </view>
+</view>

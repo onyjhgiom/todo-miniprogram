@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "爱遇小栈",
+  "navigationBarBackgroundColor": "#15132E",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#15132E",
+  "usingComponents": {
+    "love-core": "../../components/love-core/love-core"
+  }
+}

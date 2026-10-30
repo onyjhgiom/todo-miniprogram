@@ -1,0 +1,251 @@
+<!--pages/profile/profile.wxml-->
+<view class="pf themed {{mode === 'view' ? '' : 'is-edit'}}" data-theme="{{theme}}" style="{{themeStyle}};{{bgStyle}}">
+  <!-- 电影级舞台背景：随主题切换场景图/场景动画（src 为空时走 CSS 场景） -->
+  <fx-stage mode="{{fxMode}}" src="{{fxSrc}}" full="{{fxFull}}" rays="{{true}}" dust="{{false}}" topglow="{{true}}" level="{{fxLevel}}" />
+  <view class="pf__body">
+
+    <!-- ===== 头部卡：头像(image) + 姓名 + 完整度 + 模式切换 ===== -->
+    <view class="pf-hero">
+      <view class="pf-hero__avatar" bindtap="onAvatarTap" hover-class="press">
+        <image wx:if="{{avatarKind === 'file' && avatarPath}}" class="pf-hero__img" src="{{avatarPath}}" mode="aspectFill" />
+        <view wx:else class="pf-hero__emoji">{{avatarEmoji}}</view>
+        <view class="pf-hero__badge">📷</view>
+      </view>
+      <view class="pf-hero__meta">
+        <view class="pf-hero__name">{{p.name || '未填写姓名'}}</view>
+        <view class="pf-hero__sub">
+          <text wx:if="{{p.job}}">{{p.job}}</text>
+          <text wx:if="{{p.job && p.location}}"> · </text>
+          <text wx:if="{{p.location}}">{{p.location}}</text>
+          <text wx:if="{{!p.job && !p.location}}">点击头像或下方按钮完善个人资料</text>
+        </view>
+        <!-- 完整度 -->
+        <view class="pf-progress">
+          <view class="pf-progress__bar"><view class="pf-progress__fill" style="width:{{progress * 100 / totalFields}}%"></view></view>
+          <text class="pf-progress__txt">{{progress}}/{{totalFields}} 项已填</text>
+        </view>
+      </view>
+      <view class="pf-hero__switch">
+        <view class="pf-seg">
+          <view class="pf-seg__item {{mode === 'view' ? 'is-on' : ''}}" bindtap="toView">资料</view>
+          <view class="pf-seg__item {{mode === 'edit' ? 'is-on' : ''}}" bindtap="toEdit">编辑</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- ===================== 查看视图 ===================== -->
+    <block wx:if="{{mode === 'view'}}">
+      <!-- 概要 -->
+      <view class="pf-card">
+        <view class="pf-card__title">📇 基本信息</view>
+        <view class="kv">
+          <view class="kv__row"><text class="kv__k">姓名</text><text class="kv__v">{{p.name || '—'}}</text></view>
+          <view class="kv__row"><text class="kv__k">性别</text><text class="kv__v">{{p.gender || '—'}}</text></view>
+          <view class="kv__row"><text class="kv__k">出生日期</text><text class="kv__v">{{p.birthday || '—'}}</text></view>
+          <view class="kv__row"><text class="kv__k">居住地</text><text class="kv__v">{{p.location || '—'}}</text></view>
+          <view class="kv__row"><text class="kv__k">职业</text><text class="kv__v">{{p.job || '—'}}</text></view>
+        </view>
+      </view>
+
+      <view class="pf-card" wx:if="{{p.bio}}">
+        <view class="pf-card__title">✍️ 个人简介</view>
+        <view class="pf-bio">{{p.bio}}</view>
+      </view>
+
+      <view class="pf-card" wx:if="{{contactRows.length}}">
+        <view class="pf-card__title">📞 联系方式</view>
+        <view class="kv">
+          <view class="kv__row" wx:for="{{p.contacts}}" wx:key="type">
+            <text class="kv__k">{{item.type}}</text><text class="kv__v">{{item.value}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="pf-card" wx:if="{{hobbyTags.length}}">
+        <view class="pf-card__title">🎯 兴趣爱好</view>
+        <view class="tags"><view class="tag" wx:for="{{hobbyTags}}" wx:key="*this">{{item}}</view></view>
+      </view>
+
+      <view class="pf-card" wx:if="{{skillTags.length}}">
+        <view class="pf-card__title">🛠 技能特长</view>
+        <view class="tags"><view class="tag tag--accent" wx:for="{{skillTags}}" wx:key="*this">{{item}}</view></view>
+      </view>
+
+      <view class="pf-card" wx:if="{{eduUI.length}}">
+        <view class="pf-card__title">🎓 教育经历</view>
+        <view class="exp" wx:for="{{eduUI}}" wx:key="id">
+          <view class="exp__head"><text class="exp__t">{{item.school}}</text><text class="exp__meta">{{item.period}}</text></view>
+          <view class="exp__sub">{{item.degree}}{{item.major ? ' · ' + item.major : ''}}</view>
+        </view>
+      </view>
+
+      <view class="pf-card" wx:if="{{workUI.length}}">
+        <view class="pf-card__title">💼 工作经历</view>
+        <view class="exp" wx:for="{{workUI}}" wx:key="id">
+          <view class="exp__head"><text class="exp__t">{{item.company}}</text><text class="exp__meta">{{item.period}}</text></view>
+          <view class="exp__sub">{{item.role}}</view>
+        </view>
+      </view>
+
+      <view wx:if="{{!p.name && !p.bio && contactRows.length===0 && eduUI.length===0 && workUI.length===0}}" class="pf-empty">
+        <view class="pf-empty__emo">🪪</view>
+        <view>还没有录入资料</view>
+        <view class="pf-empty__sub">点击下方“去编辑”，完善你的专属资料</view>
+      </view>
+
+      <view class="pf-foot">{{savedAt ? '上次保存：' + savedAt : '尚未保存'}}</view>
+      <view class="pf-edit-btn" bindtap="toEdit" hover-class="press">✏️ 去编辑 / 完善资料</view>
+    </block>
+
+    <!-- ===================== 编辑视图 ===================== -->
+    <block wx:else>
+      <!-- 基础信息 -->
+      <view class="pf-card">
+        <view class="pf-card__title">👤 基本信息</view>
+        <view class="fld">
+          <text class="fld__label">姓名</text>
+          <input class="fld__input" placeholder="你的姓名 / 昵称" value="{{p.name}}" bindinput="onName" maxlength="20" />
+        </view>
+        <view class="fld">
+          <text class="fld__label">性别</text>
+          <view class="seg">
+            <view wx:for="{{genderOptions}}" wx:key="key"
+              class="seg__item {{p.gender === item.key ? 'is-on' : ''}}" data-v="{{item.key}}" bindtap="onGender">{{item.label}}</view>
+          </view>
+        </view>
+        <view class="fld">
+          <text class="fld__label">出生日期</text>
+          <picker mode="date" value="{{p.birthday}}" bindchange="onBirthday" end="{{today}}">
+            <view class="pick fld__pick">{{p.birthday || '请选择出生日期'}} ▾</view>
+          </picker>
+        </view>
+        <view class="fld">
+          <text class="fld__label">居住地</text>
+          <input class="fld__input" placeholder="如：上海 · 杨浦" value="{{p.location}}" bindinput="onLocation" maxlength="40" />
+        </view>
+        <view class="fld">
+          <text class="fld__label">职业</text>
+          <input class="fld__input" placeholder="你的职业 / 身份" value="{{p.job}}" bindinput="onJob" maxlength="30" />
+        </view>
+        <view class="fld">
+          <text class="fld__label">个人简介</text>
+          <textarea class="fld__area" placeholder="简单介绍下自己…" value="{{bioText}}" bindinput="onBio" maxlength="200" auto-height></textarea>
+        </view>
+      </view>
+
+      <!-- 联系方式 -->
+      <view class="pf-card">
+        <view class="pf-card__row">
+          <view class="pf-card__title">📞 联系方式</view>
+          <view class="add-mini" bindtap="onContactAdd" hover-class="press">＋ 添加</view>
+        </view>
+        <view class="c-row" wx:for="{{contactRows}}" wx:key="id">
+          <input class="c-row__type" placeholder="类型" value="{{item.label}}" data-i="{{index}}" bindinput="onContactType" maxlength="8" />
+          <input class="c-row__val" placeholder="号码 / 账号 / 邮箱" value="{{item.value}}" data-i="{{index}}" bindinput="onContactValue" maxlength="60" />
+          <view class="c-row__del" data-i="{{index}}" bindtap="onContactRemove">✕</view>
+        </view>
+        <view wx:if="{{contactRows.length===0}}" class="pf-tip">点右上“＋ 添加”录入手机、微信、邮箱等联系方式</view>
+      </view>
+
+      <!-- 兴趣爱好 & 技能 -->
+      <view class="pf-card">
+        <view class="pf-card__title">🎯 兴趣爱好</view>
+        <input class="fld__input" placeholder="用逗号分隔，如：阅读, 旅行, 篮球" value="{{hobbiesText}}" bindinput="onHobbies" />
+        <view class="pf-card__title mt">🛠 技能特长</view>
+        <input class="fld__input" placeholder="如：Excel, Python, 摄影" value="{{skillsText}}" bindinput="onSkills" />
+      </view>
+
+      <!-- 教育经历 -->
+      <view class="pf-card">
+        <view class="pf-card__row">
+          <view class="pf-card__title">🎓 教育经历</view>
+          <view class="add-mini" bindtap="onEduAdd" hover-class="press">＋ 添加</view>
+        </view>
+        <view class="exp" wx:for="{{eduUI}}" wx:key="id">
+          <view class="exp__head">
+            <text class="exp__t">{{item.school}}</text>
+            <view class="exp__acts">
+              <text class="exp__op" data-id="{{item.id}}" bindtap="onEduEdit">编辑</text>
+              <text class="exp__op exp__op--danger" data-id="{{item.id}}" bindtap="onEduDelete">删除</text>
+            </view>
+          </view>
+          <view class="exp__sub">{{item.degree}}{{item.major ? ' · ' + item.major : ''}}<text wx:if="{{item.period}}" class="exp__meta">{{item.period}}</text></view>
+        </view>
+        <view wx:if="{{eduUI.length===0}}" class="pf-tip">添加你的学校、专业与起止时间（可按时间倒序）</view>
+      </view>
+
+      <!-- 工作经历 -->
+      <view class="pf-card">
+        <view class="pf-card__row">
+          <view class="pf-card__title">💼 工作经历</view>
+          <view class="add-mini" bindtap="onWorkAdd" hover-class="press">＋ 添加</view>
+        </view>
+        <view class="exp" wx:for="{{workUI}}" wx:key="id">
+          <view class="exp__head">
+            <text class="exp__t">{{item.company}}</text>
+            <view class="exp__acts">
+              <text class="exp__op" data-id="{{item.id}}" bindtap="onWorkEdit">编辑</text>
+              <text class="exp__op exp__op--danger" data-id="{{item.id}}" bindtap="onWorkDelete">删除</text>
+            </view>
+          </view>
+          <view class="exp__sub">{{item.role}}<text wx:if="{{item.period}}" class="exp__meta">{{item.period}}</text></view>
+        </view>
+        <view wx:if="{{workUI.length===0}}" class="pf-tip">添加公司、职位与工作内容</view>
+      </view>
+
+      <view class="pf-save" bindtap="onSave" hover-class="press">保存个人资料</view>
+      <view class="pf-cancel" bindtap="toView" hover-class="press">返回查看（不保存）</view>
+    </block>
+  </view>
+
+  <!-- ===================== 头像选择器 ===================== -->
+  <view wx:if="{{showAvatarPicker}}" class="pf-mask" catchtap="onAvatarClose">
+    <view class="pf-sheet" catchtap="onAvatarPickerStop">
+      <view class="pf-sheet__handle"></view>
+      <view class="pf-sheet__title">选择头像</view>
+      <view class="pf-sheet__row">
+        <view class="up-card" bindtap="onUploadAvatar" hover-class="press">
+          <view class="up-card__icon">📷</view>
+          <view class="up-card__txt">相册 / 拍摄</view>
+        </view>
+        <view class="preset" wx:for="{{presets}}" wx:key="id"
+          data-id="{{item.id}}" bindtap="onPickPreset">
+          <view class="preset__face {{p.avatar === item.id ? 'is-on' : ''}}">{{item.emoji}}</view>
+          <view class="preset__name">{{item.name}}</view>
+        </view>
+      </view>
+      <view class="pf-sheet__tip">相册图片为本地临时路径，清理缓存后可能失效；预设头像最稳定。</view>
+    </view>
+  </view>
+
+  <!-- ===================== 教育经历弹层 ===================== -->
+  <view wx:if="{{eduEditorOpen}}" class="pf-mask" catchtap="onEduEditorClose">
+    <view class="pf-sheet" catchtap="onEduSheetStop">
+      <view class="pf-sheet__handle"></view>
+      <view class="pf-sheet__title">教育经历</view>
+      <view class="fld"><text class="fld__label">学校 / 机构</text><input class="fld__input" value="{{eduForm.school}}" data-f="school" bindinput="onEduField" placeholder="学校名称" maxlength="40" /></view>
+      <view class="fld"><text class="fld__label">学历</text>
+        <picker range="{{degreeOptions}}" bindchange="onEduDegree">
+          <view class="pick fld__pick">{{eduForm.degree}} ▾</view>
+        </picker>
+      </view>
+      <view class="fld"><text class="fld__label">专业</text><input class="fld__input" value="{{eduForm.major}}" data-f="major" bindinput="onEduField" placeholder="专业 / 方向" maxlength="30" /></view>
+      <view class="fld"><text class="fld__label">起止时间</text><input class="fld__input" value="{{eduForm.period}}" data-f="period" bindinput="onEduField" placeholder="如：2019.09 - 2023.06" maxlength="30" /></view>
+      <view class="fld"><text class="fld__label">备注（可选）</text><input class="fld__input" value="{{eduForm.desc}}" data-f="desc" bindinput="onEduField" placeholder="获奖 / 社团等" maxlength="80" /></view>
+      <view class="pf-btn" bindtap="onEduSave" hover-class="press">保存该条经历</view>
+    </view>
+  </view>
+
+  <!-- ===================== 工作经历弹层 ===================== -->
+  <view wx:if="{{workEditorOpen}}" class="pf-mask" catchtap="onWorkEditorClose">
+    <view class="pf-sheet" catchtap="onWorkSheetStop">
+      <view class="pf-sheet__handle"></view>
+      <view class="pf-sheet__title">工作经历</view>
+      <view class="fld"><text class="fld__label">公司 / 单位</text><input class="fld__input" value="{{workForm.company}}" data-f="company" bindinput="onWorkField" placeholder="公司名称" maxlength="40" /></view>
+      <view class="fld"><text class="fld__label">职位</text><input class="fld__input" value="{{workForm.role}}" data-f="role" bindinput="onWorkField" placeholder="职位 / 岗位" maxlength="30" /></view>
+      <view class="fld"><text class="fld__label">起止时间</text><input class="fld__input" value="{{workForm.period}}" data-f="period" bindinput="onWorkField" placeholder="如：2020.07 - 至今" maxlength="30" /></view>
+      <view class="fld"><text class="fld__label">工作内容（可选）</text><textarea class="fld__area" value="{{workForm.desc}}" data-f="desc" bindinput="onWorkField" placeholder="主要职责 / 成果" maxlength="120" auto-height /></view>
+      <view class="pf-btn" bindtap="onWorkSave" hover-class="press">保存该段经历</view>
+    </view>
+  </view>
+</view>

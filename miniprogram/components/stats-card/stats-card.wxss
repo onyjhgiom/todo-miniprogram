@@ -1,0 +1,390 @@
+/* components/stats-card/stats-card.wxss
+ * 中古侘寂改版：深炭墨 hero（TODAY 面板风）
+ * 原渐变玻璃 → 深墨暖光 + 衬线标题 + 暖金点缀；保留全部类名与结构
+ *
+ * 工艺 token 化：圆角 / 描边 / 阴影改由 --home-hero-* 提供（默认值 = 侘寂原值），
+ * 主页「风格」维度只需覆盖这几个变量即可换形态，组件本身不感知风格。
+ */
+
+.hero {
+  position: relative;
+  margin: 8rpx 0 24rpx;
+  padding: 36rpx 36rpx 30rpx;
+  border-radius: var(--home-hero-r);
+  border-width: var(--home-hero-edge-w);
+  border-style: solid;
+  border-color: var(--home-hero-edge-c);
+  background: linear-gradient(165deg, var(--color-primary-ink) 0%, var(--color-primary-ink-2) 46%, var(--color-primary-ink) 100%);
+  color: #F2EDE4;
+  overflow: hidden;
+  box-shadow: var(--home-hero-shadow);
+  animation: hero-in 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+/* 深色主题下 primaryInk 已向白推（见 app.wxss），自动形成浅色面板；
+ * 保留细描边让边缘更利落，避免和卡片同底混淆
+ * （组件 wxss 不允许属性选择器，由 wxml 的 hero--dark 类驱动） */
+.hero--dark {
+  border-width: 2rpx;
+  border-color: var(--color-border);
+  box-shadow: var(--home-hero-shadow);
+}
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(28rpx) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ===== 顶部暖光晕（替代漂移光斑，静态更沉稳） ===== */
+.hero__halo {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40rpx);
+  pointer-events: none;
+}
+.hero__halo--1 {
+  width: 340rpx;
+  height: 340rpx;
+  right: -110rpx;
+  top: -130rpx;
+  background: radial-gradient(circle, rgba(216, 160, 92, 0.28), transparent 70%);
+}
+.hero__halo--2 {
+  width: 260rpx;
+  height: 260rpx;
+  right: 90rpx;
+  bottom: -110rpx;
+  background: radial-gradient(circle, rgba(192, 154, 94, 0.16), transparent 70%);
+}
+@keyframes halo-float {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(-26rpx, 20rpx, 0) scale(1.12); }
+}
+
+/* 高光扫过层：保留但降低存在感（暖纸微光） */
+.hero__shine {
+  position: absolute;
+  top: -60%;
+  left: -80%;
+  width: 60%;
+  height: 220%;
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.05) 45%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 55%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(8deg);
+  pointer-events: none;
+  animation: hero-shine 7s ease-in-out infinite;
+}
+@keyframes hero-shine {
+  0% { left: -80%; }
+  22% { left: 130%; }
+  100% { left: 130%; }
+}
+
+/* ===== 头部 ===== */
+.hero__head {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 30rpx;
+}
+
+.hero__greet {
+  font-size: 22rpx;
+  color: rgba(242, 237, 228, 0.42);
+  letter-spacing: 5rpx;
+  margin-bottom: 10rpx;
+}
+.hero__title {
+  font-family: var(--font-serif, serif);
+  font-size: 48rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+  line-height: 1.12;
+}
+
+/* 连续天数胶囊 */
+.hero__streak {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6rpx;
+  padding: 10rpx 20rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.07);
+  border: 2rpx solid rgba(242, 237, 228, 0.14);
+  font-size: 22rpx;
+  font-weight: 500;
+}
+.hero__streak-icon {
+  font-size: 20rpx;
+  color: #E0A06A;
+}
+.hero__streak-num {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #E0A06A;
+}
+.hero__streak-unit {
+  color: rgba(242, 237, 228, 0.62);
+}
+
+/* ===== 统计条（细线内嵌面板） ===== */
+.hero__stats {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2rpx solid rgba(242, 237, 228, 0.12);
+  border-radius: 32rpx;
+  padding: 24rpx 12rpx;
+}
+
+.hero__stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+.hero__stat--main .hero__stat-num {
+  font-size: 58rpx;
+  font-weight: 700;
+  line-height: 1;
+}
+.hero__stat-num {
+  font-size: 36rpx;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.4rpx;
+}
+.hero__stat-label {
+  font-size: 22rpx;
+  color: rgba(242, 237, 228, 0.55);
+  letter-spacing: 0.6rpx;
+}
+
+.hero__divider {
+  width: 2rpx;
+  align-self: stretch;
+  background: rgba(242, 237, 228, 0.12);
+  margin: 4rpx 0;
+}
+
+/* ============================================================
+ * 剧场版追加：让 hero 面板具备「主视觉」的分量 ——
+ * 更立体的投影、更强的光轴对比、更精致的数字排版。
+ * ============================================================ */
+
+.hero {
+  /* 底部一道落地投影 + 顶部内高光，面板像浮在纸面上 */
+  box-shadow:
+    var(--home-hero-shadow, var(--elev-4, 0 32rpx 72rpx rgba(74, 58, 42, .16))),
+    inset 0 2rpx 0 rgba(255, 255, 255, .26),
+    inset 0 -2rpx 0 rgba(0, 0, 0, .06);
+  animation: hero-stage-in .62s cubic-bezier(.16, .84, .28, 1) both;
+}
+
+@keyframes hero-stage-in {
+  from { opacity: 0; transform: translate3d(0, -20rpx, 0) scale(.985); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+/* 光斑更大更柔，漂移更慢 —— 呼吸感而非闪动感 */
+.hero__halo { filter: blur(70rpx); }
+.hero__halo--1 { opacity: .5; }
+.hero__halo--2 { opacity: .38; }
+
+/* 主数字：金属渐变 + 微投影，做出「压印」的精致感 */
+.hero__stat--main .hero__stat-num {
+  background: linear-gradient(180deg, #FFF8EC 0%, #F0DCB4 62%, #D9BE8C 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2rpx 6rpx rgba(60, 30, 0, .18);
+}
+.hero__stat-num {
+  text-shadow: 0 1rpx 4rpx rgba(60, 30, 0, .14);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 标签微微提亮，层级更清楚 */
+.hero__stat-label { color: rgba(242, 237, 228, .72); }
+
+/* 分隔线改为上下渐隐，避免硬切 */
+.hero__divider {
+  background: linear-gradient(
+    180deg,
+    rgba(242, 237, 228, 0) 0%,
+    rgba(242, 237, 228, .22) 50%,
+    rgba(242, 237, 228, 0) 100%
+  );
+}
+
+/* 连续打卡徽标：加一圈柔光，作为面板里的视觉焦点 */
+.hero__streak {
+  box-shadow: 0 0 0 1rpx rgba(255, 255, 255, .16), 0 6rpx 18rpx rgba(0, 0, 0, .16);
+  transition: transform 300ms cubic-bezier(.34, 1.56, .64, 1);
+}
+
+/* ============================================================
+ * 深海蓝金 · 上海：城市环境氛围（只在 theme=deepsea 时渲染）
+ * —— 底部极淡的陆家嘴天际线轮廓 + 一道暖金地平线，
+ *    与页面背景的上海实景呼应，形成「蓝金双色」的沉浸氛围。
+ * ============================================================ */
+.hero__skyline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 112rpx;
+  opacity: .62;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  /* 层级从上到下：明珠球 → 明珠塔身 → 环绕/金茂/上海中心剪影 */
+  background-image:
+    radial-gradient(circle, rgba(211, 172, 116, .55) 0 5rpx, rgba(211, 172, 116, 0) 6rpx),
+    linear-gradient(rgba(186, 210, 244, .34), rgba(186, 210, 244, .12)),
+    linear-gradient(rgba(186, 210, 244, .3), rgba(186, 210, 244, .1)),
+    linear-gradient(rgba(186, 210, 244, .26), rgba(186, 210, 244, .09)),
+    linear-gradient(rgba(186, 210, 244, .22), rgba(186, 210, 244, .08)),
+    linear-gradient(rgba(186, 210, 244, .18), rgba(186, 210, 244, .06)),
+    linear-gradient(rgba(186, 210, 244, .14), rgba(186, 210, 244, .05));
+  background-size:
+    20rpx 20rpx,
+    5rpx 58rpx,
+    26rpx 98rpx,
+    24rpx 74rpx,
+    20rpx 60rpx,
+    30rpx 42rpx,
+    22rpx 32rpx;
+  background-position:
+    84% 72%,
+    84% 100%,
+    12% 100%,
+    31% 100%,
+    45% 100%,
+    60% 100%,
+    72% 100%;
+}
+
+/* 暖金地平线：天际线脚下的一道细光，蓝金体系的分界 */
+.hero__horizon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 110rpx;
+  height: 2rpx;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(211, 172, 116, 0) 0%,
+    rgba(211, 172, 116, .5) 22%,
+    rgba(211, 172, 116, .26) 58%,
+    rgba(211, 172, 116, 0) 100%
+  );
+}
+
+/* 副标题：把「今天该做的事」说清楚，克制的一行小字 */
+.hero__sub {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  line-height: 1.5;
+  letter-spacing: .6rpx;
+  color: rgba(242, 237, 228, .56);
+}
+
+/* 深海蓝金下的 hero：更深的蓝底 + 香槟金发丝边（与卡片工艺统一）。
+ * 背景由 stats-card.ts 注入陆家嘴夜景图（左暗右城），CSS 剪影装饰让位。 */
+.hero--deepsea {
+  border-width: 2rpx;
+  border-color: rgba(211, 172, 116, .22);
+}
+.hero--deepsea .hero__skyline,
+.hero--deepsea .hero__horizon {
+  display: none;
+}
+
+/* ============================================================
+ * 液态金属 · 透明玻璃 hero（只在 theme=liquid 时渲染）
+ * 背景图（上海日景）从面板后清晰透出：近全透明底 + backdrop 毛玻璃，
+ * 镜面高光发丝边 + 冷白光晕；文字整体转深海军蓝保证可读。
+ * ============================================================ */
+.hero.hero--glass {
+  background: linear-gradient(160deg,
+    rgba(255, 255, 255, 0.34) 0%,
+    rgba(255, 255, 255, 0.16) 45%,
+    rgba(210, 228, 250, 0.22) 100%);
+  -webkit-backdrop-filter: blur(28rpx) saturate(1.35);
+  backdrop-filter: blur(28rpx) saturate(1.35);
+  border-color: rgba(255, 255, 255, 0.55);
+  color: #16324F;
+  box-shadow:
+    0 16rpx 40rpx rgba(28, 34, 48, 0.14),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.85),
+    inset 0 -1rpx 0 rgba(255, 255, 255, 0.3);
+}
+/* 光晕换冷白，避免暖金在玻璃上发脏 */
+.hero--glass .hero__halo--1 {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.55), transparent 70%);
+}
+.hero--glass .hero__halo--2 {
+  background: radial-gradient(circle, rgba(150, 185, 235, 0.3), transparent 70%);
+}
+/* 文字体系：深海军蓝 */
+.hero--glass .hero__greet {
+  color: rgba(22, 50, 79, 0.62);
+}
+.hero--glass .hero__title {
+  color: #122B45;
+}
+/* 主数字：深蓝金属渐变（替换金色压印渐变） */
+.hero--glass .hero__stat--main .hero__stat-num {
+  background: linear-gradient(180deg, #2C4A72 0%, #16324F 62%, #0E2238 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+}
+.hero--glass .hero__stat-num {
+  color: #16324F;
+  text-shadow: none;
+}
+.hero--glass .hero__stat-label {
+  color: rgba(22, 50, 79, 0.66);
+}
+/* 统计条：内嵌白玻璃 */
+.hero--glass .hero__stats {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+.hero--glass .hero__divider {
+  background: linear-gradient(
+    180deg,
+    rgba(22, 50, 79, 0) 0%,
+    rgba(22, 50, 79, 0.22) 50%,
+    rgba(22, 50, 79, 0) 100%
+  );
+}
+/* 连续天数胶囊：白玻璃 + 钢青数字 */
+.hero--glass .hero__streak {
+  background: rgba(255, 255, 255, 0.28);
+  border-color: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0 0 1rpx rgba(255, 255, 255, 0.35), 0 6rpx 18rpx rgba(28, 34, 48, 0.12);
+}
+.hero--glass .hero__streak-icon,
+.hero--glass .hero__streak-num {
+  color: #2C5A8F;
+}
+.hero--glass .hero__streak-unit {
+  color: rgba(22, 50, 79, 0.66);
+}

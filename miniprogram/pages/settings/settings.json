@@ -1,0 +1,12 @@
+{
+  "navigationBarTitleText": "我的",
+  "navigationBarBackgroundColor": "#15110D",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#15110D",
+  "usingComponents": {
+    "theme-switcher": "/components/theme-switcher/theme-switcher",
+    "custom-theme-picker": "/components/custom-theme-picker/custom-theme-picker",
+    "empty-state": "/components/empty-state/empty-state",
+    "fx-stage": "/components/fx-stage/fx-stage"
+  }
+}

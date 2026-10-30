@@ -1,0 +1,32 @@
+<!--components/love-orb/love-orb.wxml-->
+<!-- LoveOrb 爱情能量球：可独立复用的自定义组件
+     用法：<love-orb items="{{orbItems}}" level="{{lv}}" primary="{{primary}}" accent="{{accent}}"
+                    reduced="{{reducedMotion}}" bind:select="onOrbSelect" bind:arrive="onOrbArrive"
+                    bind:levelup="onOrbLevelUp"></love-orb>
+     飞入：this.selectComponent('#orb').flyIn(item, viewportX, viewportY)
+-->
+<view class="orb-wrap" style="height:{{height}}rpx">
+  <canvas
+    type="2d"
+    id="orbCv"
+    class="orb-cv"
+    bindtouchstart="onTouchStart"
+    bindtouchmove="onTouchMove"
+    bindtouchend="onTouchEnd"
+    bindtouchcancel="onTouchEnd"
+    bindmousedown="onMouseDown"
+    bindmousemove="onMouseMove"
+    bindmouseup="onMouseUp"
+    bindwheel="onWheel"
+  ></canvas>
+
+  <view class="orb-hint" wx:if="{{hint}}">{{hint}}</view>
+
+  <!-- 形态名（页面可自行决定是否展示） -->
+  <view class="orb-form" wx:if="{{showForm}}">
+    <text class="orb-form__lv">Lv.{{level}}</text>
+    <text class="orb-form__name">{{formName}}</text>
+  </view>
+
+  <slot></slot>
+</view>

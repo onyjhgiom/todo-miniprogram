@@ -1,0 +1,16 @@
+.nm { display: flex; flex-direction: column; align-items: center; gap: 24rpx; }
+.nm__show {
+  width: 100%; max-width: 560rpx; height: 160rpx; border-radius: var(--r-lg);
+  background: var(--card); border: 2rpx solid var(--line); box-shadow: var(--sd-1);
+  display: flex; align-items: center; justify-content: center; letter-spacing: 8rpx;
+}
+.nm__num { font-size: 64rpx; color: var(--clay); font-weight: 700; }
+.nm__ph { font-size: 56rpx; color: var(--ink-3); }
+.nm__pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16rpx; width: 100%; max-width: 560rpx; }
+.nm__n {
+  height: 96rpx; border-radius: var(--r-md); background: var(--card);
+  display: flex; align-items: center; justify-content: center; font-size: 40rpx; color: var(--ink-2);
+  border: 2rpx solid var(--line); box-shadow: var(--sd-1);
+}
+.nm__n:active { transform: scale(.95); }
+.nm__n--del { color: var(--clay); }

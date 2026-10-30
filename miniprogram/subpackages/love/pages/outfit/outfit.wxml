@@ -1,0 +1,141 @@
+<!-- pages/love/outfit/outfit.wxml -->
+<view class="ay" data-skin="{{skin.key}}" style="{{skin.style}}">
+  <view class="ay-tabs">
+    <view class="ay-tab {{tab===item.key?'ay-tab--on':''}}" wx:for="{{tabs}}" wx:key="key"
+          data-key="{{item.key}}" bindtap="onTab">{{item.label}}</view>
+  </view>
+
+  <!-- ==================== 成套穿搭 ==================== -->
+  <block wx:if="{{tab==='look'}}">
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">👗 喜欢的风格</text></view>
+      <view class="ay-chips">
+        <view class="ay-chip {{style===item.key?'ay-chip--on':''}}" wx:for="{{styleList}}" wx:key="key"
+              data-v="{{item.key}}" bindtap="onStyle">{{item.emoji}} {{item.key}}</view>
+      </view>
+    </view>
+
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">📍 场合</text></view>
+      <view class="ay-chips">
+        <view class="ay-chip {{occasion===item?'ay-chip--on':''}}" wx:for="{{occList}}" wx:key="*this"
+              data-v="{{item}}" bindtap="onOccasion">{{item}}</view>
+      </view>
+      <view class="ay-faint ay-mt">{{occRule}}</view>
+    </view>
+
+    <view class="ay-card ay-card--flat ay-anim">
+      <view class="ay-between">
+        <view>
+          <view class="ay-card__title">季节与温度</view>
+          <view class="ay-faint">填温度会更准（如 18）</view>
+        </view>
+      </view>
+      <view class="ay-chips">
+        <view class="ay-chip {{season===item?'ay-chip--on':''}}" wx:for="{{seasons}}" wx:key="*this"
+              data-v="{{item}}" bindtap="onSeason">{{item}}</view>
+      </view>
+      <input class="ay-field__input ay-mt" style="padding:16rpx;background:var(--ay-card-soft);border-radius:16rpx"
+             placeholder="今天多少度？填数字" type="number" value="{{temp}}" bindinput="onTemp" bindblur="onTempBlur" />
+    </view>
+
+    <view class="ay-card ay-card--flat ay-anim">
+      <view class="ay-between">
+        <view>
+          <view class="ay-card__title">我的身形与预算</view>
+          <view class="ay-faint">决定版型建议与价位区间</view>
+        </view>
+        <view class="ay-btn ay-btn--sm ay-btn--line" bindtap="onToggleSetup">{{showSetup?'收起':'修改'}}</view>
+      </view>
+      <block wx:if="{{showSetup}}">
+        <view class="ay-hr"></view>
+        <view class="ay-card__title" style="font-size:25rpx">身形</view>
+        <view class="ay-chips">
+          <view class="ay-chip {{prefs.body===item.key?'ay-chip--on':''}}" wx:for="{{bodyList}}" wx:key="key"
+                data-v="{{item.key}}" bindtap="onBody">{{item.label}}</view>
+        </view>
+        <view class="ay-card__title" style="font-size:25rpx">身高</view>
+        <view class="ay-chips">
+          <view class="ay-chip {{prefs.height===item.key?'ay-chip--on':''}}" wx:for="{{heightTags}}" wx:key="key"
+                data-v="{{item.key}}" bindtap="onHeight">{{item.label}}</view>
+        </view>
+        <view class="ay-card__title" style="font-size:25rpx">月可支配（元）— 填了自动定预算档</view>
+        <input class="ay-field__input" style="padding:16rpx;background:var(--ay-card-soft);border-radius:16rpx"
+               placeholder="如 6000" type="number" value="{{monthlyText}}" bindinput="onMonthly" bindblur="onMonthlyBlur" />
+        <view class="ay-card__title ay-mt" style="font-size:25rpx">预算档（可手动覆盖）</view>
+        <view class="ay-chips">
+          <view class="ay-chip {{prefs.budget===item.key?'ay-chip--on':''}}" wx:for="{{bands}}" wx:key="key"
+                data-v="{{item.key}}" bindtap="onBudget">{{item.label}}</view>
+        </view>
+      </block>
+    </view>
+
+    <block wx:if="{{plan}}">
+      <view class="ay-card ay-anim">
+        <view class="ay-card__hd">
+          <text class="ay-card__title">{{plan.style}} · {{plan.occasion}}</text>
+          <text class="ay-card__more">{{plan.budget}}</text>
+        </view>
+        <view class="ay-t">{{plan.summary}}</view>
+        <view class="ay-btn ay-btn--block ay-btn--ghost ay-mt" bindtap="onCopyLook">📋 复制这套搭配</view>
+      </view>
+
+      <view class="ay-card ay-anim">
+        <view class="ay-card__hd"><text class="ay-card__title">🧩 单品清单</text></view>
+        <view class="ay-step" wx:for="{{plan.pieces}}" wx:key="slot">
+          <view class="ay-step__hd">{{item.emoji}} {{item.slot}} · {{item.name}}</view>
+          <view class="ay-step__li" style="padding-left:0">{{item.detail}}</view>
+          <view class="ay-step__li" style="padding-left:0;color:var(--ay-primary)">参考价 {{item.price}}</view>
+        </view>
+      </view>
+
+      <view class="ay-card ay-anim">
+        <view class="ay-card__hd"><text class="ay-card__title">🎨 配色公式</text></view>
+        <view class="ay-t">{{plan.color}}</view>
+        <view class="ay-hr"></view>
+        <view class="ay-card__hd"><text class="ay-card__title">📐 按你的身形</text></view>
+        <view class="ay-step__li" wx:for="{{plan.bodyLines}}" wx:key="*this" style="padding-left:0">{{item}}</view>
+        <view class="ay-hr"></view>
+        <view class="ay-card__hd"><text class="ay-card__title">💡 提醒</text></view>
+        <view class="ay-step__li" wx:for="{{plan.tips}}" wx:key="*this" style="padding-left:0">{{item}}</view>
+      </view>
+    </block>
+  </block>
+
+  <!-- ==================== 好物推荐 ==================== -->
+  <block wx:if="{{tab==='goods'}}">
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">🛍️ 品类</text></view>
+      <view class="ay-chips">
+        <view class="ay-chip {{goodsCat===item?'ay-chip--on':''}}" wx:for="{{goodsCats}}" wx:key="*this"
+              data-v="{{item}}" bindtap="onGoodsCat">{{item}}</view>
+      </view>
+      <view class="ay-hr"></view>
+      <view class="ay-card__title" style="font-size:25rpx">当前预算档：{{prefs.budget}}</view>
+      <view class="ay-chips">
+        <view class="ay-chip {{prefs.budget===item.key?'ay-chip--on':''}}" wx:for="{{bands}}" wx:key="key"
+              data-v="{{item.key}}" bindtap="onBudget">{{item.label}}</view>
+      </view>
+      <view class="ay-faint ay-mt">价位随预算档自动换算；预算档可在上面「修改」里用月收入自动定位。</view>
+    </view>
+
+    <view class="ay-card ay-anim" wx:for="{{goods}}" wx:key="name">
+      <view class="ay-card__hd">
+        <text class="ay-card__title">{{item.emoji}} {{item.name}}</text>
+        <text class="ay-card__more">{{item.price}}</text>
+      </view>
+      <view class="ay-t">{{item.spec}}</view>
+      <view class="ay-hr"></view>
+      <view class="ay-card__title" style="font-size:25rpx">怎么挑</view>
+      <view class="ay-step__li" style="padding-left:0">{{item.how}}</view>
+      <view class="ay-faint ay-mt">避雷：{{item.trap}}</view>
+    </view>
+
+    <view class="ay-card ay-card--soft ay-anim">
+      <view class="ay-faint">
+        说明：这里不给商品链接——价格与库存实时变动，写死的链接一定会过期。
+        给的是「品类 + 材质 + 价位区间 + 选购判断标准」，在任何渠道（线下 / 电商 / 二手）都能照着挑。
+      </view>
+    </view>
+  </block>
+</view>

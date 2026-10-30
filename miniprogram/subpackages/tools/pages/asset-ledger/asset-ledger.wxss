@@ -1,0 +1,1156 @@
+/* subpackages/tools/pages/asset-ledger/asset-ledger.wxss
+ * 资产账本视觉规范：按参考图还原
+ *
+ * ★ 配色取舍：本页不跟随全局主题色，而是自带一套「冷灰底 + 白卡 + 橙」的
+ *   token，因为参考图就是这个观感，跟随主题色会让「还原度」直接失真。
+ *   主题只用于区分深/浅（dark / rose 两套深色主题有专门覆盖块）。
+ *   所有 --al-* 变量都定义在 .al 上，深色覆盖块权重更高（.al[data-theme=x]），
+ *   所以只需写一次覆盖，不必关心注入顺序。
+ *
+ * ★ 图标全部用纯 CSS 画（::before/::after + background-image 多重渐变）：
+ *   参考图是单色几何线性图标，emoji 无法还原；用 CSS 画还能自动继承 currentColor。
+ */
+
+/* ==================== 页面级 token ==================== */
+
+.al {
+  --al-bg: #F2F3F5;
+  --al-card: #FFFFFF;
+  --al-dock-bg: #FFFFFF;
+  --al-badge-bg: #F5F6F7;
+  --al-ink: #17181A;
+  --al-ink-2: #6B7280;
+  --al-ink-3: #A0A5AD;
+  --al-line: #ECEDEF;
+  --al-track: #F0F1F3;
+  --al-accent: #EA580C;
+  --al-accent-soft: rgba(234, 88, 12, 0.10);
+  --al-chip: #26272B;
+  --al-chip-text: #FFFFFF;
+  --al-shadow: 0 2rpx 10rpx rgba(17, 24, 39, 0.05);
+  --al-shadow-lg: 0 10rpx 30rpx rgba(17, 24, 39, 0.12);
+}
+
+/* 深色主题：rose 槽位在 app.wxss 里已改造为深色「深邃暗夜」，一并覆盖 */
+.al[data-theme='dark'],
+.al[data-theme='rose'] {
+  --al-bg: #0E1013;
+  --al-card: #1A1D21;
+  --al-dock-bg: #1A1D21;
+  --al-badge-bg: rgba(255, 255, 255, 0.07);
+  --al-ink: #F2F3F5;
+  --al-ink-2: #9BA1AA;
+  --al-ink-3: #6B7280;
+  --al-line: rgba(255, 255, 255, 0.08);
+  --al-track: rgba(255, 255, 255, 0.09);
+  --al-chip: #F2F3F5;
+  --al-chip-text: #16181B;
+  --al-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.3);
+  --al-shadow-lg: 0 10rpx 30rpx rgba(0, 0, 0, 0.5);
+}
+
+.al,
+.al view,
+.al scroll-view,
+.al input,
+.al text {
+  box-sizing: border-box;
+}
+
+.al {
+  position: relative;
+  min-height: 100vh;
+  padding: 0 40rpx;
+  background: var(--al-bg);
+  font-family: -apple-system, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+}
+
+/* ==================== 顶部标题栏 ==================== */
+
+.al__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* 三段尺寸全部由 wxml 内联给出（不同机型胶囊位置不同，不能写死）：
+   *   padding-top  = 状态栏高
+   *   height       = 状态栏高 + 导航行高（box-sizing: border-box，height 含 padding-top）
+   *   padding-right= 让开微信原生胶囊的量
+   * 内容区因而与胶囊同一垂直中心，水平上停在胶囊左侧。 */
+  margin-bottom: 22rpx;
+}
+
+/* 左侧：返回钮 + 标题。flex:1 + min-width:0 让标题占满剩余空间并可截断 */
+.al__head-l {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.al__title {
+  /* 让标题占据剩余空间：左侧返回钮 + 右侧按钮组夹击，
+   * 窄屏上宁可标题省略号截断，也不能把按钮压小或挤出可点范围 */
+  flex: 1;
+  min-width: 0;
+  font-size: 44rpx;
+  font-weight: 700;
+  color: var(--al-ink);
+  letter-spacing: -0.6rpx;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* 标题字号三档递减：返回钮 + 三按钮 + 标题同排，横向空间按屏宽分档给足。
+ * 档位与 scripts/check-navbar.js 的验算保持一致，改这里必须同步改脚本。 */
+@media (max-width: 414px) {
+  .al__title {
+    font-size: 40rpx;
+  }
+}
+
+@media (max-width: 380px) {
+  .al__title {
+    font-size: 36rpx;
+  }
+}
+
+.al__acts {
+  display: flex;
+  align-items: center;
+  /* 按钮不参与收缩，永远保持完整可点范围 */
+  flex-shrink: 0;
+  /* 30rpx > 两侧热区外扩之和（14rpx × 2），保证相邻按钮的可点范围不互相盖住 */
+  gap: 30rpx;
+}
+
+.al__round {
+  position: relative;
+  /* 64rpx 视觉（加返回钮后横向空间吃紧，从 72 收一档），
+   * 实际可点范围靠 ::after 外扩到 92rpx ≈ 46px，仍满足「触控目标 ≥ 44px」 */
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: var(--al-card);
+  color: var(--al-ink-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--al-shadow);
+  transition: transform 0.16s ease;
+}
+
+/* 外扩 14rpx 小于组内 gap（30rpx）的一半，相邻按钮热区不会重叠。 */
+.al__round::after {
+  content: '';
+  position: absolute;
+  top: -14rpx;
+  right: -14rpx;
+  bottom: -14rpx;
+  left: -14rpx;
+}
+
+/* 返回钮：裸箭头（不套白圆），省下横向空间给标题 */
+.al__round--back {
+  background: transparent;
+  box-shadow: none;
+  color: var(--al-ink);
+}
+
+.al__round--hover {
+  transform: scale(0.92);
+}
+
+/* ==================== 搜索条 ==================== */
+
+.al__search {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  padding-bottom: 22rpx;
+}
+
+.al__search-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  height: 76rpx;
+  padding: 0 26rpx;
+  border-radius: 999rpx;
+  background: var(--al-card);
+  box-shadow: var(--al-shadow);
+  color: var(--al-ink-3);
+}
+
+.al__search-input {
+  flex: 1;
+  font-size: 26rpx;
+  color: var(--al-ink);
+}
+
+.al__search-ph {
+  color: var(--al-ink-3);
+}
+
+.al__search-clear {
+  font-size: 24rpx;
+  color: var(--al-ink-3);
+  padding: 6rpx;
+}
+
+.al__search-cancel {
+  font-size: 26rpx;
+  color: var(--al-ink-2);
+  flex-shrink: 0;
+}
+
+/* ==================== 概览卡 ==================== */
+
+.ov {
+  background: var(--al-card);
+  border-radius: 32rpx;
+  padding: 32rpx 32rpx 28rpx;
+  box-shadow: var(--al-shadow);
+}
+
+.ov__head {
+  display: flex;
+  align-items: baseline;
+  gap: 14rpx;
+}
+
+.ov__title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--al-ink);
+}
+
+.ov__badge {
+  font-size: 24rpx;
+  color: var(--al-ink-3);
+}
+
+.ov__body {
+  display: flex;
+  margin-top: 26rpx;
+}
+
+.ov__col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+  min-width: 0;
+}
+
+.ov__col--right {
+  padding-left: 24rpx;
+}
+
+.ov__label {
+  font-size: 24rpx;
+  color: var(--al-ink-2);
+}
+
+.ov__num {
+  font-size: 46rpx;
+  font-weight: 700;
+  color: var(--al-ink);
+  letter-spacing: -1rpx;
+  line-height: 1.1;
+}
+
+.ov__line {
+  height: 2rpx;
+  background: var(--al-line);
+  margin: 28rpx 0 24rpx;
+}
+
+.ov__stats {
+  display: flex;
+  align-items: center;
+  gap: 38rpx;
+}
+
+.ov__stat {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.ov__dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ov__stat-label {
+  font-size: 24rpx;
+  color: var(--al-ink-2);
+}
+
+.ov__stat-num {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: var(--al-ink);
+}
+
+/* ==================== 分类 Tab ==================== */
+
+.al__cats {
+  margin-top: 34rpx;
+  white-space: nowrap;
+}
+
+.al__cats-track {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 44rpx;
+  padding-bottom: 6rpx;
+}
+
+.al__cat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.al__cat-text {
+  font-size: 28rpx;
+  color: var(--al-ink-2);
+}
+
+.al__cat-line {
+  width: 46rpx;
+  height: 6rpx;
+  border-radius: 3rpx;
+  background: transparent;
+}
+
+.al__cat.is-active .al__cat-text {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--al-ink);
+}
+
+.al__cat.is-active .al__cat-line {
+  background: var(--al-accent);
+}
+
+/* ==================== 筛选 chips + 排序 ==================== */
+
+.al__filters {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  margin-top: 26rpx;
+}
+
+.al__chips {
+  flex: 1;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.al__chips-track {
+  display: inline-flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.al__chip {
+  height: 64rpx;
+  line-height: 64rpx;
+  padding: 0 30rpx;
+  border-radius: 999rpx;
+  font-size: 26rpx;
+  color: var(--al-ink-2);
+  background: var(--al-card);
+  box-shadow: var(--al-shadow);
+}
+
+.al__chip.is-active {
+  background: var(--al-chip);
+  color: var(--al-chip-text);
+  font-weight: 600;
+  box-shadow: none;
+}
+
+.al__sort {
+  position: relative;
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: var(--al-card);
+  color: var(--al-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--al-shadow);
+  flex-shrink: 0;
+  transition: transform 0.16s ease;
+}
+
+/* 同 .al__round：视觉 64rpx 不变，热区外扩到 92rpx ≈ 46px 便于点击。
+ * 外扩量 14rpx 仍小于与左侧筛选胶囊之间的 20rpx 间距，不会误触到胶囊。 */
+.al__sort::after {
+  content: '';
+  position: absolute;
+  top: -14rpx;
+  right: -14rpx;
+  bottom: -14rpx;
+  left: -14rpx;
+}
+
+.al__sort--hover {
+  transform: scale(0.92);
+}
+
+.al__sort.is-active {
+  color: var(--al-accent);
+}
+
+/* ==================== 卡片瀑布流 ==================== */
+
+.al__grid {
+  display: flex;
+  align-items: flex-start;
+  gap: 20rpx;
+  margin-top: 28rpx;
+}
+
+.al__col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background: var(--al-card);
+  border-radius: 28rpx;
+  padding: 26rpx 24rpx 22rpx;
+  box-shadow: var(--al-shadow);
+  transition: transform 0.16s ease;
+}
+
+.card--hover {
+  transform: scale(0.975);
+}
+
+.card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12rpx;
+  min-height: 84rpx;
+  margin-bottom: 16rpx;
+}
+
+.card__pic {
+  width: 100rpx;
+  height: 84rpx;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+}
+
+.card__pic-emoji {
+  font-size: 64rpx;
+  line-height: 1;
+}
+
+.card__pic--logo {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 22rpx;
+  align-items: center;
+  justify-content: center;
+}
+
+.card__pic-text {
+  font-size: 28rpx;
+  font-weight: 800;
+  letter-spacing: -0.6rpx;
+}
+
+.card__badge {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 6rpx 14rpx;
+  border-radius: 999rpx;
+  background: var(--al-badge-bg);
+  flex-shrink: 0;
+}
+
+.card__dot {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.card__badge-text {
+  font-size: 20rpx;
+  color: var(--al-ink-2);
+}
+
+.card__name {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--al-ink);
+  line-height: 1.3;
+}
+
+.card__meta {
+  font-size: 21rpx;
+  color: var(--al-ink-3);
+  margin-top: 8rpx;
+  line-height: 1.4;
+}
+
+.card__amount {
+  display: flex;
+  align-items: baseline;
+  margin-top: 22rpx;
+}
+
+.card__num {
+  font-size: 38rpx;
+  font-weight: 700;
+  color: var(--al-ink);
+  letter-spacing: -0.6rpx;
+  line-height: 1.1;
+}
+
+.card__unit {
+  font-size: 22rpx;
+  color: var(--al-ink-3);
+  margin-left: 5rpx;
+}
+
+.card__side {
+  margin-left: auto;
+  display: flex;
+  align-items: baseline;
+  gap: 5rpx;
+  padding-left: 10rpx;
+}
+
+.card__side-label {
+  font-size: 20rpx;
+  color: var(--al-ink-3);
+}
+
+.card__side-num {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: var(--al-ink-2);
+}
+
+.card__bar {
+  height: 8rpx;
+  border-radius: 4rpx;
+  background: var(--al-track);
+  margin-top: 20rpx;
+  overflow: hidden;
+}
+
+.card__fill {
+  height: 100%;
+  min-width: 8rpx;
+  border-radius: 4rpx;
+  background: linear-gradient(90deg, #FB923C 0%, #EA580C 100%);
+}
+
+/* 质保行（资产卡专用）：颜色由内联 style 按保内/过保注入（绿/灰），与状态徽章一致 */
+.card__warranty {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  margin-top: 14rpx;
+  padding: 8rpx 0;
+  font-size: 20rpx;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12rpx;
+  margin-top: 16rpx;
+}
+
+.card__foot-l {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  font-size: 20rpx;
+  color: var(--al-ink-3);
+  min-width: 0;
+}
+
+.card__foot-r {
+  font-size: 20rpx;
+  color: var(--al-ink-3);
+  flex-shrink: 0;
+}
+
+/* ==================== 空状态 & 底部占位 ==================== */
+
+.al__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14rpx;
+  padding: 130rpx 0;
+}
+
+.al__empty-ic {
+  font-size: 96rpx;
+  opacity: 0.45;
+}
+
+.al__empty-t {
+  font-size: 28rpx;
+  color: var(--al-ink-2);
+}
+
+.al__empty-s {
+  font-size: 23rpx;
+  color: var(--al-ink-3);
+}
+
+/* 底部占位：让最后一行卡片能完整滚到底部 dock 之上。
+ * 高度依据（rpx，750rpx = 屏宽）：dock 118 + 视觉余量 → 原为 210；
+ * 加右下 FAB 后，FAB 顶边距屏幕底 152 + 108 = 260rpx，
+ * 占位须 ≥ 260rpx 才能保证滚到底时最后一张卡不被 FAB 压住，故提到 280rpx。 */
+.al__pad {
+  height: 280rpx;
+}
+
+/* ==================== 底部 dock ==================== */
+
+.dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  display: flex;
+  align-items: stretch;
+  gap: 16rpx;
+  padding: 0 40rpx calc(26rpx + env(safe-area-inset-bottom));
+  pointer-events: none;
+}
+
+.dock > view {
+  pointer-events: auto;
+}
+
+/* 三个独立的圆矩形按钮：我的资产 / 每月支出 / 切换深浅色 */
+.dock__btn {
+  flex: 1;
+  min-width: 0;
+  height: 92rpx;
+  border-radius: 26rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+  background: var(--al-dock-bg);
+  color: var(--al-ink);
+  font-size: 24rpx;
+  box-shadow: var(--al-shadow-lg);
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.dock__btn--hover {
+  opacity: 0.72;
+}
+
+/* 当前所在 Tab 高亮为橙色实底；切换按钮永远中性色 */
+.dock__btn.is-active {
+  background: var(--al-accent);
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.dock__label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ==================== 右下角新建按钮（FAB） ====================
+ * 位置：内容区右下角、底部 dock 之上 —— 拇指自然落点，单手可点。
+ *
+ * 纵向定位依据：
+ *   dock 高度 = 26rpx(下内边距) + 92rpx(按钮) = 118rpx，再加安全区；
+ *   FAB 再留 34rpx 视觉间距 → bottom = 152rpx + safe-area。
+ *
+ * 热区：视觉 108rpx（约 54px，已是标准 FAB 尺寸），
+ *   ::after 再外扩 16rpx → 实际可点 140rpx ≈ 70px，远超 44px 最小触控目标；
+ *   外扩量小于与 dock 之间的 34rpx 间距，不会误触到底部按钮。 */
+.fab {
+  position: fixed;
+  right: 40rpx;
+  bottom: calc(152rpx + env(safe-area-inset-bottom));
+  /* 低于 dock(60) —— 两者区域不重叠，仅为层级语义；远低于弹层 mask(200) */
+  z-index: 58;
+  width: 108rpx;
+  height: 108rpx;
+  border-radius: 50%;
+  background: var(--al-accent);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10rpx 26rpx rgba(234, 88, 12, 0.42);
+  transition: transform 0.16s ease;
+}
+
+.fab::after {
+  content: '';
+  position: absolute;
+  top: -16rpx;
+  right: -16rpx;
+  bottom: -16rpx;
+  left: -16rpx;
+}
+
+.fab--hover {
+  transform: scale(0.92);
+}
+
+/* 深色下橙色实底对比度足够，只把投影加重一点，避免浮起来的感觉丢失 */
+.al[data-theme='dark'] .fab,
+.al[data-theme='rose'] .fab {
+  box-shadow: 0 10rpx 26rpx rgba(0, 0, 0, 0.5);
+}
+
+/* ==================== 纯 CSS 图标 ==================== */
+
+.ic {
+  display: block;
+  flex-shrink: 0;
+}
+
+/* 月亮（当前浅色 → 点它切深色）：透明圆 + 内偏移 inset 阴影成月牙 */
+.ic-moon {
+  width: 26rpx;
+  height: 26rpx;
+  border-radius: 50%;
+  box-shadow: inset 7rpx -5rpx 0 0 currentColor;
+}
+
+/* 太阳（当前深色 → 点它切浅色）：实心圆 + 8 道光线圆点 */
+.ic-sun {
+  width: 22rpx;
+  height: 22rpx;
+  border-radius: 50%;
+  background: currentColor;
+  position: relative;
+}
+
+.ic-sun::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6rpx;
+  height: 6rpx;
+  margin: -3rpx 0 0 -3rpx;
+  border-radius: 50%;
+  box-shadow:
+    0 -13rpx 0 0 currentColor,
+    0 13rpx 0 0 currentColor,
+    -13rpx 0 0 0 currentColor,
+    13rpx 0 0 0 currentColor,
+    -9rpx -9rpx 0 0 currentColor,
+    9rpx -9rpx 0 0 currentColor,
+    -9rpx 9rpx 0 0 currentColor,
+    9rpx 9rpx 0 0 currentColor;
+}
+
+/* 返回箭头（向左的 chevron）：旋转 45° 的 L 形描边 */
+.ic-back {
+  width: 20rpx;
+  height: 20rpx;
+  border-left: 3.5rpx solid currentColor;
+  border-bottom: 3.5rpx solid currentColor;
+  transform: rotate(45deg);
+  margin: 0 6rpx 4rpx 0;
+}
+
+/* 放大镜 */
+.ic-search {
+  width: 24rpx;
+  height: 24rpx;
+  border: 3rpx solid currentColor;
+  border-radius: 50%;
+  position: relative;
+}
+
+.ic-search::after {
+  content: '';
+  position: absolute;
+  right: -8rpx;
+  bottom: -7rpx;
+  width: 3rpx;
+  height: 13rpx;
+  background: currentColor;
+  border-radius: 2rpx;
+  transform: rotate(-45deg);
+}
+
+.ic--sm {
+  width: 20rpx;
+  height: 20rpx;
+  border-width: 2.5rpx;
+}
+
+/* 加号 */
+.ic-plus {
+  width: 30rpx;
+  height: 30rpx;
+  position: relative;
+}
+
+.ic-plus::before,
+.ic-plus::after {
+  content: '';
+  position: absolute;
+  background: currentColor;
+  border-radius: 3rpx;
+}
+
+.ic-plus::before {
+  left: 0;
+  top: 50%;
+  width: 30rpx;
+  height: 3.5rpx;
+  margin-top: -1.75rpx;
+}
+
+.ic-plus::after {
+  top: 0;
+  left: 50%;
+  width: 3.5rpx;
+  height: 30rpx;
+  margin-left: -1.75rpx;
+}
+
+/* 大号加号（FAB 用）：笔画同步加粗到 4.5rpx，视觉重量与 108rpx 圆钮匹配 */
+.ic-plus--lg {
+  width: 42rpx;
+  height: 42rpx;
+}
+
+.ic-plus--lg::before {
+  width: 42rpx;
+  height: 4.5rpx;
+  margin-top: -2.25rpx;
+}
+
+.ic-plus--lg::after {
+  width: 4.5rpx;
+  height: 42rpx;
+  margin-left: -2.25rpx;
+}
+
+/* 排序 / 筛选：三条递减横线 */
+.ic-filter {
+  width: 32rpx;
+  height: 24rpx;
+  border-radius: 2rpx;
+  background-image:
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor);
+  background-size: 32rpx 3.5rpx, 19rpx 3.5rpx, 9rpx 3.5rpx;
+  background-position: 0 0, 7rpx 10rpx, 12rpx 20rpx;
+  background-repeat: no-repeat;
+}
+
+/* 饼图（资产）：conic-gradient 画缺口；不支持时退化为实心圆 */
+.ic-pie {
+  width: 28rpx;
+  height: 28rpx;
+  border-radius: 50%;
+  background-color: currentColor;
+  background-image: conic-gradient(from -35deg, currentColor 0 72%, rgba(255, 255, 255, 0.55) 72% 100%);
+}
+
+/* 信用卡（支出）：实心卡 + 镂空磁条 */
+.ic-card {
+  width: 32rpx;
+  height: 24rpx;
+  border-radius: 5rpx;
+  background: currentColor;
+  position: relative;
+}
+
+.ic-card::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 6rpx;
+  height: 4rpx;
+  background: var(--al-dock-bg);
+}
+
+/* 日历（订阅卡底部） */
+.ic-cal {
+  width: 19rpx;
+  height: 19rpx;
+  border: 2rpx solid currentColor;
+  border-radius: 3rpx;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.ic-cal::before {
+  content: '';
+  position: absolute;
+  left: -2rpx;
+  right: -2rpx;
+  top: 3rpx;
+  height: 2rpx;
+  background: currentColor;
+}
+
+/* 盾牌（质保行）：用 clip-path 剪出盾形，颜色随父级 currentColor（绿=保内 / 灰=过保） */
+.ic-shield {
+  width: 18rpx;
+  height: 20rpx;
+  background: currentColor;
+  clip-path: polygon(50% 0, 100% 16%, 100% 60%, 50% 100%, 0 60%, 0 16%);
+  flex-shrink: 0;
+}
+
+/* ==================== 弹层 ==================== */
+
+.mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(17, 24, 39, 0.45);
+}
+
+.sheet {
+  width: 100%;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 40rpx 40rpx 0 0;
+  background: var(--al-card, #FFFFFF);
+  padding-bottom: calc(26rpx + env(safe-area-inset-bottom));
+  animation: sheet-up 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(48rpx);
+    opacity: 0.4;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.sheet--sort {
+  padding: 40rpx 40rpx calc(34rpx + env(safe-area-inset-bottom));
+}
+
+.sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30rpx 40rpx 20rpx;
+}
+
+.sheet__act {
+  font-size: 28rpx;
+  color: var(--al-ink-2, #6B7280);
+}
+
+.sheet__act--primary {
+  color: var(--al-accent, #EA580C);
+  font-weight: 600;
+}
+
+.sheet__title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--al-ink, #17181A);
+  text-align: center;
+}
+
+.sheet__body {
+  padding: 0 40rpx;
+}
+
+/* 排序选项 */
+.sopt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30rpx 0;
+  border-bottom: 2rpx solid var(--al-line, #ECEDEF);
+}
+
+.sopt:last-child {
+  border-bottom: none;
+}
+
+.sopt__text {
+  font-size: 28rpx;
+  color: var(--al-ink-2, #6B7280);
+}
+
+.sopt.is-active .sopt__text {
+  color: var(--al-accent, #EA580C);
+  font-weight: 600;
+}
+
+.sopt__check {
+  width: 20rpx;
+  height: 11rpx;
+  border-left: 3.5rpx solid var(--al-accent, #EA580C);
+  border-bottom: 3.5rpx solid var(--al-accent, #EA580C);
+  transform: rotate(-45deg);
+  margin-right: 6rpx;
+}
+
+/* ==================== 表单 ==================== */
+
+.fld {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+  padding: 28rpx 0;
+  border-bottom: 2rpx solid var(--al-line, #ECEDEF);
+}
+
+.fld__label {
+  font-size: 27rpx;
+  color: var(--al-ink-2, #6B7280);
+  flex-shrink: 0;
+}
+
+.fld__input {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  font-size: 28rpx;
+  color: var(--al-ink, #17181A);
+}
+
+.fld__value {
+  font-size: 28rpx;
+  color: var(--al-ink, #17181A);
+}
+
+.fld__ph {
+  color: var(--al-ink-3);
+}
+
+.fld__block {
+  padding: 28rpx 0;
+  border-bottom: 2rpx solid var(--al-line, #ECEDEF);
+}
+
+.fld__hint {
+  font-size: 22rpx;
+  line-height: 1.65;
+  color: var(--al-ink-3);
+  padding: 24rpx 0 44rpx;
+}
+
+.fld__input--box {
+  text-align: left;
+  padding: 20rpx 24rpx;
+  border-radius: 18rpx;
+  background: var(--al-badge-bg);
+}
+
+.pick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-top: 22rpx;
+}
+
+.pick--gap {
+  margin-top: 0;
+  margin-bottom: 4rpx;
+}
+
+.pick__ico {
+  width: 78rpx;
+  height: 78rpx;
+  border-radius: 20rpx;
+  background: var(--al-badge-bg);
+  border: 3rpx solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+}
+
+.pick__ico.is-active {
+  border-color: var(--al-accent, #EA580C);
+  background: var(--al-accent-soft);
+}
+
+/* 表单里的分类胶囊。
+   分类有十几类，原生 picker 的滚轮要转好几圈才能找到目标，而且看不到全貌；
+   平铺成胶囊一眼看全、一点就到（与页面上筛选 chips 是同一套视觉）。 */
+.pick__cat {
+  padding: 14rpx 26rpx;
+  border-radius: 999rpx;
+  border: 3rpx solid transparent;
+  background: var(--al-badge-bg);
+  font-size: 25rpx;
+  line-height: 1.2;
+  color: var(--al-ink-2, #6B7280);
+}
+
+.pick__cat.is-active {
+  border-color: var(--al-accent, #EA580C);
+  background: var(--al-accent-soft);
+  color: var(--al-accent, #EA580C);
+  font-weight: 600;
+}
+
+.pick__color {
+  width: 62rpx;
+  height: 62rpx;
+  border-radius: 50%;
+  border: 3rpx solid transparent;
+  box-shadow: inset 0 0 0 2rpx rgba(0, 0, 0, 0.08);
+}
+
+.pick__color.is-active {
+  border-color: var(--al-ink, #17181A);
+}

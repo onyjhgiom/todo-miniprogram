@@ -1,0 +1,407 @@
+/* subpackages/travel/pages/inspiration/inspiration.wxss
+   沉浸式旅行灵感：目的地照片背景 + 玻璃 UI
+   三层视图：grid（目的地网格）/ plans（城市计划列表）/ post（计划帖子）
+   视觉令牌与首页 travel/index 保持一致 */
+page {
+  background: #08122d;
+}
+
+.insp {
+  position: relative;
+  min-height: 100vh;
+  color: #fff;
+  font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+  overflow: hidden;
+}
+
+/* ============ 五层沉浸式背景 ============ */
+.insp__bg {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 0;
+}
+.insp__photo {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  transform: scale(1.08);
+  animation: insp-ken 40s ease-in-out infinite alternate;
+}
+.insp__shade {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    linear-gradient(180deg, rgba(8,18,45,0.30) 0%, rgba(8,18,45,0.62) 60%, rgba(6,12,30,0.92) 100%),
+    radial-gradient(120% 80% at 50% 0%, rgba(108,131,232,0.12), transparent 60%);
+}
+.insp__air {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  backdrop-filter: blur(1px);
+}
+.insp__leak {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60rpx);
+  opacity: 0.5;
+}
+.insp__leak--1 {
+  width: 420rpx; height: 420rpx;
+  top: -120rpx; right: -80rpx;
+  background: radial-gradient(circle, rgba(169,140,255,0.55), transparent 70%);
+  animation: insp-leak 34s ease-in-out infinite alternate;
+}
+.insp__leak--2 {
+  width: 380rpx; height: 380rpx;
+  bottom: 8%; left: -120rpx;
+  background: radial-gradient(circle, rgba(108,131,232,0.45), transparent 70%);
+  animation: insp-leak 42s ease-in-out infinite alternate-reverse;
+}
+.insp__dust {
+  position: absolute;
+  width: 6rpx; height: 6rpx;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.8);
+  box-shadow: 0 0 12rpx rgba(255,255,255,0.6);
+  opacity: 0.7;
+  animation: insp-dust 14s linear infinite;
+}
+.insp__dust--1 { top: 18%; left: 12%; animation-delay: 0s; }
+.insp__dust--2 { top: 30%; left: 78%; animation-delay: 2s; }
+.insp__dust--3 { top: 47%; left: 22%; animation-delay: 4s; }
+.insp__dust--4 { top: 60%; left: 64%; animation-delay: 6s; }
+.insp__dust--5 { top: 72%; left: 36%; animation-delay: 8s; }
+.insp__dust--6 { top: 84%; left: 82%; animation-delay: 10s; }
+
+/* ============ 透明导航 ============ */
+.insp__nav {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  padding-left: 28rpx;
+  padding-bottom: 14rpx;
+  padding-right: 28rpx;
+}
+.insp__back {
+  width: 64rpx; height: 64rpx;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  border: 1rpx solid rgba(255,255,255,0.22);
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(12rpx);
+  flex-shrink: 0;
+}
+.insp__backico {
+  width: 18rpx; height: 18rpx;
+  border-left: 3rpx solid #fff;
+  border-bottom: 3rpx solid #fff;
+  transform: rotate(45deg);
+  margin-left: 6rpx;
+}
+.insp__navtitle { display: flex; flex-direction: column; min-width: 0; }
+.insp__navcn { font-size: 34rpx; font-weight: 600; letter-spacing: 1rpx; }
+.insp__navcn--sm { font-size: 28rpx; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.insp__naven {
+  font-size: 18rpx; letter-spacing: 4rpx; text-transform: uppercase;
+  color: rgba(255,255,255,0.6); font-style: italic;
+}
+
+/* ============ 正文通用 ============ */
+.insp__body {
+  position: relative;
+  z-index: 2;
+  padding-left: 28rpx;
+  padding-right: 28rpx;
+  padding-bottom: 80rpx;
+}
+.insp__crumb {
+  display: inline-block;
+  font-size: 24rpx;
+  color: rgba(255,255,255,0.78);
+  padding: 6rpx 0;
+  margin-bottom: 18rpx;
+}
+.insp__footnote {
+  margin-top: 34rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: rgba(255,255,255,0.55);
+}
+.insp__tag {
+  font-size: 18rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  background: rgba(255,255,255,0.16);
+  border: 1rpx solid rgba(255,255,255,0.28);
+  backdrop-filter: blur(8rpx);
+  color: #fff;
+}
+
+/* ============ grid：目的地网格 ============ */
+.insp__hd { margin: 8rpx 0 30rpx; }
+.insp__t1 {
+  font-size: 46rpx; font-weight: 700; letter-spacing: 1rpx;
+  text-shadow: 0 4rpx 24rpx rgba(0,0,0,0.4);
+}
+.insp__t2 {
+  margin-top: 12rpx;
+  font-size: 24rpx; line-height: 1.5;
+  color: rgba(255,255,255,0.74);
+}
+.insp__grid {
+  display: flex;
+  gap: 18rpx;
+  align-items: flex-start;
+}
+.insp__col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+.insp__card {
+  position: relative;
+  width: 100%;
+  height: 348rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+  background: rgba(255,255,255,0.06);
+  border: 1rpx solid rgba(255,255,255,0.14);
+  box-shadow: 0 16rpx 40rpx rgba(0,0,0,0.30);
+}
+/* 统一高度：两列整齐对齐，避免错落/巨卡导致视觉错乱（仍保留玻璃质感与图片差异） */
+/* 渐变主题卡（无实拍图时）：背景层 + 大字水印 */
+.insp__tint { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 0; }
+.insp__glyph {
+  position: absolute;
+  top: 46%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 160rpx;
+  font-weight: 700;
+  color: rgba(255,255,255,0.32);
+  font-family: "Songti SC", "STSong", serif;
+  z-index: 2;
+  letter-spacing: 8rpx;
+}
+.insp__card--sun .insp__tint,
+.insp__desthd--sun .insp__tint,
+.insp__posthd--sun .insp__tint { background: linear-gradient(155deg, #E8A24A, #B5542E); }
+.insp__card--jade .insp__tint,
+.insp__desthd--jade .insp__tint,
+.insp__posthd--jade .insp__tint { background: linear-gradient(155deg, #3FB6A8, #1E6E63); }
+.insp__card--sea .insp__tint,
+.insp__desthd--sea .insp__tint,
+.insp__posthd--sea .insp__tint { background: linear-gradient(155deg, #5A8FE0, #274C8C); }
+.insp__card--violet .insp__tint,
+.insp__desthd--violet .insp__tint,
+.insp__posthd--violet .insp__tint { background: linear-gradient(155deg, #8E7BE0, #4A3A9E); }
+.insp__card--earth .insp__tint,
+.insp__desthd--earth .insp__tint,
+.insp__posthd--earth .insp__tint { background: linear-gradient(155deg, #9C7B4E, #5E4628); }
+.insp__img {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+}
+.insp__cardmask {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 78%;
+  background: linear-gradient(180deg, transparent, rgba(6,12,30,0.86));
+}
+.insp__tags {
+  position: absolute;
+  top: 16rpx; left: 16rpx; right: 16rpx;
+  display: flex; flex-wrap: wrap; gap: 8rpx;
+}
+.insp__cardinfo {
+  position: absolute;
+  left: 18rpx; right: 18rpx; bottom: 16rpx;
+}
+.insp__name { font-size: 36rpx; font-weight: 700; letter-spacing: 1rpx; }
+.insp__en {
+  font-size: 18rpx; letter-spacing: 3rpx; text-transform: uppercase;
+  font-style: italic; color: rgba(255,255,255,0.7); margin-top: 2rpx;
+}
+.insp__region { font-size: 20rpx; color: rgba(255,255,255,0.7); margin-top: 6rpx; }
+.insp__foot {
+  font-size: 19rpx; color: rgba(255,217,160,0.92);
+  margin-top: 8rpx;
+}
+
+/* ============ plans：城市头图 + 计划列表 ============ */
+.insp__desthd {
+  position: relative;
+  height: 300rpx;
+  border-radius: 22rpx;
+  overflow: hidden;
+  margin-bottom: 26rpx;
+  box-shadow: 0 18rpx 44rpx rgba(0,0,0,0.34);
+}
+.insp__desthd__img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+.insp__desthd__mask {
+  position: absolute; left: 0; right: 0; top: 0; bottom: 0;
+  background: linear-gradient(180deg, rgba(6,12,30,0.30) 0%, rgba(6,12,30,0.86) 100%);
+}
+.insp__desthd__t {
+  position: absolute; left: 24rpx; right: 24rpx; bottom: 22rpx;
+}
+.insp__desthd__name { font-size: 46rpx; font-weight: 700; letter-spacing: 1rpx; }
+.insp__desthd__en {
+  font-size: 20rpx; letter-spacing: 2rpx; font-style: italic;
+  color: rgba(255,255,255,0.72); margin-top: 4rpx;
+}
+.insp__desthd__blurb {
+  font-size: 24rpx; line-height: 1.5; color: rgba(255,255,255,0.86);
+  margin-top: 12rpx;
+}
+.insp__desthd__tags { display: flex; flex-wrap: wrap; gap: 10rpx; margin-top: 14rpx; }
+
+.insp__pltitle {
+  font-size: 30rpx; font-weight: 600; letter-spacing: 1rpx;
+  margin-bottom: 18rpx;
+}
+.insp__plans { display: flex; flex-direction: column; gap: 16rpx; }
+.insp__plancard {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 24rpx 24rpx;
+  border-radius: 20rpx;
+  background: rgba(255,255,255,0.08);
+  border: 1rpx solid rgba(255,255,255,0.16);
+  box-shadow: 0 12rpx 30rpx rgba(0,0,0,0.22);
+}
+.insp__plancard__main { flex: 1; min-width: 0; }
+.insp__plancard__title { font-size: 30rpx; font-weight: 600; }
+.insp__plancard__summary {
+  font-size: 22rpx; color: rgba(255,255,255,0.76);
+  margin-top: 6rpx; line-height: 1.45;
+}
+.insp__plancard__tags { display: flex; flex-wrap: wrap; gap: 8rpx; margin-top: 12rpx; }
+.insp__plancard__arrow {
+  font-size: 44rpx; color: rgba(255,255,255,0.7);
+  flex-shrink: 0;
+}
+
+/* ============ 通用 CTA ============ */
+.insp__cta {
+  display: flex; align-items: center; justify-content: center; gap: 10rpx;
+  height: 92rpx;
+  margin-top: 30rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(120deg, #6C83E8, #A98CFF);
+  color: #fff; font-size: 28rpx; font-weight: 600;
+  box-shadow: 0 12rpx 30rpx rgba(108,131,232,0.40);
+}
+.insp__cta__arrow { font-size: 30rpx; }
+
+/* ============ post：旅行帖子 ============ */
+.insp__posthd {
+  position: relative;
+  height: 280rpx;
+  border-radius: 22rpx;
+  overflow: hidden;
+  margin-bottom: 24rpx;
+  box-shadow: 0 18rpx 44rpx rgba(0,0,0,0.34);
+}
+.insp__posthd__img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+.insp__posthd__mask {
+  position: absolute; left: 0; right: 0; top: 0; bottom: 0;
+  background: linear-gradient(180deg, rgba(6,12,30,0.28) 0%, rgba(6,12,30,0.84) 100%);
+}
+.insp__posthd__t { position: absolute; left: 24rpx; right: 24rpx; bottom: 20rpx; }
+.insp__posthd__plan { font-size: 40rpx; font-weight: 700; letter-spacing: 1rpx; }
+.insp__posthd__city {
+  font-size: 20rpx; letter-spacing: 2rpx; font-style: italic;
+  color: rgba(255,255,255,0.74); margin-top: 4rpx;
+}
+
+.insp__post {
+  background: rgba(255,255,255,0.06);
+  border: 1rpx solid rgba(255,255,255,0.14);
+  border-radius: 22rpx;
+  padding: 30rpx 28rpx;
+  backdrop-filter: blur(16rpx);
+}
+.insp__post__lead {
+  font-size: 27rpx; line-height: 1.65; color: #fff;
+  padding-bottom: 22rpx;
+  border-bottom: 1rpx solid rgba(255,255,255,0.14);
+}
+.insp__post__body {
+  font-size: 25rpx; line-height: 1.75; color: rgba(255,255,255,0.84);
+  margin-top: 20rpx;
+}
+.insp__metagrid {
+  display: flex;
+  gap: 14rpx;
+  margin-top: 26rpx;
+}
+.insp__metacell {
+  flex: 1;
+  padding: 18rpx 16rpx;
+  border-radius: 16rpx;
+  background: rgba(255,255,255,0.08);
+  border: 1rpx solid rgba(255,255,255,0.14);
+  text-align: center;
+}
+.insp__metak { font-size: 19rpx; color: rgba(255,255,255,0.6); }
+.insp__metav { font-size: 23rpx; font-weight: 600; margin-top: 8rpx; color: rgba(255,217,160,0.95); }
+
+.insp__secttitle {
+  font-size: 28rpx; font-weight: 600; letter-spacing: 1rpx;
+  margin-top: 30rpx; margin-bottom: 16rpx;
+  padding-left: 16rpx;
+  border-left: 6rpx solid #A98CFF;
+}
+.insp__highlights { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.insp__hl {
+  font-size: 22rpx;
+  padding: 10rpx 20rpx;
+  border-radius: 999rpx;
+  background: rgba(169,140,255,0.18);
+  border: 1rpx solid rgba(169,140,255,0.40);
+  color: #fff;
+}
+.insp__outline { display: flex; flex-direction: column; gap: 6rpx; }
+.insp__olini {
+  display: flex; align-items: flex-start; gap: 18rpx;
+  padding: 14rpx 0;
+  border-bottom: 1rpx solid rgba(255,255,255,0.10);
+}
+.insp__olini:last-child { border-bottom: none; }
+.insp__olidot {
+  width: 14rpx; height: 14rpx;
+  border-radius: 50%;
+  margin-top: 10rpx;
+  flex-shrink: 0;
+  background: linear-gradient(120deg, #6C83E8, #A98CFF);
+  box-shadow: 0 0 10rpx rgba(169,140,255,0.6);
+}
+.insp__oltext { font-size: 25rpx; line-height: 1.6; color: rgba(255,255,255,0.88); }
+
+/* ============ 动画 ============ */
+@keyframes insp-ken {
+  0%   { transform: scale(1.08) translate(0, 0); }
+  100% { transform: scale(1.16) translate(-2%, -2%); }
+}
+@keyframes insp-leak {
+  0%   { transform: translate(0, 0); }
+  100% { transform: translate(20rpx, 30rpx); }
+}
+@keyframes insp-dust {
+  0%   { transform: translateY(0); opacity: 0.7; }
+  50%  { opacity: 1; }
+  100% { transform: translateY(-40rpx); opacity: 0.2; }
+}
+
+/* ============ 降级：尊重「减少动态效果」 ============ */
+@media (prefers-reduced-motion: reduce) {
+  .insp__photo,
+  .insp__leak,
+  .insp__dust { animation: none !important; }
+}

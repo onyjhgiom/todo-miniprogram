@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "旅行模式",
+  "navigationBarBackgroundColor": "#081A35",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#081A35",
+  "backgroundTextStyle": "light",
+  "navigationStyle": "custom",
+  "enablePullDownRefresh": true,
+  "usingComponents": {}
+}

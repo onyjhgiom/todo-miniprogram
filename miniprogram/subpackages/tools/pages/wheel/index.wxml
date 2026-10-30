@@ -1,0 +1,206 @@
+<!-- subpackages/tools/pages/wheel/index.wxml
+     万能转盘主页：顶部转盘切换 → 转盘舞台（canvas + 指针 + 中心按钮）→ 选项横滑 → 操作区
+     四个浮层：结果 / 模板库 / 设置 / 转盘列表。-->
+<view class="wh" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <!-- ===== 自定义头部：深蓝紫渐变（对齐参考稿「万能转盘 ✦」） ===== -->
+  <view class="wh__header" style="padding-top:{{statusBarHeight}}px">
+    <view class="wh__back" bindtap="onBack">‹</view>
+    <view class="wh__htitle">万能转盘 ✦</view>
+    <view class="wh__hicons">
+      <view class="wh__hicon">•••</view>
+      <view class="wh__hicon">◉</view>
+    </view>
+  </view>
+
+  <!-- ===== 快捷胶囊（对齐参考稿 hero 横滑：当前转盘 / 换模板 / 设置 / 记录） ===== -->
+  <view class="wh__bar">
+    <scroll-view class="wh__pills" scroll-x enable-flex show-scrollbar="{{false}}">
+      <view class="wh__pill wh__pill--active" bindtap="onOpenList">
+        <text class="wh__pillIcon">{{wheelIcon}}</text>
+        <text class="wh__pillText">{{wheelName}}</text>
+        <text class="wh__pillCaret">切换↔</text>
+      </view>
+      <view class="wh__pill" bindtap="onOpenTemplates">🎨 换模板</view>
+      <view class="wh__pill" bindtap="onOpenSet">⚙️ 设置</view>
+      <view class="wh__pill" bindtap="onHistory">▤ 记录</view>
+    </scroll-view>
+  </view>
+
+  <!-- ===== 转盘舞台 ===== -->
+  <view class="wh__stage">
+    <!-- 结果弹窗期间整块收起：canvas 在部分机型上按原生组件渲染，z-index 压不住弹窗；
+         同时避免画布消失后留下一个空白圆盘 -->
+    <view class="wh__ring {{canvasOff ? 'is-off' : ''}}" style="width:{{size}}px;height:{{size}}px">
+      <canvas type="2d" id="wheelCanvas" class="wh__canvas" style="width:{{size}}px;height:{{size}}px"></canvas>
+      <!-- 指针：固定在 12 点方向，不随转盘旋转 -->
+      <view class="wh__pointer"></view>
+      <!-- 中心按钮 -->
+      <view class="wh__spin {{spinning ? 'is-busy' : ''}} {{optCount < 2 ? 'is-off' : ''}}"
+            style="width:{{spinSize}}px;height:{{spinSize}}px" bindtap="onSpin">
+        <text class="wh__spinText">{{spinning ? '转动中' : '开始'}}</text>
+        <text class="wh__spinSub" wx:if="{{!spinning}}">转一转</text>
+      </view>
+    </view>
+    <view class="wh__tip" wx:if="{{optCount < 2}}">至少添加 2 个选项才能转</view>
+    <view class="wh__hint" wx:else>点中心开始 · 长按选项可改权重或删除</view>
+  </view>
+
+  <!-- ===== 当前选项 ===== -->
+  <view class="wh__sec">
+    <view class="wh__secHead">
+      <text class="wh__secTitle">当前选项</text>
+      <text class="wh__secNum">{{optCount}} / 12</text>
+    </view>
+    <scroll-view class="wh__opts" scroll-x enable-flex show-scrollbar="{{false}}">
+      <view class="wh__optWrap">
+        <view class="wh__opt" wx:for="{{options}}" wx:key="id"
+              data-idx="{{index}}" bindtap="onOptionTap" bindlongpress="onOptionLongPress"
+              style="background:{{item.color}}">
+          <text class="wh__optText" style="color:{{item.ink}}">{{item.icon}}{{item.text}}</text>
+          <view class="wh__optW" wx:if="{{item.weight > 1}}" style="background:{{item.ink}};color:{{item.color}}">×{{item.weight}}</view>
+          <view class="wh__optDone" wx:if="{{item.done}}">✓</view>
+        </view>
+        <view class="wh__optAdd" bindtap="onAddOption">＋ 添加</view>
+      </view>
+    </scroll-view>
+    <view class="wh__rowBtns">
+      <button class="wh__btn" bindtap="onEditAll">编辑全部</button>
+      <button class="wh__btn wh__btn--plain" bindtap="onThemePalette">换配色</button>
+      <button class="wh__btn wh__btn--plain" bindtap="onRenameWheel">重命名</button>
+    </view>
+  </view>
+
+  <!-- ===== 结果弹窗：全屏居中，主次操作分行，避免按钮串过高溢出屏幕 ===== -->
+  <view class="wh__mask wh__mask--result" wx:if="{{showResult}}" bindtap="onResultClose">
+    <!-- 彩带撒花铺满整屏，落在卡片「后面」，不会盖住结果文字 -->
+    <view class="wh__confetti">
+      <view wx:for="{{confetti}}" wx:key="id" class="wh__cf"
+            style="left:{{item.left}}%;background:{{item.color}};animation-delay:{{item.delay}}ms;animation-duration:{{item.dur}}ms"></view>
+    </view>
+    <view class="wh__result" catchtap="onNoop">
+      <view class="wh__resX" bindtap="onResultClose">✕</view>
+      <view class="wh__resKicker">
+        <text>{{wheelIcon || '🎡'}} {{wheelName}}</text>
+      </view>
+      <view class="wh__resBig" style="background:{{resultColor}};color:{{resultInk}}">
+        <text class="wh__resIcon" wx:if="{{resultIcon}}">{{resultIcon}}</text>
+        <text class="wh__resText {{resultLong ? 'is-long' : ''}}">{{resultText}}</text>
+      </view>
+      <view class="wh__resMeta">{{resultMeta}}</view>
+      <view class="wh__resMain">
+        <button class="wh__rbtn wh__rbtn--main" bindtap="onResultAgain">再来一次</button>
+        <button class="wh__rbtn wh__rbtn--gold" bindtap="onResultToTodo">转为待办</button>
+      </view>
+      <view class="wh__resSub">
+        <text class="wh__rsub" wx:if="{{canReroll}}" bindtap="onResultReroll">移除此项再转</text>
+        <text class="wh__rsub" bindtap="onResultPoster">生成海报</text>
+        <text class="wh__rsub" bindtap="onResultClose">关闭</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 模板库弹层 ===== -->
+  <view class="wh__mask" wx:if="{{showTpl}}" bindtap="onCloseTpl">
+    <view class="wh__sheet" catchtap="onNoop">
+      <view class="wh__sheetHead">
+        <text class="wh__sheetTitle">选个模板</text>
+        <text class="wh__x" bindtap="onCloseTpl">✕</text>
+      </view>
+      <scroll-view class="wh__cats" scroll-x show-scrollbar="{{false}}">
+        <view class="wh__catsIn">
+          <view class="wh__cat {{tplActive === item.key ? 'is-on' : ''}}" wx:for="{{tplCats}}" wx:key="key"
+                data-key="{{item.key}}" bindtap="onTplCat">{{item.icon}} {{item.label}}</view>
+        </view>
+      </scroll-view>
+      <scroll-view class="wh__tpls" scroll-y>
+        <view class="wh__tpl" wx:for="{{tplList}}" wx:key="id" data-id="{{item.id}}" bindtap="onUseTemplate">
+          <text class="wh__tplIcon">{{item.icon}}</text>
+          <view class="wh__tplMeta">
+            <view class="wh__tplName">
+              {{item.name}}
+              <text class="wh__tplHot" wx:if="{{item.uses > 0}}">用过{{item.uses}}次</text>
+            </view>
+            <view class="wh__tplDesc">{{item.desc}} · {{item.count}}项</view>
+          </view>
+          <view class="wh__tplDots">
+            <view class="wh__dot" wx:for="{{item.colors}}" wx:for-item="c" wx:key="*this" style="background:{{c}}"></view>
+          </view>
+        </view>
+      </scroll-view>
+      <button class="wh__btn wh__btn--full" bindtap="onBlankTemplate">＋ 空白转盘（自己填）</button>
+    </view>
+  </view>
+
+  <!-- ===== 设置弹层 ===== -->
+  <view class="wh__mask" wx:if="{{showSet}}" bindtap="onCloseSet">
+    <view class="wh__sheet wh__sheet--set" catchtap="onNoop">
+      <view class="wh__sheetHead">
+        <text class="wh__sheetTitle">转盘设置</text>
+        <text class="wh__x" bindtap="onCloseSet">✕</text>
+      </view>
+      <view class="wh__setRow">
+        <text class="wh__setLabel">转动时长</text>
+        <view class="wh__segs">
+          <view class="wh__seg {{setDuration === 'short' ? 'is-on' : ''}}" data-v="short" bindtap="onSetDuration">短 2s</view>
+          <view class="wh__seg {{setDuration === 'standard' ? 'is-on' : ''}}" data-v="standard" bindtap="onSetDuration">标准 3.5s</view>
+          <view class="wh__seg {{setDuration === 'long' ? 'is-on' : ''}}" data-v="long" bindtap="onSetDuration">长 5s</view>
+        </view>
+      </view>
+      <view class="wh__setRow">
+        <text class="wh__setLabel">转动音效与提示音</text>
+        <switch class="wh__sw" checked="{{setSound}}" color="#C08552" data-k="sound" bindchange="onToggleSet" />
+      </view>
+      <view class="wh__setRow">
+        <text class="wh__setLabel">停下时震动</text>
+        <switch class="wh__sw" checked="{{setVibrate}}" color="#C08552" data-k="vibrate" bindchange="onToggleSet" />
+      </view>
+      <view class="wh__setRow">
+        <text class="wh__setLabel">摇一摇转动</text>
+        <switch class="wh__sw" checked="{{setShake}}" color="#C08552" data-k="shake" bindchange="onToggleSet" />
+      </view>
+      <view class="wh__setRow">
+        <text class="wh__setLabel">全局静音</text>
+        <switch class="wh__sw" checked="{{setMuted}}" color="#C08552" data-k="muted" bindchange="onToggleSet" />
+      </view>
+      <view class="wh__setRow">
+        <text class="wh__setLabel">完成待办后推荐转盘</text>
+        <switch class="wh__sw" checked="{{setReward}}" color="#C08552" data-k="reward" bindchange="onToggleSet" />
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 转盘列表弹层 ===== -->
+  <view class="wh__mask" wx:if="{{showList}}" bindtap="onCloseList">
+    <view class="wh__sheet wh__sheet--set" catchtap="onNoop">
+      <view class="wh__sheetHead">
+        <text class="wh__sheetTitle">我的转盘（{{wheelList.length}}/20）</text>
+        <text class="wh__x" bindtap="onCloseList">✕</text>
+      </view>
+      <scroll-view class="wh__tpls" scroll-y>
+        <view class="wh__witem {{item.current ? 'is-on' : ''}}" wx:for="{{wheelList}}" wx:key="id">
+          <view class="wh__witemMain" data-id="{{item.id}}" bindtap="onPickWheel">
+            <text class="wh__tplIcon">{{item.icon}}</text>
+            <view class="wh__tplMeta">
+              <view class="wh__tplName">{{item.name}}</view>
+              <view class="wh__tplDesc">{{item.count}} 个选项</view>
+            </view>
+          </view>
+          <view class="wh__witemActs">
+            <text class="wh__mini" data-id="{{item.id}}" bindtap="onCopyWheel">复制</text>
+            <text class="wh__mini wh__mini--danger" data-id="{{item.id}}" bindtap="onDelWheel">删除</text>
+          </view>
+        </view>
+      </scroll-view>
+      <button class="wh__btn wh__btn--full" bindtap="onNewWheel">＋ 新建空白转盘</button>
+    </view>
+  </view>
+
+  <!-- ===== 底部固定操作栏（对齐参考稿：收藏 / 开始转盘 / 换一批） ===== -->
+  <view class="wh__foot">
+    <view class="wh__fav {{faved ? 'is-on' : ''}}" bindtap="onToggleFav">{{faved ? '★ 已收藏' : '☆ 收藏模板'}}</view>
+    <view class="wh__start" bindtap="onSpin">▶ 开始转盘 ✦</view>
+    <view class="wh__shuffle" bindtap="onOpenTemplates">↻ 换一批</view>
+  </view>
+
+</view>

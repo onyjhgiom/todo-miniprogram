@@ -1,0 +1,79 @@
+<!-- subpackages/tools/pages/civil/timeline.wxml -->
+<view class="ctl themed" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <!-- ===== 顶部 ===== -->
+  <view class="ctl__hero" style="background:{{heroGradient}}">
+    <view class="ctl__hero-title">🗓️ 全年考试时间轴</view>
+    <view class="ctl__hero-sub">3-12 月，国考 · 省考 · 事业编 · 央国企 · 通用策略 五条线整合到同一张轴</view>
+    <view class="ctl__hero-now">当前为 {{currentMonth}} 月 · 共 {{totalEvents}} 个节点</view>
+  </view>
+
+  <!-- ===== 下一个关键节点 ===== -->
+  <view class="ctl__next" wx:if="{{next}}">
+    <text class="ctl__next-icon">🎯</text>
+    <view class="ctl__next-main">
+      <view class="ctl__next-t">下一个关键节点：{{next.label}} · {{next.theme}}</view>
+      <view class="ctl__next-s">距今约 {{next.days}} 天 —— 倒排准备时间，别等公告出了才动手</view>
+    </view>
+  </view>
+
+  <!-- ===== 赛道筛选 ===== -->
+  <scroll-view class="ctl__filters" scroll-x show-scrollbar="{{false}}">
+    <view class="ctl__filter {{filter === item.key ? 'ctl__filter--on' : ''}}"
+      wx:for="{{filters}}" wx:key="key" data-key="{{item.key}}" bindtap="onFilter"
+      style="{{filter === item.key ? 'background:' + item.color + ';border-color:' + item.color : ''}}">
+      {{item.label}}<text class="ctl__filter-n">{{item.count}}</text>
+    </view>
+  </scroll-view>
+
+  <!-- ===== 月份轴 ===== -->
+  <view class="ctl__months">
+    <view class="ctl__m {{item.isNow ? 'ctl__m--now' : ''}} {{item.isFocus ? 'ctl__m--focus' : ''}}"
+      wx:for="{{months}}" wx:key="month">
+
+      <!-- 左侧：轴点 + 竖线 -->
+      <view class="ctl__rail">
+        <view class="ctl__rail-dot {{item.isNow ? 'ctl__rail-dot--now' : ''}} {{item.isPast ? 'ctl__rail-dot--past' : ''}}">
+          {{item.month}}
+        </view>
+        <view class="ctl__rail-line" wx:if="{{index !== months.length - 1}}"></view>
+      </view>
+
+      <!-- 右侧：月份内容 -->
+      <view class="ctl__body">
+        <view class="ctl__m-head">
+          <text class="ctl__m-label">{{item.label}}</text>
+          <text class="ctl__m-now" wx:if="{{item.isNow}}">当前月</text>
+          <text class="ctl__m-n">{{item.count}} 个节点<text wx:if="{{item.majorCount}}" class="ctl__m-major"> · {{item.majorCount}} 关键</text></text>
+        </view>
+        <text class="ctl__m-theme">{{item.theme}}</text>
+
+        <view class="ctl__e" wx:for="{{item.events}}" wx:for-item="e" wx:key="title"
+          data-track="{{e.track}}" bindtap="onEvent" hover-class="ctl__press" hover-stay-time="50">
+          <view class="ctl__e-bar" style="background:{{e.color}}"></view>
+          <view class="ctl__e-main">
+            <view class="ctl__e-head">
+              <text class="ctl__e-chip" style="color:{{e.color}};background:{{e.soft}}">{{e.icon}} {{e.trackShort}}</text>
+              <text class="ctl__e-star" wx:if="{{e.major}}">★ 关键</text>
+            </view>
+            <text class="ctl__e-title">{{e.title}}</text>
+            <text class="ctl__e-desc">{{e.desc}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="ctl__legend">
+    ★ = 关键节点，错过要等一年 · 点任意节点进入对应赛道详情
+  </view>
+
+  <view class="ctl__pad"></view>
+
+  <!-- ===== 底部 ===== -->
+  <view class="ctl__bottom">
+    <view class="ctl__btn" bindtap="onCopy" hover-class="ctl__press" hover-stay-time="50">
+      📋 复制全年时间轴（做自己的备考日历）
+    </view>
+  </view>
+</view>

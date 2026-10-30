@@ -1,0 +1,9 @@
+{
+  "name": "triggerDueReminders",
+  "version": "1.0.0",
+  "description": "每分钟扫描到期待办并发送订阅消息提醒",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

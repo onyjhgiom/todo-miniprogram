@@ -1,0 +1,229 @@
+<!--pages/group-reminder/group-reminder.wxml-->
+<!-- 多人提醒 · 参照 multi_person_reminder_optimized.html 重排：
+     概览(数字+圆形按钮) → 引导卡 → 三指标数据条 → 空态(双人插画) / 场景入口
+     → 提醒记录卡(可折叠，紧凑行) → 触发记录 → 底部圆角方 FAB -->
+<view class="tshell themed {{shellClass}} {{bgClass}}" data-theme="{{theme}}" style="{{themeStyle}}">
+  <view class="tshell__wrap gr">
+
+    <!-- 顶部概览 -->
+    <view class="gr__top">
+      <view class="gr__sum">
+        <text class="gr__num">{{activeCount}}</text>
+        <text class="gr__sum-lab">进行中</text>
+      </view>
+      <view class="gr__acts">
+        <view class="gr__round" hover-class="gr__round--tap" hover-stay-time="60" bindtap="toggleStyleSheet">🎨</view>
+        <view class="gr__round" hover-class="gr__round--tap" hover-stay-time="60" bindtap="onAdd">＋</view>
+      </view>
+    </view>
+
+    <!-- 风格 / 背景切换 -->
+    <view wx:if="{{showStyleSheet}}" class="ts-theme-sheet ts-card" catchtap="onStyleSheetStop">
+      <view class="ts-theme-sheet__block">
+        <view class="ts-theme-row">
+          <text class="ts-theme-label">页面质感</text>
+          <view
+            wx:for="{{pagePresets}}" wx:key="key"
+            class="ts-theme-chip {{pageStyle === item.key ? 'is-on' : ''}}"
+            data-key="{{item.key}}" bindtap="onPageStyle"
+          ><view class="dot" style="background:{{item.dot}}"></view>{{item.name}}</view>
+        </view>
+      </view>
+      <view class="ts-theme-sheet__block">
+        <view class="ts-theme-row">
+          <text class="ts-theme-label">背景氛围</text>
+          <view
+            wx:for="{{bgPresets}}" wx:key="key"
+            class="ts-theme-chip {{bgStyle === item.key ? 'is-on' : ''}}"
+            data-key="{{item.key}}" bindtap="onBgStyle"
+          ><view class="dot" style="background:{{item.dot}}"></view>{{item.name}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 引导卡 -->
+    <view class="gr__intro" wx:if="{{!showStyleSheet}}">
+      <text class="gr__intro-b">把重要的事，和重要的人一起记住</text>
+      <text class="gr__intro-t">创建多人提醒后，所有参与成员都会在指定时间收到通知。</text>
+      <view class="gr__intro-mini"><text class="gr__dot"></text><text>支持单次 · 每天 · 每周 · 每月 · 随时编辑</text></view>
+      <text class="gr__intro-heart">♡</text>
+    </view>
+
+    <!-- 三指标数据条（全部真实计算） -->
+    <view class="gr__strip">
+      <view class="gr__metric">
+        <text class="gr__metric-num">{{metrics.active}}</text>
+        <text class="gr__metric-lab">进行中的提醒</text>
+      </view>
+      <view class="gr__metric gr__metric--green">
+        <text class="gr__metric-num">{{metrics.members}}</text>
+        <text class="gr__metric-lab">共同参与成员</text>
+      </view>
+      <view class="gr__metric gr__metric--gold">
+        <text class="gr__metric-num">{{metrics.week}}</text>
+        <text class="gr__metric-lab">本周待提醒</text>
+      </view>
+    </view>
+
+    <!-- 空态：双人插画 -->
+    <view wx:if="{{!loading && alerts.length === 0}}" class="gr__empty">
+      <text class="gr__spark gr__spark--l">✦</text>
+      <view class="gr__people">
+        <view class="gr__person gr__person--l"></view>
+        <view class="gr__person gr__person--r"></view>
+      </view>
+      <text class="gr__empty-t">还没有多人提醒</text>
+      <text class="gr__empty-d">把生日、聚会、缴费、纪念日{'\n'}交给大家一起记住，不再错过重要时刻</text>
+      <view class="gr__empty-hint">点击右上角 ＋ 创建第一条提醒 ♡</view>
+      <text class="gr__spark gr__spark--r">✦</text>
+    </view>
+
+    <!-- 场景快捷入口 -->
+    <view class="gr__scenes" wx:if="{{alerts.length > 0}}">
+      <view
+        wx:for="{{scenes}}" wx:key="key"
+        class="gr__scene" hover-class="gr__scene--tap" hover-stay-time="60"
+        data-key="{{item.key}}" bindtap="onSceneTap"
+      >{{item.icon}} <text class="gr__scene-b">{{item.name}}</text></view>
+    </view>
+
+    <!-- 提醒记录（紧凑行 + 可折叠） -->
+    <view wx:if="{{alerts.length > 0}}" class="gr__section">
+      <view class="gr__sec-head" hover-class="gr__sec-head--tap" hover-stay-time="60" bindtap="onToggleRecords">
+        <text class="gr__sec-name">提醒记录</text>
+        <view class="gr__sec-right">
+          <text class="gr__sec-count">{{alerts.length}} 条</text>
+          <text class="gr__sec-arrow">{{showRecords ? '收起 ▲' : '展开 ▼'}}</text>
+        </view>
+      </view>
+
+      <view wx:if="{{showRecords}}" class="gr__records">
+        <view
+          wx:for="{{alerts}}" wx:key="id"
+          class="gr__record {{item.id === highlightId ? 'is-highlight' : ''}}"
+        >
+          <view class="gr__rec-row" data-id="{{item.id}}" hover-class="gr__record--tap" hover-stay-time="60" bindtap="onEdit">
+            <view class="gr__rec-avatar">{{item.icon}}</view>
+            <view class="gr__rec-main">
+              <text class="gr__rec-t">{{item.title}}</text>
+              <text class="gr__rec-meta">{{item.timeText}} · {{item.repeatLabel}} · {{item.memberChips.length}} 人</text>
+            </view>
+            <text class="gr__rec-status {{item.enabled ? 'is-on' : ''}}">{{item.enabled ? '进行中' : '已停用'}}</text>
+            <view class="gr__rec-more" data-id="{{item.id}}" catchtap="onToggleRowActs">⋯</view>
+          </view>
+
+          <!-- 该行的操作区：默认收起，点 ⋯ 才展开（避免 7 个按钮常驻把列表撑爆） -->
+          <view wx:if="{{expandedId === item.id}}" class="gr__rec-acts">
+            <view class="gr__rec-note" wx:if="{{item.note}}">{{item.note}}</view>
+            <view class="gr__rec-members">
+              <view class="gr__mchip" wx:for="{{item.memberChips}}" wx:for-item="m" wx:key="name">
+                <view class="gr__mchip-av" style="background:{{m.tone}}">{{m.avatar}}</view>
+                <text class="gr__mchip-nm">{{m.name}}</text>
+              </view>
+            </view>
+            <view class="gr__rec-status2">{{item.statusText}}</view>
+            <view class="gr__rec-btns">
+              <button class="gr__mini gr__mini--share" open-type="share" data-id="{{item.id}}" hover-class="gr__mini--tap" catchtap="noop">↗ 转发好友</button>
+              <view class="gr__mini" data-id="{{item.id}}" bindtap="onShare" hover-class="gr__mini--tap" catchtap="noop">复制</view>
+              <view class="gr__mini gr__mini--primary" data-id="{{item.id}}" bindtap="onTestFire" hover-class="gr__mini--tap" catchtap="noop">▶ 测试</view>
+              <view class="gr__mini" data-id="{{item.id}}" bindtap="onToggle" hover-class="gr__mini--tap" catchtap="noop">{{item.enabled ? '停用' : '启用'}}</view>
+              <view class="gr__mini" data-id="{{item.id}}" bindtap="onAllowSubscribe" hover-class="gr__mini--tap" catchtap="noop">{{item.subscribed ? '已订阅' : '通知'}}</view>
+              <view class="gr__mini gr__mini--danger" data-id="{{item.id}}" bindtap="onDelete" hover-class="gr__mini--tap" catchtap="noop">删除</view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 触发记录 -->
+    <view class="logs ts-card gr__logs">
+      <view class="logs__head" bindtap="onToggleLogs" hover-class="press">
+        <text class="logs__title">📋 触发记录</text>
+        <text class="logs__count">{{logCount}} 条</text>
+        <text class="logs__arrow">{{showLogs ? '收起 ▲' : '展开 ▼'}}</text>
+      </view>
+      <view wx:if="{{showLogs}}">
+        <view wx:if="{{logs.length === 0}}" class="logs__empty">还没有触发记录，到点后会自动记录</view>
+        <view wx:for="{{logs}}" wx:key="id" class="log">
+          <view class="log__main">
+            <text class="log__title">{{item.title}}</text>
+            <text class="log__chan log__chan--{{item.channel}}">{{item.channel === 'in-app' ? '本机' : '订阅'}}</text>
+            <text class="log__status log__status--{{item.status}}">{{item.status === 'shown' ? '已展示' : (item.status === 'pushed' ? '已推送' : '失败')}}</text>
+          </view>
+          <view class="log__sub">⏰ {{item.atFormat || ''}} · 通知：{{item.membersText || '我'}}</view>
+        </view>
+        <view wx:if="{{logs.length > 0}}" class="logs__clear" bindtap="onClearLogs" hover-class="press">清空记录</view>
+      </view>
+    </view>
+
+    <!-- 底部文案 -->
+    <view class="gr__tip" wx:if="{{alerts.length > 0}}">多人一起记，<text>重要的事不再错过</text> · 温柔提醒每一个人</view>
+
+    <!-- 悬浮新增 -->
+    <view class="gr__fab" hover-class="gr__fab--tap" hover-stay-time="60" bindtap="onAdd">＋</view>
+  </view>
+
+  <!-- ============ 新建 / 编辑 弹层 ============ -->
+  <view wx:if="{{showEditor}}" class="mask" catchtap="onEditorClose">
+    <view class="sheet" catchtap="onSheetStop">
+      <view class="sheet__handle"></view>
+      <view class="sheet__title">{{editingId ? '编辑多人提醒' : '创建多人提醒'}} <text class="sheet__heart">♡</text></view>
+
+      <view class="field">
+        <text class="field__label">提醒内容</text>
+        <input class="field__input" placeholder="例如：周五一起吃饭" value="{{formTitle}}" bindinput="onTitle" maxlength="60" />
+      </view>
+
+      <view class="field">
+        <text class="field__label">提醒时间</text>
+        <view class="field__row">
+          <picker mode="date" value="{{formDate}}" bindchange="onDate">
+            <view class="pick">{{formDate}} ▾</view>
+          </picker>
+          <picker mode="time" value="{{formTime}}" bindchange="onTime">
+            <view class="pick">{{formTime}} ▾</view>
+          </picker>
+        </view>
+      </view>
+
+      <view class="field">
+        <text class="field__label">一起提醒谁（已选 {{selectedIds.length}} 人）</text>
+        <view class="chips wrap">
+          <view
+            wx:for="{{members}}" wx:key="id"
+            class="chip person {{selectedIds.indexOf(item.id) >= 0 ? 'is-on' : ''}}"
+            data-id="{{item.id}}" bindtap="onMemberToggle"
+          >{{item.avatar}} {{item.name}}</view>
+        </view>
+      </view>
+
+      <view class="field">
+        <text class="field__label">备注（可选）</text>
+        <input class="field__input field__input--sm" placeholder="补充说明、地点等" value="{{formNote}}" bindinput="onNote" maxlength="120" />
+      </view>
+
+      <view class="field">
+        <text class="field__label">重复</text>
+        <view class="chips">
+          <view
+            wx:for="{{repeatOptions}}" wx:key="key"
+            class="chip {{repeat === item.key ? 'is-on' : ''}}"
+            data-key="{{item.key}}" bindtap="onRepeat"
+          >{{item.label}}</view>
+        </view>
+      </view>
+
+      <view class="field">
+        <text class="field__label">到点方式</text>
+        <view class="chips">
+          <view class="chip {{method === 'modal' ? 'is-on' : ''}}" data-key="modal" bindtap="onMethod">弹窗提醒</view>
+          <view class="chip {{method === 'toast' ? 'is-on' : ''}}" data-key="toast" bindtap="onMethod">通知条</view>
+        </view>
+      </view>
+
+      <view wx:if="{{formError}}" class="field__err">{{formError}}</view>
+
+      <view class="ts-btn sheet__save" bindtap="onSave" hover-class="press">{{editingId ? '保存修改' : '创建提醒'}}</view>
+    </view>
+  </view>
+</view>

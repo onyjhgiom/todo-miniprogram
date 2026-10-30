@@ -1,0 +1,126 @@
+<!-- subpackages/tools/pages/wheel/edit.wxml
+     选项编辑页：转盘名 / 配色 → 选项行（色块·图标·文字·权重·排序·删除）→ 底部操作区
+     四个浮层：图标选择 / 颜色选择 / 批量粘贴 / 待办导入。-->
+<view class="we" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <!-- ===== 基本信息 ===== -->
+  <view class="we__card">
+    <view class="we__row">
+      <text class="we__label">转盘名称</text>
+      <input class="we__input" value="{{name}}" maxlength="16" placeholder="我的转盘" bindinput="onNameInput" />
+    </view>
+    <view class="we__row" bindtap="onPalette">
+      <text class="we__label">配色方案</text>
+      <view class="we__right">
+        <text class="we__muted">{{paletteLabel}}</text>
+        <text class="we__arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 选项列表 ===== -->
+  <view class="we__card">
+    <view class="we__secHead">
+      <text class="we__secTitle">选项 {{count}} / 12</text>
+      <text class="we__secTip">权重 = 中奖概率倍率</text>
+    </view>
+
+    <view class="we__item" wx:for="{{rows}}" wx:key="id">
+      <view class="we__itemTop">
+        <view class="we__swatch" style="background:{{item.color}}" data-idx="{{index}}" bindtap="onPickColor"></view>
+        <view class="we__iconBtn" data-idx="{{index}}" bindtap="onPickIcon">{{item.icon || '图'}}</view>
+        <input class="we__text" value="{{item.text}}" maxlength="10" placeholder="最多 10 字"
+               data-idx="{{index}}" bindinput="onTextInput" />
+        <view class="we__w" data-idx="{{index}}" bindtap="onWeight">×{{item.weight}}</view>
+        <view class="we__del" data-idx="{{index}}" bindtap="onDelOption">✕</view>
+      </view>
+      <view class="we__itemBtm">
+        <text class="we__mv" data-idx="{{index}}" data-dir="-1" bindtap="onMove">↑ 上移</text>
+        <text class="we__mv" data-idx="{{index}}" data-dir="1" bindtap="onMove">↓ 下移</text>
+        <text class="we__tag" wx:if="{{item.fromTodo}}">来自待办</text>
+      </view>
+    </view>
+
+    <button class="we__add" wx:if="{{canAdd}}" bindtap="onAddOption">＋ 添加选项</button>
+    <view class="we__empty" wx:if="{{count === 0}}">还没有选项，试试「批量粘贴」或「从待办导入」</view>
+  </view>
+
+  <view class="we__pad"></view>
+
+  <!-- ===== 底部操作区 ===== -->
+  <view class="we__dock">
+    <view class="we__dockRow">
+      <view class="we__dockBtn" bindtap="onOpenPaste">批量粘贴</view>
+      <view class="we__dockBtn" bindtap="onImportTodos">从待办导入</view>
+      <view class="we__dockBtn" bindtap="onShuffle">打乱顺序</view>
+      <view class="we__dockBtn we__dockBtn--danger" bindtap="onClear">清空全部</view>
+    </view>
+    <view class="we__dockBtn we__dockBtn--main" bindtap="onSave">保存并返回</view>
+  </view>
+
+  <!-- ===== 图标选择 ===== -->
+  <view class="we__mask" wx:if="{{showIcons}}" bindtap="onCloseIcons">
+    <view class="we__sheet" catchtap="onNoop">
+      <view class="we__sheetHead">
+        <text class="we__sheetTitle">选个图标</text>
+        <text class="we__x" bindtap="onCloseIcons">✕</text>
+      </view>
+      <view class="we__grid">
+        <view class="we__gridItem" data-v="__none__" bindtap="onChooseIcon">无</view>
+        <view class="we__gridItem" wx:for="{{icons}}" wx:key="*this" data-v="{{item}}" bindtap="onChooseIcon">{{item}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 颜色选择 ===== -->
+  <view class="we__mask" wx:if="{{showColors}}" bindtap="onCloseColors">
+    <view class="we__sheet" catchtap="onNoop">
+      <view class="we__sheetHead">
+        <text class="we__sheetTitle">选个颜色</text>
+        <text class="we__x" bindtap="onCloseColors">✕</text>
+      </view>
+      <view class="we__grid we__grid--color">
+        <view class="we__colorItem" wx:for="{{colors}}" wx:key="*this" data-v="{{item}}" bindtap="onChooseColor" style="background:{{item}}"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 批量粘贴 ===== -->
+  <view class="we__mask" wx:if="{{showPaste}}" bindtap="onClosePaste">
+    <view class="we__sheet" catchtap="onNoop">
+      <view class="we__sheetHead">
+        <text class="we__sheetTitle">批量导入</text>
+        <text class="we__x" bindtap="onClosePaste">✕</text>
+      </view>
+      <textarea class="we__textarea" value="{{pasteText}}" placeholder="每行一个选项，也可用逗号、顿号分隔" bindinput="onPasteInput" />
+      <view class="we__sheetBtns">
+        <button class="we__sbtn" bindtap="onClosePaste">取消</button>
+        <button class="we__sbtn we__sbtn--main" bindtap="onPasteConfirm">拆分为选项</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 待办导入 ===== -->
+  <view class="we__mask" wx:if="{{showTodos}}" bindtap="onCloseTodos">
+    <view class="we__sheet" catchtap="onNoop">
+      <view class="we__sheetHead">
+        <text class="we__sheetTitle">从待办导入</text>
+        <text class="we__x" bindtap="onCloseTodos">✕</text>
+      </view>
+      <scroll-view class="we__todoList" scroll-y>
+        <view class="we__todo" wx:for="{{todoList}}" wx:key="id" data-id="{{item.id}}" data-idx="{{index}}" bindtap="onToggleTodoPick">
+          <view class="we__check {{item.picked ? 'is-on' : ''}}"></view>
+          <view class="we__todoMain">
+            <view class="we__todoText">{{item.content}}</view>
+            <view class="we__todoMeta">{{item.meta}}</view>
+          </view>
+        </view>
+      </scroll-view>
+      <view class="we__sheetBtns">
+        <button class="we__sbtn" bindtap="onCloseTodos">取消</button>
+        <button class="we__sbtn we__sbtn--main" bindtap="onImportConfirm">导入（{{todoPicked}}）</button>
+      </view>
+    </view>
+  </view>
+
+</view>

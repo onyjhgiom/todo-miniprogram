@@ -1,0 +1,192 @@
+<!--subpackages/travel/pages/inspiration：旅行灵感 · 目的地 → 旅行计划 → 旅行帖子
+  三层视图状态机：grid（目的地网格）/ plans（某城计划列表）/ post（计划对应帖子）
+  数据关联：curDest.plans[index] → curPlan.post，点击逐级下钻，保证帖子属于所选计划 -->
+<view class="insp">
+
+  <!-- ============ 五层沉浸式背景（恒在最底） ============ -->
+  <view class="insp__bg" aria-hidden="true">
+    <image class="insp__photo" src="/subpackages/travel/assets/bg-coast.jpg" mode="aspectFill" />
+    <view class="insp__shade"></view>
+    <view class="insp__air"></view>
+    <view class="insp__leak insp__leak--1"></view>
+    <view class="insp__leak insp__leak--2"></view>
+    <view class="insp__dust insp__dust--1"></view>
+    <view class="insp__dust insp__dust--2"></view>
+    <view class="insp__dust insp__dust--3"></view>
+    <view class="insp__dust insp__dust--4"></view>
+    <view class="insp__dust insp__dust--5"></view>
+    <view class="insp__dust insp__dust--6"></view>
+  </view>
+
+  <!-- ============ 透明导航（标题随层级变化） ============ -->
+  <view class="insp__nav" style="padding-top:{{statusBarH}}px">
+    <view class="insp__back" hover-class="press" bindtap="onBack">
+      <view class="insp__backico"></view>
+    </view>
+    <view class="insp__navtitle">
+      <block wx:if="{{view==='grid'}}">
+        <text class="insp__navcn">旅行灵感</text>
+        <text class="insp__naven">Inspirations</text>
+      </block>
+      <block wx:elif="{{view==='plans'}}">
+        <text class="insp__navcn">{{curDest.name}}</text>
+        <text class="insp__naven">{{curDest.en}}</text>
+      </block>
+      <block wx:else>
+        <text class="insp__navcn insp__navcn--sm">{{curPlan.title}}</text>
+        <text class="insp__naven">Travel Plan</text>
+      </block>
+    </view>
+  </view>
+
+  <!-- ============ grid：目的地网格 ============ -->
+  <view wx:if="{{view==='grid'}}" class="insp__body" style="padding-top:{{bodyPad}}px">
+    <view class="insp__hd">
+      <view class="insp__t1">想去哪儿？</view>
+      <view class="insp__t2">从世界地图上挑一个心动的目的地，看看别人怎么玩</view>
+    </view>
+    <view class="insp__grid">
+      <view class="insp__col">
+        <view class="insp__card {{item.theme ? ('insp__card--' + item.theme) : ''}} {{item.feature ? 'insp__card--feature' : ''}}"
+          wx:for="{{colL}}" wx:key="name" data-index="{{item.index}}" hover-class="press" bindtap="onPick">
+          <image wx:if="{{item.img}}" class="insp__img" src="{{item.img}}" mode="aspectFill" />
+          <block wx:else>
+            <view class="insp__tint"></view>
+            <text class="insp__glyph">{{item.glyph}}</text>
+          </block>
+          <view class="insp__cardmask"></view>
+          <view class="insp__tags">
+            <text class="insp__tag" wx:for="{{item.tags}}" wx:for-item="t" wx:key="*this">{{t}}</text>
+          </view>
+          <view class="insp__cardinfo">
+            <view class="insp__name">{{item.name}}</view>
+            <view class="insp__en">{{item.en}}</view>
+            <view class="insp__region">{{item.region}}</view>
+            <view class="insp__foot">{{item.season}} · {{item.budget}}</view>
+          </view>
+        </view>
+      </view>
+      <view class="insp__col">
+        <view class="insp__card {{item.theme ? ('insp__card--' + item.theme) : ''}} {{item.feature ? 'insp__card--feature' : ''}}"
+          wx:for="{{colR}}" wx:key="name" data-index="{{item.index}}" hover-class="press" bindtap="onPick">
+          <image wx:if="{{item.img}}" class="insp__img" src="{{item.img}}" mode="aspectFill" />
+          <block wx:else>
+            <view class="insp__tint"></view>
+            <text class="insp__glyph">{{item.glyph}}</text>
+          </block>
+          <view class="insp__cardmask"></view>
+          <view class="insp__tags">
+            <text class="insp__tag" wx:for="{{item.tags}}" wx:for-item="t" wx:key="*this">{{t}}</text>
+          </view>
+          <view class="insp__cardinfo">
+            <view class="insp__name">{{item.name}}</view>
+            <view class="insp__en">{{item.en}}</view>
+            <view class="insp__region">{{item.region}}</view>
+            <view class="insp__foot">{{item.season}} · {{item.budget}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class="insp__footnote">点击任意目的地，看看它的旅行计划 ♡</view>
+  </view>
+
+  <!-- ============ plans：某城市的推荐计划列表 ============ -->
+  <view wx:if="{{view==='plans'}}" class="insp__body" style="padding-top:{{bodyPad}}px">
+    <view class="insp__crumb" hover-class="press" bindtap="onBack">‹ 旅行灵感</view>
+
+    <view class="insp__desthd {{curDest.theme ? ('insp__desthd--' + curDest.theme) : ''}}">
+      <image wx:if="{{curDest.img}}" class="insp__desthd__img" src="{{curDest.img}}" mode="aspectFill" />
+      <block wx:else>
+        <view class="insp__tint"></view>
+        <text class="insp__glyph">{{curDest.glyph}}</text>
+      </block>
+      <view class="insp__desthd__mask"></view>
+      <view class="insp__desthd__t">
+        <view class="insp__desthd__name">{{curDest.name}}</view>
+        <view class="insp__desthd__en">{{curDest.en}} · {{curDest.region}}</view>
+        <view class="insp__desthd__blurb">{{curDest.blurb}}</view>
+        <view class="insp__desthd__tags">
+          <text class="insp__tag" wx:for="{{curDest.tags}}" wx:for-item="t" wx:key="*this">{{t}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="insp__plans">
+      <view class="insp__pltitle">推荐的旅行计划</view>
+      <view class="insp__plancard" wx:for="{{curDest.plans}}" wx:key="id"
+        data-index="{{index}}" hover-class="press" bindtap="onPickPlan">
+        <view class="insp__plancard__main">
+          <view class="insp__plancard__title">{{item.title}}</view>
+          <view class="insp__plancard__summary">{{item.summary}}</view>
+          <view class="insp__plancard__tags">
+            <text class="insp__tag" wx:for="{{item.tags}}" wx:for-item="t" wx:key="*this">{{t}}</text>
+          </view>
+        </view>
+        <view class="insp__plancard__arrow">›</view>
+      </view>
+    </view>
+
+    <view class="insp__cta" hover-class="press" bindtap="onCreateFrom">
+      <text>以「{{curDest.name}}」为目的地，规划行程</text>
+      <text class="insp__cta__arrow">→</text>
+    </view>
+  </view>
+
+  <!-- ============ post：某计划对应的旅行帖子 ============ -->
+  <view wx:if="{{view==='post'}}" class="insp__body" style="padding-top:{{bodyPad}}px">
+    <view class="insp__crumb" hover-class="press" bindtap="onBack">‹ {{curDest.name}} 的计划</view>
+
+    <view class="insp__posthd {{curDest.theme ? ('insp__posthd--' + curDest.theme) : ''}}">
+      <image wx:if="{{curDest.img}}" class="insp__posthd__img" src="{{curDest.img}}" mode="aspectFill" />
+      <block wx:else>
+        <view class="insp__tint"></view>
+        <text class="insp__glyph">{{curDest.glyph}}</text>
+      </block>
+      <view class="insp__posthd__mask"></view>
+      <view class="insp__posthd__t">
+        <view class="insp__posthd__plan">{{curPlan.title}}</view>
+        <view class="insp__posthd__city">{{curDest.name}} · {{curDest.en}}</view>
+      </view>
+    </view>
+
+    <view class="insp__post">
+      <view class="insp__post__lead">{{curPlan.post.lead}}</view>
+
+      <view class="insp__post__body" wx:for="{{curPlan.post.body}}" wx:key="*this">{{item}}</view>
+
+      <view class="insp__metagrid">
+        <view class="insp__metacell">
+          <view class="insp__metak">建议天数</view>
+          <view class="insp__metav">{{curPlan.post.days}} 天</view>
+        </view>
+        <view class="insp__metacell">
+          <view class="insp__metak">最佳季节</view>
+          <view class="insp__metav">{{curPlan.post.bestSeason}}</view>
+        </view>
+        <view class="insp__metacell">
+          <view class="insp__metak">参考预算</view>
+          <view class="insp__metav">{{curPlan.post.budget}}</view>
+        </view>
+      </view>
+
+      <view class="insp__secttitle">行程亮点</view>
+      <view class="insp__highlights">
+        <text class="insp__hl" wx:for="{{curPlan.post.highlights}}" wx:for-item="t" wx:key="*this">{{t}}</text>
+      </view>
+
+      <view class="insp__secttitle">每日行程概要</view>
+      <view class="insp__outline">
+        <view class="insp__olini" wx:for="{{curPlan.post.outline}}" wx:key="*this">
+          <view class="insp__olidot"></view>
+          <text class="insp__oltext">{{item}}</text>
+        </view>
+      </view>
+
+      <view class="insp__cta" hover-class="press" bindtap="onCreateFrom">
+        <text>以「{{curDest.name}}」为目的地，规划行程</text>
+        <text class="insp__cta__arrow">→</text>
+      </view>
+    </view>
+  </view>
+
+</view>

@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "起卦·人生疏导",
+  "navigationBarBackgroundColor": "#15110D",
+  "navigationBarTextStyle": "white",
+  "usingComponents": {
+    "fx-stage": "/components/fx-stage/fx-stage"
+  }
+}

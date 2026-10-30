@@ -1,0 +1,199 @@
+<!-- subpackages/recruit/pages/recruit/analysis.wxml -->
+<view class="an themed" data-theme="{{theme}}" style="{{themeStyle}}">
+  <view class="an__hero" style="background:{{heroGradient}}">
+    <view class="an__hero-top">
+      <text class="an__hero-title">秋招数据看板</text>
+      <view class="an__chip" bindtap="onCopySummary">复制进度</view>
+    </view>
+    <view class="an__stats">
+      <view class="an__stat"><text class="an__stat-n">{{total}}</text><text class="an__stat-l">总投递</text></view>
+      <view class="an__stat"><text class="an__stat-n">{{active}}</text><text class="an__stat-l">进行中</text></view>
+      <view class="an__stat"><text class="an__stat-n">{{interviewRate}}%</text><text class="an__stat-l">进面率</text></view>
+      <view class="an__stat an__stat--ok"><text class="an__stat-n">{{offerRate}}%</text><text class="an__stat-l">Offer 率</text></view>
+    </view>
+    <view class="an__hero-sub">近 6 周投递 {{trendTotal}} 家 · 平均准备度 {{avgReadiness}}%（{{avgLevel}}）</view>
+  </view>
+
+  <!-- 看板诊断：把数字变成「卡在哪一环 + 该干嘛」 -->
+  <view class="an__diag" wx:if="{{hasData && board}}">
+    <view class="an__diag-head">
+      <text class="an__diag-title">🩺 看板诊断</text>
+      <text class="an__diag-headline">{{board.headline}}</text>
+    </view>
+    <view class="an__find" wx:for="{{board.findings}}" wx:key="text">
+      <text class="an__find-dot an__find-dot--{{item.tone}}"></text>
+      <text class="an__find-text">{{item.text}}</text>
+    </view>
+    <block wx:if="{{board.priorities.length}}">
+      <view class="an__diag-sub">优先动作</view>
+      <view class="an__prio" wx:for="{{board.priorities}}" wx:key="key"
+        data-kind="{{item.go.kind}}" data-target="{{item.go.target}}" bindtap="onBoardActionTap">
+        <text class="an__prio-icon">{{item.icon}}</text>
+        <view class="an__prio-body">
+          <text class="an__prio-text">{{item.text}}</text>
+          <text class="an__prio-reason">{{item.reason}}</text>
+        </view>
+        <text wx:if="{{item.urgent}}" class="an__prio-urgent">紧急</text>
+      </view>
+    </block>
+  </view>
+
+  <!-- 空态 -->
+  <view class="an__empty" wx:if="{{!hasData}}">
+    <text class="an__empty-emoji">📊</text>
+    <text class="an__empty-tip">还没有数据可以分析</text>
+    <text class="an__empty-sub">添加投递记录后，这里会自动生成漏斗、节奏与行动建议</text>
+  </view>
+  <view class="an__jump" wx:if="{{!hasData}}">
+    <view class="an__jbtn an__jbtn--primary" bindtap="jumpList">去添加投递</view>
+  </view>
+
+  <block wx:if="{{hasData}}">
+    <!-- 转化漏斗 -->
+    <view class="an__card">
+      <view class="an__card-head">
+        <text class="an__card-title">🔻 投递转化漏斗</text>
+        <text class="an__card-sub">按「曾到达过」统计</text>
+      </view>
+      <view class="an__funnel">
+        <view class="an__frow" wx:for="{{funnel}}" wx:key="key">
+          <view class="an__frow-head">
+            <text class="an__frow-label">{{item.label}}</text>
+            <text class="an__frow-rate" wx:if="{{!item.isTop}}">转化 {{item.rateFromPrev}}%</text>
+          </view>
+          <view class="an__bar-bg">
+            <view class="an__bar-fill an__bar-fill--{{item.key}}" style="width:{{item.barPct}}%"></view>
+          </view>
+          <text class="an__frow-sub">曾到达 {{item.reached}} 家 · 当前停在 {{item.current}} 家</text>
+        </view>
+      </view>
+      <text class="an__note">进面率 {{interviewRate}}%，Offer 率 {{offerRate}}%。转化率骤降的那一环，就是最该补的地方。</text>
+    </view>
+
+    <!-- 投递节奏 -->
+    <view class="an__card">
+      <view class="an__card-head">
+        <text class="an__card-title">📈 投递节奏</text>
+        <text class="an__card-sub">近 6 周</text>
+      </view>
+      <view class="an__trend">
+        <view class="an__tcol" wx:for="{{trend}}" wx:key="start">
+          <text class="an__tcol-n">{{item.count}}</text>
+          <view class="an__tbar-wrap">
+            <view class="an__tbar {{item.isCurrent ? 'an__tbar--on' : ''}}" style="height:{{item.pct}}%"></view>
+          </view>
+          <text class="an__tcol-l">{{item.label}}</text>
+        </view>
+      </view>
+      <text class="an__note">单周最高 {{trendMax}} 家。秋招靠的是稳定输出，不是某一周的爆发。</text>
+    </view>
+
+    <!-- 内推 vs 自投 -->
+    <view class="an__card">
+      <view class="an__card-head">
+        <text class="an__card-title">🤝 内推 vs 自投</text>
+        <text class="an__card-sub">进面及以上为分子</text>
+      </view>
+      <view class="an__ref" wx:for="{{referral}}" wx:key="key">
+        <view class="an__ref-head">
+          <text class="an__ref-label">{{item.label}}</text>
+          <text class="an__ref-val">{{item.total}} 家 · 进面率 {{item.interviewRate}}%</text>
+        </view>
+        <view class="an__bar-bg">
+          <view class="an__bar-fill an__bar-fill--{{item.key}}" style="width:{{item.pct}}%"></view>
+        </view>
+        <text class="an__frow-sub">进面及以上 {{item.interviewPlus}} 家 · Offer {{item.offer}} 个</text>
+      </view>
+    </view>
+
+    <!-- 渠道来源 -->
+    <view class="an__card">
+      <view class="an__card-head">
+        <text class="an__card-title">🔗 投递渠道来源</text>
+        <text class="an__card-sub">按链接自动识别</text>
+      </view>
+      <view class="an__plist">
+        <view class="an__prow" wx:for="{{platform}}" wx:key="label">
+          <text class="an__plabel">{{item.label}}</text>
+          <view class="an__pbar-bg">
+            <view class="an__pbar" style="width:{{item.pct}}%"></view>
+          </view>
+          <text class="an__pval">{{item.count}} 家 · {{item.ratio}}%</text>
+        </view>
+      </view>
+      <text class="an__note">在投递详情里填上「投递入口 / JD 链接」，这里就能看出哪个渠道最出量。</text>
+    </view>
+
+    <!-- Offer 对比 -->
+    <view class="an__card" wx:if="{{offers.length > 0}}">
+      <view class="an__card-head">
+        <text class="an__card-title">🏆 Offer 对比</text>
+        <text class="an__card-sub">点公司名进详情</text>
+      </view>
+      <scroll-view class="an__otable-wrap" scroll-x>
+        <view class="an__otable">
+          <view class="an__orow">
+            <view class="an__ocell an__ocell--lbl">公司</view>
+            <view class="an__ocell an__ocell--co" wx:for="{{offers}}" wx:key="_id" data-id="{{item._id}}" bindtap="onOpenOffer">{{item.company}}</view>
+          </view>
+          <view class="an__orow">
+            <view class="an__ocell an__ocell--lbl">职位</view>
+            <view class="an__ocell" wx:for="{{offers}}" wx:key="_id">{{item.position || '—'}}</view>
+          </view>
+          <view class="an__orow">
+            <view class="an__ocell an__ocell--lbl">薪资</view>
+            <view class="an__ocell an__ocell--hl" wx:for="{{offers}}" wx:key="_id">{{item.salary}}</view>
+          </view>
+          <view class="an__orow">
+            <view class="an__ocell an__ocell--lbl">Base</view>
+            <view class="an__ocell" wx:for="{{offers}}" wx:key="_id">{{item.base}}</view>
+          </view>
+          <view class="an__orow">
+            <view class="an__ocell an__ocell--lbl">面试评分</view>
+            <view class="an__ocell an__ocell--star" wx:for="{{offers}}" wx:key="_id">{{item.stars}}</view>
+          </view>
+          <view class="an__orow">
+            <view class="an__ocell an__ocell--lbl">渠道</view>
+            <view class="an__ocell" wx:for="{{offers}}" wx:key="_id">{{item.isReferral ? '内推' : '自投'}}</view>
+          </view>
+        </view>
+      </scroll-view>
+      <text class="an__note">薪资按你填的原文展示，不做换算；答复期限记得在「截止时间」里设好，会自动进 Deadline 雷达。</text>
+    </view>
+
+    <!-- 面试准备度 -->
+    <view class="an__card">
+      <view class="an__card-head">
+        <text class="an__card-title">🎯 面试准备度</text>
+        <text class="an__card-sub">按需补强排序</text>
+      </view>
+      <view class="an__rrow" wx:for="{{readinessRows}}" wx:key="_id" data-id="{{item._id}}" bindtap="onOpenApp">
+        <view class="an__rmain">
+          <view class="an__rhead">
+            <text class="an__rco">{{item.company}}</text>
+            <text class="an__rpos" wx:if="{{item.position}}">{{item.position}}</text>
+          </view>
+          <text class="an__rtip">{{item.tip}}</text>
+        </view>
+        <view class="an__rscore an__rscore--{{item.levelKey}}">
+          <text class="an__rnum">{{item.score}}</text>
+          <text class="an__rlevel">{{item.level}}</text>
+        </view>
+      </view>
+      <text class="an__note" wx:if="{{readinessHidden > 0}}">另有 {{readinessHidden}} 个投递未展示</text>
+    </view>
+
+    <!-- 行动建议 -->
+    <view class="an__card">
+      <view class="an__card-head">
+        <text class="an__card-title">🧭 下一步行动建议</text>
+      </view>
+      <view class="an__tip" wx:for="{{tips}}" wx:key="*this">{{item}}</view>
+    </view>
+
+    <view class="an__jump">
+      <view class="an__jbtn" bindtap="jumpList">📋 投递列表</view>
+      <view class="an__jbtn an__jbtn--primary" bindtap="jumpResource">📚 资源库</view>
+    </view>
+  </block>
+</view>

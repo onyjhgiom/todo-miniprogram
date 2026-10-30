@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "课程表",
+  "navigationBarBackgroundColor": "#F2F6FC",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#F2F6FC",
+  "usingComponents": {
+    "undo-bar": "/course-schedule/components/undo-bar/undo-bar",
+    "cs-theme-picker": "/course-schedule/components/cs-theme-picker/cs-theme-picker"
+  }
+}

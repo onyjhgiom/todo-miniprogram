@@ -1,0 +1,2 @@
+/* pages/love/share/share.wxss */
+@import "../../styles/love-common.wxss";

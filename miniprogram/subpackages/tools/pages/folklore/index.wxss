@@ -1,0 +1,533 @@
+/* pages/folklore/index.wxss
+ * 国风民俗 · 新中式视觉系统
+ * 颜色集中管理（--gf-* 命名空间，不与全局主题 --color-* 冲突）：
+ *   深黛蓝底 #171D29 / 次级 #232B3A / 鎏金 #C8A66A / 亮金 #E6D2A5
+ *   宣纸 #F4EBDD / 深宣纸 #E9DCC5 / 墨 #302B25 / 次墨 #77766F / 朱砂 #A94435
+ */
+
+.page {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background: var(--gf-bg, #171D29);
+  color: var(--gf-ink-on-dark, #E8E2D4);
+}
+
+/* ============ 舞台背景：水墨山水 + 云雾 + 暗角 ============ */
+.gf-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+/* 山水：低对比 + 上下渐变遮罩融进深色底 */
+.gf-bg__mountains {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 46%;
+  background: url('/subpackages/tools/assets/guofeng/bg-mountains.jpg') center top / 100% auto no-repeat;
+  opacity: 0.34;
+  -webkit-mask: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.55) 55%, transparent 100%);
+  mask: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.55) 55%, transparent 100%);
+}
+/* 云雾：两团淡金/青灰光晕缓慢漂移 */
+.gf-bg__mist {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.gf-bg__mist--a {
+  top: -8%;
+  right: -22%;
+  width: 70%;
+  height: 34%;
+  background: radial-gradient(ellipse, rgba(200, 166, 106, 0.14), transparent 68%);
+  animation: gf-drift 46s ease-in-out infinite alternate;
+}
+.gf-bg__mist--b {
+  bottom: 6%;
+  left: -24%;
+  width: 76%;
+  height: 38%;
+  background: radial-gradient(ellipse, rgba(110, 130, 160, 0.10), transparent 70%);
+  animation: gf-drift 56s ease-in-out -18s infinite alternate-reverse;
+}
+@keyframes gf-drift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(4%, 3%, 0) scale(1.08); }
+}
+/* 四角暗角：聚焦中心内容 */
+.gf-bg__vignette {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse 120% 90% at 50% 40%, transparent 58%, rgba(9, 12, 20, 0.72) 100%);
+}
+
+/* ============ 内容层（压在背景上） ============ */
+.body {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  padding: 8rpx 24rpx 0;
+  box-sizing: border-box;
+}
+
+/* ============ 头部主视觉 ============ */
+.hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 26rpx 10rpx 18rpx;
+}
+.hero__seal {
+  flex: 0 0 auto;
+  writing-mode: vertical-lr;
+  letter-spacing: 6rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #F6E8DC;
+  background: linear-gradient(160deg, #B4503D, #8E3226);
+  padding: 14rpx 8rpx;
+  border-radius: 6rpx;
+  box-shadow: 0 4rpx 14rpx rgba(169, 68, 53, 0.4);
+  margin-right: 20rpx;
+}
+.hero__text { flex: 1; min-width: 0; }
+.hero__title {
+  font-size: 48rpx;
+  font-weight: 700;
+  letter-spacing: 4rpx;
+  white-space: nowrap;
+  background: linear-gradient(180deg, #F2E3BE 8%, #E6D2A5 42%, #C8A66A 88%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2rpx 18rpx rgba(200, 166, 106, 0.18);
+}
+.hero__sub {
+  margin-top: 12rpx;
+  display: flex;
+  align-items: center;
+  font-size: 22rpx;
+  letter-spacing: 4rpx;
+  color: rgba(230, 210, 165, 0.78);
+}
+.hero__sub-line {
+  flex: 0 0 44rpx;
+  height: 1rpx;
+  margin-right: 14rpx;
+  background: linear-gradient(90deg, rgba(200, 166, 106, 0), rgba(200, 166, 106, 0.6));
+}
+.hero__sub-line:last-child {
+  margin-right: 0;
+  margin-left: 14rpx;
+  background: linear-gradient(90deg, rgba(200, 166, 106, 0.6), rgba(200, 166, 106, 0));
+}
+
+/* ============ 雅集卡内八卦展示（结构图：八卦展示属于雅集的一部分） ============ */
+/* 八卦盘嵌在米白宣纸上：加深色底板 + 双金边，像一枚压在纸上的古铜罗盘 */
+.daily__bagua {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6rpx 0 22rpx;
+}
+.daily__bagua-disc {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 36% 30%, #2C3648 0%, #1B2230 58%, #121722 100%);
+  border: 2rpx solid rgba(200, 166, 106, 0.7);
+  box-shadow:
+    0 8rpx 22rpx rgba(48, 43, 37, 0.35),
+    inset 0 2rpx 10rpx rgba(230, 210, 165, 0.18);
+}
+/* 外圈细金环（不随盘面旋转，静态压边） */
+.daily__bagua-disc::before {
+  content: '';
+  position: absolute;
+  top: 8rpx;
+  left: 8rpx;
+  right: 8rpx;
+  bottom: 8rpx;
+  border-radius: 50%;
+  border: 1rpx solid rgba(200, 166, 106, 0.4);
+  pointer-events: none;
+}
+.daily__bagua-cap {
+  margin-top: 14rpx;
+  font-size: 20rpx;
+  letter-spacing: 3rpx;
+  color: var(--gf-ink-muted, #77766F);
+}
+
+/* ============ 起卦入口（鎏金卡） ============ */
+.gua-entry {
+  display: flex;
+  align-items: center;
+  border-radius: 18rpx;
+  padding: 26rpx 24rpx;
+  margin-bottom: 18rpx;
+  background: linear-gradient(160deg, rgba(200, 166, 106, 0.16), rgba(200, 166, 106, 0.06));
+  border: 1rpx solid rgba(200, 166, 106, 0.5);
+  box-shadow: 0 6rpx 22rpx rgba(9, 12, 20, 0.35);
+}
+.gua-entry__icon-wrap {
+  flex: 0 0 84rpx;
+  height: 84rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 34% 28%, rgba(246, 232, 220, 0.9), rgba(200, 166, 106, 0.25) 78%);
+  border: 1rpx solid rgba(200, 166, 106, 0.55);
+}
+.gua-entry__icon-wrap--plain {
+  background: radial-gradient(circle at 34% 28%, rgba(244, 235, 221, 0.55), rgba(35, 43, 58, 0.6) 80%);
+}
+.gua-entry__icon { font-size: 44rpx; }
+.gua-entry__main { flex: 1; margin-left: 22rpx; display: flex; flex-direction: column; min-width: 0; }
+.gua-entry__title {
+  font-size: 31rpx;
+  font-weight: 600;
+  letter-spacing: 2rpx;
+  color: var(--gf-gold-light, #E6D2A5);
+}
+.gua-entry__desc { margin-top: 6rpx; font-size: 22rpx; color: rgba(232, 226, 212, 0.55); }
+.gua-entry__arrow { font-size: 38rpx; color: rgba(200, 166, 106, 0.8); }
+.gua-entry--sub { border-color: rgba(200, 166, 106, 0.28); margin-top: 18rpx; }
+.gua-entry--sub .gua-entry__title { color: rgba(240, 234, 220, 0.92); font-size: 29rpx; }
+
+/* ============ 宣纸卷轴卡（每日国风雅集） ============ */
+.paper {
+  position: relative;
+  border-radius: 16rpx;
+  padding: 30rpx 26rpx 26rpx;
+  background:
+    repeating-linear-gradient(0deg, rgba(48, 43, 37, 0.022) 0 2rpx, transparent 2rpx 7rpx),
+    linear-gradient(175deg, #F6EEE1 0%, #F4EBDD 55%, #EBDFC9 100%);
+  border: 1rpx solid rgba(200, 166, 106, 0.55);
+  box-shadow:
+    0 10rpx 30rpx rgba(9, 12, 20, 0.45),
+    inset 0 0 0 6rpx rgba(200, 166, 106, 0.08),
+    inset 0 2rpx 10rpx rgba(255, 255, 255, 0.6);
+  margin-bottom: 30rpx;
+  color: var(--gf-ink, #302B25);
+}
+/* 淡墨山水角饰：细金回纹角 */
+.paper__corner {
+  position: absolute;
+  width: 34rpx;
+  height: 34rpx;
+  border-color: rgba(200, 166, 106, 0.75);
+  border-style: solid;
+  border-width: 0;
+}
+.paper__corner--tl { top: 10rpx; left: 10rpx; border-top-width: 2rpx; border-left-width: 2rpx; }
+.paper__corner--tr { top: 10rpx; right: 10rpx; border-top-width: 2rpx; border-right-width: 2rpx; }
+
+.daily__head { display: flex; align-items: center; margin-bottom: 20rpx; }
+.daily__tag { display: flex; align-items: center; }
+.daily__tag-seal {
+  width: 44rpx;
+  height: 44rpx;
+  margin-right: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #F6E8DC;
+  background: linear-gradient(160deg, #B4503D, #8E3226);
+  border-radius: 6rpx;
+}
+.daily__tag-t {
+  font-size: 30rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+  color: var(--gf-ink, #302B25);
+}
+.daily__date { margin-left: 16rpx; font-size: 22rpx; color: var(--gf-ink-muted, #77766F); }
+.daily__refresh {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  font-size: 22rpx;
+  color: var(--gf-cinnabar, #A94435);
+  padding: 8rpx 20rpx;
+  border-radius: 999rpx;
+  border: 1rpx solid rgba(169, 68, 53, 0.4);
+  background: rgba(169, 68, 53, 0.07);
+}
+.daily__refresh-ico { margin-right: 6rpx; font-size: 24rpx; }
+.daily__refresh--loading .daily__refresh-ico {
+  animation: gf-rotate 0.9s linear infinite;
+}
+@keyframes gf-rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* —— 今日卦象 —— */
+.daily__gua {
+  display: flex;
+  align-items: stretch;
+  padding: 4rpx 0 8rpx;
+  border-top: 1rpx dashed rgba(119, 118, 111, 0.35);
+}
+.daily__gua-label {
+  flex: 0 0 auto;
+  writing-mode: vertical-lr;
+  letter-spacing: 6rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #F6E8DC;
+  background: linear-gradient(180deg, #B4503D, #8E3226);
+  border-radius: 6rpx;
+  padding: 14rpx 8rpx;
+  margin-right: 22rpx;
+}
+/* 三爻符号：阳爻整条 / 阴爻两段；自上而下渲染（数据自下而上，展示时翻转） */
+.gua-sym { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.gua-sym__lines { display: flex; flex-direction: column; gap: 8rpx; }
+.gua-line {
+  width: 92rpx;
+  height: 12rpx;
+  border-radius: 3rpx;
+  background: linear-gradient(180deg, #4A4136, #302B25);
+  box-shadow: 0 1rpx 2rpx rgba(48, 43, 37, 0.4);
+}
+.gua-line--yin {
+  background: none;
+  box-shadow: none;
+  /* 阴爻 = 两段 */
+  background-image:
+    linear-gradient(180deg, #4A4136, #302B25),
+    linear-gradient(180deg, #4A4136, #302B25);
+  background-size: 40rpx 12rpx, 40rpx 12rpx;
+  background-position: 0 center, 100% center;
+  background-repeat: no-repeat;
+}
+.gua-line--mid { /* 中位爻与上下爻留同距，无特殊样式，保留类便于调整 */ }
+.gua-sym__name { margin-top: 12rpx; font-size: 20rpx; color: var(--gf-ink-muted, #77766F); letter-spacing: 2rpx; }
+
+.daily__gua-text { flex: 1; margin-left: 24rpx; min-width: 0; display: flex; }
+.daily__gua-element {
+  flex: 0 0 auto;
+  margin-right: 14rpx;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: var(--gf-cinnabar, #A94435);
+  line-height: 1.2;
+}
+.daily__gua-p { flex: 1; font-size: 25rpx; line-height: 1.7; color: var(--gf-ink, #302B25); }
+
+/* —— 民俗风物 · 经典语录（独立宣纸卡） —— */
+.fengwu__head { display: flex; align-items: center; margin-bottom: 22rpx; }
+.tag-cinnabar {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  font-size: 20rpx;
+  color: var(--gf-cinnabar, #A94435);
+  border: 1rpx solid rgba(169, 68, 53, 0.5);
+  border-radius: 6rpx;
+  padding: 4rpx 12rpx;
+  margin-right: 18rpx;
+  background: rgba(169, 68, 53, 0.05);
+}
+.tag-cinnabar--seal {
+  align-self: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40rpx;
+  height: 40rpx;
+  padding: 0;
+  margin-right: 14rpx;
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #F6E8DC;
+  background: linear-gradient(160deg, #B4503D, #8E3226);
+  border-color: transparent;
+}
+.fengwu__head-t {
+  font-size: 29rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+  color: var(--gf-ink, #302B25);
+  white-space: nowrap;
+}
+.fengwu__head-line {
+  flex: 1;
+  height: 1rpx;
+  margin-left: 18rpx;
+  background: linear-gradient(90deg, rgba(200, 166, 106, 0.5), rgba(200, 166, 106, 0));
+}
+.fengwu__block { display: flex; align-items: flex-start; }
+.fengwu__p { flex: 1; font-size: 24rpx; line-height: 1.8; color: #4A4136; min-width: 0; }
+
+/* —— 经典语录（浅米卡 + 左朱砂线） —— */
+.verse {
+  margin-top: 20rpx;
+  padding: 22rpx 22rpx 20rpx;
+  border-radius: 12rpx;
+  background: linear-gradient(175deg, #F9F3E7, #F1E7D2);
+  border: 1rpx solid rgba(200, 166, 106, 0.3);
+  border-left: 5rpx solid var(--gf-cinnabar, #A94435);
+  box-shadow: inset 0 1rpx 6rpx rgba(255, 255, 255, 0.5);
+}
+.verse__quote { font-size: 30rpx; font-weight: 700; line-height: 1.7; color: var(--gf-ink, #302B25); }
+.verse__src { margin-top: 10rpx; font-size: 22rpx; letter-spacing: 1rpx; color: var(--gf-cinnabar, #A94435); }
+.verse__note { margin-top: 12rpx; font-size: 23rpx; line-height: 1.7; color: var(--gf-ink-muted, #77766F); }
+
+/* ============ 趣味模块 ============ */
+.mod-head { display: flex; align-items: center; margin: 34rpx 4rpx 20rpx; }
+.mod-head__line {
+  flex: 1;
+  height: 1rpx;
+  background: linear-gradient(90deg, rgba(200, 166, 106, 0), rgba(200, 166, 106, 0.55));
+}
+.mod-head__line:last-child {
+  background: linear-gradient(90deg, rgba(200, 166, 106, 0.55), rgba(200, 166, 106, 0));
+}
+.mod-head__t {
+  margin: 0 18rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+  letter-spacing: 8rpx;
+  color: var(--gf-gold-light, #E6D2A5);
+}
+.mod-head__seal {
+  width: 34rpx;
+  height: 34rpx;
+  margin-right: 14rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20rpx;
+  color: #F6E8DC;
+  background: linear-gradient(160deg, #B4503D, #8E3226);
+  border-radius: 6rpx;
+}
+
+.mod-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20rpx; }
+.mod-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border-radius: 16rpx;
+  padding: 24rpx 20rpx;
+  background: linear-gradient(165deg, rgba(35, 43, 58, 0.92), rgba(23, 29, 41, 0.94));
+  border: 1rpx solid rgba(200, 166, 106, 0.34);
+  box-shadow: 0 6rpx 20rpx rgba(9, 12, 20, 0.4);
+  overflow: hidden;
+  transition: transform 120ms ease, opacity 120ms ease;
+}
+/* 金色高光偶尔流过边框 */
+.mod-cell::after {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: -80%;
+  width: 60%;
+  height: 220%;
+  transform: rotate(24deg);
+  background: linear-gradient(90deg, transparent, rgba(230, 210, 165, 0.10), transparent);
+  animation: gf-shine 9s ease-in-out infinite;
+  pointer-events: none;
+}
+.mod-cell:nth-child(2n)::after { animation-delay: -4.5s; }
+@keyframes gf-shine {
+  0%, 55%  { left: -80%; }
+  85%, 100% { left: 130%; }
+}
+
+.mod-cell--hover { transform: scale(0.97); opacity: 0.9; }
+/* 宣纸圆池图标 */
+.mod-cell__pool {
+  width: 84rpx;
+  height: 84rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 36% 30%, #F8F1E4, #E9DCC5 82%);
+  border: 1rpx solid rgba(200, 166, 106, 0.6);
+  box-shadow: inset 0 -3rpx 8rpx rgba(119, 118, 111, 0.25);
+}
+.mod-cell__icon { font-size: 44rpx; }
+.mod-cell__main { margin-top: 16rpx; display: flex; flex-direction: column; min-width: 0; }
+.mod-cell__name {
+  font-size: 29rpx;
+  font-weight: 600;
+  letter-spacing: 2rpx;
+  color: var(--gf-gold-light, #E6D2A5);
+}
+.mod-cell__desc { margin-top: 6rpx; font-size: 22rpx; line-height: 1.6; color: rgba(232, 226, 212, 0.55); }
+.mod-cell__arrow {
+  position: absolute;
+  right: 18rpx;
+  bottom: 20rpx;
+  font-size: 30rpx;
+  color: rgba(200, 166, 106, 0.75);
+}
+
+/* 「卦象推演」段头：与趣味模块拉开一段距离 */
+.mod-head--gua { margin-top: 34rpx; }
+
+/* ============ 页脚 ============ */
+.page-foot { display: flex; flex-direction: column; align-items: center; padding: 10rpx 0 26rpx; }
+.page-foot__t {
+  font-size: 22rpx;
+  letter-spacing: 6rpx;
+  color: rgba(200, 166, 106, 0.6);
+}
+.page-foot__line {
+  margin-top: 14rpx;
+  width: 240rpx;
+  height: 1rpx;
+  background: linear-gradient(90deg, rgba(200, 166, 106, 0), rgba(200, 166, 106, 0.5), rgba(200, 166, 106, 0));
+}
+
+.safe-bottom { height: 40rpx; }
+
+/* ============ 底部永久免责 ============ */
+.disclaimer {
+  position: relative;
+  z-index: 1;
+  padding: 18rpx 28rpx calc(18rpx + env(safe-area-inset-bottom));
+  font-size: 22rpx;
+  line-height: 1.6;
+  color: rgba(232, 226, 212, 0.45);
+  text-align: center;
+  background: rgba(13, 17, 26, 0.92);
+  border-top: 1rpx solid rgba(200, 166, 106, 0.25);
+}
+
+.press { opacity: 0.7; }
+
+/* ============ 无障碍：系统「减弱动态」时关闭装饰动画 ============ */
+@media (prefers-reduced-motion: reduce) {
+  .gf-bg__mist--a,
+  .gf-bg__mist--b,
+  .mod-cell::after,
+  .daily__refresh--loading .daily__refresh-ico {
+    animation: none !important;
+  }
+}

@@ -1,0 +1,349 @@
+<!-- pages/recruit/openings.wxml -->
+<view class="op themed" data-theme="{{theme}}" style="{{themeStyle}}">
+  <view class="op__hero" style="background:{{heroGradient}}">
+    <text class="op__hero-title">📅 岗位开放</text>
+    <text class="op__hero-sub">互联网大厂 · 外企 · 四大八大 · 央国企，按「公司 × 招聘类型 × 岗位类别」追踪</text>
+    <view class="op__hero-counts">
+      <text class="op__hc">进行中 {{counts.open}}</text>
+      <text class="op__hc op__hc--warn">即将截止 {{counts.closing}}</text>
+      <text class="op__hc">未开始 {{counts.upcoming}}</text>
+      <text class="op__hc">待公布 {{counts.tba}}</text>
+    </view>
+  </view>
+
+  <!-- 免责声明：数据仅供参考 -->
+  <view class="op__notice">
+    <text class="op__notice-t">⚠️ 数据说明</text>
+    <text class="op__notice-s">本表为人工整理的参考信息，数据版本 {{dataVersion}}。招聘节奏变化快，且「招满即止」的岗位实际关岗通常早于公告日。标「待公布」的条目代表官方尚未发布公告，请查看「往年参考」判断节奏。一切开放与截止时间，请以企业官方招聘渠道为准。</text>
+  </view>
+
+  <view class="op__search">
+    <input class="op__search-input" placeholder="搜索公司 / 岗位 / 关键词（如：财务、外企、审计）" value="{{keyword}}" bindinput="onSearch" />
+    <view class="op__search-clear" wx:if="{{keyword}}" bindtap="onClearSearch">×</view>
+  </view>
+
+  <scroll-view class="op__tabs" scroll-x>
+    <view class="op__tab {{status === 'all' ? 'op__tab--on' : ''}}" data-key="all" bindtap="onStatus">全部</view>
+    <view wx:for="{{statusTabs}}" wx:key="key" wx:if="{{item.key !== 'all'}}"
+      class="op__tab {{status === item.key ? 'op__tab--on' : ''}}"
+      data-key="{{item.key}}" bindtap="onStatus">{{item.label}}</view>
+  </scroll-view>
+
+  <scroll-view class="op__tabs op__tabs--sub" scroll-x>
+    <view class="op__tab op__tab--sm {{companyType === 'all' ? 'op__tab--on' : ''}}" data-key="all" bindtap="onCompanyType">全部行业</view>
+    <view wx:for="{{companyTypeTabs}}" wx:key="*this"
+      class="op__tab op__tab--sm {{companyType === item ? 'op__tab--on' : ''}}"
+      data-key="{{item}}" bindtap="onCompanyType">{{item}}</view>
+  </scroll-view>
+
+  <scroll-view class="op__tabs op__tabs--sub" scroll-x>
+    <view class="op__tab op__tab--sm {{ownership === 'all' ? 'op__tab--on' : ''}}" data-key="all" bindtap="onOwnership">全部性质</view>
+    <view wx:for="{{ownershipTabs}}" wx:key="*this"
+      class="op__tab op__tab--sm {{ownership === item ? 'op__tab--on' : ''}}"
+      data-key="{{item}}" bindtap="onOwnership">{{item}}</view>
+  </scroll-view>
+
+  <scroll-view class="op__tabs op__tabs--sub" scroll-x>
+    <view class="op__tab op__tab--sm {{recruitType === 'all' ? 'op__tab--on' : ''}}" data-key="all" bindtap="onRecruitType">全部类型</view>
+    <view wx:for="{{recruitTypeTabs}}" wx:key="*this"
+      class="op__tab op__tab--sm {{recruitType === item ? 'op__tab--on' : ''}}"
+      data-key="{{item}}" bindtap="onRecruitType">{{item}}</view>
+  </scroll-view>
+
+  <scroll-view class="op__tabs op__tabs--sub" scroll-x>
+    <view class="op__tab op__tab--sm op__tab--fav {{followedOnly ? 'op__tab--on' : ''}}" bindtap="toggleFollowedOnly">
+      ⭐ 只看关注{{favCount > 0 ? ' ' + favCount : ''}}
+    </view>
+    <view wx:for="{{groupTabs}}" wx:key="key"
+      class="op__tab op__tab--sm {{groupBy === item.key ? 'op__tab--on' : ''}}"
+      data-key="{{item.key}}" bindtap="onGroup">{{item.label}}</view>
+  </scroll-view>
+
+  <view class="op__count">
+    <block wx:if="{{view === 'timeline'}}">
+      <text class="op__count-tl">📈 时间线 · {{tl.datedCount}} 条有日期 / {{tl.undatedCount}} 条待公布</text>
+    </block>
+    <block wx:else>
+      共 {{total}} 条
+      <text class="op__reset" bindtap="resetFilter">重置筛选</text>
+    </block>
+    <text class="op__seg">
+      <text class="op__seg-i {{view === 'list' ? 'op__seg-i--on' : ''}}" data-view="list" bindtap="toggleView">≡ 列表</text>
+      <text class="op__seg-i {{view === 'timeline' ? 'op__seg-i--on' : ''}}" data-view="timeline" bindtap="toggleView">↔ 时间线</text>
+    </text>
+  </view>
+
+  <!-- 为我推荐：基于简历 + 求职意向的个性化岗位推荐（列表视图才展示） -->
+  <view class="op__reco" wx:if="{{view === 'list' && recos.length}}">
+    <view class="op__reco-head">
+      <text class="op__reco-title">🤖 为我推荐</text>
+      <text class="op__reco-sub">按你的简历与意向匹配，点一下即可存为投递卡</text>
+    </view>
+    <view class="op__reco-item" wx:for="{{recos}}" wx:key="key" data-id="{{item.id}}" bindtap="onRecoTap">
+      <view class="op__reco-main">
+        <text class="op__reco-co">{{item.company}}</text>
+        <text class="op__reco-pos">{{item.position}}</text>
+        <view class="op__reco-reasons">
+          <text class="op__reco-reason" wx:for="{{item.reasons}}" wx:for-item="r" wx:key="*this">{{r}}</text>
+        </view>
+      </view>
+      <view class="op__reco-side">
+        <text class="op__reco-score">{{item.score}}</text>
+        <text class="op__reco-st {{item.applied ? 'op__reco-st--dup' : ''}}">{{item.applied ? '已投' : item.statusLabel}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 首屏骨架：岗位库要跑筛选 + 分组 + 排序，先把位置占住，避免进页面先白一下 -->
+  <view class="op__sk" wx:if="{{loading}}">
+    <view class="ix-skeleton ix-skeleton--block"></view>
+    <view class="ix-skeleton ix-skeleton--block"></view>
+    <view class="ix-skeleton ix-skeleton--block"></view>
+  </view>
+
+  <!-- 分组浏览：每组可折叠，默认只渲染前 8 条 -->
+  <view class="op__groups" wx:if="{{view === 'list' && !loading}}">
+    <view class="op__group" wx:for="{{groups}}" wx:for-item="grp" wx:key="key">
+      <view class="op__group-head" data-key="{{grp.key}}" bindtap="toggleGroup">
+        <text class="op__group-label">{{grp.label}}</text>
+        <text class="op__group-count">{{grp.count}}</text>
+        <text class="op__group-arrow">{{grp.expand ? '收起' : '展开'}}</text>
+      </view>
+
+      <view class="op__list" wx:if="{{grp.expand}}">
+        <view class="op__item op__item--{{item.status}}" wx:for="{{grp.items}}" wx:key="_id">
+          <view class="op__item-head" data-id="{{item._id}}" bindtap="toggleExpand">
+            <view class="op__row1">
+              <text class="op__co">{{item.company}}</text>
+              <text class="op__badge op__badge--{{item.status}}">{{item.statusLabel}}</text>
+              <text class="op__fav {{item.fav ? 'op__fav--on' : ''}}" data-id="{{item._id}}" catchtap="toggleFav">{{item.fav ? '★' : '☆'}}</text>
+            </view>
+            <view class="op__row2">
+              <text class="op__cat">{{item.jobCategory}}</text>
+              <text class="op__type">{{item.recruitType}}</text>
+              <text class="op__ctype">{{item.companyType}}</text>
+              <text class="op__own op__own--{{item.ownershipKey}}">{{item.ownership}}</text>
+            </view>
+            <view class="op__row3">
+              <text class="op__date">开放 {{item.openDate}}</text>
+              <text class="op__due op__due--{{item.status}}">{{item.dueText}}</text>
+            </view>
+            <view class="op__row4" wx:if="{{item.rollingHint}}">
+              <text class="op__rolling">招满即止 · 实际关岗可能早于公告日，建议尽早投递</text>
+            </view>
+          </view>
+
+          <view class="op__item-body" wx:if="{{item.expand}}">
+            <view class="op__kv" wx:if="{{item.group}}">
+              <text class="op__k">事业群/分所</text><text class="op__v">{{item.group}}</text>
+            </view>
+            <view class="op__kv">
+              <text class="op__k">往年参考</text><text class="op__v">{{item.lastYearRef || '—'}}</text>
+            </view>
+            <view class="op__kv">
+              <text class="op__k">信息来源</text><text class="op__v">{{item.source}}</text>
+            </view>
+            <view class="op__kv">
+              <text class="op__k">更新时间</text><text class="op__v">{{item.updatedAt}}</text>
+            </view>
+            <view class="op__note" wx:if="{{item.note}}">{{item.note}}</view>
+
+            <!-- 备战指南：点开这条岗位即可看到「如何为它做准备」 -->
+            <view class="op__prep" wx:if="{{item.prep}}">
+              <view class="op__prep-head">
+                <text class="op__prep-title">🎯 如何为这个岗位做准备</text>
+                <text class="op__prep-tag">随岗位自动生成</text>
+              </view>
+              <text class="op__prep-focus">{{item.prep.focus}}</text>
+              <view class="op__prep-timing">⏱ {{item.prep.timing}}</view>
+
+              <view class="op__prep-stage" wx:for="{{item.prep.stages}}" wx:for-item="st" wx:key="when">
+                <text class="op__prep-when">▸ {{st.when}}</text>
+                <text class="op__prep-li" wx:for="{{st.todo}}" wx:for-item="td" wx:key="*this">· {{td}}</text>
+              </view>
+
+              <block wx:if="{{item.prepOpen}}">
+                <view class="op__prep-block" wx:for="{{item.prep.blocks}}" wx:for-item="bk" wx:key="key">
+                  <text class="op__prep-bt">{{bk.icon}} {{bk.title}}</text>
+                  <text class="op__prep-li" wx:for="{{bk.items}}" wx:for-item="bi" wx:key="*this">· {{bi}}</text>
+                </view>
+                <view class="op__prep-block op__prep-block--risk">
+                  <text class="op__prep-bt">⚠️ 容易踩的坑</text>
+                  <text class="op__prep-li" wx:for="{{item.prep.risks}}" wx:for-item="rk" wx:key="*this">· {{rk}}</text>
+                </view>
+              </block>
+
+              <view class="op__prep-acts">
+                <view class="op__pact" data-id="{{item._id}}" catchtap="togglePrep">{{item.prepOpen ? '收起完整清单' : '展开完整清单'}}</view>
+                <view class="op__pact op__pact--primary" data-id="{{item._id}}" catchtap="copyPrep">复制清单</view>
+              </view>
+            </view>
+
+            <view class="op__acts">
+              <view class="op__act op__act--primary" data-id="{{item._id}}" catchtap="copyLink">复制投递入口</view>
+              <view class="op__act" data-id="{{item._id}}" catchtap="addToApps">存为投递卡</view>
+              <view class="op__act" data-id="{{item._id}}" catchtap="openSource">查看来源</view>
+            </view>
+          </view>
+        </view>
+
+        <view class="op__more" wx:if="{{grp.hasMore}}" data-key="{{grp.key}}" bindtap="loadMore">
+          加载更多（还有 {{grp.count - grp.shown}} 条）
+        </view>
+      </view>
+    </view>
+
+    <view class="op__empty" wx:if="{{total === 0 && !loading}}">{{followedOnly ? '还没有关注的岗位：点岗位右侧的 ☆ 即可关注，关注后可在秋招首页快速回看' : '没有匹配的岗位，换个筛选条件试试'}}</view>
+    <!-- 空状态也给一个可点的下一步：一键回到全量岗位 -->
+    <view class="op__empty-btn" wx:if="{{total === 0 && !loading}}" bindtap="resetFilter">{{followedOnly ? '看全部岗位' : '重置筛选条件'}}</view>
+  </view>
+
+  <!-- 纵向智能时间线：日期节点 + 状态圆点 + 岗位卡，直接告诉用户「下一步该做什么」 -->
+  <view class="op__vt" wx:if="{{view === 'timeline'}}">
+    <view class="op__vt-head">
+      <text class="op__vt-title">📈 岗位时间线</text>
+      <text class="op__vt-sub">不只记录节奏，还告诉你下一步该做什么 · 有日期 {{tl.datedCount}} 条 / 待公布 {{tl.undatedCount}} 条</text>
+    </view>
+    <view class="op__vt-legend">
+      <text class="op__vlg op__vlg--open">进行中</text>
+      <text class="op__vlg op__vlg--closing">即将截止</text>
+      <text class="op__vlg op__vlg--upcoming">未开始</text>
+      <text class="op__vlg op__vlg--closed">已截止</text>
+    </view>
+
+    <view class="op__vt-body">
+      <view class="op__vt-node" wx:for="{{tl.nodes}}" wx:key="key" wx:for-item="nd">
+        <view class="op__vt-axis">
+          <view class="op__vt-dot op__vt-dot--{{nd.status}}"></view>
+          <view class="op__vt-line"></view>
+        </view>
+        <view class="op__vt-main">
+          <view class="op__vt-date">
+            <text class="op__vt-day">{{nd.label}}</text>
+            <text class="op__vt-rel">{{nd.rel}}</text>
+          </view>
+          <view class="op__vt-card op__vt-card--{{c.status}} {{c.urgent ? 'op__vt-card--urgent' : ''}}"
+            wx:for="{{nd.items}}" wx:for-item="c" wx:key="_id"
+            data-id="{{c._id}}" bindtap="onBarTap">
+            <view class="op__vc-r1">
+              <text class="op__vc-co">{{c.company}}</text>
+              <text class="op__vc-badge op__vc-badge--{{c.status}}">{{c.statusLabel}}</text>
+              <text class="op__vc-fav {{c.fav ? 'op__vc-fav--on' : ''}}" data-id="{{c._id}}" catchtap="toggleFav">{{c.fav ? '★' : '☆'}}</text>
+            </view>
+            <view class="op__vc-r2">
+              <text class="op__vc-pos">{{c.position}}</text>
+              <text class="op__vc-type">{{c.recruitType}}</text>
+            </view>
+            <view class="op__vc-r3">
+              <text class="op__vc-date">📅 {{c.dateText}}</text>
+              <text class="op__vc-fit" wx:if="{{c.fit !== null}}">匹配 {{c.fit}}%</text>
+            </view>
+            <view class="op__vc-next"><text class="op__vc-next-ico">➜</text>{{c.next}}</view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 待公布折叠区：200+ 条无日期数据收在这里，不淹没上方节奏 -->
+      <view class="op__vt-node op__vt-node--tba" wx:if="{{tl.tba.length}}">
+        <view class="op__vt-axis">
+          <view class="op__vt-dot op__vt-dot--tba"></view>
+          <view class="op__vt-line"></view>
+        </view>
+        <view class="op__vt-main">
+          <view class="op__vt-date" bindtap="toggleTba">
+            <text class="op__vt-day">待公布</text>
+            <text class="op__vt-rel">{{tl.tba.length}} 条 · {{tbaOpen ? '收起' : '展开'}}</text>
+          </view>
+          <block wx:if="{{tbaOpen}}">
+            <view class="op__vt-card op__vt-card--{{c.status}}"
+              wx:for="{{tl.tba}}" wx:for-item="c" wx:key="_id"
+              data-id="{{c._id}}" bindtap="onBarTap">
+              <view class="op__vc-r1">
+                <text class="op__vc-co">{{c.company}}</text>
+                <text class="op__vc-badge op__vc-badge--{{c.status}}">{{c.statusLabel}}</text>
+                <text class="op__vc-fav {{c.fav ? 'op__vc-fav--on' : ''}}" data-id="{{c._id}}" catchtap="toggleFav">{{c.fav ? '★' : '☆'}}</text>
+              </view>
+              <view class="op__vc-r2">
+                <text class="op__vc-pos">{{c.position}}</text>
+                <text class="op__vc-type">{{c.recruitType}}</text>
+              </view>
+              <view class="op__vc-r3">
+                <text class="op__vc-date">📅 日期待公布</text>
+                <text class="op__vc-fit" wx:if="{{c.fit !== null}}">匹配 {{c.fit}}%</text>
+              </view>
+              <view class="op__vc-next"><text class="op__vc-next-ico">➜</text>{{c.next}}</view>
+            </view>
+          </block>
+          <view class="op__vt-tba-hint" wx:else>官方尚未发布公告，展开可看名单；可按往年节奏提前准备</view>
+        </view>
+      </view>
+
+      <view class="op__vt-empty" wx:if="{{!tl.nodes.length && !tl.tba.length}}">没有匹配的岗位，换个筛选条件试试</view>
+    </view>
+    <view class="op__vt-tip">点卡片看详情与备战清单；☆ 关注会同步到秋招首页「我关注的岗位」。匹配度基于你的简历与求职意向，未填写时不显示。</view>
+  </view>
+
+  <view class="op__foot">共收录 {{total}} 条开放信息 · 数据版本 {{dataVersion}} · 以官方公告为准</view>
+
+  <!-- 回到顶部 -->
+  <view class="op__top" wx:if="{{showTop}}" bindtap="backToTop">↑</view>
+
+  <!-- 来源弹层 -->
+  <view class="op__mask" wx:if="{{showSource}}" bindtap="closeSource">
+    <view class="op__sheet" catchtap="">
+      <text class="op__sheet-title">数据来源</text>
+      <text class="op__sheet-body">{{curSource}}</text>
+      <view class="op__sheet-btns">
+        <view class="op__fbtn op__fbtn--ghost" bindtap="closeSource">关闭</view>
+        <view class="op__fbtn op__fbtn--primary" bindtap="copySource">复制</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 区间条详情弹层 -->
+  <view class="op__mask" wx:if="{{tlBar}}" bindtap="closeBar">
+    <view class="op__sheet" catchtap="">
+      <view class="op__tl-d-head">
+        <text class="op__tl-d-dot op__tl-d-dot--{{tlBar.status}}"></text>
+        <text class="op__sheet-title">{{tlBar.company}} · {{tlBar.position}}</text>
+        <text class="op__tl-d-status op__tl-d-status--{{tlBar.status}}">{{tlBar.statusLabel}}</text>
+      </view>
+      <text class="op__sheet-body">{{tlBar.detail}}</text>
+
+      <!-- 备战指南（时间线弹层内） -->
+      <view class="op__prep" wx:if="{{tlPrep}}">
+        <view class="op__prep-head">
+          <text class="op__prep-title">🎯 如何为这个岗位做准备</text>
+        </view>
+        <text class="op__prep-focus">{{tlPrep.focus}}</text>
+        <view class="op__prep-timing">⏱ {{tlPrep.timing}}</view>
+
+        <view class="op__prep-stage" wx:for="{{tlPrep.stages}}" wx:for-item="st" wx:key="when">
+          <text class="op__prep-when">▸ {{st.when}}</text>
+          <text class="op__prep-li" wx:for="{{st.todo}}" wx:for-item="td" wx:key="*this">· {{td}}</text>
+        </view>
+
+        <block wx:if="{{tlPrepOpen}}">
+          <view class="op__prep-block" wx:for="{{tlPrep.blocks}}" wx:for-item="bk" wx:key="key">
+            <text class="op__prep-bt">{{bk.icon}} {{bk.title}}</text>
+            <text class="op__prep-li" wx:for="{{bk.items}}" wx:for-item="bi" wx:key="*this">· {{bi}}</text>
+          </view>
+          <view class="op__prep-block op__prep-block--risk">
+            <text class="op__prep-bt">⚠️ 容易踩的坑</text>
+            <text class="op__prep-li" wx:for="{{tlPrep.risks}}" wx:for-item="rk" wx:key="*this">· {{rk}}</text>
+          </view>
+        </block>
+
+        <view class="op__prep-acts">
+          <view class="op__pact" data-src="tl" catchtap="togglePrep">{{tlPrepOpen ? '收起完整清单' : '展开完整清单'}}</view>
+          <view class="op__pact op__pact--primary" data-src="tl" catchtap="copyPrep">复制清单</view>
+        </view>
+      </view>
+
+      <view class="op__sheet-btns">
+        <view class="op__fbtn op__fbtn--ghost" bindtap="closeBar">关闭</view>
+        <view class="op__fbtn op__fbtn--primary" data-id="{{tlBar._id}}" catchtap="addToApps">存为投递卡</view>
+      </view>
+    </view>
+  </view>
+</view>

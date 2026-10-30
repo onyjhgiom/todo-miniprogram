@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="zjxWhxOZzMDJzzmJUakUSK">
+<head data-page-node-id="iHNXNZ1T8M3PisnpYzF1mx">
+<meta charset="UTF-8" data-page-node-id="s4TyGkoegDINhssGeHmZyf">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="N5MxtvybpqAYmsDw0w3AqO">
+<title>待办清单 · 中古侘寂改版预览（正式项目）</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #DDD9CF; padding: 44px 28px 60px;
+    display: flex; gap: 36px; justify-content: center; flex-wrap: wrap;
+  }
+  :root {
+    --bg: #F0EDE6; --card: #FCFBF8; --bg-soft: #E9E5DC;
+    --ink: #35302A; --ink2: #6E6558; --mute: #9E9384;
+    --border: #E4DED2;
+    --primary: #B5714C; --deep: #96573A;
+    --sage: #6E8E6E; --gold: #C09A5E;
+  }
+  .serif { font-family: "Songti SC", "STSong", serif; letter-spacing: 1px; }
+  .phone {
+    width: 390px; height: 844px; border-radius: 44px; overflow: hidden;
+    position: relative; flex-shrink: 0; background: var(--bg);
+    box-shadow: 0 30px 70px rgba(53,48,42,.3);
+  }
+  .screen { height: 100%; overflow-y: auto; padding: 0 16px 120px; }
+  .screen::-webkit-scrollbar { width: 0; }
+  .phone-title { text-align: center; margin-bottom: 14px; color: #55503F; font-size: 15px; font-weight: 600; letter-spacing: 2px; }
+
+  /* ===== hero（深炭墨） ===== */
+  .hero {
+    margin: 14px 0 14px; padding: 20px 20px 17px; border-radius: 22px;
+    background: linear-gradient(165deg, #3B362F 0%, #35302A 46%, #2C2823 100%);
+    color: #F2EDE4; position: relative; overflow: hidden;
+    box-shadow: 0 8px 20px rgba(53,48,42,.26);
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(80% 50% at 88% 0%, rgba(216,160,92,.28), transparent 62%);
+  }
+  .hero__greet { font-size: 11px; letter-spacing: 2.5px; color: rgba(242,237,228,.42); }
+  .hero__t { margin-top: 6px; font-size: 24px; font-weight: 700; }
+  .streak {
+    position: absolute; right: 18px; top: 44px;
+    font-size: 11px; padding: 4px 10px; border-radius: 99px;
+    background: rgba(255,255,255,.07); border: 1px solid rgba(242,237,228,.14); color: #E0A06A;
+  }
+  .hstats {
+    position: relative; display: flex; margin-top: 14px; padding: 12px 6px;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(242,237,228,.12); border-radius: 16px;
+  }
+  .hstat { flex: 1; text-align: center; }
+  .hstat b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; }
+  .hstat.main b { font-size: 28px; }
+  .hstat span { display: block; margin-top: 3px; font-size: 11px; color: rgba(242,237,228,.55); }
+  .hdiv { width: 1px; background: rgba(242,237,228,.12); margin: 2px 0; }
+
+  /* ===== 视图切换 ===== */
+  .vswitch { display: flex; justify-content: center; margin: 12px 0; }
+  .vtrack {
+    display: flex; background: var(--bg-soft); border: 1px solid var(--border);
+    border-radius: 99px; padding: 3px;
+  }
+  .vitem { position: relative; padding: 7px 16px; font-size: 12px; color: var(--mute); border-radius: 99px; }
+  .vitem.on { background: var(--ink); color: #F7F2E8; font-weight: 600; }
+
+  /* ===== 筛选 ===== */
+  .seg { display: flex; gap: 4px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 99px; padding: 4px; }
+  .segi { flex: 1; text-align: center; padding: 7px 0; font-size: 12px; color: var(--ink2); border-radius: 99px; }
+  .segi.on { background: var(--ink); color: #F7F2E8; font-weight: 600; }
+  .searchrow { display: flex; gap: 8px; margin-top: 10px; }
+  .sinput {
+    flex: 1; height: 38px; border-radius: 99px; background: var(--card);
+    border: 1px solid var(--border); font-size: 12.5px; color: var(--mute);
+    display: flex; align-items: center; padding: 0 14px;
+  }
+  .fchip {
+    height: 38px; padding: 0 13px; border-radius: 99px; font-size: 12px;
+    display: inline-flex; align-items: center;
+    background: var(--card); border: 1px solid var(--border); color: var(--ink2);
+  }
+  .fchip.hl { background: linear-gradient(135deg, #D08A6A, #B5714C); color: #F7F2E8; border-color: transparent; }
+
+  /* ===== todo 卡 ===== */
+  .todo {
+    position: relative; margin-top: 10px; padding: 14px 14px 14px 18px;
+    background: var(--card); border: 1px solid rgba(228,222,210,.9);
+    border-radius: 17px; box-shadow: 0 4px 12px rgba(90,74,56,.07);
+    display: flex; gap: 11px; align-items: flex-start;
+  }
+  .todo .bar { position: absolute; left: 0; top: 13px; bottom: 13px; width: 3px; border-radius: 0 3px 3px 0; }
+  .cbx {
+    width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+    border: 1.5px solid var(--border); background: var(--card);
+  }
+  .cbx.on { background: var(--sage); border-color: transparent; position: relative; }
+  .cbx.on::after {
+    content: ""; position: absolute; left: 8px; top: 4px; width: 4.5px; height: 8.5px;
+    border-right: 2px solid #FBFDFA; border-bottom: 2px solid #FBFDFA; transform: rotate(45deg);
+  }
+  .todo__t { font-size: 15.5px; font-weight: 600; color: var(--ink); }
+  .todo__t.done { color: var(--mute); text-decoration: line-through; font-weight: 400; }
+  .todo__m { margin-top: 5px; display: flex; gap: 5px; }
+  .tag { font-size: 10px; padding: 1.5px 8px; border-radius: 99px; background: rgba(181,113,76,.12); color: #96573A; }
+  .tag.g { background: rgba(192,154,94,.16); color: #8C6E30; }
+
+  /* ===== 底部 dock ===== */
+  .dock {
+    position: absolute; left: 14px; right: 14px; bottom: 18px; height: 58px;
+    background: rgba(252,251,248,.92); border: 1px solid rgba(228,222,210,.9);
+    border-radius: 99px; box-shadow: 0 8px 20px rgba(90,74,56,.16);
+    display: flex; align-items: center; padding: 0 4px; backdrop-filter: blur(10px);
+  }
+  .dt { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px; font-size: 10.5px; color: var(--mute); }
+  .dt i { font-style: normal; font-size: 19px; filter: grayscale(.85); opacity: .6; }
+  .dt.on { color: var(--ink); font-weight: 600; }
+  .dt.on i { filter: grayscale(.4); opacity: 1; transform: translateY(-2px); }
+  .dt.on::after { content: ""; width: 14px; height: 3px; border-radius: 99px; background: var(--ink); margin-top: 1px; }
+
+  /* ===== 记账本 ===== */
+  .lg-head { padding: 18px 4px 0; display: flex; justify-content: space-between; align-items: flex-start; }
+  .lg-t { font-size: 22px; font-weight: 700; color: var(--ink); }
+  .lg-m { margin-top: 5px; font-size: 13px; color: var(--ink2); display: flex; gap: 8px; align-items: center; }
+  .lg-btn {
+    width: 32px; height: 32px; border-radius: 50%; background: var(--card);
+    border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 14px;
+  }
+  .acc { display: flex; gap: 6px; margin-top: 12px; overflow: hidden; }
+  .acc > div { padding: 6px 12px; border-radius: 99px; background: var(--card); border: 1px solid var(--border); font-size: 12px; color: var(--ink2); white-space: nowrap; }
+  .acc > div.on { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .sum { display: flex; gap: 6px; margin-top: 12px; }
+  .sumc { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 16px; text-align: center; padding: 12px 0; }
+  .sumc span { font-size: 10.5px; color: var(--mute); }
+  .sumc b { display: block; margin-top: 3px; font-size: 15px; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .sumc.in b { color: #C08468; } .sumc.out b { color: #6E8E6E; }
+  .lgcard { background: var(--card); border: 1px solid var(--border); border-radius: 17px; padding: 13px 14px; margin-top: 12px; }
+  .lgcard h4 { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .tr { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-top: 1px solid #EFEAE0; margin-top: 4px; }
+  .tr:first-of-type { border-top: 0; }
+  .tr .n { font-size: 13px; color: var(--ink); }
+  .tr .d { font-size: 10.5px; color: var(--mute); margin-top: 2px; }
+  .tr .a { font-size: 14px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .tr .a.in { color: #C08468; } .tr .a.out { color: #6E8E6E; }
+
+  /* ===== 工具中心 ===== */
+  .tools-head { padding: 18px 4px 0; }
+  .tools-head .row1 { display: flex; justify-content: space-between; align-items: baseline; }
+  .tools-head b { font-size: 22px; color: var(--ink); }
+  .tools-head span { font-size: 12px; color: var(--mute); }
+  .ts { margin-top: 12px; height: 42px; border-radius: 99px; background: var(--card); border: 1px solid var(--border); display: flex; align-items: center; padding: 0 14px; color: var(--mute); font-size: 13px; }
+  .cats { display: flex; gap: 6px; margin-top: 12px; overflow: hidden; }
+  .cat { padding: 6px 12px; border-radius: 99px; background: var(--card); border: 1px solid var(--border); font-size: 12px; color: var(--ink2); white-space: nowrap; }
+  .cat.on { background: linear-gradient(135deg, #B5714C, #96573A); color: #fff; border-color: transparent; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; }
+  .g { background: var(--card); border: 1px solid rgba(228,222,210,.9); border-radius: 16px; padding: 12px 4px; text-align: center; }
+  .gi { width: 44px; height: 44px; border-radius: 13px; margin: 0 auto 5px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .g p { font-size: 11.5px; font-weight: 600; color: var(--ink); }
+</style>
+</head>
+<body data-page-node-id="3hPMAoVSdIrf2ZuqVR2xFl">
+
+<!-- 首页 -->
+<div data-page-node-id="I0n2gWe04jWH0HMMUjnNA6">
+  <div class="phone-title" data-page-node-id="4cyUJTMql6fb7dUHmcmhP0">首页 · 改版后</div>
+  <div class="phone" data-page-node-id="BPhmVEhmy1b7Qp6RYIO3gu">
+    <div class="screen" data-page-node-id="878u6JPu9ZI2vbxesIECWn">
+      <div class="hero" data-page-node-id="uuiQPqbGuzSw3METe1qWGB">
+        <div class="hero__greet" data-page-node-id="N7AB5OOyz8CAiK0yJKZoLr">下午好 · 9月11日 · 周五</div>
+        <div class="hero__t serif" data-page-node-id="Iv1kHl84QpyUhjs3d0OwmO">你的待办清单</div>
+        <div class="streak" data-page-node-id="Vqa8jSZE0ce6cWcG3uW5Ty">▲ 6 天连续</div>
+        <div class="hstats" data-page-node-id="j4dOGZjGwQNL84TATCvgDj">
+          <div class="hstat main" data-page-node-id="tt2H92rvbiWDom3Oge703W"><b data-page-node-id="Rg3iYLISMJJCg8xCTIEmuz">1</b><span data-page-node-id="8Xm1CRf5kFwFqDPvXcLeQa">进行中</span></div><div class="hdiv" data-page-node-id="4WKqBOXvljwgzFfwGAM6p2"></div>
+          <div class="hstat" data-page-node-id="Q6LJDEuKHvpxCnoDF3SrPA"><b data-page-node-id="mGUoftybIoUr1Flm3UoMPQ">0</b><span data-page-node-id="gm1Eac6lgcHUwTVch59gUn">今日完成</span></div><div class="hdiv" data-page-node-id="rqYpfMTZy8Xy8A13uNYGfT"></div>
+          <div class="hstat" data-page-node-id="i1sJ3fHJIwJOKtrHL0KCuO"><b data-page-node-id="B7T0AzhuiU0jAujQdyOycL">0</b><span data-page-node-id="Zb9nYl5IQCvgqq6imfLQY0">本周完成</span></div><div class="hdiv" data-page-node-id="IHIqNCQoBwQyEU3R6LuNKO"></div>
+          <div class="hstat" data-page-node-id="7gdhFiTMhxIVbVOHrMiQmL"><b data-page-node-id="CJZZEVjqdvkPs9q8GGF4dW">0</b><span data-page-node-id="wGGMdhpB7Jlw3qMDxy0HhU">已完成</span></div>
+        </div>
+      </div>
+
+      <div class="vswitch" data-page-node-id="QQJde2Gyp3Owtuv7IfGgmP">
+        <div class="vtrack" data-page-node-id="Xy8Z7bOjIE5apB3RakYX1W">
+          <div class="vitem on" data-page-node-id="TpryOdp39FPwpnfDEy1x6j">📋 列表</div>
+          <div class="vitem" data-page-node-id="QmstUhQI4aprkc31Y6NslW">📅 日历</div>
+          <div class="vitem" data-page-node-id="62Z1wCHFM0gXS0xX5nQuH6">🗂️ 看板</div>
+        </div>
+      </div>
+
+      <div class="seg" data-page-node-id="Yx8Td3a9ZZ5GnPqeGV7cOz">
+        <div class="segi on" data-page-node-id="RJqSX09PxF9D141zQRa7Gh">全部 1</div><div class="segi" data-page-node-id="qnwLikQahJ4XTITHBACe2m">进行中 1</div><div class="segi" data-page-node-id="0ksi6gc49RkS6g1NjfnXx3">已完成</div>
+      </div>
+      <div class="searchrow" data-page-node-id="GApL5T64TxTljwz6d2uJbu">
+        <div class="sinput" data-page-node-id="xlnGxWb7qRWWxdjZ1wtOdv">🔍 搜索内容、地点、人物、标签…</div>
+      </div>
+      <div class="searchrow" style="margin-top:8px" data-page-node-id="Fli3NknHb9IwlQ92rRhCD7">
+        <div class="fchip hl" data-page-node-id="bAeMWCZEBLo1JZn8ZWTusR">优先级 ▾</div>
+        <div class="fchip" data-page-node-id="Rq1rapoW9IoVmPTRd2JpzH">地点 ▾</div>
+        <div class="fchip" data-page-node-id="Ma8oWXJT2bYBveGFhhASeQ">人物 ▾</div>
+        <div class="fchip" data-page-node-id="vaL1DkYMw1tcfQgMwypHIo">标签 ▾</div>
+      </div>
+
+      <div class="todo" data-page-node-id="15HLdfTNxANVMF0fsYJxBM">
+        <i class="bar" style="background:linear-gradient(180deg,#D08A6A,#B5714C)" data-page-node-id="TGrJS1FrUxEGCgt0fX1kO3"></i>
+        <div class="cbx" data-page-node-id="xRVZFavrz3UeB2G74p22dT"></div>
+        <div style="flex:1" data-page-node-id="ozmZhmAF2UXFRIdG4GkOw4">
+          <div class="todo__t" data-page-node-id="xER0fu2NXFKNuEUYE6gbE1">腾讯·财务管理（网申）</div>
+          <div class="todo__m" data-page-node-id="EELev510MSruTOUIhnCqMC"><span class="tag" data-page-node-id="esyfzMm6IFwqGvyGlgCSyB">#秋招</span><span class="tag g" data-page-node-id="fSgOW0J7Rge5lW3Mx2YlkC">高</span></div>
+        </div>
+      </div>
+      <div class="todo" style="opacity:.72" data-page-node-id="mQUeuLpR5jNOkrUNmHJ4PH">
+        <i class="bar" style="background:linear-gradient(180deg,#E3B999,#C09A5E)" data-page-node-id="YLRF86K8xj2dieInJhsReI"></i>
+        <div class="cbx on" data-page-node-id="rHfM0UjirrdgJs3soZ1EPe"></div>
+        <div style="flex:1" data-page-node-id="DE9bGMC3mpKjzloC3yFPwt">
+          <div class="todo__t done" data-page-node-id="xHMSje5YTCAMl8EJFcRPZq">给旧木桌上一层蜡</div>
+          <div class="todo__m" data-page-node-id="EaMMYb0FRxZOG3TV6G9tSD"><span class="tag g" data-page-node-id="uoCmHV16SW2uKv1F6Ro2F7">#生活</span></div>
+        </div>
+      </div>
+      <div style="text-align:center;font-size:11px;color:var(--mute);margin-top:12px" data-page-node-id="XqUqUgVTDtCEQdYgxNjNlw">共 1 项</div>
+    </div>
+    <div class="dock" data-page-node-id="DQI4NP0CG8NKZoWZfXToSQ">
+      <div class="dt on" data-page-node-id="BjZ74yP3fPnILVpDfOzBOY"><i data-page-node-id="RZw506aI2XkzWZPvSevFIa">🏠</i>首页</div>
+      <div class="dt" data-page-node-id="npRmXBTUhpDhwil191GYV1"><i data-page-node-id="p1t4IAqJlAYSu32CGE7OZW">📅</i>日历</div>
+      <div class="dt" data-page-node-id="goBP5fPvL4lq45Jmxi74ZU"><i data-page-node-id="hbFooH39O5SApwrGj8eq17">🗂️</i>看板</div>
+      <div class="dt" data-page-node-id="IEr9lQlqDEgRLqk9FcTdc3"><i data-page-node-id="vNhMg5CD7Wk3dyUyJV4Fdk">🧰</i>工具</div>
+      <div class="dt" data-page-node-id="ukCsY9N1c5kWecja9eQfF5"><i data-page-node-id="XQgAScivjZP2yNPndlsJip">✨</i>模板</div>
+      <div class="dt" data-page-node-id="tFv0LRDKrAax2bmF9kLgwR"><i data-page-node-id="roP5ZmIq8lqechsLcIyrmO">⚙️</i>设置</div>
+    </div>
+  </div>
+</div>
+
+<!-- 记账本 -->
+<div data-page-node-id="QtAenPloTXfUYjySrZN4YF">
+  <div class="phone-title" data-page-node-id="QKgH6U44zZKmVF4oFoXEXd">工具 · 记账本 · 改版后</div>
+  <div class="phone" data-page-node-id="YI0Mzr3AFpF8nN1TwWFwCg">
+    <div class="screen" data-page-node-id="uivLHAAhQK3OkK8bqHALBJ">
+      <div class="lg-head" data-page-node-id="KFT3Mc1cgFLt3dosLnCKzd">
+        <div data-page-node-id="gPjuq3GBu4MPDoF9fqfJgp">
+          <div class="lg-t serif" data-page-node-id="5470nA5rgXmbKnuC7mCpGG">记账本</div>
+          <div class="lg-m" data-page-node-id="B6MFoDsyXpdaj1xkHZlAxd"><span class="lg-btn" style="width:24px;height:24px;font-size:12px" data-page-node-id="Nuo5WXcdXJBvH0y7biy6El">‹</span> 2026年9月 <span class="lg-btn" style="width:24px;height:24px;font-size:12px" data-page-node-id="bXqc4xBMd4ow01J4IIJ4MH">›</span></div>
+        </div>
+        <div style="display:flex;gap:6px" data-page-node-id="EEARjZhzUiQpkypILcT411"><div class="lg-btn" data-page-node-id="rMTgwwnVWl8X31JBQTDJVA">📤</div><div class="lg-btn" data-page-node-id="lgZowYc6b0uMfGUCT5eiG5">⚙️</div></div>
+      </div>
+      <div class="acc" data-page-node-id="CfOIQ1BZXQn4LgzeT95xTz">
+        <div class="on" data-page-node-id="w419dBDAJkmxcFVvrCYJbs">全部账户</div><div data-page-node-id="yLUx1OCFbIxSagx6pUBBhN">🏦 招行</div><div data-page-node-id="AU2DlG3Hb0opbdfEFD7ESW">💳 花呗</div><div data-page-node-id="kvHDtXMB6uVxIEESs03nVp">💰 现金</div>
+      </div>
+      <div class="sum" data-page-node-id="ASPir1lROQNWV6us8Bnrbh">
+        <div class="sumc in" data-page-node-id="e1MAcCituuBvXEI9qB2RIR"><span data-page-node-id="nFOIsQeWzNa2PqPuia1FCy">收入</span><b data-page-node-id="ZvKTSmK4y7nqUg57rNXjcF">¥12,800</b></div>
+        <div class="sumc out" data-page-node-id="O13WudyekOowMvhBqZKz6O"><span data-page-node-id="5hL8PAZIxk2erXUUAWXNQg">支出</span><b data-page-node-id="cJ1TQiZoLHvIRFFvmz4vf8">¥4,362</b></div>
+        <div class="sumc" data-page-node-id="sgNVsVwZIFqulMzsADXQXt"><span data-page-node-id="frH7QSEFSR6lDnI1cMpVqK">结余</span><b data-page-node-id="EU4x2FIH2d6lwAezUB5223">¥8,438</b></div>
+      </div>
+
+      <div class="lgcard" data-page-node-id="bidnK1saxx0oyQEBEEGEqZ">
+        <h4 data-page-node-id="CEPB12atPAxFv9JXeGeXkb">💰 本月预算</h4>
+        <div style="height:8px;border-radius:99px;background:#EDE8DE;margin-top:9px;overflow:hidden" data-page-node-id="Fl2NQDXS6w1DG8Nz0EC881"><i style="display:block;width:62%;height:100%;border-radius:99px;background:linear-gradient(90deg,#E3B999,#B5714C)" data-page-node-id="97x2dKhJzdwbLaEM8W8p6G"></i></div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10.5px;color:var(--mute)" data-page-node-id="X0LHXbKyPkKuN8CH46BESP"><span data-page-node-id="Vti2xyrjsipjmZmnq4LA0D">已用 ¥4,362</span><span data-page-node-id="SZxs6HUXxJONwN97iSivZZ">预算 ¥7,000</span></div>
+      </div>
+
+      <div class="lgcard" data-page-node-id="hgRBHWVA6O1eSQJ4nVPHM3">
+        <h4 data-page-node-id="pAHWPaX80p4LHZRUMqu9tQ">📒 最近流水</h4>
+        <div class="tr" data-page-node-id="tBFCQ7X99v1wpxJw4hWj7h"><div data-page-node-id="B3mWp01ZCCuO7iu3NWvh13"><div class="n" data-page-node-id="MYs298CeVFQamBwi0F3miw">☕ 楼下咖啡</div><div class="d" data-page-node-id="APLS4aJFiLEgN9GvtBJCAl">今天 08:32 · 餐饮</div></div><div class="a out" data-page-node-id="xMGJtCCyf51IOJhN0Jz4tq">-32</div></div>
+        <div class="tr" data-page-node-id="wDINtmXZEfaimxQTAd40EI"><div data-page-node-id="OXCRQogTqsb5mXuUhXO6Dz"><div class="n" data-page-node-id="yxhppjfqTNyPbOgY0ddXlO">🚇 地铁通勤</div><div class="d" data-page-node-id="05MDvkXiRTLbBs05WBX923">今天 08:02 · 交通</div></div><div class="a out" data-page-node-id="oTxyexRgTbaPRBkfB0rYhE">-6</div></div>
+        <div class="tr" data-page-node-id="VYZO9o5ysRN1zAswENO8EG"><div data-page-node-id="QMsESlOpHFe9VVWjlY9zWx"><div class="n" data-page-node-id="4HGfkOn43eXy0OuStp2upi">💼 兼职结算</div><div class="d" data-page-node-id="AkJ1guHFJaRakK10GoOo4X">昨天 21:10 · 收入</div></div><div class="a in" data-page-node-id="XFXMxhUN7MHnElQxE0pxqI">+800</div></div>
+        <div class="tr" data-page-node-id="876CFs3tdELqZXpD6aNHHq"><div data-page-node-id="8MsWPsEet56Dm9Y2F6uqFi"><div class="n" data-page-node-id="036UQKKpQ4ZUMKGH2RmQSE">🛒 生鲜采购</div><div class="d" data-page-node-id="xrJD5behguyorvDCTAjx1B">昨天 19:40 · 日用</div></div><div class="a out" data-page-node-id="n7hnqYpHXVC70iGjOaTGPb">-126</div></div>
+      </div>
+    </div>
+    <div class="dock" data-page-node-id="OGkP0qWn2OfbsXmqZNViFN">
+      <div class="dt" data-page-node-id="4nwtrD2J6xrHCjo6CzJslZ"><i data-page-node-id="hnhv9TlZ9yIF9cXkrhuQza">🏠</i>首页</div>
+      <div class="dt" data-page-node-id="WGzR05kgYq56fpguziP1V4"><i data-page-node-id="tOOqgBXtFHhxPxlV98ome1">📅</i>日历</div>
+      <div class="dt" data-page-node-id="zsdGr7Rp1KAkqWrdlWn7eA"><i data-page-node-id="3jywTDB5sUEK6f2BjqdFQG">🗂️</i>看板</div>
+      <div class="dt on" data-page-node-id="i6A6t5WizJt33E07iDJMal"><i data-page-node-id="2KqWB2hOsbZaZ1FP0aAMKz">🧰</i>工具</div>
+      <div class="dt" data-page-node-id="2eZhIqkdWWZDm6KHLmRTZJ"><i data-page-node-id="56Ga8OT4p1kWg4Pc9QBIPd">✨</i>模板</div>
+      <div class="dt" data-page-node-id="YFbMYw72MEOyaKD5YQmiC7"><i data-page-node-id="CZLVPd2MCe8OYzcLWuBWFw">⚙️</i>设置</div>
+    </div>
+  </div>
+</div>
+
+<!-- 工具中心 -->
+<div data-page-node-id="mhrVYkQF0TMIN3FLzjn5tV">
+  <div class="phone-title" data-page-node-id="OrhioCiE0kptc1fvf6dUwb">工具中心 · 改版后</div>
+  <div class="phone" data-page-node-id="go4fmiGttmePpEu8MoNBZ5">
+    <div class="screen" data-page-node-id="Xsvk9MmIQ6D2APqtkFjKOM">
+      <div class="tools-head" data-page-node-id="1i8mw1XUiDXgrPpeKNsFAG">
+        <div class="row1" data-page-node-id="H42JDBJwweitnFGKmFQcJv"><b class="serif" data-page-node-id="5KGiAESQgHAMrHamDZ2iwG">工具中心</b><span data-page-node-id="9jbhZkal2xs8mtb4I0sOv3">18 个工具</span></div>
+        <div class="ts" data-page-node-id="UdacKpovyrom0vuefbDj8C">🔍 搜索工具，如：番茄、倒计时、红包</div>
+        <div class="cats" data-page-node-id="e7d2StsdDNeGFdlDEUlglk">
+          <div class="cat on" data-page-node-id="6kHbJvkZXsxIATOn4mjBfe">全部</div><div class="cat" data-page-node-id="QzBN7A0cqJ9XntHHxWhsPo">🎮 游戏</div><div class="cat" data-page-node-id="SDs2J9HYSfS8SQIk7manTT">⏳ 时间</div><div class="cat" data-page-node-id="jkP6DE0A0fh8QTleO7HAV4">🔔 提醒</div><div class="cat" data-page-node-id="3MbAU95e01leA4UEw6NY6M">💼 求职</div><div class="cat" data-page-node-id="Id1mvNHrggMCsuGZQiz25k">🧰 实用</div>
+        </div>
+      </div>
+      <div class="grid" data-page-node-id="ldrFFTYndyE3WNvB6aGIeB">
+        <div class="g" data-page-node-id="e99wibpx9KgQWtF1Qnzbmb"><div class="gi" style="background:rgba(192,154,94,.15)" data-page-node-id="sqsHXZhBgyvH3GyiuGn0Ca">🎮</div><p data-page-node-id="MFnVXGQxsJYWr2juejKbI7">闲趣游戏</p></div>
+        <div class="g" data-page-node-id="hJ8mTj63ZRKaLS7psUSFVX"><div class="gi" style="background:rgba(110,142,110,.15)" data-page-node-id="9H1RHrhhTWoPBgiBOdyaP7">🧬</div><p data-page-node-id="z4EwwDyfdbzB0HzeEHlem3">人生进度</p></div>
+        <div class="g" data-page-node-id="MCyTEbqK4CAZ163iUq9GBe"><div class="gi" style="background:rgba(181,113,76,.14)" data-page-node-id="ZGwY7Idcekck1C92uaQo5r">⏳</div><p data-page-node-id="jEJ9VWAHG86FxuMf5vgHNN">时间进度</p></div>
+        <div class="g" data-page-node-id="ZZF1H5rdxSRQdLb284PE29"><div class="gi" style="background:rgba(116,156,132,.15)" data-page-node-id="DVmQpTFqzZkmFbuFPNQw7r">▦</div><p data-page-node-id="qcrvyFJ9VQzNizD3v74sSv">人生格子</p></div>
+        <div class="g" data-page-node-id="mZrYrgqzeD6x7yaOt4duBU"><div class="gi" style="background:rgba(216,160,92,.16)" data-page-node-id="fXR9bI1cHLwWT7Mc6R5CpQ">📅</div><p data-page-node-id="6FVmCZpUfCfVDXid9v19hg">倒数日</p></div>
+        <div class="g" data-page-node-id="OVw2CEzenkntJrDSLn9nzt"><div class="gi" style="background:rgba(192,82,47,.13)" data-page-node-id="idMrNMPcCDpPxFsizRWOmr">🎈</div><p data-page-node-id="UBWQMBy8FFTsKIRNu0BDur">节假日</p></div>
+        <div class="g" data-page-node-id="oO0owMcR2HE8gnR4L4SpTt"><div class="gi" style="background:rgba(181,113,76,.14)" data-page-node-id="FEkwTvjfyiP61J4BqSmWEQ">✅</div><p data-page-node-id="cM3Lu8tc59vCTCjXynQEZ1">待办清单</p></div>
+        <div class="g" data-page-node-id="WBOciecUGiKEsjdljfbAbn"><div class="gi" style="background:rgba(192,154,94,.16)" data-page-node-id="mfBfkbvW3N3ZFFZ7GcdRhe">⏰</div><p data-page-node-id="5cnznfti3Bd7Ffx3p4OGFW">番茄专注</p></div>
+        <div class="g" data-page-node-id="9czB9qKg2F9AXVuLgnvjCg"><div class="gi" style="background:rgba(181,113,76,.14)" data-page-node-id="vCBCW0D9TGDeulB7eqetbD">⏱️</div><p data-page-node-id="l6GtGgvNslnAg9nKsomhIs">翻页钟</p></div>
+        <div class="g" data-page-node-id="0XCvIuDbwkd4liX71dJJUv"><div class="gi" style="background:rgba(216,160,92,.16)" data-page-node-id="DR6YNhBofLmjVcnqSDTBCz">🎙️</div><p data-page-node-id="I3iBV5c0qpjxvSmUkeygFp">备忘录</p></div>
+        <div class="g" data-page-node-id="ujHdvWQ0WzkL0tAognHJlB"><div class="gi" style="background:rgba(110,142,110,.15)" data-page-node-id="ILa6gFjcUHeVIaDTRllrY6">💰</div><p data-page-node-id="PJc6TMG4qAmCmjAqQPyTPW">记账本</p></div>
+        <div class="g" data-page-node-id="DdMPVoBUeaHXivjaoYvUbw"><div class="gi" style="background:rgba(192,132,104,.15)" data-page-node-id="vGMwpDWZkdF0nIV6BVmdvK">📌</div><p data-page-node-id="9nTPORhEohSFmFaJv5IV9G">便签</p></div>
+        <div class="g" data-page-node-id="fVSMBUufuCfbIZfuMjYvix"><div class="gi" style="background:rgba(192,132,104,.15)" data-page-node-id="xwcVfRIviXcRcBbFPwaZfF">💖</div><p data-page-node-id="WQr2p30VJnp93Kdqh9Uubk">重要日</p></div>
+        <div class="g" data-page-node-id="gaPjuFuolS47YzxSwRp39T"><div class="gi" style="background:rgba(192,154,94,.16)" data-page-node-id="pSkDxzS0xsrXbTE95Rghnh">✨</div><p data-page-node-id="yAoDteFqZBy3QIaz9PWEJn">愿望清单</p></div>
+        <div class="g" data-page-node-id="QIHoG7iOcg5ouzR9z9DUkx"><div class="gi" style="background:rgba(165,102,75,.14)" data-page-node-id="yImzTFgBOnnbTOBHRfwcvR">💼</div><p data-page-node-id="o2gyDKnpuWlR7TQZQHv9gC">秋招助手</p></div>
+        <div class="g" data-page-node-id="IeZbhPYDuCpqKIXmyE3VHA"><div class="gi" style="background:rgba(116,156,132,.15)" data-page-node-id="L0m7ZD2HZlytvqGhGmODGi">🔮</div><p data-page-node-id="WAW8RA7HiPZCe8epJQyQ8H">星语星球</p></div>
+      </div>
+    </div>
+    <div class="dock" data-page-node-id="M1tRWJUN3GuK3ZtlgRrVyU">
+      <div class="dt" data-page-node-id="iAZesmQZ9196yDan5w3cLH"><i data-page-node-id="NryRkmKvBpQsYgBcUwS0JY">🏠</i>首页</div>
+      <div class="dt" data-page-node-id="kXv9WsAPLekpbMSgykvEte"><i data-page-node-id="7P3Y8F7AaWoBy9E3SDwWAN">📅</i>日历</div>
+      <div class="dt" data-page-node-id="1FpCBDGk5UFsSzJaxMatsd"><i data-page-node-id="sdTFh9DwaryFhI3Qs9zJ0d">🗂️</i>看板</div>
+      <div class="dt on" data-page-node-id="j1WgqP49mdpymr3V2qzGxt"><i data-page-node-id="0BsUMAZw70hqBXgo4rDRB4">🧰</i>工具</div>
+      <div class="dt" data-page-node-id="CPNLhLvi36dzPitjLB8jqx"><i data-page-node-id="EU7lwDIrAYI3EHtxU9P2R5">✨</i>模板</div>
+      <div class="dt" data-page-node-id="iqomUqy3XGRFynN1yRIbtE"><i data-page-node-id="XIa9eVh22rmkdHegBihIBE">⚙️</i>设置</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!--pages/folklore/index.wxml-->
+<!-- 国风民俗 · 新中式视觉重构：深黛蓝山水舞台 + 宣纸卷轴卡 + 鎏金细节 + 八卦盘组件 -->
+<view class="page themed" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <!-- ====== 舞台背景：水墨山水（低对比，不与内容抢）+ 云纹 + 暗角 ====== -->
+  <view class="gf-bg" aria-hidden="true">
+    <view class="gf-bg__mountains"></view>
+    <view class="gf-bg__mist gf-bg__mist--a"></view>
+    <view class="gf-bg__mist gf-bg__mist--b"></view>
+    <view class="gf-bg__vignette"></view>
+  </view>
+
+  <scroll-view class="body" scroll-y enhanced show-scrollbar="{{false}}">
+
+    <!-- ====== 头部主视觉：印章 + 大标题 + 副标题 + 八卦盘 ====== -->
+    <view class="hero">
+      <view class="hero__seal">
+        <text>传统文化</text>
+      </view>
+      <view class="hero__text">
+        <view class="hero__title">每日国风雅集</view>
+        <view class="hero__sub">
+          <view class="hero__sub-line"></view>
+          <text>一卦一世界 · 一念一乾坤</text>
+          <view class="hero__sub-line"></view>
+        </view>
+      </view>
+    </view>
+
+    <!-- ====== 每日国风雅集（宣纸卷轴卡：日期 / 五行 / 八卦展示 / 刷新） ====== -->
+    <view class="paper daily">
+      <view class="paper__corner paper__corner--tl"></view>
+      <view class="paper__corner paper__corner--tr"></view>
+
+      <view class="daily__head">
+        <view class="daily__tag">
+          <text class="daily__tag-seal">雅</text>
+          <text class="daily__tag-t">每日国风雅集</text>
+        </view>
+        <text class="daily__date">{{daily.dateLabel}}</text>
+        <view class="daily__refresh {{refreshing ? 'daily__refresh--loading' : ''}}"
+              hover-class="press" hover-stay-time="60" bindtap="onRefreshDaily">
+          <text class="daily__refresh-ico">↻</text>刷新
+        </view>
+      </view>
+
+      <block wx:if="{{daily}}">
+        <!-- 八卦展示：主视觉，居中缓旋（嵌深色底板，适配宣纸底） -->
+        <view class="daily__bagua">
+          <view class="daily__bagua-disc">
+            <bagua-display size="{{216}}" reduced="{{false}}" />
+          </view>
+          <text class="daily__bagua-cap">八卦 · {{daily.wuxing.element}}行</text>
+        </view>
+
+        <!-- 今日五行：朱砂竖排标签 + 由当日五行派生的三爻符号 -->
+        <view class="daily__gua">
+          <view class="daily__gua-label"><text>今日卦象</text></view>
+          <view class="gua-sym">
+            <view class="gua-sym__lines">
+              <view class="gua-line {{item ? '' : 'gua-line--yin'}}"
+                    wx:for="{{guaLines}}" wx:key="index"></view>
+            </view>
+            <text class="gua-sym__name">{{guaName}}卦</text>
+          </view>
+          <view class="daily__gua-text">
+            <text class="daily__gua-element">{{daily.wuxing.element}}</text>
+            <text class="daily__gua-p">{{daily.wuxing.text}}</text>
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <!-- ====== 民俗风物 · 经典语录（独立宣纸卡） ====== -->
+    <view class="paper fengwu" wx:if="{{daily}}">
+      <view class="paper__corner paper__corner--tl"></view>
+      <view class="paper__corner paper__corner--tr"></view>
+
+      <view class="fengwu__head">
+        <view class="tag-cinnabar tag-cinnabar--seal"><text>俗</text></view>
+        <text class="fengwu__head-t">民俗风物 · 经典语录</text>
+        <view class="fengwu__head-line"></view>
+      </view>
+
+      <!-- 民俗风物 -->
+      <view class="fengwu__block">
+        <view class="tag-cinnabar"><text>风物</text></view>
+        <text class="fengwu__p">{{daily.fengwu}}</text>
+      </view>
+
+      <!-- 经典语录（浅米卡 + 左朱砂线） -->
+      <view class="verse">
+        <view class="verse__quote">「{{daily.verse.text}}」</view>
+        <view class="verse__src">{{daily.verse.source}}</view>
+        <view class="verse__note">{{daily.verse.note}}</view>
+      </view>
+    </view>
+
+    <!-- ====== 趣味模块（双列网格，第 5 张自然落在左列） ====== -->
+    <view class="mod-head">
+      <view class="mod-head__line"></view>
+      <text class="mod-head__t">趣 味 模 块</text>
+      <view class="mod-head__seal"><text>录</text></view>
+      <view class="mod-head__line"></view>
+    </view>
+
+    <view class="mod-grid">
+      <view
+        class="mod-cell"
+        wx:for="{{modules}}"
+        wx:key="type"
+        hover-class="mod-cell--hover"
+        hover-stay-time="60"
+        bindtap="onOpenModule"
+        data-type="{{item.type}}"
+      >
+        <view class="mod-cell__pool"><text class="mod-cell__icon">{{item.icon}}</text></view>
+        <view class="mod-cell__main">
+          <text class="mod-cell__name">{{item.name}}</text>
+          <text class="mod-cell__desc">{{item.desc}}</text>
+        </view>
+        <view class="mod-cell__arrow">›</view>
+      </view>
+    </view>
+
+    <!-- ====== 卦象推演：起卦 · 速查（业务入口，不在结构图内但必须保留） ====== -->
+    <view class="mod-head mod-head--gua">
+      <view class="mod-head__line"></view>
+      <text class="mod-head__t">卦 象 推 演</text>
+      <view class="mod-head__seal"><text>卜</text></view>
+      <view class="mod-head__line"></view>
+    </view>
+
+    <view class="gua-entry" hover-class="press" hover-stay-time="60" bindtap="onOpenGuaxiang">
+      <view class="gua-entry__icon-wrap"><text class="gua-entry__icon">☯️</text></view>
+      <view class="gua-entry__main">
+        <text class="gua-entry__title">起卦 · 人生疏导</text>
+        <text class="gua-entry__desc">六十四卦 · 铜钱/数字/时间/随缘 · 动爻变卦</text>
+      </view>
+      <text class="gua-entry__arrow">›</text>
+    </view>
+
+    <view class="gua-entry gua-entry--sub" hover-class="press" hover-stay-time="60" bindtap="onOpenLibrary">
+      <view class="gua-entry__icon-wrap gua-entry__icon-wrap--plain"><text class="gua-entry__icon">📖</text></view>
+      <view class="gua-entry__main">
+        <text class="gua-entry__title">六十四卦速查</text>
+        <text class="gua-entry__desc">按卦序浏览全部卦象与象传</text>
+      </view>
+      <text class="gua-entry__arrow">›</text>
+    </view>
+
+    <!-- 新增模块：六爻涂爻 · 自画成卦 -->
+    <view class="gua-entry gua-entry--sub" hover-class="press" hover-stay-time="60" bindtap="onOpenDraw">
+      <view class="gua-entry__icon-wrap gua-entry__icon-wrap--plain"><text class="gua-entry__icon">🖌️</text></view>
+      <view class="gua-entry__main">
+        <text class="gua-entry__title">六爻涂爻 · 自画成卦</text>
+        <text class="gua-entry__desc">点按六爻切换阴阳，实时成卦推演变卦</text>
+      </view>
+      <text class="gua-entry__arrow">›</text>
+    </view>
+
+    <!-- 新增模块：每日一卦 · 卦历打卡 -->
+    <view class="gua-entry gua-entry--sub" hover-class="press" hover-stay-time="60" bindtap="onOpenDaily">
+      <view class="gua-entry__icon-wrap gua-entry__icon-wrap--plain"><text class="gua-entry__icon">📅</text></view>
+      <view class="gua-entry__main">
+        <text class="gua-entry__title">每日一卦 · 卦历打卡</text>
+        <text class="gua-entry__desc">按日生成专属卦象，打卡成个人卦历</text>
+      </view>
+      <text class="gua-entry__arrow">›</text>
+    </view>
+
+    <view class="page-foot">
+      <text class="page-foot__t">传 承 · 智 慧 · 生 活 · 美 学</text>
+      <view class="page-foot__line"></view>
+    </view>
+
+    <view class="safe-bottom" />
+  </scroll-view>
+
+  <!-- 底部永久免责 -->
+  <view class="disclaimer">{{disclaimer}}</view>
+</view>

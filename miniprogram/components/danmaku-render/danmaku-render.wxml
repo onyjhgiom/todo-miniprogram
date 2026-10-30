@@ -1,0 +1,8 @@
+<!-- 弹幕渲染组件：铺满父容器，内部用 Canvas 2D + 引擎驱动 -->
+<view class="dm-root">
+  <canvas
+    type="2d"
+    id="dmCanvas"
+    class="dm-canvas"
+  ></canvas>
+</view>

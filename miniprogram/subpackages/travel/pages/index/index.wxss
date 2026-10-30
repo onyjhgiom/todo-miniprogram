@@ -1,0 +1,1043 @@
+/* subpackages/travel/pages/index/index.wxss
+   旅行模式 · 沉浸式旅行驾驶舱
+   —— 全屏目的地风景 + 五层背景 + 玻璃拟态 UI + CSS 旅行箱主视觉
+   色彩规范（低饱和、禁荧光）：深海蓝 #081A35 / Primary #6C83E8 / Accent #A98CFF
+   Warm #FFD7A0 / Text #FFFFFF / Glass rgba(255,255,255,.10) / Border rgba(255,255,255,.20)
+   注意：尺寸全部用普通 rpx（不用 var() 套 calc，规避真机 rpx-in-var 不转换问题） */
+
+page {
+  background: #081A35;
+}
+
+.tv {
+  position: relative;
+  min-height: 100vh;
+  color: #fff;
+  overflow: hidden;
+}
+
+/* ============================ 五层背景 ============================ */
+.tv__bg {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: #081A35;
+}
+
+/* Layer 1：目的地照片（Ken Burns：30~40s 极慢呼吸） */
+.tv__photo {
+  position: absolute;
+  left: -3%;
+  top: -3%;
+  width: 106%;
+  height: 106%;
+  animation: tvKen 38s ease-in-out infinite alternate;
+}
+@keyframes tvKen {
+  0%   { transform: scale(1) translateY(0); }
+  100% { transform: scale(1.07) translateY(-14rpx); }
+}
+
+/* Layer 2：压暗渐变（保证白字可读） */
+.tv__shade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(8, 18, 45, 0.30) 0%, rgba(8, 18, 45, 0.18) 34%, rgba(8, 26, 53, 0.58) 68%, rgba(8, 26, 53, 0.82) 100%);
+}
+
+/* Layer 3：空气感（柔焦大气层） */
+.tv__air {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background:
+    radial-gradient(90% 46% at 50% 100%, rgba(8, 18, 45, 0.55) 0%, rgba(8, 18, 45, 0) 70%),
+    radial-gradient(60% 30% at 50% 0%, rgba(169, 140, 255, 0.10) 0%, rgba(169, 140, 255, 0) 70%);
+}
+
+/* Layer 4：光斑 ×2（20~40s 极慢漂移，若有若无） */
+.tv__leak {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60rpx);
+}
+.tv__leak--1 {
+  left: -18%;
+  top: 6%;
+  width: 64%;
+  height: 30%;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 215, 160, 0.20) 0%, rgba(255, 215, 160, 0) 70%);
+  animation: tvLeakA 30s ease-in-out infinite alternate;
+}
+.tv__leak--2 {
+  right: -22%;
+  bottom: 12%;
+  width: 70%;
+  height: 34%;
+  background: radial-gradient(circle at 50% 50%, rgba(108, 131, 232, 0.22) 0%, rgba(108, 131, 232, 0) 70%);
+  animation: tvLeakB 36s ease-in-out infinite alternate;
+}
+@keyframes tvLeakA {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0.75; }
+  100% { transform: translate3d(10%, 6%, 0); opacity: 1; }
+}
+@keyframes tvLeakB {
+  0%   { transform: translate3d(0, 0, 0); opacity: 1; }
+  100% { transform: translate3d(-8%, -6%, 0); opacity: 0.7; }
+}
+
+/* Layer 5：星尘（少量、微小光点缓慢上浮） */
+.tv__dust {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 0 8rpx rgba(255, 255, 255, 0.6);
+  opacity: 0;
+  animation: tvDust 16s linear infinite;
+}
+@keyframes tvDust {
+  0%   { transform: translateY(0); opacity: 0; }
+  12%  { opacity: 0.7; }
+  88%  { opacity: 0.4; }
+  100% { transform: translateY(-46vh); opacity: 0; }
+}
+.tv__dust--1 { left: 8%;  top: 78%; width: 5rpx; height: 5rpx; animation-delay: 0s;   animation-duration: 18s; }
+.tv__dust--2 { left: 20%; top: 88%; width: 3rpx; height: 3rpx; animation-delay: 3s;   animation-duration: 15s; }
+.tv__dust--3 { left: 33%; top: 92%; width: 4rpx; height: 4rpx; animation-delay: 7s;   animation-duration: 20s; }
+.tv__dust--4 { left: 47%; top: 84%; width: 3rpx; height: 3rpx; animation-delay: 1.5s; animation-duration: 14s; }
+.tv__dust--5 { left: 60%; top: 90%; width: 5rpx; height: 5rpx; animation-delay: 9s;   animation-duration: 19s; }
+.tv__dust--6 { left: 72%; top: 80%; width: 3rpx; height: 3rpx; animation-delay: 5s;   animation-duration: 16s; }
+.tv__dust--7 { left: 84%; top: 86%; width: 4rpx; height: 4rpx; animation-delay: 11s;  animation-duration: 21s; }
+.tv__dust--8 { left: 92%; top: 76%; width: 3rpx; height: 3rpx; animation-delay: 2.5s; animation-duration: 13s; }
+.tv__dust--9 { left: 14%; top: 70%; width: 3rpx; height: 3rpx; animation-delay: 8s;   animation-duration: 17s; }
+.tv__dust--10 { left: 55%; top: 72%; width: 4rpx; height: 4rpx; animation-delay: 13s; animation-duration: 22s; }
+
+/* ============================ 透明导航 ============================ */
+.tv__nav {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  height: 52px;
+  padding-left: 24rpx;
+  box-sizing: content-box;
+}
+.tv__back {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1rpx solid rgba(255, 255, 255, 0.20);
+}
+.tv__backico {
+  width: 18rpx;
+  height: 18rpx;
+  border-left: 4rpx solid #fff;
+  border-bottom: 4rpx solid #fff;
+  transform: rotate(45deg) translate(2rpx, -2rpx);
+}
+.tv__navtitle {
+  display: flex;
+  align-items: baseline;
+  gap: 12rpx;
+}
+.tv__navcn {
+  font-size: 32rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+  text-shadow: 0 2rpx 12rpx rgba(8, 18, 45, 0.6);
+}
+.tv__naven {
+  font-size: 22rpx;
+  font-style: italic;
+  letter-spacing: 0.18em;
+  color: rgba(255, 215, 160, 0.9);
+}
+
+/* ============================ 正文 ============================ */
+.tv__body {
+  position: relative;
+  z-index: 1;
+  padding: 0 30rpx 90rpx;
+}
+
+/* 标题区 */
+.tv__hd {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  margin-top: 8rpx;
+}
+.tv__badge {
+  flex-shrink: 0;
+  width: 92rpx;
+  height: 92rpx;
+  border-radius: 26rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.08) 60%);
+  border: 1rpx solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 10rpx 26rpx rgba(8, 18, 45, 0.35), inset 0 1rpx 0 rgba(255, 255, 255, 0.35);
+}
+/* 徽章里的小行李箱（纯 CSS，与主视觉同语言） */
+.tv__badge__case {
+  position: relative;
+  width: 38rpx;
+  height: 48rpx;
+  border-radius: 8rpx;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.85) 0%, rgba(169, 140, 255, 0.55) 100%);
+  box-shadow: inset 0 0 0 2rpx rgba(255, 255, 255, 0.6);
+}
+.tv__badge__case::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -12rpx;
+  width: 18rpx;
+  height: 14rpx;
+  margin-left: -9rpx;
+  border: 3rpx solid rgba(255, 255, 255, 0.75);
+  border-bottom: none;
+  border-radius: 8rpx 8rpx 0 0;
+}
+.tv__badge__case::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 3rpx;
+  margin-left: -1.5rpx;
+  background: rgba(255, 255, 255, 0.55);
+}
+.tv__hdt {
+  flex: 1;
+  min-width: 0;
+}
+.tv__t1 {
+  display: flex;
+  align-items: baseline;
+  gap: 14rpx;
+}
+.tv__t1cn {
+  font-size: 46rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+  text-shadow: 0 4rpx 18rpx rgba(8, 18, 45, 0.55);
+}
+.tv__t1en {
+  font-size: 26rpx;
+  font-style: italic;
+  letter-spacing: 0.18em;
+  color: rgba(255, 215, 160, 0.95);
+}
+.tv__t2 {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.70);
+  letter-spacing: 1rpx;
+  text-shadow: 0 2rpx 10rpx rgba(8, 18, 45, 0.6);
+}
+
+/* 顶部动作 pills */
+.tv__acts {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16rpx;
+  margin-top: 22rpx;
+}
+.tv__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 14rpx 28rpx;
+  border-radius: 999rpx;
+  font-size: 25rpx;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1rpx solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 8rpx 24rpx rgba(8, 18, 45, 0.35), inset 0 1rpx 0 rgba(255, 255, 255, 0.25);
+  white-space: nowrap;
+}
+.tv__pill--hi {
+  background: linear-gradient(120deg, rgba(108, 131, 232, 0.85) 0%, rgba(169, 140, 255, 0.85) 100%);
+  border-color: rgba(169, 140, 255, 0.55);
+  box-shadow: 0 10rpx 30rpx rgba(108, 131, 232, 0.45), inset 0 1rpx 0 rgba(255, 255, 255, 0.35);
+}
+.tv__pillplus {
+  font-size: 28rpx;
+  font-weight: 700;
+}
+.tv__pilldot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #b9c0d8;
+  flex-shrink: 0;
+}
+.tv__pilldot.on {
+  background: #52E0A1;
+  box-shadow: 0 0 10rpx rgba(82, 224, 161, 0.8);
+}
+.tv__pill__arrow {
+  margin-left: 4rpx;
+  color: rgba(255, 255, 255, 0.85);
+}
+.tv__pill--big {
+  padding: 18rpx 34rpx;
+  font-size: 26rpx;
+}
+
+/* 手写感标语 */
+.tv__slogan {
+  margin: 26rpx 6rpx 0;
+  text-align: right;
+  font-size: 30rpx;
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: 2rpx;
+  color: #fff;
+  text-shadow: 0 4rpx 16rpx rgba(8, 18, 45, 0.65);
+  transform: rotate(-1.5deg);
+}
+
+/* ============================ 视觉中心：旅行箱 ============================ */
+.tv__hero {
+  position: relative;
+  height: 600rpx;
+  margin-top: 10rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* 底部光环 */
+.tv__halo {
+  position: absolute;
+  left: 50%;
+  bottom: 64rpx;
+  width: 460rpx;
+  height: 92rpx;
+  margin-left: -230rpx;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(169, 140, 255, 0.45) 0%, rgba(108, 131, 232, 0.18) 46%, rgba(108, 131, 232, 0) 72%);
+  filter: blur(6rpx);
+  animation: tvHalo 4.5s ease-in-out infinite;
+}
+@keyframes tvHalo {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50%      { transform: scale(1.08); opacity: 1; }
+}
+/* 轨道环 1：静态椭圆虚线环 */
+.tv__orbit--1 {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 500rpx;
+  height: 500rpx;
+  margin-left: -250rpx;
+  margin-top: -250rpx;
+  border: 2rpx dashed rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  transform: scaleY(0.40);
+  opacity: 0.75;
+}
+/* 轨道环 2：环上一颗卫星光点在椭圆轨道上巡航 */
+.tv__orbit--2 {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 500rpx;
+  height: 500rpx;
+  margin-left: -250rpx;
+  margin-top: -250rpx;
+  transform: scaleY(0.40);
+  animation: tvOrbit 14s linear infinite;
+}
+.tv__orbit--2::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -8rpx;
+  width: 16rpx;
+  height: 16rpx;
+  margin-left: -8rpx;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 16rpx 4rpx rgba(255, 255, 255, 0.8);
+}
+@keyframes tvOrbit {
+  0%   { transform: scaleY(0.40) rotate(0deg); }
+  100% { transform: scaleY(0.40) rotate(360deg); }
+}
+
+/* 漂浮物（登机牌 / 相机 / 定位 / 拍立得）：玻璃小圆片 + 微浮动 */
+.tv__chip {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.30) 0%, rgba(255, 255, 255, 0.10) 100%);
+  border: 1rpx solid rgba(255, 255, 255, 0.40);
+  box-shadow: 0 12rpx 30rpx rgba(8, 18, 45, 0.35), inset 0 1rpx 0 rgba(255, 255, 255, 0.4);
+  animation: tvBob 5s ease-in-out infinite;
+}
+@keyframes tvBob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-14rpx); }
+}
+.tv__chip--plane {
+  left: 8%;
+  top: 30%;
+  width: 88rpx;
+  height: 88rpx;
+  animation-delay: 0.6s;
+}
+/* 纸飞机（CSS 三角拼装，避免彩色 emoji） */
+.tv__plane {
+  width: 0;
+  height: 0;
+  border-left: 30rpx solid rgba(255, 255, 255, 0.95);
+  border-top: 16rpx solid transparent;
+  border-bottom: 16rpx solid transparent;
+  transform: rotate(-8deg);
+  filter: drop-shadow(0 4rpx 8rpx rgba(8, 18, 45, 0.4));
+}
+.tv__chip--cam {
+  right: 10%;
+  top: 40%;
+  width: 92rpx;
+  height: 92rpx;
+  animation-delay: 1.4s;
+}
+/* 相机（圆角矩形 + 镜头） */
+.tv__cam {
+  position: relative;
+  width: 44rpx;
+  height: 32rpx;
+  border-radius: 8rpx;
+  background: rgba(255, 255, 255, 0.92);
+}
+.tv__cam__lens {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 18rpx;
+  height: 18rpx;
+  margin: -9rpx 0 0 -9rpx;
+  border-radius: 50%;
+  background: #46557E;
+  border: 3rpx solid rgba(255, 255, 255, 0.9);
+  box-sizing: content-box;
+}
+.tv__cam__dot {
+  position: absolute;
+  right: 5rpx;
+  top: 5rpx;
+  width: 6rpx;
+  height: 6rpx;
+  border-radius: 50%;
+  background: #FFD7A0;
+}
+.tv__chip--pin {
+  right: 20%;
+  top: 12%;
+  width: 76rpx;
+  height: 76rpx;
+  animation-delay: 2.2s;
+}
+/* 定位 Pin（水滴形） */
+.tv__pin {
+  position: relative;
+  width: 30rpx;
+  height: 30rpx;
+  border-radius: 50% 50% 50% 0;
+  background: linear-gradient(140deg, #6C83E8, #A98CFF);
+  transform: rotate(-45deg);
+  box-shadow: 0 4rpx 10rpx rgba(8, 18, 45, 0.4);
+}
+.tv__pin__hole {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12rpx;
+  height: 12rpx;
+  margin: -6rpx 0 0 -6rpx;
+  border-radius: 50%;
+  background: #fff;
+}
+/* 拍立得照片卡 */
+.tv__chip--photo1 {
+  left: 16%;
+  top: 56%;
+  width: 104rpx;
+  height: 104rpx;
+  animation-delay: 1s;
+}
+.tv__chip--photo2 {
+  right: 6%;
+  top: 62%;
+  width: 96rpx;
+  height: 96rpx;
+  animation-delay: 2.8s;
+}
+.tv__photo-card {
+  width: 64rpx;
+  height: 74rpx;
+  border-radius: 6rpx;
+  background: #fff;
+  padding: 6rpx 6rpx 14rpx;
+  box-sizing: border-box;
+  box-shadow: 0 6rpx 16rpx rgba(8, 18, 45, 0.35);
+  transform: rotate(-6deg);
+}
+.tv__chip--photo2 .tv__photo-card {
+  transform: rotate(7deg);
+}
+.tv__photo-card__img {
+  width: 100%;
+  height: 100%;
+  border-radius: 3rpx;
+}
+.tv__photo-card__img--a {
+  background: linear-gradient(160deg, #7FB2E8 0%, #C9A2D8 60%, #F2D9A6 100%);
+}
+.tv__photo-card__img--b {
+  background: linear-gradient(160deg, #86D8C8 0%, #6C83E8 70%, #46557E 100%);
+}
+
+/* 旅行箱：外层上下浮动 5s，内层左右摇摆 8s（分层避免 transform 互抢） */
+.tv__case {
+  position: relative;
+  z-index: 2;
+  animation: tvCaseFloat 5s ease-in-out infinite;
+}
+@keyframes tvCaseFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-14rpx); }
+}
+.tv__case__sway {
+  position: relative;
+  animation: tvCaseSway 8s ease-in-out infinite;
+}
+@keyframes tvCaseSway {
+  0%, 100% { transform: rotate(-2.5deg); }
+  50%      { transform: rotate(2.5deg); }
+}
+/* 草帽 */
+.tv__hat {
+  position: absolute;
+  left: 50%;
+  top: -44rpx;
+  width: 128rpx;
+  height: 34rpx;
+  margin-left: -64rpx;
+  border-radius: 50%;
+  background: linear-gradient(160deg, #F2D9A6 0%, #D9B87C 100%);
+  box-shadow: 0 6rpx 14rpx rgba(8, 18, 45, 0.35);
+  transform: rotate(-10deg);
+  z-index: 3;
+}
+.tv__hat__crown {
+  position: absolute;
+  left: 50%;
+  top: -24rpx;
+  width: 64rpx;
+  height: 34rpx;
+  margin-left: -32rpx;
+  border-radius: 32rpx 32rpx 6rpx 6rpx;
+  background: linear-gradient(180deg, #F2D9A6 0%, #D9B87C 78%, #8A6A3C 78%, #8A6A3C 88%, #D9B87C 88%);
+}
+/* 箱体 */
+.tv__casebody {
+  position: relative;
+  width: 190rpx;
+  height: 236rpx;
+  border-radius: 30rpx;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0.16) 42%, rgba(108, 131, 232, 0.30) 100%);
+  border: 2rpx solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 24rpx 50rpx rgba(8, 18, 45, 0.45), inset 0 2rpx 6rpx rgba(255, 255, 255, 0.45);
+}
+/* 拉杆 */
+.tv__casebody__handle {
+  position: absolute;
+  left: 50%;
+  top: -40rpx;
+  width: 84rpx;
+  height: 44rpx;
+  margin-left: -42rpx;
+  border: 8rpx solid rgba(255, 255, 255, 0.55);
+  border-bottom: none;
+  border-radius: 20rpx 20rpx 0 0;
+  box-sizing: border-box;
+}
+/* 竖棱 */
+.tv__casebody__ribs {
+  position: absolute;
+  left: 14rpx;
+  right: 14rpx;
+  top: 12rpx;
+  bottom: 12rpx;
+  border-radius: 20rpx;
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0) 0 30rpx, rgba(255, 255, 255, 0.28) 30rpx 36rpx);
+}
+/* 行李牌（暖金小标签，呼应 Warm 色） */
+.tv__casebody__ribs::after {
+  content: '';
+  position: absolute;
+  right: -6rpx;
+  top: 58rpx;
+  width: 22rpx;
+  height: 34rpx;
+  border-radius: 6rpx;
+  background: linear-gradient(160deg, #FFD7A0, #E8B36C);
+  box-shadow: 0 4rpx 10rpx rgba(8, 18, 45, 0.35);
+}
+/* 滚轮 */
+.tv__casebody__wheel {
+  position: absolute;
+  bottom: -12rpx;
+  width: 22rpx;
+  height: 22rpx;
+  border-radius: 50%;
+  background: rgba(70, 85, 126, 0.9);
+  border: 3rpx solid rgba(255, 255, 255, 0.4);
+}
+.tv__casebody__wheel--l { left: 24rpx; }
+.tv__casebody__wheel--r { right: 24rpx; }
+
+/* 地面光圈 */
+.tv__ground {
+  position: absolute;
+  left: 50%;
+  bottom: 52rpx;
+  width: 340rpx;
+  height: 22rpx;
+  margin-left: -170rpx;
+  border-radius: 50%;
+  border: 2rpx solid rgba(255, 255, 255, 0.35);
+  border-bottom-color: transparent;
+  filter: blur(1rpx);
+}
+
+/* ============================ 玻璃卡片通用 ============================ */
+.tv__card {
+  border-radius: 32rpx;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.14) 0%, rgba(13, 25, 55, 0.42) 100%);
+  border: 1rpx solid rgba(255, 255, 255, 0.20);
+  box-shadow: 0 16rpx 40rpx rgba(4, 10, 28, 0.45), inset 0 1rpx 0 rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+
+/* ============================ 空状态 ============================ */
+.tv__empty {
+  margin-top: 6rpx;
+  text-align: center;
+}
+.tv__empty__t {
+  font-size: 34rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+  text-shadow: 0 4rpx 16rpx rgba(8, 18, 45, 0.6);
+}
+.tv__empty__s {
+  margin: 16rpx auto 0;
+  max-width: 520rpx;
+  font-size: 24rpx;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.72);
+  text-shadow: 0 2rpx 10rpx rgba(8, 18, 45, 0.6);
+}
+.tv__cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  height: 100rpx;
+  margin: 34rpx auto 0;
+  max-width: 520rpx;
+  border-radius: 999rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+  color: #fff;
+  background: linear-gradient(100deg, #6C83E8 0%, #A98CFF 60%, #C9A8FF 100%);
+  border: 1rpx solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 18rpx 44rpx rgba(108, 131, 232, 0.5), inset 0 2rpx 0 rgba(255, 255, 255, 0.4);
+}
+.tv__cta__arrow {
+  font-size: 32rpx;
+}
+
+/* ============================ 概览条 ============================ */
+.tv__stat {
+  display: flex;
+  align-items: center;
+  padding: 26rpx 16rpx;
+  margin-top: 30rpx;
+}
+.tv__stat__cell {
+  flex: 1;
+  text-align: center;
+}
+.tv__stat__num {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  text-shadow: 0 0 18rpx rgba(169, 140, 255, 0.55);
+}
+.tv__stat__num--sm {
+  font-size: 30rpx;
+}
+.tv__stat__label {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.62);
+}
+.tv__stat__line {
+  width: 1rpx;
+  height: 48rpx;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* ============================ 行程卡片 ============================ */
+.tv__trip {
+  margin-top: 24rpx;
+}
+.tv__trip--arch {
+  padding: 24rpx;
+}
+.tv__trip__cover {
+  position: relative;
+  height: 180rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tv__trip__coverimg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+.tv__trip__coveremo {
+  font-size: 76rpx;
+  filter: drop-shadow(0 6rpx 12rpx rgba(8, 18, 45, 0.4));
+}
+.tv__trip__cd {
+  position: absolute;
+  left: 20rpx;
+  bottom: 16rpx;
+  padding: 6rpx 18rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(8, 18, 45, 0.55);
+}
+.tv__trip__cd--soon {
+  background: linear-gradient(100deg, #E86C8C, #C0522F);
+}
+.tv__trip__cd--traveling {
+  background: linear-gradient(100deg, #52B98C, #3C8E6E);
+}
+.tv__trip__cd--past {
+  background: rgba(8, 18, 45, 0.4);
+}
+.tv__trip__body {
+  padding: 22rpx 24rpx 24rpx;
+}
+.tv__trip__title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #fff;
+}
+.tv__trip__meta {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.82);
+}
+.tv__trip__meta--mute {
+  color: rgba(255, 255, 255, 0.55);
+}
+.tv__trip__row {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  margin-top: 16rpx;
+}
+.tv__trip__rowk {
+  width: 96rpx;
+  flex-shrink: 0;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.62);
+}
+.tv__trip__bar {
+  flex: 1;
+  height: 12rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+.tv__trip__barfill {
+  height: 100%;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, #6C83E8, #A98CFF);
+  box-shadow: 0 0 10rpx rgba(169, 140, 255, 0.6);
+  transition: width 0.3s ease;
+}
+.tv__trip__barfill--ok {
+  background: linear-gradient(90deg, #52B98C, #7FD8AC);
+}
+.tv__trip__barfill--over {
+  background: linear-gradient(90deg, #E86C8C, #C0522F);
+}
+.tv__trip__rowv {
+  flex-shrink: 0;
+  min-width: 96rpx;
+  text-align: right;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.78);
+}
+.tv__trip__rowv.is-over {
+  color: #FF9DB0;
+  font-weight: 600;
+}
+.tv__trip__foot {
+  margin-top: 16rpx;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.55);
+}
+.tv__trip__rowline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+.tv__trip__archtitle {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #fff;
+}
+.tv__trip__archdate {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ============================ 快捷入口 ============================ */
+.tv__qa {
+  display: flex;
+  gap: 18rpx;
+  margin-top: 28rpx;
+}
+.tv__qacard {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding: 24rpx 20rpx 22rpx;
+  border-radius: 28rpx;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.14) 0%, rgba(13, 25, 55, 0.40) 100%);
+  border: 1rpx solid rgba(255, 255, 255, 0.20);
+  box-shadow: 0 14rpx 34rpx rgba(4, 10, 28, 0.4), inset 0 1rpx 0 rgba(255, 255, 255, 0.16);
+}
+.tv__qaico {
+  font-size: 40rpx;
+  line-height: 1;
+  filter: drop-shadow(0 4rpx 10rpx rgba(8, 18, 45, 0.4));
+}
+.tv__qaname {
+  margin-top: 14rpx;
+  font-size: 26rpx;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.tv__qadesc {
+  margin-top: 6rpx;
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.60);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tv__qaarrow {
+  position: absolute;
+  right: 18rpx;
+  bottom: 20rpx;
+  font-size: 30rpx;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* ============================ 旅行灵感 ============================ */
+.tv__insp {
+  margin-top: 40rpx;
+}
+.tv__insp__hd {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+.tv__insp__bar {
+  width: 8rpx;
+  height: 30rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(180deg, #FFD7A0, #A98CFF);
+}
+.tv__insp__t {
+  font-size: 30rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+  text-shadow: 0 4rpx 14rpx rgba(8, 18, 45, 0.6);
+}
+.tv__insp__scroll {
+  margin-top: 20rpx;
+  width: 100%;
+}
+.tv__insp__row {
+  display: flex;
+  gap: 20rpx;
+  padding: 4rpx 2rpx 8rpx;
+}
+.tv__insp__card {
+  position: relative;
+  flex-shrink: 0;
+  width: 300rpx;
+  height: 340rpx;
+  border-radius: 28rpx;
+  overflow: hidden;
+  border: 1rpx solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 16rpx 36rpx rgba(4, 10, 28, 0.45);
+}
+.tv__insp__img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+.tv__insp__mask {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(8, 18, 45, 0) 40%, rgba(8, 18, 45, 0.78) 100%);
+}
+.tv__insp__info {
+  position: absolute;
+  left: 20rpx;
+  right: 20rpx;
+  bottom: 18rpx;
+}
+.tv__insp__name {
+  font-size: 32rpx;
+  font-weight: 700;
+  text-shadow: 0 2rpx 10rpx rgba(8, 18, 45, 0.6);
+}
+.tv__insp__season {
+  margin-top: 6rpx;
+  font-size: 21rpx;
+  color: rgba(255, 255, 255, 0.75);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tv__insp__budget {
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #FFD7A0;
+}
+
+/* ============================ 底部 ============================ */
+.tv__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  margin-top: 44rpx;
+}
+.tv__motto {
+  font-family: 'Kaiti SC', 'STKaiti', 'KaiTi', serif;
+  font-style: italic;
+  color: #fff;
+  text-shadow: 0 4rpx 16rpx rgba(8, 18, 45, 0.65);
+  transform: rotate(-2deg);
+}
+.tv__motto__l1 {
+  font-size: 30rpx;
+  font-weight: 700;
+}
+.tv__motto__l2 {
+  margin-top: 4rpx;
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.85);
+}
+.tv__footnote {
+  margin-top: 44rpx;
+  text-align: center;
+  font-size: 21rpx;
+  color: rgba(255, 255, 255, 0.42);
+  letter-spacing: 1rpx;
+}
+
+/* ============================ 归档 ============================ */
+.tv__arch {
+  padding: 24rpx 26rpx;
+  margin-top: 32rpx;
+}
+.tv__arch__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 26rpx;
+  color: #fff;
+}
+.tv__arch__arrow {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ============================ 交互反馈 / 降级 ============================ */
+.press {
+  opacity: 0.86;
+  transform: scale(0.985);
+}
+
+/* 弱动效偏好：关闭所有装饰动画，保留静态玻璃版式 */
+@media (prefers-reduced-motion: reduce) {
+  .tv__photo,
+  .tv__leak--1,
+  .tv__leak--2,
+  .tv__dust,
+  .tv__halo,
+  .tv__orbit--2,
+  .tv__chip,
+  .tv__case,
+  .tv__case__sway {
+    animation: none;
+  }
+  .tv__dust {
+    opacity: 0;
+  }
+}

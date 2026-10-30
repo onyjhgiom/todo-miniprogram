@@ -1,0 +1,95 @@
+<game-shell title="{{title}}" timeText="{{timeText}}" statText="{{statText}}" paused="{{paused}}"
+  win="{{win}}" winSub="{{winSub}}" winStats="{{winStats}}" winNewBest="{{winNewBest}}" winQuote="{{winQuote}}"
+  fail="{{fail}}" failSub="{{failSub}}" failStats="{{failStats}}" failBtnText="重开本关"
+  bind:back="onBack" bind:reset="onReset" bind:hint="onHint" bind:home="onHome" bind:pause="onPause"
+  bind:again="onAgain" bind:winhome="onWinHome"
+  bind:failretry="onFailRetry" bind:failcontinue="onFailContinue" bind:failhome="onFailHome">
+  <view class="mz" bindtouchstart="onTouchStart" bindtouchmove="onTouchMove" bindtouchend="onTouchEnd">
+
+    <view class="row mz__lv">
+      <view class="mz__lvb" bindtap="onPrevLevel">‹</view>
+      <view class="mz__lvinfo">
+        <text class="t-sm strong">第 {{level}} 关</text>
+        <text class="t-xs muted-2">{{levelLabel}} · 最少 {{par}} 步</text>
+      </view>
+      <view class="mz__lvb" bindtap="onNextLevel">›</view>
+    </view>
+
+    <!-- 难度（控制编织度/提示与演示次数） + 换一张新图 -->
+    <view class="row row--between mz__diffrow">
+      <view class="mz__seg">
+        <view
+          wx:for="{{diffList}}"
+          wx:key="key"
+          class="mz__seg-item {{diff === item.key ? 'is-on' : ''}}"
+          data-key="{{item.key}}"
+          bindtap="onDiffTap"
+          hover-class="mz__seg-hover" hover-stay-time="50">{{item.label}}</view>
+      </view>
+      <view class="mz__regen" bindtap="onRegenerate" hover-class="mz__regen-hover" hover-stay-time="50">🎲 换一张</view>
+    </view>
+
+    <view class="row row--between mz__bar">
+      <view class="row mz__progress">
+        <text class="mz__dot mz__dot--start"></text>
+        <view class="mz__track">
+          <!-- 进度用 transform: scaleX 驱动：width 动画会每帧触发布局，改为合成层变换 -->
+          <view class="mz__fill" style="transform: scaleX({{progressX}});"></view>
+        </view>
+        <text class="mz__dot mz__dot--end"></text>
+      </view>
+      <text class="t-xs muted-2">提示剩 {{hintLeft}} 次 · 演示剩 {{demoLeft}}</text>
+    </view>
+
+    <view class="mz__board" id="mzBoard" style="grid-template-columns: repeat({{cols}}, 1fr);">
+      <!-- 格子只绑定「墙 + 终点 + 自己的标记」。
+           原来这里还挂了 trail / hintPath / demoPath 三次 indexOf 扫描与 bump 撞墙类，
+           一次移动要把 400 个格子的表达式全部重算（撞墙时还会让所有同向墙面一起抖动）。
+           现在标记收敛成 marks[index] 单值查表，撞墙反馈也搬进了小球组件。 -->
+      <view wx:for="{{cells}}" wx:key="index"
+        class="mz__cell {{item.t?'w-t':''}} {{item.r?'w-r':''}} {{item.b?'w-b':''}} {{item.l?'w-l':''}} {{index===end?'mz__cell--e':''}} {{marks[index]==='hint'?'mz__cell--hint':''}}"
+        data-index="{{index}}" bindtap="onTapCell">
+        <view wx:if="{{index===end}}" class="mz__flag"></view>
+        <view wx:elif="{{marks[index]==='demo'}}" class="mz__demoDot"></view>
+        <view wx:elif="{{marks[index]==='hint'}}" class="mz__hintDot"></view>
+        <view wx:elif="{{marks[index]==='crumb'}}" class="mz__crumb"></view>
+      </view>
+
+      <!-- 玩家小球：独立组件，位移/尺寸/撞墙回弹都在组件内部 setData，
+           走一步不会牵动棋盘这 400 个节点 -->
+      <maze-ball id="mzBall"></maze-ball>
+    </view>
+
+    <view class="mz__ctrls">
+      <view class="mz__side">
+        <view class="mz__undo {{canUndo ? '' : 'mz__undo--disabled'}}" bindtap="onUndo">
+          <text class="mz__undoIcon">↶</text>
+          <text class="t-xs">撤销</text>
+        </view>
+        <view class="mz__undo {{demoLeft > 0 ? '' : 'mz__undo--disabled'}}" bindtap="onDemo">
+          <text class="mz__undoIcon">🎬</text>
+          <text class="t-xs">演示 {{demoLeft}}</text>
+        </view>
+      </view>
+      <!-- 方向键：按下即走一格，按住 260ms 后连发（20×20 关长通路不必点上百次） -->
+      <view class="mz__dir">
+        <view class="mz__d" bindtouchstart="onDirStart" bindtouchend="onDirEnd" bindtouchcancel="onDirEnd" data-dr="-1" data-dc="0">
+          <view class="mz__arrow mz__arrow--up"></view>
+        </view>
+        <view class="row">
+          <view class="mz__d" bindtouchstart="onDirStart" bindtouchend="onDirEnd" bindtouchcancel="onDirEnd" data-dr="0" data-dc="-1">
+            <view class="mz__arrow mz__arrow--left"></view>
+          </view>
+          <view class="mz__d" bindtouchstart="onDirStart" bindtouchend="onDirEnd" bindtouchcancel="onDirEnd" data-dr="1" data-dc="0">
+            <view class="mz__arrow mz__arrow--down"></view>
+          </view>
+          <view class="mz__d" bindtouchstart="onDirStart" bindtouchend="onDirEnd" bindtouchcancel="onDirEnd" data-dr="0" data-dc="1">
+            <view class="mz__arrow mz__arrow--right"></view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <text class="t-xs muted-2 center">演示=沿最短路径播放；也可直接上下左右滑动屏幕</text>
+  </view>
+</game-shell>

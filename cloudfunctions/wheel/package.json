@@ -1,0 +1,9 @@
+{
+  "name": "wheel",
+  "version": "1.0.0",
+  "description": "万能转盘云端镜像（转盘配置 / 抽奖记录，_openid 隔离）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

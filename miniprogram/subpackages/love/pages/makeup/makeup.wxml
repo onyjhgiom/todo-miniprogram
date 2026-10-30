@@ -1,0 +1,113 @@
+<!-- pages/love/makeup/makeup.wxml -->
+<view class="ay" data-skin="{{skin.key}}" style="{{skin.style}}">
+  <view class="ay-tabs">
+    <view class="ay-tab {{tab===item.key?'ay-tab--on':''}}" wx:for="{{tabs}}" wx:key="key"
+          data-key="{{item.key}}" bindtap="onTab">{{item.label}}</view>
+  </view>
+
+  <!-- ==================== 妆容 ==================== -->
+  <block wx:if="{{tab==='face'}}">
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">💄 想要什么妆感</text></view>
+      <view class="ay-chips">
+        <view class="ay-chip {{style===item.key?'ay-chip--on':''}}" wx:for="{{styleList}}" wx:key="key"
+              data-v="{{item.key}}" bindtap="onStyle">{{item.emoji}} {{item.key}}</view>
+      </view>
+      <view class="ay-faint" wx:if="{{style}}">{{styleList[0].desc}}</view>
+    </view>
+
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">📍 去什么场合</text></view>
+      <view class="ay-chips">
+        <view class="ay-chip {{occasion===item.key?'ay-chip--on':''}}" wx:for="{{occList}}" wx:key="key"
+              data-v="{{item.key}}" bindtap="onOccasion">{{item.emoji}} {{item.key}}</view>
+      </view>
+    </view>
+
+    <view class="ay-card ay-card--flat ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">我的底子</text></view>
+      <view class="ay-card__title" style="font-size:25rpx">肤质</view>
+      <view class="ay-chips">
+        <view class="ay-chip {{prefs.skin===item.key?'ay-chip--on':''}}" wx:for="{{skinTags}}" wx:key="key"
+              data-v="{{item.key}}" bindtap="onSkinType">{{item.label}}</view>
+      </view>
+      <view class="ay-card__title" style="font-size:25rpx">肤色</view>
+      <view class="ay-chips">
+        <view class="ay-chip {{prefs.tone===item.key?'ay-chip--on':''}}" wx:for="{{toneTags}}" wx:key="key"
+              data-v="{{item.key}}" bindtap="onTone">{{item.label}}</view>
+      </view>
+    </view>
+
+    <block wx:if="{{plan}}">
+      <view class="ay-card ay-anim">
+        <view class="ay-card__hd">
+          <text class="ay-card__title">{{plan.styleName}} · {{plan.occasionName}}</text>
+          <text class="ay-card__more">约 {{plan.minutes}} 分钟</text>
+        </view>
+        <view class="ay-t">{{plan.summary}}</view>
+        <view class="ay-palette">
+          <view class="ay-palette__i" wx:for="{{plan.palette}}" wx:key="*this" style="background:{{item}}"></view>
+        </view>
+        <view class="ay-btn ay-btn--block ay-btn--ghost ay-mt" bindtap="onCopyPlan">📋 复制整套步骤</view>
+      </view>
+
+      <view class="ay-card ay-anim" wx:for="{{plan.steps}}" wx:key="part">
+        <view class="ay-card__hd">
+          <text class="ay-card__title">{{item.emoji}} {{item.part}}</text>
+          <text class="ay-faint">{{item.product}}</text>
+        </view>
+        <view class="ay-step__li" wx:for="{{item.steps}}" wx:for-item="s" wx:key="*this" style="padding-left:0">{{s}}</view>
+      </view>
+
+      <view class="ay-card ay-anim">
+        <view class="ay-card__hd"><text class="ay-card__title">👜 出门前 &amp; 补妆</text></view>
+        <view class="ay-step__li" wx:for="{{plan.touchUp}}" wx:key="*this" style="padding-left:0">{{item}}</view>
+        <view class="ay-hr"></view>
+        <view class="ay-card__title">⚠️ 避雷</view>
+        <view class="ay-step__li" wx:for="{{plan.avoid}}" wx:key="*this" style="padding-left:0;color:#C0524F">{{item}}</view>
+      </view>
+    </block>
+  </block>
+
+  <!-- ==================== 美甲 ==================== -->
+  <block wx:if="{{tab==='nail'}}">
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">💅 甲型</text></view>
+      <view class="ay-chips">
+        <view class="ay-chip {{nailShape===item?'ay-chip--on':''}}" wx:for="{{nailShapes}}" wx:key="*this"
+              data-v="{{item}}" bindtap="onNailShape">{{item}}</view>
+      </view>
+      <view class="ay-card__hd"><text class="ay-card__title">风格偏好（最多 3 个）</text></view>
+      <view class="ay-chips">
+        <view class="ay-chip {{nailStyles.indexOf(item)>=0?'ay-chip--on':''}}" wx:for="{{nailTags}}" wx:key="*this"
+              data-v="{{item}}" bindtap="onNailStyle">{{item}}</view>
+      </view>
+      <view class="ay-card__hd"><text class="ay-card__title">场合</text></view>
+      <view class="ay-chips">
+        <view class="ay-chip {{nailOcc===item?'ay-chip--on':''}}" wx:for="{{nailOccasions}}" wx:key="*this"
+              data-v="{{item}}" bindtap="onNailOcc">{{item}}</view>
+      </view>
+    </view>
+
+    <view class="ay-card ay-anim" wx:for="{{nails}}" wx:key="key">
+      <view class="ay-card__hd">
+        <text class="ay-card__title">{{item.emoji}} {{item.name}}</text>
+        <text class="ay-card__more">{{item.price}}</text>
+      </view>
+      <view class="ay-t">{{item.pattern}}</view>
+      <view class="ay-palette">
+        <view class="ay-palette__i" wx:for="{{item.colors}}" wx:key="*this" style="background:{{item}}"></view>
+      </view>
+      <view class="ay-faint ay-mt">适合甲型：{{item.shapes}} · 维持 {{item.last}}</view>
+      <view class="ay-faint">适配：{{item.fit}}</view>
+      <view class="ay-hr"></view>
+      <view class="ay-card__title" style="font-size:25rpx">做法要点</view>
+      <view class="ay-step__li" wx:for="{{item.how}}" wx:for-item="s" wx:key="*this" style="padding-left:0">{{s}}</view>
+    </view>
+
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">🩹 美甲护理常识</text></view>
+      <view class="ay-step__li" wx:for="{{nailCare}}" wx:key="*this" style="padding-left:0">{{item}}</view>
+    </view>
+  </block>
+</view>

@@ -1,0 +1,84 @@
+<!--pages/tools/tools.wxml-->
+<view class="page themed" data-theme="{{theme}}" style="{{themeStyle}};{{bgStyle}}">
+  <!-- 电影级舞台层：工具中心是一级入口枢纽，用最足的体积光与浮尘撑起气势 -->
+  <fx-stage
+    mode="{{fxMode}}"
+    src="{{fxSrc}}"
+    full="{{fxFull}}"
+    rays="{{true}}"
+    dust="{{true}}"
+    topglow="{{true}}"
+    level="{{fxLevel}}"
+  />
+
+  <!-- 吸顶头部：标题 + 搜索 -->
+  <view class="head">
+    <view class="head__title-row">
+      <text class="head__title">工具中心</text>
+      <text class="head__count">{{total}} 个工具</text>
+    </view>
+
+    <!-- 搜索框（聚焦态吃主题色） -->
+    <view class="search">
+      <text class="search__icon">🔍</text>
+      <input
+        class="search__input"
+        value="{{keyword}}"
+        placeholder="搜索工具，如：番茄、倒计时、红包"
+        placeholder-class="search__placeholder"
+        bindinput="onSearch"
+        confirm-type="search"
+      />
+      <view wx:if="{{keyword}}" class="search__clear" hover-class="tools-press" hover-stay-time="60" bindtap="onClearSearch">✕</view>
+    </view>
+  </view>
+
+  <!-- 横向分类 Tab（激活态吃 --gradient-primary，跟随主题色） -->
+  <scroll-view class="cat" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="cat__track">
+      <view
+        wx:for="{{categories}}"
+        wx:key="key"
+        class="cat__chip {{activeCat === item.key ? 'is-active' : ''}}"
+        bindtap="onCategory"
+        hover-class="tools-press"
+        hover-start-time="0"
+        hover-stay-time="60"
+        data-key="{{item.key}}"
+      >
+        <text class="cat__icon">{{item.icon}}</text>
+        <text class="cat__label">{{item.label}}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 工具宫格：只传 id（避免整个对象跨线程往返），按压零延迟反馈
+       fx-stagger 让宫格单元逐个浮现（内部是普通 view，全局类可直接生效） -->
+  <view class="grid fx-stagger" wx:if="{{displayTools.length > 0}}">
+    <view
+      wx:for="{{displayTools}}"
+      wx:key="id"
+      class="cell"
+      hover-class="cell--hover"
+      hover-start-time="0"
+      hover-stay-time="80"
+      bindtap="onTool"
+      bindlongpress="onToolLongPress"
+      data-id="{{item.id}}"
+    >
+      <view wx:if="{{item.badge}}" class="cell__badge">{{item.badge}}</view>
+      <view class="cell__icon" style="background: {{item.tintBg}};">
+        <text class="cell__glyph" style="color: {{item.tintText}};">{{item.icon}}</text>
+      </view>
+      <text class="cell__name">{{item.name}}</text>
+      <text class="cell__desc">{{item.desc || ''}}</text>
+    </view>
+  </view>
+
+  <!-- 空态 -->
+  <view class="empty" wx:else>
+    <text class="empty__icon">🔍</text>
+    <text class="empty__title">没有找到相关工具</text>
+    <text class="empty__sub">换个关键词试试，或点击上方分类</text>
+  </view>
+</view>

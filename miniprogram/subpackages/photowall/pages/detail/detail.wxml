@@ -1,0 +1,49 @@
+<view class="pd themed" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <view class="pd-stage">
+    <image wx:if="{{img}}" class="pd-img" src="{{img}}" mode="widthFix" bindtap="onPreview" />
+    <view wx:else class="pd-stage-ph">
+      <view class="pd-stage-ic">🖼️</view>
+      <view class="pd-stage-t">预览生成中…</view>
+    </view>
+  </view>
+
+  <view class="pd-card">
+    <view class="pd-title">{{title}}</view>
+    <view wx:if="{{draft}}" class="pd-draft">草稿</view>
+    <view class="pd-rows">
+      <view class="pd-row">
+        <view class="pd-k">形状</view>
+        <view class="pd-v">{{shapeName}}</view>
+      </view>
+      <view class="pd-row">
+        <view class="pd-k">照片</view>
+        <view class="pd-v">{{count}} 张</view>
+      </view>
+      <view class="pd-row">
+        <view class="pd-k">创建</view>
+        <view class="pd-v">{{createdText}}</view>
+      </view>
+      <view class="pd-row">
+        <view class="pd-k">更新</view>
+        <view class="pd-v">{{updatedText}}</view>
+      </view>
+    </view>
+
+    <view class="pd-note" bindtap="onNote">
+      <text class="pd-note-k">备注</text>
+      <text class="pd-note-v">{{note ? note : '点这里写点什么'}}</text>
+    </view>
+  </view>
+
+  <view class="pd-acts">
+    <view class="pd-act main" bindtap="onEdit">再编辑</view>
+    <view class="pd-act" bindtap="onExport">导出图片</view>
+    <view class="pd-act" bindtap="onSaveAlbum">保存相册</view>
+    <view class="pd-act" bindtap="onFav">{{favorite ? '取消收藏' : '收藏'}}</view>
+    <view class="pd-act" bindtap="onCopy">复制</view>
+    <view class="pd-act danger" bindtap="onDelete">删除</view>
+  </view>
+
+  <view class="pd-tip">点图片可全屏查看并长按转发；导出的是 1440px 高清图。</view>
+</view>

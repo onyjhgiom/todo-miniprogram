@@ -1,0 +1,20 @@
+<!--components/focus-mode-tabs/focus-mode-tabs.wxml-->
+<!-- 模式切换：竖向胶囊列表（2026-10-07 按参照图改为右侧竖排）。
+     当前项用主色渐变块，其余为玻璃白底；每项显示 emoji + 模式名 + 时长。 -->
+<view class="tabs {{disabled ? 'is-disabled' : ''}}">
+  <view
+    wx:for="{{list}}"
+    wx:key="key"
+    class="tabs__item {{value === item.key ? 'is-active' : ''}}"
+    hover-class="tabs__item--tap"
+    hover-stay-time="60"
+    data-key="{{item.key}}"
+    bindtap="onTap"
+  >
+    <text class="tabs__emoji">{{item.emoji}}</text>
+    <view class="tabs__body">
+      <text class="tabs__tx">{{item.label}}</text>
+      <text class="tabs__min">{{item.minutes}} 分钟</text>
+    </view>
+  </view>
+</view>

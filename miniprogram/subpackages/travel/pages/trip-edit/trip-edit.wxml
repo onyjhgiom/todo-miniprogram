@@ -1,0 +1,161 @@
+<!--pages/travel/trip-edit：新建 / 编辑行程-->
+<view class="tshell themed" data-theme="{{theme}}" style="{{themeStyle}}">
+  <view class="tshell__wrap">
+
+    <view class="ts-card">
+      <view class="ts-sec-h">基本信息</view>
+
+      <view class="field">
+        <text class="field__label">行程标题</text>
+        <input class="field__input" placeholder="例如：成都 4 日游" placeholder-class="field__ph"
+          value="{{title}}" bindinput="onTitle" maxlength="30" cursor-spacing="24" />
+      </view>
+
+      <view class="field">
+        <text class="field__label">目的地</text>
+        <view class="field__row">
+          <input class="field__input field__input--flex" placeholder="城市 / 地区" placeholder-class="field__ph"
+            value="{{destination}}" bindinput="onDestination" maxlength="20" cursor-spacing="24" />
+          <view class="field__pick" bindtap="onPickLocation" hover-class="press">选点</view>
+        </view>
+      </view>
+
+      <view class="field">
+        <text class="field__label">出发日期</text>
+        <picker mode="date" value="{{startDate}}" start="{{minDate}}" bindchange="onStartChange">
+          <view class="field__picker">{{startDate}}</view>
+        </picker>
+      </view>
+
+      <view class="field">
+        <text class="field__label">返程日期</text>
+        <picker mode="date" value="{{endDate}}" start="{{startDate}}" bindchange="onEndChange">
+          <view class="field__picker">{{endDate}}</view>
+        </picker>
+      </view>
+
+      <view class="field">
+        <text class="field__label">总预算（元，可留空）</text>
+        <input class="field__input" type="digit" placeholder="例如：3200" placeholder-class="field__ph"
+          value="{{budget}}" bindinput="onBudget" maxlength="7" cursor-spacing="24" />
+      </view>
+
+      <view class="field">
+        <text class="field__label">同行者（用「、」分隔）</text>
+        <input class="field__input" placeholder="例如：我、小明" placeholder-class="field__ph"
+          value="{{membersText}}" bindinput="onMembers" maxlength="60" cursor-spacing="24" confirm-type="done" />
+      </view>
+    </view>
+
+    <!-- 封面 -->
+    <view class="ts-card">
+      <view class="ts-sec-h">封面</view>
+      <view class="cover__preview" style="{{coverStyle}}" bindtap="onToggleCovers" hover-class="press">
+        <image wx:if="{{coverIsImage}}" class="cover__img" src="{{cover}}" mode="aspectFill" />
+        <text wx:else class="cover__emo">{{coverEmoji}}</text>
+      </view>
+      <view wx:if="{{showCovers}}" class="cover__grid">
+        <view wx:for="{{covers}}" wx:key="key" class="cover__cell {{item.on ? 'is-on' : ''}}"
+          style="background:{{item.gradient}}" data-key="{{item.key}}" bindtap="onPickCover" hover-class="press">
+          <text class="cover__cellemo">{{item.emoji}}</text>
+          <text class="cover__cellname">{{item.name}}</text>
+        </view>
+        <view class="cover__cell cover__cell--add" bindtap="onPickCoverImage" hover-class="press">
+          <text class="cover__cellemo">🖼️</text>
+          <text class="cover__cellname">相册</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 场景（决定行李模板） -->
+    <view class="ts-card">
+      <view class="ts-sec-h">旅行场景（决定行李清单）</view>
+      <view class="chips">
+        <view wx:for="{{scenes}}" wx:key="key" class="chip {{item.on ? 'is-on' : ''}}"
+          data-key="{{item.key}}" bindtap="onToggleScene" hover-class="press">
+          <text class="chip__emo">{{item.icon}}</text>
+          <text class="chip__name">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- AI 智能规划（创建内置环节） -->
+    <view class="ts-card ai-card">
+      <view class="ts-sec-h ai-sec">
+        <text>✨ AI 智能规划</text>
+        <text wx:if="{{aiItems.length > 0}}" class="ai-count">已生成 {{aiItems.length}} 条</text>
+      </view>
+
+      <!-- AI 未就绪：内嵌一键启用（探测云函数 aiStatus，不依赖数据库集合） -->
+      <view wx:if="{{!aiOn}}" class="ai-off">
+        <text class="ai-off__txt">开启 AI 智能规划后，可一键生成逐日行程（景点 / 美食 / 演出 / 特色），并可直接在此调整。</text>
+        <view class="ts-btn ts-btn--primary ai-btn" bindtap="onAiEnable" hover-class="press">启用并生成</view>
+      </view>
+
+      <!-- 已启用：未生成 -->
+      <block wx:elif="{{aiItems.length === 0 && !aiLoading}}">
+        <view class="hint hint--mute">基于你填写的目的地、{{dayCount}} 天、预算与场景，AI 生成完整行程草案。</view>
+        <view class="ts-btn ts-btn--primary ai-btn" bindtap="onAiGen" hover-class="press">生成 {{dayCount}} 天行程</view>
+      </block>
+
+      <!-- 生成中 -->
+      <view wx:elif="{{aiLoading}}" class="ai-loading">
+        <view class="ai-loading__dot"></view>
+        <text>AI 正在为你规划 {{dayCount}} 天行程…</text>
+      </view>
+
+      <!-- 已生成：可编辑预览 -->
+      <block wx:else>
+        <view wx:for="{{aiGroups}}" wx:key="day" class="ai-day">
+          <view class="ai-day__h">第 {{item.day}} 天</view>
+          <view wx:for="{{item.items}}" wx:for-item="it" wx:key="_k" class="ai-row">
+            <view class="ai-row__top">
+              <picker mode="time" value="{{it.startTime}}" data-k="{{it._k}}" bindchange="onAiTime">
+                <view class="ai-time">{{it.startTime}}</view>
+              </picker>
+              <view class="ai-type ai-type--{{it.typeCls}}" data-k="{{it._k}}" bindtap="onAiType" hover-class="press">{{it.type}}</view>
+              <input class="ai-content" value="{{it.content}}" placeholder="安排标题" placeholder-class="field__ph" data-k="{{it._k}}" bindinput="onAiContent" maxlength="40" cursor-spacing="16" />
+              <view class="ai-del" data-k="{{it._k}}" bindtap="onAiRemove" hover-class="press">×</view>
+            </view>
+            <view class="ai-row__sub">
+              <input class="ai-place" value="{{it.place}}" placeholder="地点" placeholder-class="field__ph" data-k="{{it._k}}" bindinput="onAiPlace" maxlength="40" cursor-spacing="16" />
+              <input class="ai-cost" type="digit" value="{{it.cost}}" placeholder="花费" placeholder-class="field__ph" data-k="{{it._k}}" bindinput="onAiCost" maxlength="7" cursor-spacing="16" />
+            </view>
+          </view>
+          <view class="ai-add" data-day="{{item.day}}" bindtap="onAiAdd" hover-class="press">＋ 在第 {{item.day}} 天加一条</view>
+        </view>
+
+        <view class="ai-actions">
+          <view class="ts-btn ts-btn--ghost" bindtap="onAiDiscard" hover-class="press">放弃</view>
+          <view class="ts-btn ts-btn--ghost" bindtap="onAiGen" hover-class="press">重新生成</view>
+        </view>
+        <view class="hint">可直接修改时间 / 类型 / 标题 / 地点 / 花费，删除或新增条目；生成后这些安排会成为行程里可继续编辑的条目。</view>
+      </block>
+    </view>
+
+    <!-- 路线快速填充 -->
+    <view class="ts-card">
+      <view class="ts-sec-h">路线快速填充（{{dayCount}} 天）</view>
+      <view wx:if="{{routeHint}}" class="hint">已按目的地为你匹配：{{routeHint}}</view>
+      <view wx:else class="hint hint--mute">未匹配到目的地模板，将使用 {{dayCount}} 天通用骨架</view>
+      <view class="routes">
+        <view wx:for="{{routes}}" wx:key="key" class="route {{selectedRoute === item.key ? 'is-on' : ''}}"
+          data-key="{{item.key}}" bindtap="onPickRoute" hover-class="press">
+          <text class="route__name">{{item.name}}</text>
+          <text class="route__budget">建议预算 ¥{{item.budgetHint}}</text>
+        </view>
+      </view>
+      <view wx:if="{{routes.length === 0}}" class="ts-empty ts-empty--sm">
+        <view class="sub">暂无 {{dayCount}} 天模板，可创建后手动添加安排</view>
+      </view>
+    </view>
+
+    <view class="actions">
+      <view class="ts-btn ts-btn--ghost" bindtap="onCancel" hover-class="press">取消</view>
+      <view class="ts-btn ts-btn--primary" bindtap="onSave" hover-class="press">
+        {{isEdit ? '保存修改' : '创建行程'}}
+      </view>
+    </view>
+
+  </view>
+</view>

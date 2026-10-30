@@ -1,0 +1,16 @@
+.m3 { display: flex; flex-direction: column; align-items: center; gap: 16rpx; }
+.m3__head { width: 100%; max-width: 560rpx; }
+.m3__board {
+  width: 100%; max-width: 560rpx; display: grid; grid-template-columns: repeat(7, 1fr); gap: 10rpx;
+  background: var(--card-3); padding: 12rpx; border-radius: var(--r-lg); border: 2rpx solid var(--line);
+}
+.m3__cell {
+  aspect-ratio: 1 / 1; border-radius: 14rpx; transition: transform .1s ease; box-shadow: var(--sd-1);
+}
+.m3__cell:active { transform: scale(.92); }
+.m3__cell--sel { box-shadow: inset 0 0 0 5rpx #fff, 0 0 0 3rpx var(--mint); }
+.m3__c0 { background: linear-gradient(135deg, #EDC2A2, #BE6F44); }
+.m3__c1 { background: linear-gradient(135deg, #F0E0BC, #C9A25E); }
+.m3__c2 { background: linear-gradient(135deg, #BFD9C8, #6F9E86); }
+.m3__c3 { background: linear-gradient(135deg, #E7C7A6, #C89B6A); }
+.m3__c4 { background: linear-gradient(135deg, #C9B7D6, #8E7AA8); }

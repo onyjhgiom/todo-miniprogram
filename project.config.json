@@ -1,0 +1,72 @@
+{
+  "description": "微信小程序 + 云开发 待办事项（Todo）项目配置",
+  "packOptions": {
+    "ignore": [
+      { "type": "glob", "value": "**/*.bak*" },
+      { "type": "suffix", "value": ".md" },
+      { "type": "suffix", "value": ".d.ts" },
+      { "type": "glob", "value": "**/app.sample.js" },
+      { "type": "folder", "value": "course-schedule/test" },
+      { "type": "folder", "value": ".tmp-pw" },
+      { "type": "folder", "value": ".tmp-check-openings" },
+      { "type": "folder", "value": ".tmp-verify" }
+    ],
+    "include": []
+  },
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "preloadBackgroundData": false,
+    "minified": true,
+    "newFeature": false,
+    "coverView": true,
+    "nodeModules": false,
+    "autoAudits": false,
+    "showShadowRootInWxmlPanel": true,
+    "scopeDataCheck": false,
+    "uglifyFileName": false,
+    "checkInvalidKey": true,
+    "checkSiteMap": true,
+    "uploadWithSourceMap": true,
+    "compileHotReLoad": false,
+    "useMultiFrameRuntime": true,
+    "useApiHook": true,
+    "useApiHostProcess": true,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    },
+    "enableEngineNative": false,
+    "useIsolateContext": true,
+    "userConfirmedBundleSwitch": false,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "disableUseStrict": false,
+    "minifyWXML": true,
+    "showES6CompileOption": false,
+    "useCompilerPlugins": [
+      "typescript"
+    ],
+    "ignoreUploadUnusedFiles": false,
+    "ignoreDevUnusedFiles": false,
+    "compileWorklet": false,
+    "localPlugins": false,
+    "condition": false
+  },
+  "compileType": "miniprogram",
+  "libVersion": "3.4.6",
+  "appid": "wx514f26332600479c",
+  "projectname": "todo-miniprogram",
+  "cloudfunctionRoot": "cloudfunctions/",
+  "miniprogramRoot": "miniprogram/",
+  "condition": {},
+  "editorSetting": {
+    "tabIndent": "auto",
+    "tabSize": 2
+  },
+  "simulatorPluginLibVersion": {}
+}

@@ -1,0 +1,13 @@
+<!-- 迷宫小球：位置 / 尺寸 / 撞墙回弹全部自持。
+     独立成组件是为了「渲染隔离」——原来小球坐标挂在页面 data 上，每走一步都触发整页
+     setData，400 格棋盘跟着重渲染，移动时就会掉帧、看起来像画面在震。
+     收进组件后，走一步只重渲染组件内部这 3 个节点。 -->
+<view
+  class="mb"
+  style="transform: translate3d({{left}}px, {{top}}px, 0); transition-duration: {{instant ? 0 : moveMs}}ms;"
+>
+  <!-- 中层：撞墙「顶一下再弹回」。只做视觉位移，逻辑坐标不变，所以既不会穿墙也不会卡墙角 -->
+  <view class="mb__bump bx-{{bump}}">
+    <view class="mb__inner" style="width:{{size}}px;height:{{size}}px;margin:-{{half}}px 0 0 -{{half}}px;"></view>
+  </view>
+</view>

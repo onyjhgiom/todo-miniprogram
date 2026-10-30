@@ -1,0 +1,137 @@
+<!--pages/astro/horoscope.wxml
+  星座运势详情：头部星座切换 → Tab(今日/本周/本月/本年) → 雷达图 → 折线图 → 文字解读 → 幸运信息网格 → 浏览记录
+  canvas 雷达图+折线图为原生 2d 手绘；image 加载失败统一 onImgErr 兜底占位
+-->
+<view class="astro-page">
+  <view class="astro-statusbar"></view>
+
+  <!-- 头部信息卡片：选中星座图标 + 名称 + 切换下拉 -->
+  <view class="astro-card astro-card--major">
+    <view class="horo-head">
+      <image class="horo-head__icon" src="{{sign.icon}}" mode="aspectFit"
+        binderror="onImgErr" data-fb="zodiac"></image>
+      <view class="horo-head__info">
+        <text class="astro-title">{{sign.name}}</text>
+        <text class="astro-subtitle">{{sign.en}} · {{sign.range}} · {{sign.element}} · 守护 {{sign.ruler}}</text>
+      </view>
+      <view class="astro-btn astro-btn--ghost" hover-class="astro-btn--hover" hover-stay-time="50"
+        bindtap="onOpenSwitch">切换</view>
+    </view>
+
+  </view>
+
+  <!-- Tab 周期切换 -->
+  <view class="astro-card">
+    <view class="horo-tab">
+      <view wx:for="{{periods}}" wx:key="key" class="horo-tab__item {{period === item.key ? 'is-active' : ''}}"
+        hover-class="horo-tab__item--hover" hover-stay-time="50"
+        bindtap="onSwitchPeriod" data-key="{{item.key}}">{{item.label}}</view>
+    </view>
+  </view>
+
+<!-- 切换星座弹窗：放在页面顶层，避免被卡片 transform/backdrop-filter 创建的层叠上下文盖住（此前 Tab 卡片会浮在弹窗上导致误触） -->
+<block wx:if="{{switchOpen}}">
+  <view class="astro-modal-mask" catchtap="onCloseSwitch">
+    <view class="astro-modal" catchtap="noop">
+      <text class="astro-title" style="display:block;margin-bottom:18rpx;">选择本命星座</text>
+      <view class="switch-grid">
+        <view wx:for="{{zodiacs}}" wx:key="key" class="switch-grid__item"
+          hover-class="switch-grid__item--hover" hover-stay-time="50"
+          bindtap="onSelectSign" data-key="{{item.key}}">
+          <image class="switch-grid__icon" src="{{item.icon}}" mode="aspectFit"
+            binderror="onImgErr" data-fb="zodiac"></image>
+          <text class="switch-grid__name">{{item.name}}</text>
+        </view>
+      </view>
+      <view class="astro-btn astro-btn--ghost" style="margin-top:20rpx;" bindtap="onCloseSwitch">取消</view>
+    </view>
+  </view>
+</block>
+
+  <!-- 雷达图悬浮卡片：原生 canvas 绘制五维蛛网图 -->
+  <view class="astro-card">
+    <text class="astro-tag">五维雷达</text>
+    <text class="astro-subtitle" style="display:block;margin:6rpx 0 14rpx;">综合 / 爱情 / 事业 / 财富 / 健康</text>
+    <canvas
+      type="2d"
+      id="radar"
+      class="horo-canvas"
+      style="width:560rpx;height:480rpx;"
+      bindtouchstart="onCanvasTap"
+    ></canvas>
+  </view>
+
+  <!-- 趋势折线图：仅 今日之外 周期 显示（今日折线=周折线其中一点） -->
+  <block wx:if="{{period !== 'today'}}">
+    <view class="astro-card">
+      <text class="astro-tag">{{periodLabel}} 趋势</text>
+      <canvas
+        type="2d"
+        id="line"
+        class="horo-canvas"
+        style="width:560rpx;height:260rpx;"
+      ></canvas>
+    </view>
+  </block>
+
+  <!-- 运势文字解读 -->
+  <view class="astro-card">
+    <text class="astro-tag" style="margin-bottom:14rpx;">解读</text>
+    <block wx:for="{{interprets}}" wx:key="key">
+      <view class="horo-dim">
+        <text class="astro-tag" style="background:linear-gradient(135deg,{{item.tint}},{{item.tint2}});border:none;">{{item.label}} · {{item.score}}/10</text>
+        <text class="astro-body" style="display:block;margin-top:10rpx;">{{item.text}}</text>
+      </view>
+    </block>
+  </view>
+
+  <!-- 幸运附属信息（2列 flex 网格） -->
+  <view class="astro-card">
+    <text class="astro-tag" style="margin-bottom:14rpx;">幸运附属</text>
+    <view class="luck-grid">
+      <view class="luck-cell">
+        <text class="astro-muted">幸运数字</text>
+        <text class="astro-body">{{horoscope.lucky.number}}</text>
+      </view>
+      <view class="luck-cell">
+        <text class="astro-muted">幸运色</text>
+        <view style="display:flex;align-items:center;gap:10rpx;">
+          <view class="luck-dot" style="background:{{horoscope.lucky.color}};"></view>
+          <text class="astro-body">{{horoscope.lucky.colorName}}</text>
+        </view>
+      </view>
+      <view class="luck-cell">
+        <text class="astro-muted">速配</text>
+        <text class="astro-body">{{horoscope.lucky.match}}</text>
+      </view>
+      <view class="luck-cell">
+        <text class="astro-muted">避雷</text>
+        <text class="astro-body">{{horoscope.lucky.avoid}}</text>
+      </view>
+      <view class="luck-cell luck-cell--full">
+        <text class="astro-muted">今日星象</text>
+        <text class="astro-body">{{horoscope.lucky.starTip}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 浏览历史快速查看 -->
+  <view class="astro-card">
+    <text class="astro-tag" style="margin-bottom:14rpx;">最近浏览</text>
+    <view wx:if="{{history.length === 0}}" class="astro-empty">还没有浏览记录</view>
+    <view wx:else class="horo-his">
+      <view wx:for="{{history}}" wx:key="id" class="astro-row"
+        hover-class="astro-row--hover" hover-stay-time="50">
+        <image class="horo-his__icon" src="{{item.icon}}" mode="aspectFit"
+          binderror="onImgErr" data-fb="zodiac"></image>
+        <view style="flex:1;">
+          <text class="astro-body">{{item.name}} · {{item.periodLabel}}</text>
+          <text class="astro-muted">{{item.timeLabel}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="astro-statusbar"></view>
+  <view style="padding:20rpx 32rpx calc(20rpx + env(safe-area-inset-bottom));font-size:22rpx;line-height:1.6;color:#94a3b8;text-align:center;">纯属娱乐，请勿过度相信 · 内容不构成任何人生建议</view>
+</view>

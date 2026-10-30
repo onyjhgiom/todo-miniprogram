@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "openapi": ["subscribeMessage.send"]
+  },
+  "timeout": 60,
+  "installDependency": true,
+  "env": {
+    "TRAVEL_AI_KEY": "",
+    "TRAVEL_AI_BASE": "",
+    "TRAVEL_AI_MODEL": ""
+  },
+  "triggers": [
+    {
+      "name": "tripReminderDaily",
+      "type": "timer",
+      "config": "0 0 8 * * * *"
+    }
+  ]
+}

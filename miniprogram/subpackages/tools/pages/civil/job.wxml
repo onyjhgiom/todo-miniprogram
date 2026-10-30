@@ -1,0 +1,185 @@
+<!-- subpackages/tools/pages/civil/job.wxml -->
+<view class="cj themed" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <block wx:if="{{found}}">
+
+    <!-- ===== 顶部：岗位名 + 编制大字横幅 ===== -->
+    <view class="cj__hero" style="background:{{heroGradient}}">
+      <view class="cj__hero-track">
+        <text class="cj__hero-track-icon">{{trackIcon}}</text>
+        <text class="cj__hero-track-name">{{trackName}}</text>
+      </view>
+      <view class="cj__hero-title">{{title}}</view>
+      <view class="cj__hero-unit">{{unit}}</view>
+      <view class="cj__hero-bian {{hasBian ? 'cj__hero-bian--bian' : (tone === 'warn' ? 'cj__hero-bian--warn' : 'cj__hero-bian--unbian')}}">
+        {{hasBian ? '✅ 带编制' : (tone === 'warn' ? '⚠️ 无编制 · 慎选' : '⚪ 无编制')}} · {{compileShort}}
+      </view>
+    </view>
+
+    <!-- ===== 编制说明（本模块核心差异化） ===== -->
+    <view class="cj__card cj__card--bian">
+      <view class="cj__bian-head">
+        <text class="cj__bian-label">{{compileLabel}}</text>
+        <text class="cx-tag cx-tag--{{tone}}">{{compilePhrase}}</text>
+      </view>
+      <text class="cj__bian-desc">{{compileDesc}}</text>
+      <view class="cj__bian-warn" wx:if="{{compileWarning}}">
+        <text class="cj__bian-warn-icon">⚠️</text>
+        <text class="cj__bian-warn-t">{{compileWarning}}</text>
+      </view>
+      <view class="cj__bian-link" bindtap="onTrack" hover-class="cj__press" hover-stay-time="50">
+        查看「{{trackShort}}」完整流程与备考策略 ›
+      </view>
+    </view>
+
+    <!-- ===== 官方报名入口（每个岗位必有） ===== -->
+    <view class="cj__sec">官方报名入口</view>
+    <view class="cj__card cj__card--apply" wx:if="{{apply}}">
+      <view class="cj__apply-head">
+        <text class="cj__apply-badge">官方</text>
+        <text class="cj__apply-name">{{apply.name}}</text>
+      </view>
+      <view class="cj__apply-org">主办：{{apply.org}}</view>
+      <view class="cj__apply-url">
+        <text class="cj__apply-host">{{apply.host}}</text>
+        <text class="cj__apply-copy" bindtap="onCopyApply" hover-class="cj__press" hover-stay-time="50">复制链接</text>
+      </view>
+      <text class="cj__apply-note">{{apply.note}}</text>
+      <view class="cj__apply-path" wx:if="{{applyPath}}">
+        <view class="cj__path-head">
+          <text class="cj__path-label">本岗位在入口内的检索路径</text>
+          <text class="cj__path-copy" bindtap="onCopyPath" hover-class="cj__press" hover-stay-time="50">复制</text>
+        </view>
+        <text class="cj__path-text">{{applyPath}}</text>
+      </view>
+      <view class="cj__apply-tip">小程序内无法直接打开外部政务网站，复制后粘贴到浏览器即可进入报名。</view>
+    </view>
+
+    <!-- ===== 硬性条件 ===== -->
+    <view class="cj__sec">报考条件</view>
+    <view class="cj__card">
+      <view class="cj__meta" wx:for="{{meta}}" wx:key="label">
+        <text class="cj__meta-icon">{{item.icon}}</text>
+        <text class="cj__meta-label">{{item.label}}</text>
+        <text class="cj__meta-value {{item.hi ? 'cj__meta-value--hi' : ''}}">{{item.value}}</text>
+      </view>
+    </view>
+
+    <!-- ===== 竞争与待遇 ===== -->
+    <view class="cj__sec">竞争与待遇</view>
+    <view class="cj__grid">
+      <view class="cj__stat">
+        <text class="cj__stat-k">报录比（参考）</text>
+        <text class="cj__stat-v">{{ratio}}</text>
+      </view>
+      <view class="cj__stat">
+        <text class="cj__stat-k">难度评级</text>
+        <text class="cj__stat-v">{{stars}}</text>
+        <text class="cj__stat-s">{{diffLabel}}</text>
+      </view>
+    </view>
+    <view class="cj__card cj__card--salary">
+      <text class="cj__salary-k">💰 待遇参考</text>
+      <text class="cj__salary-v">{{salary}}</text>
+    </view>
+
+    <!-- ===== 🎯 备战指南（核心） ===== -->
+    <block wx:if="{{guide}}">
+      <view class="cj__sec cj__sec--flex">
+        <text>🎯 如何为这个岗位做准备</text>
+        <text class="cj__sec-btn" bindtap="onToggleGuide">{{guideOpen ? '收起' : '展开'}}</text>
+      </view>
+
+      <!-- 重心 + 节奏 常显（最有信息量） -->
+      <view class="cj__card cj__card--focus">
+        <text class="cj__focus-t">{{guide.focus}}</text>
+        <view class="cj__timing">
+          <text class="cj__timing-icon">⏱</text>
+          <text class="cj__timing-t">{{guide.timing}}</text>
+        </view>
+      </view>
+
+      <block wx:if="{{guideOpen}}">
+
+        <!-- 阶段行动 -->
+        <view class="cj__card">
+          <view class="cj__block-title">行动节奏（按天倒推）</view>
+          <view class="cj__stage" wx:for="{{guide.stages}}" wx:key="when">
+            <view class="cj__stage-when">{{item.when}}</view>
+            <view class="cj__stage-body">
+              <view class="cj__li" wx:for="{{item.todo}}" wx:for-item="td" wx:key="*this">
+                <text class="cj__dot">·</text>
+                <text class="cj__li-t">{{td}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 分维度准备要点 -->
+        <view class="cj__sec">准备要点 · 逐块对照</view>
+        <view class="cj__card" wx:for="{{guide.blocks}}" wx:key="key">
+          <view class="cj__block-title">{{item.icon}} {{item.title}}</view>
+          <view class="cj__li" wx:for="{{item.items}}" wx:for-item="it" wx:key="*this">
+            <text class="cj__dot">·</text>
+            <text class="cj__li-t">{{it}}</text>
+          </view>
+        </view>
+
+        <!-- 避坑 -->
+        <block wx:if="{{guide.risks.length}}">
+          <view class="cj__sec">容易踩的坑</view>
+          <view class="cj__card cj__card--warn">
+            <view class="cj__li" wx:for="{{guide.risks}}" wx:key="*this">
+              <text class="cj__dot cj__dot--warn">⚠</text>
+              <text class="cj__li-t">{{item}}</text>
+            </view>
+          </view>
+        </block>
+
+        <!-- 招录完整流程 -->
+        <view class="cj__sec">招录完整流程 · {{process.length}} 步</view>
+        <view class="cj__card">
+          <view class="cj__step" wx:for="{{process}}" wx:key="*this">
+            <view class="cj__step-no">{{index + 1}}</view>
+            <text class="cj__step-t">{{item}}</text>
+          </view>
+        </view>
+
+      </block>
+    </block>
+
+    <!-- ===== 同赛道其他岗位 ===== -->
+    <block wx:if="{{relations.length}}">
+      <view class="cj__sec">同赛道岗位（共 {{relations.length}} 条精选）</view>
+      <view class="cj__rel" wx:for="{{relations}}" wx:key="id"
+        data-id="{{item.id}}" bindtap="onRelation" hover-class="cj__press" hover-stay-time="50">
+        <view class="cj__rel-main">
+          <view class="cj__rel-head">
+            <text class="cj__rel-title">{{item.title}}</text>
+            <text class="cx-tag cx-tag--{{item.tone}}">{{item.hasBian ? '有编' : '无编'}} · {{item.compileShort}}</text>
+          </view>
+          <text class="cj__rel-unit">{{item.unit}}</text>
+          <text class="cj__rel-diff">难度 {{item.stars}}</text>
+        </view>
+        <text class="cj__rel-arrow">›</text>
+      </view>
+    </block>
+
+    <view class="cj__pad"></view>
+
+    <!-- ===== 底部操作 ===== -->
+    <view class="cj__bottom">
+      <view class="cj__btn cj__btn--primary" bindtap="onCopy" hover-class="cj__press" hover-stay-time="50">
+        复制备战清单
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== 岗位不存在 ===== -->
+  <view class="cj__empty" wx:else>
+    <text class="cj__empty-icon">🧭</text>
+    <text class="cj__empty-t">没有找到这条岗位</text>
+    <text class="cj__empty-s">链接可能已失效，回岗位库重新选一条吧</text>
+    <view class="cj__empty-btn" bindtap="onTrack" hover-class="cj__press" hover-stay-time="50">返回岗位库</view>
+  </view>
+</view>

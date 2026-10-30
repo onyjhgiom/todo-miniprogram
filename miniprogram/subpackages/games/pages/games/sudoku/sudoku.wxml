@@ -1,0 +1,21 @@
+<game-shell title="{{title}}" timeText="{{timeText}}" statText="{{statText}}" paused="{{paused}}"
+  bind:back="onBack" bind:reset="onReset" bind:hint="onHint" bind:home="onHome" bind:pause="onPause">
+  <view class="sd">
+    <view class="row sd__bar">
+      <view class="chip {{size===4?'chip--active':''}}" data-size="4" bindtap="pick">4宫</view>
+      <view class="chip {{size===6?'chip--active':''}}" data-size="6" bindtap="pick">6宫</view>
+      <view class="chip {{size===9?'chip--active':''}}" data-size="9" bindtap="pick">9宫</view>
+    </view>
+    <view class="sd__board" style="grid-template-columns: repeat({{size}}, 1fr);">
+      <view wx:for="{{board}}" wx:key="index"
+        class="sd__cell {{given[index]?'sd__cell--given':''}} {{selected===index?'sd__cell--sel':''}}"
+        data-index="{{index}}" bindtap="onSelect">
+        <text wx:if="{{item}}" class="sd__num serif">{{item}}</text>
+      </view>
+    </view>
+    <view class="sd__pad">
+      <view wx:for="{{nums}}" wx:key="*this" class="sd__n" data-n="{{item}}" bindtap="onNum">{{item}}</view>
+      <view class="sd__n sd__n--del" bindtap="onErase">⌫</view>
+    </view>
+  </view>
+</game-shell>

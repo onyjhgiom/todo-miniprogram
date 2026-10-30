@@ -1,0 +1,198 @@
+<!--pages/travel/packing：行李清单-->
+<view class="tshell themed" data-theme="{{theme}}" style="{{themeStyle}}">
+  <view class="tshell__wrap">
+
+    <!-- 进度头 -->
+    <view class="ts-card ph">
+      <view class="ph__top">
+        <view class="ph__texts">
+          <view class="ph__title">📦 行李清单</view>
+          <view class="ph__sub">{{tripTitle}} · {{destination}}</view>
+        </view>
+        <view class="ph__ops">
+          <view class="ph__op" bindtap="onToggleBatch" hover-class="press">{{batchMode ? '完成' : '批量'}}</view>
+          <view class="ph__op" bindtap="onOpenGen" hover-class="press">模板</view>
+        </view>
+      </view>
+
+      <view class="ph__num">{{packed}}/{{total}} 已打包 {{percent}}%</view>
+      <view class="ph__bar"><view class="ph__barfill" style="width:{{percent}}%"></view></view>
+      <view wx:if="{{essentialLeft > 0}}" class="ph__warn">还有 {{essentialLeft}} 件必备物品未打包</view>
+      <view wx:if="{{allDone}}" class="ph__done">🎉 全部打包完成，出发吧！</view>
+    </view>
+
+    <!-- 筛选 -->
+    <view class="ts-card filters">
+      <view class="filters__row">
+        <view class="fchip {{filter === 'all' ? 'is-on' : ''}}" data-key="all" bindtap="onFilter" hover-class="press">全部</view>
+        <view class="fchip {{filter === 'unpacked' ? 'is-on' : ''}}" data-key="unpacked" bindtap="onFilter" hover-class="press">仅未完成</view>
+        <view class="fchip {{filter === 'essential' ? 'is-on' : ''}}" data-key="essential" bindtap="onFilter" hover-class="press">仅必备</view>
+        <picker mode="selector" range="{{['全部人'].concat(owners)}}" bindchange="onOwner">
+          <view class="fchip">👤 {{owner || '全部人'}}</view>
+        </picker>
+      </view>
+      <view wx:if="{{batchMode}}" class="filters__batch">
+        <view class="fchip" bindtap="onSelectAll" hover-class="press">全选</view>
+        <view class="fchip" bindtap="onBatchDelete" hover-class="press">批量删除</view>
+        <picker mode="selector" range="{{categories}}" bindchange="onBatchCategory">
+          <view class="fchip">批量改分类</view>
+        </picker>
+        <view class="fchip fchip--mute">已选 {{selected.length}}</view>
+      </view>
+    </view>
+
+    <!-- 分组 -->
+    <view wx:if="{{groups.length === 0}}" class="ts-empty">
+      <text class="emo">🧳</text>
+      <view>清单还是空的</view>
+      <view class="sub">用模板一键生成，或手动添加物品</view>
+      <view class="ts-btn ts-btn--primary" bindtap="onOpenGen" hover-class="press">选择模板生成</view>
+    </view>
+
+    <view wx:for="{{groups}}" wx:for-item="g" wx:key="category" class="ts-card grp">
+      <view class="grp__head" data-cat="{{g.category}}" bindtap="onToggleGroup" hover-class="press">
+        <text class="grp__emo">{{g.categoryEmoji}}</text>
+        <text class="grp__name">{{g.category}}</text>
+        <text class="grp__count">{{g.packed}}/{{g.total}}</text>
+        <text wx:if="{{g.essentialLeft > 0}}" class="grp__ess">必备 {{g.essentialLeft}}</text>
+        <text class="grp__fold">{{g.collapsed ? '▸' : '▾'}}</text>
+      </view>
+
+      <view wx:if="{{!g.collapsed}}" class="grp__body">
+        <view wx:for="{{g.items}}" wx:for-item="it" wx:key="_id" class="item {{it.packed ? 'is-done' : ''}}">
+          <!-- 批量选择框 -->
+          <view wx:if="{{batchMode}}" class="item__check {{selected.indexOf(it._id) >= 0 ? 'is-on' : ''}}"
+            data-id="{{it._id}}" bindtap="onSelectItem" hover-class="press">
+            {{selected.indexOf(it._id) >= 0 ? '✓' : ''}}
+          </view>
+
+          <!-- 勾选圆 -->
+          <view wx:else class="item__circle {{it.packed ? 'is-on' : ''}}" data-id="{{it._id}}" bindtap="onToggle">
+            <text wx:if="{{it.packed}}" class="item__tick">✓</text>
+          </view>
+
+          <view class="item__main" data-id="{{it._id}}" bindtap="onEditItem" hover-class="press">
+            <view class="item__line1">
+              <text class="item__name">{{it.name}}</text>
+              <text wx:if="{{it.count > 1}}" class="item__count">×{{it.count}}</text>
+              <text wx:if="{{it.isEssential}}" class="item__ess">必备</text>
+            </view>
+            <view class="item__line2">
+              <text wx:if="{{it.owner}}" class="item__meta">👤 {{it.owner}}</text>
+              <text wx:if="{{it.reminderText}}" class="item__meta">🔔 {{it.reminderText}}</text>
+              <text wx:if="{{it.note}}" class="item__meta item__meta--note">{{it.note}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{groups.length > 0}}" class="ts-card danger">
+      <view class="danger__btn" bindtap="onClearAll" hover-class="press">清空整个清单</view>
+    </view>
+
+  </view>
+
+  <!-- 底部添加 -->
+  <view class="fab" bindtap="onAddItem" hover-class="press">＋</view>
+
+  <!-- 撒花 -->
+  <view wx:if="{{showConfetti}}" class="confetti">
+    <view wx:for="{{confettiDots}}" wx:key="*this" class="confetti__dot"
+      style="left:{{item.left}}%;background:{{item.color}};width:{{item.size}}rpx;height:{{item.size * 1.6}}rpx;animation-delay:{{item.delay}}ms"></view>
+  </view>
+
+  <!-- 智能生成引导 -->
+  <view wx:if="{{showGen}}" class="mask" bindtap="onCloseGen">
+    <view class="gen" catchtap="onNoop">
+      <view class="gen__title">选择旅行场景</view>
+      <view class="gen__sub">可多选，系统会合并生成一份不重复的清单</view>
+
+      <view class="gen__chips">
+        <view wx:for="{{scenes}}" wx:key="key" class="gchip {{item.on ? 'is-on' : ''}}"
+          data-key="{{item.key}}" bindtap="onToggleSceneChip" hover-class="press">
+          <text class="gchip__emo">{{item.icon}}</text>
+          <view class="gchip__texts">
+            <text class="gchip__name">{{item.name}}</text>
+            <text class="gchip__desc">{{item.desc}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="gen__quick">
+        <view class="gen__quicktitle">或直接用整套模板</view>
+        <view class="gen__quickrow">
+          <view wx:for="{{templateList}}" wx:key="key" class="qchip" data-key="{{item.key}}"
+            bindtap="onUseTemplate" hover-class="press">
+            <text>{{item.icon}}</text>
+            <text class="qchip__name">{{item.name}}</text>
+            <text class="qchip__n">{{item.count}} 件</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="gen__ops">
+        <view class="ts-btn ts-btn--ghost" bindtap="onCloseGen" hover-class="press">取消</view>
+        <view class="ts-btn ts-btn--primary" bindtap="onGenerate" hover-class="press">生成清单</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 物品编辑 -->
+  <view wx:if="{{showEditor}}" class="mask" bindtap="onCloseEditor">
+    <view class="sheet" catchtap="onNoop">
+      <view class="sheet__title">{{isNew ? '添加物品' : '编辑物品'}}</view>
+
+      <view class="sheet__field">
+        <text class="sheet__label">名称</text>
+        <input class="sheet__input" placeholder="例如：充电宝" placeholder-class="sheet__ph" value="{{draft.name}}"
+          data-key="name" bindinput="onDraftInput" maxlength="24" cursor-spacing="24" />
+      </view>
+
+      <view class="sheet__field">
+        <text class="sheet__label">数量</text>
+        <view class="stepper">
+          <view class="stepper__btn" data-delta="{{-1}}" bindtap="onDraftCount" hover-class="press">－</view>
+          <view class="stepper__val">{{draft.count}}</view>
+          <view class="stepper__btn" data-delta="{{1}}" bindtap="onDraftCount" hover-class="press">＋</view>
+        </view>
+      </view>
+
+      <view class="sheet__field">
+        <text class="sheet__label">分类</text>
+        <picker mode="selector" range="{{categories}}" bindchange="onDraftCategory">
+          <view class="sheet__picker">{{draft.category}}</view>
+        </picker>
+      </view>
+
+      <view class="sheet__field">
+        <text class="sheet__label">所属人（可留空）</text>
+        <input class="sheet__input" placeholder="同行者昵称" placeholder-class="sheet__ph" value="{{draft.owner}}"
+          data-key="owner" bindinput="onDraftInput" maxlength="12" cursor-spacing="24" />
+      </view>
+
+      <view class="sheet__field sheet__field--row">
+        <text class="sheet__label">设为必备</text>
+        <switch checked="{{draft.isEssential}}" bindchange="onDraftEssential" color="#B5714C" />
+      </view>
+
+      <view class="sheet__field">
+        <text class="sheet__label">出发前提醒</text>
+        <picker mode="selector" range="{{reminderLabels}}" bindchange="onDraftReminder">
+          <view class="sheet__picker">{{draft.reminderText || '不提醒'}}</view>
+        </picker>
+      </view>
+
+      <view class="sheet__field">
+        <text class="sheet__label">备注</text>
+        <textarea class="sheet__area" placeholder="补充说明" placeholder-class="sheet__ph" value="{{draft.note}}"
+          data-key="note" bindinput="onDraftInput" maxlength="120" auto-height="{{false}}" cursor-spacing="24" />
+      </view>
+
+      <view class="sheet__ops">
+        <view wx:if="{{!isNew}}" class="ts-btn ts-btn--ghost" bindtap="onDeleteDraft" hover-class="press">删除</view>
+        <view class="ts-btn ts-btn--primary" bindtap="onSaveDraft" hover-class="press">保存</view>
+      </view>
+    </view>
+  </view>
+</view>

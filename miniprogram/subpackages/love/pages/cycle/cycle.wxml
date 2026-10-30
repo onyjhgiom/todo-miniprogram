@@ -1,0 +1,346 @@
+<!-- pages/love/cycle/cycle.wxml -->
+<view class="ay" data-skin="{{skin.key}}" style="{{skin.style}}">
+  <view class="ay-tabs">
+    <view class="ay-tab {{tab===item.key?'ay-tab--on':''}}" wx:for="{{tabs}}" wx:key="key"
+          data-key="{{item.key}}" bindtap="onTab">{{item.label}}</view>
+  </view>
+
+  <!-- ==================== 经期 ==================== -->
+  <block wx:if="{{tab==='cycle'}}">
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd">
+        <text class="ay-card__title">{{cyc.phaseEmoji}} {{cyc.phaseName}}</text>
+        <text class="ay-card__more" wx:if="{{cyc.hasData}}">第 {{cyc.dayIndex}} 天</text>
+      </view>
+      <view class="ay-t" wx:if="{{cyc.hasData}}">{{advice.desc}}</view>
+      <view class="ay-t" wx:else>记录第一次经期之后，这里会给出周期预测、阶段建议和提醒。</view>
+
+      <block wx:if="{{cyc.hasData}}">
+        <view class="ay-hr"></view>
+        <view class="ay-between">
+          <view>
+            <view class="ay-row__t">下次预计 {{cyc.nextStart}}</view>
+            <view class="ay-faint">{{remDue ? remTitle + ' · ' + remDesc : '还有 ' + cyc.daysToNext + ' 天'}}</view>
+          </view>
+          <view class="ay-btn ay-btn--sm ay-btn--ghost" bindtap="onAddImportantDay">加入重要日</view>
+        </view>
+        <view class="ay-hr"></view>
+        <view class="ay-row">
+          <text class="ay-row__ico">✨</text>
+          <view class="ay-row__main">
+            <view class="ay-row__t">排卵日 {{cyc.ovulation}}</view>
+            <view class="ay-row__d">易孕期 {{cyc.fertileStart}} ~ {{cyc.fertileEnd}}{{cyc.inFertile ? '（今天在易孕期内）' : ''}}</view>
+          </view>
+        </view>
+        <view class="ay-row" wx:if="{{cyc.delayText}}">
+          <text class="ay-row__ico">⏰</text>
+          <view class="ay-row__main"><view class="ay-row__d">{{cyc.delayText}}</view></view>
+        </view>
+        <view class="ay-faint ay-mt">
+          平均周期 {{cyc.avgCycle || settings.cycleLen}} 天 · 平均 {{cyc.avgPeriod || settings.periodLen}} 天 · 已记录 {{cyc.count}} 次
+        </view>
+      </block>
+
+      <view class="ay-wrap ay-mt">
+        <view class="ay-btn ay-btn--sm" bindtap="onStartToday">🌹 今天来了</view>
+        <view class="ay-btn ay-btn--sm ay-btn--ghost" wx:if="{{cyc.running}}" bindtap="onEndToday">✅ 今天结束</view>
+        <view class="ay-btn ay-btn--sm ay-btn--line" bindtap="onToggleForm">{{showForm ? '收起' : '✍️ 手动记录'}}</view>
+      </view>
+    </view>
+
+    <!-- 记录表单 -->
+    <view class="ay-card ay-anim" wx:if="{{showForm}}">
+      <view class="ay-card__hd"><text class="ay-card__title">记录这次经期</text></view>
+      <view class="ay-field">
+        <text class="ay-field__label">开始日</text>
+        <picker mode="date" value="{{formStart}}" bindchange="onPickStart">
+          <view class="ay-field__input">{{formStart || '请选择'}}</view>
+        </picker>
+      </view>
+      <view class="ay-field">
+        <text class="ay-field__label">结束日</text>
+        <picker mode="date" value="{{formEnd}}" bindchange="onPickEnd">
+          <view class="ay-field__input {{formEnd?'':'ay-field__ph'}}">{{formEnd || '还没结束就不用填'}}</view>
+        </picker>
+      </view>
+      <view class="ay-field">
+        <text class="ay-field__label">流量</text>
+        <view class="ay-chips" style="flex:1">
+          <view class="ay-chip {{formFlow===item?'ay-chip--on':''}}" wx:for="{{flowTags}}" wx:key="*this"
+                data-v="{{item}}" bindtap="onFlow">{{item==='light'?'偏少':(item==='heavy'?'偏多':'正常')}}</view>
+        </view>
+      </view>
+      <view class="ay-field">
+        <text class="ay-field__label">痛经</text>
+        <view class="ay-chips" style="flex:1">
+          <view class="ay-chip {{formPain===index?'ay-chip--on':''}}" wx:for="{{['无痛','轻微','明显','剧烈']}}" wx:key="*this"
+                data-v="{{index}}" bindtap="onFormPain">{{item}}</view>
+        </view>
+      </view>
+      <view class="ay-card__hd" style="margin-top:12rpx"><text class="ay-card__title">情绪</text></view>
+      <view class="ay-chips">
+        <view class="ay-chip {{formMoods.indexOf(item)>=0?'ay-chip--on':''}}" wx:for="{{moodTags}}" wx:key="*this"
+              data-f="formMoods" data-v="{{item}}" bindtap="onToggleTag">{{item}}</view>
+      </view>
+      <view class="ay-card__hd"><text class="ay-card__title">身体症状</text></view>
+      <view class="ay-chips">
+        <view class="ay-chip {{formSymptoms.indexOf(item)>=0?'ay-chip--on':''}}" wx:for="{{symptomTags}}" wx:key="*this"
+              data-f="formSymptoms" data-v="{{item}}" bindtap="onToggleTag">{{item}}</view>
+      </view>
+      <input class="ay-field__input ay-mt" style="padding:16rpx;background:var(--ay-card-soft);border-radius:16rpx"
+             placeholder="想记点什么（可选）" value="{{formNote}}" bindinput="onNote" />
+      <view class="ay-btn ay-btn--block ay-mt" bindtap="onSavePeriod">保存记录</view>
+    </view>
+
+    <!-- 阶段建议 -->
+    <view class="ay-card ay-anim" wx:if="{{cyc.hasData}}">
+      <view class="ay-card__hd"><text class="ay-card__title">🍲 这一阶段怎么吃</text></view>
+      <view class="ay-step__li" wx:for="{{advice.food}}" wx:key="*this" style="padding-left:0">{{item}}</view>
+      <view class="ay-hr"></view>
+      <view class="ay-card__hd"><text class="ay-card__title">🏃 怎么动</text></view>
+      <view class="ay-step__li" wx:for="{{advice.move}}" wx:key="*this" style="padding-left:0">{{item}}</view>
+      <view class="ay-hr"></view>
+      <view class="ay-card__hd"><text class="ay-card__title">🧴 皮肤怎么护</text></view>
+      <view class="ay-step__li" wx:for="{{advice.skin}}" wx:key="*this" style="padding-left:0">{{item}}</view>
+      <view class="ay-hr"></view>
+      <view class="ay-card__hd"><text class="ay-card__title">🫧 情绪与穿搭</text></view>
+      <view class="ay-step__li" wx:for="{{advice.mood}}" wx:key="*this" style="padding-left:0">{{item}}</view>
+      <view class="ay-step__li" wx:for="{{advice.wear}}" wx:key="*this" style="padding-left:0">{{item}}</view>
+      <view class="ay-hr"></view>
+      <view class="ay-card__hd"><text class="ay-card__title">⚠️ 就医红线</text></view>
+      <view class="ay-step__li" wx:for="{{advice.caution}}" wx:key="*this" style="padding-left:0;color:#C0524F">{{item}}</view>
+    </view>
+
+    <!-- 痛经应对 -->
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">🩹 痛经时怎么办</text></view>
+      <view class="ay-chips">
+        <view class="ay-chip {{pain===0?'ay-chip--on':''}}" data-v="0" bindtap="onPain">无痛</view>
+        <view class="ay-chip {{pain===1?'ay-chip--on':''}}" data-v="1" bindtap="onPain">轻微</view>
+        <view class="ay-chip {{pain===2?'ay-chip--on':''}}" data-v="2" bindtap="onPain">明显</view>
+        <view class="ay-chip {{pain===3?'ay-chip--on':''}}" data-v="3" bindtap="onPain">剧烈</view>
+      </view>
+      <view class="ay-t ay-mt ay-strong">{{planTitle}}</view>
+      <view class="ay-step__li" wx:for="{{planSteps}}" wx:key="*this" style="padding-left:0">{{item}}</view>
+      <block wx:if="{{redFlags.length}}">
+        <view class="ay-hr"></view>
+        <view class="ay-card__title">出现以下情况请就医</view>
+        <view class="ay-step__li" wx:for="{{redFlags}}" wx:key="*this" style="padding-left:0;color:#C0524F">{{item}}</view>
+      </block>
+    </view>
+
+    <!-- 提醒设置 -->
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">🔔 提醒</text></view>
+      <view class="ay-card__title" style="font-size:26rpx">提前几天提醒</view>
+      <view class="ay-chips">
+        <view class="ay-chip {{settings.remindBefore===v?'ay-chip--on':''}}" wx:for="{{[1,2,3,5,7]}}" wx:key="*this"
+              data-v="{{item}}" bindtap="onRemindBefore">{{item}} 天</view>
+      </view>
+      <view class="ay-between ay-mt">
+        <view>
+          <view class="ay-row__t">微信通知</view>
+          <view class="ay-faint">{{settings.subscribed ? '已授权订阅消息' : '未授权，也可以用页面内提醒'}}</view>
+        </view>
+        <view class="ay-btn ay-btn--sm {{settings.notify?'':'ay-btn--line'}}" bindtap="onToggleNotify">
+          {{settings.notify ? '已开启' : '去开启'}}
+        </view>
+      </view>
+      <view class="ay-btn ay-btn--block ay-btn--ghost ay-mt" wx:if="{{settings.subscribed}}" bindtap="onPushNow">立即推送一条提醒</view>
+      <view class="ay-faint ay-mt">说明：微信一次性订阅消息每次授权可推 1 条，需要长期提醒就在每次进入时重新点一次「去开启」。</view>
+    </view>
+
+    <!-- 历史 -->
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd">
+        <text class="ay-card__title">📚 历史记录（{{records.length}}）</text>
+      </view>
+      <view class="ay-row" wx:for="{{records}}" wx:key="id">
+        <text class="ay-row__ico">🌹</text>
+        <view class="ay-row__main">
+          <view class="ay-row__t">{{item.start}} {{item.end ? '~ ' + item.end : '（进行中）'}}</view>
+          <view class="ay-row__d">{{item.lenText}} · 痛经{{item.painText}}<block wx:if="{{item.moods.length}}"> · {{item.moods}}</block></view>
+          <view class="ay-row__d" wx:if="{{item.note}}">{{item.note}}</view>
+        </view>
+        <view class="ay-row__extra" data-id="{{item.id}}" bindtap="onDelRecord">删除</view>
+      </view>
+      <view class="ay-empty" wx:if="{{!records.length}}">
+        <view class="ay-empty__ico">📝</view>
+        <view class="ay-empty__t">还没有记录，点上面「今天来了」开始</view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ==================== 皮肤 ==================== -->
+  <block wx:if="{{tab==='skin'}}">
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">🧴 我的肤质</text></view>
+      <view class="ay-t">{{skinPlan.summary}}</view>
+      <view class="ay-hr"></view>
+      <view class="ay-chips">
+        <view class="ay-chip {{skinTypeVal==='dry'?'ay-chip--on':''}}" data-v="dry" bindtap="onSkinType">干皮</view>
+        <view class="ay-chip {{skinTypeVal==='oil'?'ay-chip--on':''}}" data-v="oil" bindtap="onSkinType">油皮</view>
+        <view class="ay-chip {{skinTypeVal==='comb'?'ay-chip--on':''}}" data-v="comb" bindtap="onSkinType">混合皮</view>
+        <view class="ay-chip {{skinTypeVal==='sensitive'?'ay-chip--on':''}}" data-v="sensitive" bindtap="onSkinType">敏感肌</view>
+        <view class="ay-chip {{skinTypeVal==='normal'?'ay-chip--on':''}}" data-v="normal" bindtap="onSkinType">中性皮</view>
+      </view>
+      <view class="ay-card__hd"><text class="ay-card__title">诉求（最多 3 个）</text></view>
+      <view class="ay-chips">
+        <view class="ay-chip {{skinConcerns.indexOf(item)>=0?'ay-chip--on':''}}"
+              wx:for="{{skinConcernTags}}" wx:key="*this" data-v="{{item}}" bindtap="onSkinConcern">{{item}}</view>
+      </view>
+      <view class="ay-card__hd"><text class="ay-card__title">日晒强度</text></view>
+      <view class="ay-chips">
+        <view class="ay-chip {{sunVal==='indoor'?'ay-chip--on':''}}" data-v="indoor" bindtap="onSun">室内为主</view>
+        <view class="ay-chip {{sunVal==='normal'?'ay-chip--on':''}}" data-v="normal" bindtap="onSun">正常通勤</view>
+        <view class="ay-chip {{sunVal==='outdoor'?'ay-chip--on':''}}" data-v="outdoor" bindtap="onSun">户外多</view>
+      </view>
+    </view>
+
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">☀️ 晨间流程</text></view>
+      <view class="ay-step" wx:for="{{skinPlan.am}}" wx:key="title">
+        <view class="ay-step__hd">{{item.title}}</view>
+        <view class="ay-step__li" style="padding-left:0">{{item.detail}}</view>
+      </view>
+    </view>
+
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">🌙 夜间流程</text></view>
+      <view class="ay-step" wx:for="{{skinPlan.pm}}" wx:key="title">
+        <view class="ay-step__hd">{{item.title}}</view>
+        <view class="ay-step__li" style="padding-left:0">{{item.detail}}</view>
+      </view>
+    </view>
+
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">🎯 诉求专项</text></view>
+      <view class="ay-step" wx:for="{{skinPlan.focus}}" wx:key="concern">
+        <view class="ay-step__hd">{{item.concern}}</view>
+        <view class="ay-step__li" style="padding-left:0">成分：{{item.ingredients}}</view>
+        <view class="ay-step__li" style="padding-left:0">怎么用：{{item.freq}}</view>
+        <view class="ay-step__li" style="padding-left:0;color:#C0524F">注意：{{item.caution}}</view>
+      </view>
+    </view>
+
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">🗓️ 周护理</text></view>
+      <view class="ay-step__li" wx:for="{{skinPlan.weekly}}" wx:key="*this" style="padding-left:0">{{item}}</view>
+      <view class="ay-hr"></view>
+      <view class="ay-card__hd"><text class="ay-card__title">🕶️ 防晒</text></view>
+      <view class="ay-step__li" wx:for="{{skinPlan.sun}}" wx:key="*this" style="padding-left:0">{{item}}</view>
+      <view class="ay-hr"></view>
+      <view class="ay-card__hd"><text class="ay-card__title">⚠️ 避雷</text></view>
+      <view class="ay-step__li" wx:for="{{skinPlan.caution}}" wx:key="*this" style="padding-left:0;color:#C0524F">{{item}}</view>
+    </view>
+  </block>
+
+  <!-- ==================== 头发 ==================== -->
+  <block wx:if="{{tab==='hair'}}">
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">💇 我的发质</text></view>
+      <view class="ay-t">{{hairPlan.summary}}</view>
+      <view class="ay-faint ay-mt">{{hairPlan.freqText}}</view>
+      <view class="ay-hr"></view>
+      <view class="ay-card__title" style="font-size:26rpx">头皮类型</view>
+      <view class="ay-chips">
+        <view class="ay-chip {{scalpVal==='oil'?'ay-chip--on':''}}" data-v="oil" bindtap="onScalp">油性</view>
+        <view class="ay-chip {{scalpVal==='dry'?'ay-chip--on':''}}" data-v="dry" bindtap="onScalp">干性</view>
+        <view class="ay-chip {{scalpVal==='sensitive'?'ay-chip--on':''}}" data-v="sensitive" bindtap="onScalp">敏感</view>
+        <view class="ay-chip {{scalpVal==='dandruff'?'ay-chip--on':''}}" data-v="dandruff" bindtap="onScalp">有头屑</view>
+        <view class="ay-chip {{scalpVal==='normal'?'ay-chip--on':''}}" data-v="normal" bindtap="onScalp">中性</view>
+      </view>
+      <view class="ay-card__hd"><text class="ay-card__title">烫染损伤</text></view>
+      <view class="ay-chips">
+        <view class="ay-chip {{damageVal==='none'?'ay-chip--on':''}}" data-v="none" bindtap="onDamage">无烫染</view>
+        <view class="ay-chip {{damageVal==='color'?'ay-chip--on':''}}" data-v="color" bindtap="onDamage">染过</view>
+        <view class="ay-chip {{damageVal==='perm'?'ay-chip--on':''}}" data-v="perm" bindtap="onDamage">烫过</view>
+        <view class="ay-chip {{damageVal==='both'?'ay-chip--on':''}}" data-v="both" bindtap="onDamage">烫+染</view>
+      </view>
+      <view class="ay-card__hd"><text class="ay-card__title">困扰（最多 3 个）</text></view>
+      <view class="ay-chips">
+        <view class="ay-chip {{hairConcerns.indexOf(item)>=0?'ay-chip--on':''}}"
+              wx:for="{{hairConcernTags}}" wx:key="*this" data-v="{{item}}" bindtap="onHairConcern">{{item}}</view>
+      </view>
+    </view>
+
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">🚿 洗头七步</text></view>
+      <view class="ay-step" wx:for="{{hairPlan.wash}}" wx:key="title">
+        <view class="ay-step__hd">{{item.title}}</view>
+        <view class="ay-step__li" style="padding-left:0">{{item.detail}}</view>
+      </view>
+    </view>
+
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">🎯 困扰专项</text></view>
+      <view class="ay-step" wx:for="{{hairPlan.concerns}}" wx:key="concern">
+        <view class="ay-step__hd">{{item.concern}}</view>
+        <view class="ay-step__li" wx:for="{{item.steps}}" wx:for-item="s" wx:key="*this" style="padding-left:0">{{s}}</view>
+      </view>
+    </view>
+
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">🪮 日常护理</text></view>
+      <view class="ay-step__li" wx:for="{{hairPlan.care}}" wx:key="*this" style="padding-left:0">{{item}}</view>
+      <view class="ay-hr"></view>
+      <view class="ay-card__hd"><text class="ay-card__title">⚠️ 就医红线</text></view>
+      <view class="ay-step__li" wx:for="{{hairPlan.caution}}" wx:key="*this" style="padding-left:0;color:#C0524F">{{item}}</view>
+    </view>
+  </block>
+
+  <!-- ==================== 身体 ==================== -->
+  <block wx:if="{{tab==='body'}}">
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">🫧 我的身体档案</text></view>
+      <view class="ay-t">{{bodyPlan.summary}}</view>
+      <view class="ay-hr"></view>
+      <view class="ay-chips">
+        <view class="ay-chip {{bodyKp?'ay-chip--on':''}}" data-f="kp" bindtap="onToggleBodyFlag">有鸡皮肤</view>
+        <view class="ay-chip {{bodyBack?'ay-chip--on':''}}" data-f="backAcne" bindtap="onToggleBodyFlag">有后背痘</view>
+        <view class="ay-chip {{bodyConcerns.indexOf(item)>=0?'ay-chip--on':''}}"
+              wx:for="{{bodyConcernTags}}" wx:key="*this" data-v="{{item}}" bindtap="onBodyConcern">{{item}}</view>
+      </view>
+    </view>
+
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">🚿 沐浴六步</text></view>
+      <view class="ay-step" wx:for="{{bodyPlan.shower}}" wx:key="title">
+        <view class="ay-step__hd">{{item.title}}</view>
+        <view class="ay-step__li" style="padding-left:0">{{item.detail}}</view>
+      </view>
+    </view>
+
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">🧴 身体乳</text></view>
+      <view class="ay-step__li" wx:for="{{bodyPlan.lotion}}" wx:key="*this" style="padding-left:0">{{item}}</view>
+    </view>
+
+    <view class="ay-card ay-anim" wx:for="{{bodyPlan.special}}" wx:key="title">
+      <view class="ay-card__hd"><text class="ay-card__title">{{item.title}}</text></view>
+      <view class="ay-step__li" wx:for="{{item.steps}}" wx:for-item="s" wx:key="*this" style="padding-left:0">{{s}}</view>
+    </view>
+
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">🧘 体态与作息</text></view>
+      <view class="ay-step__li" wx:for="{{bodyPlan.posture}}" wx:key="*this" style="padding-left:0">{{item}}</view>
+      <view class="ay-hr"></view>
+      <view class="ay-step__li" wx:for="{{bodyPlan.sleep}}" wx:key="*this" style="padding-left:0">{{item}}</view>
+      <view class="ay-hr"></view>
+      <view class="ay-step__li" wx:for="{{bodyPlan.habit}}" wx:key="*this" style="padding-left:0">{{item}}</view>
+    </view>
+
+    <view class="ay-card ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">🩺 检查与疫苗</text></view>
+      <view class="ay-row" wx:for="{{checks}}" wx:key="key">
+        <text class="ay-row__ico">{{item.emoji}}</text>
+        <view class="ay-row__main">
+          <view class="ay-row__t">{{item.name}} · {{item.statusText}}</view>
+          <view class="ay-row__d">{{item.windowTip}}</view>
+          <view class="ay-row__d" wx:if="{{item.nextDate}}">下次建议 {{item.nextDate}}</view>
+        </view>
+        <view class="ay-row__extra" data-key="{{item.key}}" bindtap="onMarkCheck">已完成</view>
+      </view>
+    </view>
+  </block>
+</view>

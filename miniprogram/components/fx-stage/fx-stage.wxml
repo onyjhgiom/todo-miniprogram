@@ -1,0 +1,122 @@
+<!-- components/fx-stage/fx-stage.wxml
+     电影级舞台层：纯装饰，pointer-events:none，请放在页面内容之前。
+     一风格一场景：每种主题模式有专属的程序化场景元素（零图片资源）。 -->
+<view wx:if="{{mode !== 'none'}}" class="fxs fxs--{{mode}}" style="opacity:{{level / 10}}" aria-hidden="true">
+
+  <!-- 场景照片背景已改由页面根容器 background-image（themeStyle.bgStyle，base64 数据 URI）承载，
+       真机保证渲染。src 非空时这里所有 CSS 程序化场景块自动让位，只保留光效氛围。 -->
+
+  <!-- sunset 暮色湖景（暮金夜色/复古暖暮）：天空 → 落日 → 远山 → 水面倒影 -->
+  <block wx:if="{{!src && mode === 'sunset'}}">
+    <view class="fxs__sky"></view>
+    <view class="fxs__sunhalo"></view>
+    <view class="fxs__sun"></view>
+    <view class="fxs__hill fxs__hill--far"></view>
+    <view class="fxs__hill fxs__hill--near"></view>
+    <view class="fxs__water"></view>
+    <view class="fxs__glowroad"></view>
+    <view class="fxs__glitter fxs__glitter--1"></view>
+    <view class="fxs__glitter fxs__glitter--2"></view>
+  </block>
+
+  <!-- clean 极简白：左上一颗几不可见的玻璃圆球，纯净空气感 -->
+  <block wx:if="{{!src && mode === 'clean'}}">
+    <view class="fxs__orb fxs__orb--glass"></view>
+  </block>
+
+  <!-- grid 霓虹网格（深色科技）：暗星行星 + 地平线光带 + 透视网格地面 -->
+  <block wx:if="{{!src && mode === 'grid'}}">
+    <view class="fxs__planet"></view>
+    <view class="fxs__horizon"></view>
+    <view class="fxs__gridfloor"></view>
+  </block>
+
+  <!-- meadow 治愈插画：顶部暖阳 + 两层黄绿山丘，手绘晨光感 -->
+  <block wx:if="{{!src && mode === 'meadow'}}">
+    <view class="fxs__mdsun"></view>
+    <view class="fxs__mdhill fxs__mdhill--far"></view>
+    <view class="fxs__mdhill fxs__mdhill--near"></view>
+  </block>
+
+  <!-- eclipse 暗黑渐变：黑金星云日食，低调奢华 -->
+  <block wx:if="{{!src && mode === 'eclipse'}}">
+    <view class="fxs__eclipse"></view>
+    <view class="fxs__ecomet"></view>
+  </block>
+
+  <!-- confetti 潮流多彩：顶部彩纸胶囊彩点，活力跳动 -->
+  <block wx:if="{{!src && mode === 'confetti'}}">
+    <view class="fxs__cf fxs__cf--1"></view>
+    <view class="fxs__cf fxs__cf--2"></view>
+    <view class="fxs__cf fxs__cf--3"></view>
+    <view class="fxs__cf fxs__cf--4"></view>
+    <view class="fxs__cf fxs__cf--5"></view>
+  </block>
+
+  <!-- polaroid 复古怀旧：右上一张倾斜拍立得相纸，胶片时光 -->
+  <block wx:if="{{!src && mode === 'polaroid'}}">
+    <view class="fxs__polaroid">
+      <view class="fxs__polaroid__photo"></view>
+    </view>
+  </block>
+
+  <!-- leafshade 莫兰迪：顶部柔和叶影，两团低饱和绿雾 -->
+  <block wx:if="{{!src && mode === 'leafshade'}}">
+    <view class="fxs__leaf fxs__leaf--a"></view>
+    <view class="fxs__leaf fxs__leaf--b"></view>
+  </block>
+
+  <!-- aurora 玻璃拟态：顶部大幻彩渐变球 + 底部粉紫雾 -->
+  <block wx:if="{{!src && mode === 'aurora'}}">
+    <view class="fxs__gradient-orb"></view>
+    <view class="fxs__aurora-mist"></view>
+  </block>
+
+  <!-- ink 国风水墨：墨圈水痕 + 远山黛影 + 竹枝斜出 -->
+  <block wx:if="{{!src && mode === 'ink'}}">
+    <view class="fxs__inkring"></view>
+    <view class="fxs__inkmount fxs__inkmount--far"></view>
+    <view class="fxs__inkmount fxs__inkmount--near"></view>
+    <view class="fxs__bamboo">
+      <view class="fxs__bamboo__stem"></view>
+      <view class="fxs__bamboo__leaf fxs__bamboo__leaf--1"></view>
+      <view class="fxs__bamboo__leaf fxs__bamboo__leaf--2"></view>
+      <view class="fxs__bamboo__leaf fxs__bamboo__leaf--3"></view>
+      <view class="fxs__bamboo__leaf fxs__bamboo__leaf--4"></view>
+    </view>
+  </block>
+
+  <!-- pixelcamp 游戏像素：像素月亮 + 星星 + 草地 + 篝火光晕 -->
+  <block wx:if="{{!src && mode === 'pixelcamp'}}">
+    <view class="fxs__pxmoon"></view>
+    <view class="fxs__pxstar fxs__pxstar--1"></view>
+    <view class="fxs__pxstar fxs__pxstar--2"></view>
+    <view class="fxs__pxstar fxs__pxstar--3"></view>
+    <view class="fxs__pxground"></view>
+    <view class="fxs__pxfire"></view>
+  </block>
+
+  <!-- 斜向体积光轴：教堂 / 影院射光的感觉，缓慢摆动 -->
+  <view wx:if="{{rays}}" class="fxs__rays">
+    <view class="fxs__ray fxs__ray--1"></view>
+    <view class="fxs__ray fxs__ray--2"></view>
+    <view class="fxs__ray fxs__ray--3"></view>
+  </view>
+
+  <!-- 环境光晕：两团大色斑做极慢漂移，负责整体的「空气感」 -->
+  <view class="fxs__blob fxs__blob--a"></view>
+  <view class="fxs__blob fxs__blob--b"></view>
+
+  <!-- 漂浮微粒：上升后淡出，营造丁达尔效应里的浮尘 -->
+  <view wx:if="{{dust}}" class="fxs__dust">
+    <view
+      wx:for="{{motes}}"
+      wx:key="*this"
+      class="fxs__mote"
+      style="{{item}}"
+    ></view>
+  </view>
+
+  <!-- 顶部柔光带：让内容从上方被照亮，头部更有分量 -->
+  <view wx:if="{{topglow}}" class="fxs__topglow"></view>
+</view>

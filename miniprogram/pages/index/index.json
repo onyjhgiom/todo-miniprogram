@@ -1,0 +1,18 @@
+{
+  "navigationBarTitleText": "待办清单",
+  "navigationBarBackgroundColor": "#15110D",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#15110D",
+  "backgroundTextStyle": "light",
+  "usingComponents": {
+    "todo-card": "/components/todo-card/todo-card",
+    "todo-composer": "/components/todo-composer/todo-composer",
+    "stats-card": "/components/stats-card/stats-card",
+    "filter-bar": "/components/filter-bar/filter-bar",
+    "view-switcher": "/components/view-switcher/view-switcher",
+    "bottom-tab": "/components/bottom-tab/bottom-tab",
+    "empty-state": "/components/empty-state/empty-state",
+    "fx-stage": "/components/fx-stage/fx-stage"
+  }
+}

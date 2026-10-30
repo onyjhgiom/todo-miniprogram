@@ -1,0 +1,14 @@
+<game-shell title="{{title}}" timeText="{{timeText}}" statText="{{statText}}" paused="{{paused}}"
+  bind:back="onBack" bind:reset="onReset" bind:hint="onHint" bind:home="onHome" bind:pause="onPause">
+  <view class="mem">
+    <text class="t-sm muted-2 center">第 {{level}} 关 · 翻牌找出相同图案</text>
+    <view class="mem__board" style="grid-template-columns: repeat({{cols}}, 1fr);">
+      <view wx:for="{{cards}}" wx:key="key"
+        class="mem__cell {{item.flipped||item.matched?'mem__cell--open':''}}"
+        data-index="{{index}}" bindtap="onTap">
+        <text wx:if="{{item.flipped||item.matched}}" class="mem__sym">{{item.sym}}</text>
+        <text wx:else class="mem__q">?</text>
+      </view>
+    </view>
+  </view>
+</game-shell>

@@ -1,0 +1,179 @@
+/* components/flip-digit/flip-digit.wxss */
+/* 尺寸由外部 class 控制（如 width:88rpx; height:124rpx），字号由 CSS 变量 --fd-font 注入 */
+/* 配色变量化：外部主题通过 host inline style 注入 --fd-face-top/--fd-face-bottom/--fd-border/--fd-ink/--fd-shade-rgb/--fd-family，
+   未注入时回落下方默认值（与历史白卡经典版式完全一致）。 */
+
+/* ===== 透视容器 ===== */
+.fd-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 18rpx;
+  /* 透视感：视距越小组件近大远小越明显 */
+  perspective: 620rpx;
+  perspective-origin: 50% 50%;
+  /* ===== 配色默认值（白卡经典版）===== */
+  --fd-face-top: linear-gradient(180deg, #ffffff 0%, #f3f6fc 100%);
+  --fd-face-bottom: linear-gradient(180deg, #e9edf7 0%, #f6f8fd 100%);
+  --fd-border: #e2e8f5;
+  --fd-ink: #31406b;
+  --fd-shade-rgb: 101, 122, 176;
+  --fd-family: inherit;
+  /* 卡片整体投影（厚度感的外层暗影） */
+  box-shadow:
+    0 20rpx 36rpx rgba(var(--fd-shade-rgb), 0.22),
+    0 4rpx 10rpx rgba(var(--fd-shade-rgb), 0.10);
+}
+
+/* ===== 静止半页 ===== */
+.fd-half {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  overflow: hidden;
+}
+.fd-half--top {
+  top: 0;
+  border-radius: 18rpx 18rpx 0 0;
+  background: var(--fd-face-top);
+  border: 2rpx solid var(--fd-border);
+  border-bottom: none;
+}
+.fd-half--bottom {
+  bottom: 0;
+  border-radius: 0 0 18rpx 18rpx;
+  /* 下半页整体略暗，模拟牌面受光弯曲 */
+  background: var(--fd-face-bottom);
+  border: 2rpx solid var(--fd-border);
+  border-top: none;
+}
+
+/* ===== 数字（全高定位，靠半页 overflow 裁切出上下两半） ===== */
+.fd-num {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 200%; /* 半页高的两倍 = 整卡高，数字垂直居中于中缝 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fd-num--top { top: 0; }
+.fd-num--bottom { bottom: 0; }
+.fd-txt {
+  font-size: var(--fd-font, 84rpx);
+  font-weight: 700;
+  font-family: var(--fd-family, inherit);
+  color: var(--fd-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== 翻动层 ===== */
+.fd-flap {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  overflow: hidden;
+  z-index: 3;
+  backface-visibility: hidden;
+  will-change: transform;
+}
+/* 上翻动片：旧数字上半，绕底边铰链向下翻落 */
+.fd-flap--top {
+  top: 0;
+  border-radius: 18rpx 18rpx 0 0;
+  background: var(--fd-face-top);
+  border: 2rpx solid var(--fd-border);
+  border-bottom: none;
+  transform-origin: 50% 100%;
+  transform: rotateX(0deg);
+  /* 先加速离手 */
+  animation: fd-flap-top 320ms cubic-bezier(0.45, 0.05, 0.75, 0.6) forwards;
+}
+/* 下翻动片：新数字下半，绕顶边铰链从 90° 带重力感落回 */
+.fd-flap--bottom {
+  bottom: 0;
+  border-radius: 0 0 18rpx 18rpx;
+  background: var(--fd-face-bottom);
+  border: 2rpx solid var(--fd-border);
+  border-top: none;
+  transform-origin: 50% 0%;
+  transform: rotateX(90deg);
+  animation: fd-flap-bottom 360ms cubic-bezier(0.22, 0.68, 0.34, 1) 320ms forwards;
+  /* 翻动片落地前投出的软阴影 */
+  box-shadow: 0 18rpx 32rpx rgba(var(--fd-shade-rgb), 0.28);
+}
+
+/* 翻动片上的光影层：旋转时模拟受光面明暗变化，强化立体 */
+.fd-shade {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(var(--fd-shade-rgb), 0.08) 0%, rgba(var(--fd-shade-rgb), 0.24) 100%);
+  pointer-events: none;
+}
+/* 上片翻落时逐渐背光变暗 */
+.fd-shade--top {
+  opacity: 0;
+  animation: fd-darken 320ms ease-in forwards;
+}
+/* 下片落回时逐渐迎光变亮 */
+.fd-shade--bottom {
+  opacity: 0.34;
+  animation: fd-lighten 360ms ease-out 320ms forwards;
+}
+
+@keyframes fd-flap-top {
+  0% { transform: rotateX(0deg); }
+  100% { transform: rotateX(-90deg); }
+}
+@keyframes fd-flap-bottom {
+  0% { transform: rotateX(90deg); }
+  100% { transform: rotateX(0deg); }
+}
+@keyframes fd-darken {
+  from { opacity: 0; }
+  to { opacity: 0.34; }
+}
+@keyframes fd-lighten {
+  from { opacity: 0.34; }
+  to { opacity: 0; }
+}
+
+/* ===== 立体装饰 ===== */
+/* 中缝：两端淡出的细阴影线，暗示两片牌的接缝 */
+.fd-line {
+  position: absolute;
+  top: 50%;
+  left: 6rpx;
+  right: 6rpx;
+  height: 4rpx;
+  margin-top: -2rpx;
+  border-radius: 4rpx;
+  background: linear-gradient(
+    90deg,
+    rgba(var(--fd-shade-rgb), 0) 0%,
+    rgba(var(--fd-shade-rgb), 0.20) 18%,
+    rgba(var(--fd-shade-rgb), 0.30) 50%,
+    rgba(var(--fd-shade-rgb), 0.20) 82%,
+    rgba(var(--fd-shade-rgb), 0) 100%
+  );
+  z-index: 5;
+  pointer-events: none;
+}
+/* 顶部斜向高光：模拟牌面反光 */
+.fd-shine {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 18rpx;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 38%);
+  z-index: 4;
+  pointer-events: none;
+}

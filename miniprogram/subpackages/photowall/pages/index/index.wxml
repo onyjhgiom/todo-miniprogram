@@ -1,0 +1,89 @@
+<view class="pw themed" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <!-- 与待办联动：完成情况 → 解锁主题模板 -->
+  <view wx:if="{{unlockTitle || unlockNum}}" class="pw-unlock {{unlockNew ? 'pw-unlock--new' : ''}}" bindtap="onUnlockTap">
+    <view class="pw-unlock-ic">{{unlockNew ? '🎁' : ''}}</view>
+    <view class="pw-unlock-bd">
+      <view wx:if="{{unlockNum}}" class="pw-unlock-t">
+        <text>再完成 </text><text class="pw-unlock-num">{{unlockNum}}</text><text> 个待办解锁「</text><text class="pw-unlock-hl">{{unlockTheme}}</text><text>」主题</text>
+      </view>
+      <view wx:else class="pw-unlock-t">{{unlockTitle}}</view>
+      <view class="pw-unlock-s">{{unlockSub}}</view>
+    </view>
+    <view class="pw-unlock-go">去创作</view>
+  </view>
+
+  <view class="pw-tabs">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="key"
+      class="pw-tab {{tab === item.key ? 'on' : ''}}"
+      data-key="{{item.key}}"
+      bindtap="onTab"
+    >{{item.label}}</view>
+  </view>
+
+  <view class="pw-wrap">
+    <view wx:if="{{cards.length}}" class="pw-grid">
+      <view wx:for="{{cards}}" wx:key="id" class="pw-row">
+        <view
+          class="pw-card"
+          style="transform:translateX({{swipeId === item.id ? swipeX : 0}}px);"
+          data-id="{{item.id}}"
+          bindtap="onOpen"
+          bindlongpress="onLongPress"
+          bindtouchstart="onTouchStart"
+          bindtouchmove="onTouchMove"
+          bindtouchend="onTouchEnd"
+        >
+          <view class="pw-cover">
+            <image wx:if="{{item.cover}}" class="pw-cover-img" src="{{item.cover}}" mode="aspectFill" />
+            <view wx:else class="pw-cover-ph">{{item.fallback}}</view>
+          </view>
+          <view class="pw-card-bd">
+            <view class="pw-card-t">{{item.title}}</view>
+            <view class="pw-card-m">{{item.shapeName}} · {{item.count}} 张</view>
+            <view class="pw-card-d">{{item.timeText}}</view>
+          </view>
+          <view wx:if="{{item.favorite}}" class="pw-card-fav">★</view>
+        </view>
+        <view wx:if="{{!item.favShape}}" class="pw-del" data-id="{{item.id}}" bindtap="onSwipeDelete">删除</view>
+      </view>
+      <view wx:if="{{!hasMore}}" class="pw-end">已经到底了</view>
+    </view>
+
+    <view wx:else class="pw-empty">
+      <block wx:if="{{tab === 'works'}}">
+        <image class="pw-hero" src="/subpackages/photowall/assets/hero-wall.jpg" mode="widthFix" />
+        <view class="pw-empty-t">还没有照片墙</view>
+        <view class="pw-empty-s">选择一个模板，开启你的专属回忆墙</view>
+        <view class="pw-empty-btn" bindtap="onCreate"><text class="pw-btn-plus">＋</text>立即创建</view>
+      </block>
+      <block wx:else>
+        <view class="pw-mini-empty">
+          <view class="pw-empty-ic">{{tab === 'drafts' ? '📋' : '⭐'}}</view>
+          <view class="pw-empty-t pw-empty-t--sm">{{tab === 'drafts' ? '还没有草稿' : '还没有收藏模板'}}</view>
+          <view class="pw-empty-s">{{tab === 'favs' ? '在形状库里点「收藏」，常用形状会存到这里' : '选一个形状，把照片拼成它'}}</view>
+          <view wx:if="{{tab === 'drafts'}}" class="pw-empty-btn" bindtap="onCreate"><text class="pw-btn-plus">＋</text>立即创建</view>
+        </view>
+      </block>
+
+      <view wx:if="{{tab !== 'favs'}}" class="pw-rec">
+        <view class="pw-rec-head">
+          <view class="pw-rec-line"></view>
+          <text class="pw-rec-dia">◇</text>
+          <text class="pw-rec-t">推荐模板</text>
+          <text class="pw-rec-dia">◇</text>
+          <view class="pw-rec-line"></view>
+        </view>
+        <view class="pw-rec-row">
+          <view wx:for="{{recs}}" wx:key="id" class="pw-rec-item" data-id="{{item.id}}" bindtap="onUseRec">
+            <image class="pw-rec-img" src="{{item.tpl}}" mode="aspectFill" />
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="pw-fab" bindtap="onCreate">＋</view>
+</view>

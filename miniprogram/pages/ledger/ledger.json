@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "记账本",
+  "navigationBarBackgroundColor": "#F7F8F6",
+  "navigationBarTextStyle": "black",
+  "backgroundColor": "#F4F5F7",
+  "usingComponents": {
+    "empty-state": "/components/empty-state/empty-state"
+  }
+}

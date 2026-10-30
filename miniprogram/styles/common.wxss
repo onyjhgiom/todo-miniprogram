@@ -1,0 +1,239 @@
+/**
+ * 设计变量：中古 / 侘寂（深炭墨 + 暖宣纸 + 低饱和四彩）
+ * 与 app.wxss 的 --color-* 主色板同源，全局统一
+ * 同时挂在 page 与 .tk 上，保证自定义组件（样式隔离）也能取到变量
+ *
+ * 注意：本段原为 styles/tokens.wxss，已合并至此以减少分包内的重复 @import。
+ */
+page, .tk {
+  --paper: #F0EDE6;
+  --paper-2: #E9E5DC;
+  --card: #FCFBF8;
+  --card-2: #F6F3EC;
+  --card-3: #EDE8DE;
+
+  --ink: #35302A;
+  --ink-2: #6E6558;
+  --ink-3: #9E9384;
+  --ink-4: #C4BAAB;
+
+  --line: #E4DED2;
+  --line-2: #D3CABB;
+  --glow-1: #FAF7F0;
+  --glow-2: #F1EDE3;
+  --sd-1: 0 6rpx 20rpx rgba(90, 74, 56, .08);
+  --sd-2: 0 16rpx 40rpx rgba(90, 74, 56, .13);
+  --sd-inset: inset 0 1rpx 0 rgba(255, 255, 255, .7);
+
+  --clay: #B5714C;
+  --clay-2: #E3B999;
+  --clay-soft: #F5E7DC;
+  --gold: #C09A5E;
+  --gold-soft: #F6EDDA;
+  --mint: #A8C0A0;
+  --mint-2: #E7EEDF;
+  --mint-deep: #6E8E6E;
+
+  /* 四彩（与统计卡 / 强调块配套） */
+  --tone-cream: #D8A05C;   --tone-cream-soft: #F5EBD4;
+  --tone-sage: #7E9E7E;    --tone-sage-soft: #E7EEDF;
+  --tone-clay2: #C08468;   --tone-clay2-soft: #F3E4DE;
+  --tone-oat: #A9915C;     --tone-oat-soft: #F2EDDD;
+
+  --panel: #35302A;
+  --panel-2: #2C2823;
+  --panel-line: rgba(255, 255, 255, .12);
+  --panel-ink: #F2EDE4;
+  --panel-ink-2: rgba(242, 237, 228, .62);
+  --panel-ink-3: rgba(242, 237, 228, .38);
+
+  --r-xl: 44rpx;
+  --r-lg: 34rpx;
+  --r-md: 26rpx;
+  --r-sm: 18rpx;
+  --gap: 26rpx;
+
+  --font-serif: "Songti SC", "STSong", "Source Han Serif SC", "Noto Serif SC", serif;
+}
+
+/**
+ * 公共类库（可被 page 与 自定义组件 @import 复用）
+ * 依赖同文件顶部的 CSS 变量
+ */
+
+/* ============ 布局容器 ============ */
+.page {
+  min-height: 100vh;
+  padding: 24rpx 28rpx calc(200rpx + env(safe-area-inset-bottom));
+  background:
+    radial-gradient(120% 60% at 15% -10%, var(--glow-1) 0%, rgba(0, 0, 0, 0) 60%),
+    radial-gradient(90% 50% at 100% 0%, var(--glow-2) 0%, rgba(0, 0, 0, 0) 55%),
+    var(--paper);
+}
+.page--tight { padding-bottom: calc(60rpx + env(safe-area-inset-bottom)); }
+
+.row { display: flex; align-items: center; }
+.row--between { justify-content: space-between; }
+.col { display: flex; flex-direction: column; }
+.wrap { flex-wrap: wrap; }
+.grow { flex: 1; min-width: 0; }
+.mt-8 { margin-top: 8rpx; }
+.mt-16 { margin-top: 16rpx; }
+.mt-24 { margin-top: 24rpx; }
+.mt-32 { margin-top: 32rpx; }
+.mb-16 { margin-bottom: 16rpx; }
+
+/* ============ 卡片 ============ */
+.card {
+  position: relative;
+  background: var(--card);
+  border-radius: var(--r-lg);
+  border: 2rpx solid rgba(231, 220, 203, .8);
+  box-shadow: var(--sd-1), var(--sd-inset);
+  padding: 32rpx;
+  overflow: hidden;
+}
+.card--flat { box-shadow: none; background: var(--card-2); }
+.card--tint { background: linear-gradient(160deg, rgba(48, 38, 27, 0.85) 0%, rgba(40, 31, 22, 0.9) 100%); }
+.card--mint { background: linear-gradient(160deg, #FAFCF8 0%, #E9F0E4 100%); border-color: rgba(168, 192, 160, .55); }
+.card--press:active { transform: scale(.99); }
+
+.tape { position: absolute; width: 132rpx; height: 36rpx; border-radius: 4rpx; opacity: .85; }
+.tape--mint { background: rgba(168, 192, 160, .55); top: -14rpx; left: 44rpx; transform: rotate(-4deg); }
+.tape--clay { background: rgba(227, 185, 153, .5); top: -14rpx; right: 56rpx; transform: rotate(5deg); }
+.tape--gold { background: rgba(192, 154, 94, .3); top: -12rpx; left: 50%; margin-left: -66rpx; transform: rotate(-2deg); }
+
+.grain::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .35;
+  background-image: repeating-linear-gradient(135deg, rgba(160, 140, 110, .06) 0 2rpx, transparent 2rpx 8rpx);
+}
+
+/* ============ 文字 ============ */
+.t-xs { font-size: 22rpx; }
+.t-sm { font-size: 24rpx; }
+.t-md { font-size: 28rpx; }
+.t-lg { font-size: 32rpx; }
+.t-xl { font-size: 40rpx; }
+.t-xxl { font-size: 60rpx; }
+.t-display { font-size: 72rpx; line-height: 1.1; letter-spacing: -1rpx; }
+.muted { color: var(--ink-2); }
+.muted-2 { color: var(--ink-3); }
+/* 更弱的提示色：用于 input 的 placeholder-class（游戏分包 idiom / point24 使用） */
+.muted-3 { color: var(--ink-4); }
+.strong { font-weight: 600; }
+.heavy { font-weight: 700; }
+.letter { letter-spacing: 2rpx; }
+.center { text-align: center; }
+.ellipsis { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.clamp-2 {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+}
+.serif { font-family: var(--font-serif); letter-spacing: 1rpx; }
+
+/* ============ 标签 ============ */
+.chip {
+  display: inline-flex; align-items: center; height: 44rpx; padding: 0 20rpx;
+  border-radius: 999rpx; font-size: 22rpx; background: var(--card-2);
+  color: var(--ink-2); border: 2rpx solid transparent;
+}
+.chip--mint { background: var(--mint-2); color: var(--mint-deep); }
+.chip--clay { background: var(--clay-soft); color: var(--clay); }
+.chip--gold { background: var(--gold-soft); color: #9C7F3F; }
+.chip--line { background: transparent; border-color: var(--line-2); color: var(--ink-2); }
+.chip--active { background: var(--color-primary-deep); color: #F7F2E8; border-color: var(--color-primary-deep); }
+
+/* ============ 按钮 ============ */
+.btn {
+  display: flex; align-items: center; justify-content: center; height: 92rpx;
+  border-radius: 999rpx; font-size: 30rpx; font-weight: 600; letter-spacing: 2rpx;
+  transition: transform .15s ease, opacity .15s ease;
+}
+.btn--primary {
+  background: linear-gradient(135deg, #96573A, #C08468); color: #F7F2E8;
+  box-shadow: 0 10rpx 24rpx rgba(150, 87, 58, .28);
+}
+.btn--mint {
+  background: linear-gradient(135deg, #6E8E6E, #A8C0A0); color: #FBFDFA;
+  box-shadow: 0 10rpx 24rpx rgba(110, 142, 110, .24);
+}
+.btn--ghost { background: var(--card); color: var(--ink-2); border: 2rpx solid var(--line); }
+.btn--danger { background: var(--card); color: var(--clay); border: 2rpx solid rgba(192, 120, 78, .3); }
+.btn--sm { height: 68rpx; font-size: 26rpx; }
+.btn:active { transform: scale(.97); opacity: .9; }
+.btn--disabled { opacity: .45; }
+
+/* ============ 分割线 / 进度 ============ */
+.hr { height: 2rpx; background: var(--line); margin: 24rpx 0; }
+.dots {
+  height: 8rpx;
+  background-image: radial-gradient(circle, var(--line-2) 1.5rpx, transparent 1.5rpx);
+  background-size: 14rpx 8rpx; opacity: .8;
+}
+.bar { height: 12rpx; border-radius: 999rpx; background: var(--card-3); overflow: hidden; }
+.bar__in {
+  height: 100%; border-radius: 999rpx; transition: width .4s ease;
+  background: linear-gradient(90deg, #A8C0A0, #6E8E6E);
+}
+.bar__in--clay { background: linear-gradient(90deg, #E3B999, #B5714C); }
+.bar__in--gold { background: linear-gradient(90deg, #EBD8AE, #C09A5E); }
+
+/* ============ 纯 CSS 图标 ============ */
+.ic {
+  position: relative; display: inline-block; width: 36rpx; height: 36rpx;
+  flex: 0 0 auto; color: var(--ink-3);
+}
+.ic--lg { width: 48rpx; height: 48rpx; }
+.ic--sm { width: 28rpx; height: 28rpx; }
+
+.ic-home::before { content: ""; position: absolute; left: 5rpx; top: 16rpx; width: 26rpx; height: 17rpx; background: currentColor; border-radius: 4rpx 4rpx 6rpx 6rpx; }
+.ic-home::after { content: ""; position: absolute; left: 8rpx; top: 6rpx; width: 20rpx; height: 20rpx; background: currentColor; border-radius: 5rpx; transform: rotate(45deg); }
+.ic-list::before { content: ""; position: absolute; left: 5rpx; top: 10rpx; width: 26rpx; height: 5rpx; background: currentColor; border-radius: 4rpx; box-shadow: 0 10rpx 0 currentColor, 0 20rpx 0 currentColor; }
+.ic-user::before { content: ""; position: absolute; left: 10rpx; top: 3rpx; width: 16rpx; height: 16rpx; background: currentColor; border-radius: 50%; }
+.ic-user::after { content: ""; position: absolute; left: 5rpx; top: 23rpx; width: 26rpx; height: 12rpx; background: currentColor; border-radius: 14rpx 14rpx 5rpx 5rpx; }
+.ic-plus::before { content: ""; position: absolute; left: 4rpx; top: 16rpx; width: 28rpx; height: 5rpx; background: currentColor; border-radius: 4rpx; }
+.ic-plus::after { content: ""; position: absolute; left: 15rpx; top: 5rpx; width: 5rpx; height: 28rpx; background: currentColor; border-radius: 4rpx; }
+.ic-check::before { content: ""; position: absolute; left: 7rpx; top: 17rpx; width: 12rpx; height: 5rpx; background: currentColor; border-radius: 4rpx; transform: rotate(45deg); }
+.ic-check::after { content: ""; position: absolute; left: 13rpx; top: 13rpx; width: 19rpx; height: 5rpx; background: currentColor; border-radius: 4rpx; transform: rotate(-45deg); }
+.ic-cal::before { content: ""; position: absolute; left: 4rpx; top: 9rpx; width: 28rpx; height: 24rpx; border: 4rpx solid currentColor; border-radius: 6rpx; box-sizing: border-box; }
+.ic-cal::after { content: ""; position: absolute; left: 12rpx; top: 3rpx; width: 4rpx; height: 10rpx; background: currentColor; border-radius: 4rpx; box-shadow: 8rpx 0 0 currentColor; }
+.ic-clock::before { content: ""; position: absolute; left: 3rpx; top: 3rpx; width: 30rpx; height: 30rpx; border: 4rpx solid currentColor; border-radius: 50%; box-sizing: border-box; }
+.ic-clock::after { content: ""; position: absolute; left: 17rpx; top: 9rpx; width: 3rpx; height: 10rpx; background: currentColor; border-radius: 4rpx; }
+.ic-flag::before { content: ""; position: absolute; left: 8rpx; top: 3rpx; width: 20rpx; height: 13rpx; background: currentColor; border-radius: 4rpx 6rpx 6rpx 4rpx; }
+.ic-flag::after { content: ""; position: absolute; left: 8rpx; top: 2rpx; width: 4rpx; height: 30rpx; background: currentColor; border-radius: 4rpx; }
+.ic-edit::before { content: ""; position: absolute; left: 5rpx; top: 6rpx; width: 24rpx; height: 6rpx; background: currentColor; border-radius: 4rpx; transform: rotate(-45deg); }
+.ic-edit::after { content: ""; position: absolute; left: 6rpx; top: 20rpx; width: 7rpx; height: 12rpx; background: currentColor; border-radius: 0 0 6rpx 6rpx; transform: rotate(-45deg); }
+.ic-trash::before { content: ""; position: absolute; left: 7rpx; top: 10rpx; width: 22rpx; height: 22rpx; border: 4rpx solid currentColor; border-top: 0; border-radius: 0 0 8rpx 8rpx; box-sizing: border-box; }
+.ic-trash::after { content: ""; position: absolute; left: 5rpx; top: 4rpx; width: 26rpx; height: 4rpx; background: currentColor; border-radius: 4rpx; }
+.ic-note::before { content: ""; position: absolute; left: 5rpx; top: 4rpx; width: 26rpx; height: 28rpx; background: currentColor; border-radius: 4rpx 12rpx 4rpx 4rpx; opacity: .35; }
+.ic-note::after { content: ""; position: absolute; left: 10rpx; top: 11rpx; width: 16rpx; height: 4rpx; background: currentColor; border-radius: 4rpx; box-shadow: 0 8rpx 0 currentColor, 0 16rpx 0 currentColor; }
+.ic-arrow::before { content: ""; position: absolute; left: 10rpx; top: 16rpx; width: 16rpx; height: 4rpx; background: currentColor; border-radius: 4rpx; }
+.ic-arrow::after { content: ""; position: absolute; left: 19rpx; top: 12rpx; width: 10rpx; height: 10rpx; border-top: 4rpx solid currentColor; border-right: 4rpx solid currentColor; transform: rotate(45deg); border-radius: 2rpx; }
+.ic-back::before { content: ""; position: absolute; left: 12rpx; top: 16rpx; width: 16rpx; height: 4rpx; background: currentColor; border-radius: 4rpx; }
+.ic-back::after { content: ""; position: absolute; left: 8rpx; top: 12rpx; width: 10rpx; height: 10rpx; border-bottom: 4rpx solid currentColor; border-left: 4rpx solid currentColor; transform: rotate(45deg); border-radius: 2rpx; }
+.ic-star::before { content: ""; position: absolute; left: 3rpx; top: 3rpx; width: 30rpx; height: 30rpx; background: currentColor; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+.ic-search::before { content: ""; position: absolute; left: 4rpx; top: 4rpx; width: 20rpx; height: 20rpx; border: 4rpx solid currentColor; border-radius: 50%; box-sizing: border-box; }
+.ic-search::after { content: ""; position: absolute; left: 21rpx; top: 21rpx; width: 12rpx; height: 4rpx; background: currentColor; border-radius: 4rpx; transform: rotate(45deg); }
+.ic-more::before { content: ""; position: absolute; left: 8rpx; top: 8rpx; width: 6rpx; height: 6rpx; background: currentColor; border-radius: 50%; box-shadow: 10rpx 0 0 currentColor, 20rpx 0 0 currentColor; }
+.ic-bell::before { content: ""; position: absolute; left: 6rpx; top: 4rpx; width: 24rpx; height: 20rpx; background: currentColor; border-radius: 14rpx 14rpx 6rpx 6rpx; }
+.ic-bell::after { content: ""; position: absolute; left: 14rpx; top: 24rpx; width: 8rpx; height: 8rpx; background: currentColor; border-radius: 50%; }
+.ic-grid::before {
+  content: ""; position: absolute; left: 9rpx; top: 9rpx; width: 9rpx; height: 9rpx;
+  background: currentColor; border-radius: 3rpx;
+  box-shadow: 13rpx 0 0 currentColor, 0 13rpx 0 currentColor, 13rpx 13rpx 0 currentColor;
+}
+.ic-trophy::before { content: ""; position: absolute; left: 8rpx; top: 4rpx; width: 20rpx; height: 16rpx; border: 4rpx solid currentColor; border-bottom: 0; border-radius: 10rpx 10rpx 2rpx 2rpx; box-sizing: border-box; }
+.ic-trophy::after { content: ""; position: absolute; left: 16rpx; top: 20rpx; width: 4rpx; height: 12rpx; background: currentColor; }
+.ic-pause::before { content: ""; position: absolute; left: 13rpx; top: 8rpx; width: 6rpx; height: 28rpx; background: currentColor; border-radius: 3rpx; box-shadow: 12rpx 0 0 currentColor; }
+.ic-play::before { content: ""; position: absolute; left: 13rpx; top: 8rpx; width: 0; height: 0; border-left: 22rpx solid currentColor; border-top: 14rpx solid transparent; border-bottom: 14rpx solid transparent; }
+
+/* ============ 悬浮按钮 ============ */
+.fab {
+  position: fixed; right: 40rpx; bottom: calc(190rpx + env(safe-area-inset-bottom));
+  width: 108rpx; height: 108rpx; border-radius: 50%;
+  background: linear-gradient(140deg, #96573A, #C08468);
+  box-shadow: 0 14rpx 30rpx rgba(150, 87, 58, .32), inset 0 2rpx 0 rgba(255, 255, 255, .35);
+  display: flex; align-items: center; justify-content: center; z-index: 20;
+}
+.fab:active { transform: scale(.94); }
+.fab .ic { color: #F7F2E8; width: 44rpx; height: 44rpx; }
+.fab--mint { background: linear-gradient(140deg, #6E8E6E, #A8C0A0); box-shadow: 0 14rpx 30rpx rgba(110, 142, 110, .3); }

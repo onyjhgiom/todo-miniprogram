@@ -1,0 +1,265 @@
+<!--pages/little-helper/little-helper.wxml
+  小琳 · 待办助手 —— 深海蓝科技风 AI 对话界面
+  结构：固定顶栏（胶囊避让） / 消息弹性区 / 常驻快捷指令 / 底部输入栏
+  卡片数据全部来自 little-helper.ts 的真实执行结果（opResult），前端不臆造成功状态 -->
+<view class="lh {{shellClass}} {{bgClass}}" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <!-- ==================== 背景层（低对比度渐变 + 顶部环境光） ==================== -->
+  <view class="lh__bg" aria-hidden="true">
+    <view class="lh__bg-grad"></view>
+    <view class="lh__bg-glow lh__bg-glow--a"></view>
+    <view class="lh__bg-glow lh__bg-glow--b"></view>
+  </view>
+
+  <!-- ==================== 顶部助手信息栏（固定，避让胶囊） ==================== -->
+  <view class="lh__nav" style="padding-top:{{padTop}}px">
+    <view class="lh__nav-row" style="height:{{navTotal}}px;padding-top:{{padTop}}px;padding-right:{{navRight}}px">
+      <view class="lh__nav-back" hover-class="press" bindtap="onBack" aria-label="返回">
+        <view class="lh__nav-backico"></view>
+      </view>
+      <view class="lh__nav-brand">
+        <image class="lh__nav-ava" src="/assets/helper-avatar.jpg" mode="aspectFill"></image>
+        <view class="lh__nav-meta">
+          <text class="lh__nav-name">小琳 · 待办助手</text>
+          <view class="lh__nav-status">
+            <view class="lh__dot"></view>
+            <text class="lh__nav-sub">在线 · 你的智能生活助手</text>
+          </view>
+        </view>
+      </view>
+      <view class="lh__nav-acts">
+        <view wx:if="{{aiOnline}}" class="lh__ai-badge">AI</view>
+        <view class="lh__icon-btn" bindtap="toggleStyleSheet" hover-class="press">
+          <view class="lh__icon-gear"></view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 风格面板 -->
+  <view wx:if="{{showStyleSheet}}" class="lh__sheet" catchtap="onStyleSheetStop">
+    <view class="lh__sheet-block">
+      <view class="lh__sheet-row">
+        <text class="lh__sheet-label">页面质感</text>
+        <view class="lh__sheet-chips">
+          <view wx:for="{{pagePresets}}" wx:key="key" class="lh__sheet-chip {{pageStyle === item.key ? 'is-on' : ''}}" data-key="{{item.key}}" bindtap="onPageStyle">
+            <view class="dot" style="background:{{item.dot}}"></view>{{item.name}}
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class="lh__sheet-block">
+      <view class="lh__sheet-row">
+        <text class="lh__sheet-label">背景氛围</text>
+        <view class="lh__sheet-chips">
+          <view wx:for="{{bgPresets}}" wx:key="key" class="lh__sheet-chip {{bgStyle === item.key ? 'is-on' : ''}}" data-key="{{item.key}}" bindtap="onBgStyle">
+            <view class="dot" style="background:{{item.dot}}"></view>{{item.name}}
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ==================== 消息弹性区 ==================== -->
+  <scroll-view
+    class="lh__scroll"
+    scroll-y
+    scroll-into-view="{{scrollTo}}"
+    scroll-with-animation
+    enhanced="{{true}}"
+    show-scrollbar="{{false}}"
+  >
+    <view class="lh__inner">
+
+      <!-- ---------- 欢迎卡片（仅无消息时） ---------- -->
+      <view wx:if="{{showWelcome}}" class="lh__welcome">
+        <view class="lh__welcome-ava">
+          <image class="lh__welcome-ava-img" src="/assets/helper-avatar.jpg" mode="aspectFill"></image>
+          <view class="lh__welcome-halo"></view>
+        </view>
+        <view class="lh__welcome-title">你好，我是小琳</view>
+        <view class="lh__welcome-sub">我可以帮你管理待办、安排日程、设置提醒。你只需告诉我想做什么。</view>
+        <view class="lh__welcome-caps">
+          <view class="lh__cap"><text class="lh__cap-ico">🤖</text><text>任务管理</text></view>
+          <view class="lh__cap"><text class="lh__cap-ico">📅</text><text>智能日程</text></view>
+          <view class="lh__cap"><text class="lh__cap-ico">🔔</text><text>提醒助手</text></view>
+        </view>
+      </view>
+
+      <!-- ---------- 消息列表 ---------- -->
+      <block wx:for="{{messages}}" wx:key="id">
+
+        <!-- 时间分隔线：与上一条间隔 >5 分钟才显示（showTimeSep 由 TS 预计算） -->
+        <view wx:if="{{item.showTimeSep}}" class="lh__time-sep">
+          <text>{{item.time}}</text>
+        </view>
+
+        <view class="lh__row {{item.role === 'user' ? 'is-user' : 'is-bot'}}">
+
+          <!-- 用户消息 -->
+          <block wx:if="{{item.role === 'user'}}">
+            <view class="lh__bubble lh__bubble--user">
+              <image wx:if="{{item.image}}" class="lh__bubble-img" src="{{item.image}}" mode="widthFix" />
+              <text wx:if="{{item.text && item.text !== '[图片]'}}" class="lh__bubble-text">{{item.text}}</text>
+            </view>
+            <view class="lh__ava lh__ava--user">🙋</view>
+          </block>
+
+          <!-- 助手消息 -->
+          <block wx:else>
+            <image class="lh__ava lh__ava--bot" src="/assets/helper-avatar.jpg" mode="aspectFill"></image>
+            <view class="lh__bot-col">
+
+              <view wx:if="{{item.brief}}" class="lh__brief-tag">☀️ 今日简报</view>
+
+              <!-- 纯文本 -->
+              <view wx:if="{{item.type === 'text'}}" class="lh__bubble lh__bubble--bot">
+                <text class="lh__bubble-text">{{item.text}}</text>
+              </view>
+
+              <!-- 结构化任务结果卡（数据来自真实执行结果） -->
+              <view wx:elif="{{item.type === 'task_result' && item.opResult}}" class="lh__card">
+                <view class="lh__card-hd">
+                  <view class="lh__card-badge {{item.opResult.errorText ? 'is-fail' : 'is-ok'}}">
+                    <text>{{item.opResult.errorText ? '✕' : '✓'}}</text>
+                  </view>
+                  <text class="lh__card-title">{{item.opResult.title}}</text>
+                </view>
+
+                <view class="lh__card-hero">
+                  <text class="lh__card-task">{{item.opResult.taskName}}</text>
+                  <text class="lh__card-status {{item.opResult.errorText ? 'is-fail' : 'is-ok'}}">{{item.opResult.statusText}}</text>
+                </view>
+
+                <view wx:if="{{item.opResult.details.length}}" class="lh__card-detail">
+                  <view class="lh__card-dt">任务详情</view>
+                  <view wx:for="{{item.opResult.details}}" wx:for-item="d" wx:key="label" class="lh__card-drow">
+                    <text class="lh__card-dk">{{d.label}}</text>
+                    <text class="lh__card-dv">{{d.value}}</text>
+                  </view>
+                </view>
+
+                <view wx:if="{{item.opResult.errorText}}" class="lh__card-err">{{item.opResult.errorText}}</view>
+
+                <view class="lh__card-acts">
+                  <view wx:if="{{item.opResult.todoId}}" class="lh__card-btn" hover-class="press" data-todo-id="{{item.opResult.todoId}}" bindtap="onViewTask">查看任务</view>
+                  <view wx:if="{{item.opResult.undoable}}" class="lh__card-btn lh__card-btn--ghost" hover-class="press" data-msg-id="{{item.id}}" bindtap="onAction" data-payload="undo" data-kind="none">{{item.opResult.undoLabel}}</view>
+                </view>
+              </view>
+
+              <!-- 危险操作确认卡 -->
+              <view wx:elif="{{item.type === 'confirmation'}}" class="lh__card lh__card--warn">
+                <view class="lh__card-hd">
+                  <view class="lh__card-badge is-warn"><text>!</text></view>
+                  <text class="lh__card-title">请确认操作</text>
+                </view>
+                <view class="lh__bubble lh__bubble--bot lh__bubble--inline">
+                  <text class="lh__bubble-text">{{item.text}}</text>
+                </view>
+                <view class="lh__card-acts">
+                  <view
+                    class="lh__card-btn lh__card-btn--danger"
+                    hover-class="press"
+                    data-msg-id="{{item.id}}" data-payload="confirm" data-kind="none" bindtap="onAction"
+                  >确认删除</view>
+                  <view
+                    class="lh__card-btn lh__card-btn--ghost"
+                    hover-class="press"
+                    data-msg-id="{{item.id}}" data-payload="cancel" data-kind="none" bindtap="onAction"
+                  >再想想</view>
+                </view>
+              </view>
+
+              <!-- 错误卡 -->
+              <view wx:elif="{{item.type === 'error'}}" class="lh__card lh__card--err">
+                <view class="lh__card-hd">
+                  <view class="lh__card-badge is-fail"><text>✕</text></view>
+                  <text class="lh__card-title">操作未完成</text>
+                </view>
+                <view class="lh__bubble lh__bubble--bot lh__bubble--inline">
+                  <text class="lh__bubble-text">{{item.text}}</text>
+                </view>
+                <view wx:if="{{item.retryable}}" class="lh__card-acts">
+                  <view class="lh__card-btn" hover-class="press" data-msg-id="{{item.id}}" bindtap="onRetry">重试</view>
+                </view>
+              </view>
+
+              <!-- 快捷动作（仅文本消息带） -->
+              <view wx:if="{{item.showActions && item.actions && item.actions.length}}" class="lh__acts">
+                <view
+                  wx:for="{{item.actions}}" wx:for-item="act" wx:key="kind"
+                  class="lh__act" hover-class="press"
+                  data-kind="{{act.kind}}" data-label="{{act.label}}" data-module="{{act.module}}"
+                  data-payload="{{act.payload}}" data-due="{{act.due}}" data-msg-id="{{item.id}}"
+                  bindtap="onAction"
+                >{{act.label}}</view>
+              </view>
+            </view>
+          </block>
+        </view>
+      </block>
+
+      <!-- ---------- 思考中（三个渐变小圆点） ---------- -->
+      <view wx:if="{{typing}}" class="lh__row is-bot">
+        <image class="lh__ava lh__ava--bot" src="/assets/helper-avatar.jpg" mode="aspectFill"></image>
+        <view class="lh__bubble lh__bubble--bot lh__typing">
+          <view class="lh__dot-anim"></view>
+          <view class="lh__dot-anim"></view>
+          <view class="lh__dot-anim"></view>
+        </view>
+      </view>
+
+      <view id="msg_end" style="height:1rpx"></view>
+    </view>
+  </scroll-view>
+
+  <!-- ==================== 快捷指令栏（常驻，横向滚动） ==================== -->
+  <view class="lh__quick">
+    <scroll-view class="lh__quick-scroll" scroll-x show-scrollbar="{{false}}">
+      <view class="lh__quick-row">
+        <view wx:for="{{quickChips}}" wx:key="*this" class="lh__qchip" hover-class="press" data-q="{{item}}" bindtap="onChip">{{item}}</view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- ==================== 底部输入栏 ==================== -->
+  <view class="lh__composer" style="padding-bottom:{{safeBottom}}px">
+    <view class="lh__composer-row">
+      <view class="lh__cbtn {{picking ? 'is-busy' : ''}}" hover-class="press" bindtap="onPickImage">
+        <view class="lh__cico lh__cico--img"></view>
+      </view>
+      <view class="lh__cbtn {{voiceOn ? 'is-on' : ''}}" hover-class="press" bindtap="onVoiceTap">
+        <view class="lh__cico lh__cico--mic"></view>
+      </view>
+      <textarea
+        class="lh__input {{inputFocus ? 'is-focus' : ''}}"
+        placeholder="跟小琳说点什么…"
+        placeholder-class="lh__input-ph"
+        value="{{input}}"
+        auto-height="{{true}}"
+        maxlength="{{500}}"
+        cursor-spacing="24"
+        fixed="{{true}}"
+        show-confirm-bar="{{false}}"
+        adjust-position="{{true}}"
+        bindinput="onInput"
+        bindfocus="onInputFocus"
+        bindblur="onInputBlur"
+        bindconfirm="onEnter"
+        confirm-type="send"
+      />
+      <view class="lh__send {{input ? 'is-on' : ''}}" hover-class="press" bindtap="onSend">
+        <view class="lh__send-ico"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 提交中遮罩：业务操作进行中，禁止重复点击 -->
+  <view wx:if="{{submitting}}" class="lh__busy">
+    <view class="lh__busy-box">
+      <view class="lh__busy-spin"></view>
+      <text class="lh__busy-text">正在处理…</text>
+    </view>
+  </view>
+
+</view>

@@ -1,0 +1,72 @@
+/* components/focus-mode-tabs/focus-mode-tabs.wxss
+ * 竖向胶囊列表：每项一行（emoji + 模式名 + 时长），当前项主色渐变块。
+ * 尺寸沿用页面缩放参考系 --u（手机端 = 1rpx，宽窗端 = 固定 px）。
+ *
+ * 【为什么竖排 + 内容自适应宽度】
+ * 微信「字体大小」会把 <text> 再放大约 1.2 倍，固定等分格子会让放大后的字顶出边缘。
+ * 这里改成内容自适应宽度 + 整行胶囊，任何字体缩放下都是完整一行。 */
+
+.tabs {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: calc(8 * var(--u, 1rpx));
+  box-sizing: border-box;
+}
+.tabs.is-disabled {
+  opacity: 0.55;
+}
+
+.tabs__item {
+  display: flex;
+  align-items: center;
+  gap: calc(10 * var(--u, 1rpx));
+  box-sizing: border-box;
+  padding: calc(10 * var(--u, 1rpx)) calc(12 * var(--u, 1rpx));
+  border-radius: calc(16 * var(--u, 1rpx));
+  background: rgba(255, 255, 255, 0.6);
+  border: calc(1 * var(--u, 1rpx)) solid rgba(120, 140, 180, 0.1);
+  transition: transform 200ms ease, background 200ms ease, box-shadow 200ms ease;
+}
+.tabs__item--tap {
+  transform: scale(0.98);
+}
+/* 当前态：135° 主色渐变 + 极轻外发光 */
+.tabs__item.is-active {
+  background: linear-gradient(135deg, #7288C8 0%, #6076B5 100%);
+  border-color: transparent;
+  box-shadow: 0 calc(4 * var(--u, 1rpx)) calc(14 * var(--u, 1rpx)) rgba(96, 118, 181, 0.24);
+}
+
+.tabs__emoji {
+  flex-shrink: 0;
+  font-size: calc(24 * var(--u, 1rpx));
+  line-height: 1;
+}
+.tabs__body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+/* 单行文案：模式名 + 时长都必须永不换行（防字体放大后断行） */
+.tabs__tx {
+  font-size: calc(20 * var(--u, 1rpx));
+  letter-spacing: 0;
+  color: #5F6C85;
+  white-space: nowrap;
+  transition: color 200ms ease;
+}
+.tabs__min {
+  margin-top: calc(1 * var(--u, 1rpx));
+  font-size: calc(15 * var(--u, 1rpx));
+  color: #8A97AC;
+  white-space: nowrap;
+  transition: color 200ms ease;
+}
+.tabs__item.is-active .tabs__tx {
+  color: #FFFFFF;
+  font-weight: 600;
+}
+.tabs__item.is-active .tabs__min {
+  color: rgba(255, 255, 255, 0.8);
+}

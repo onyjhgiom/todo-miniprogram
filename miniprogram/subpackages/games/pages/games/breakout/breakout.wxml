@@ -1,0 +1,24 @@
+<game-shell title="{{title}}" timeText="{{timeText}}" statText="{{statText}}" paused="{{paused}}"
+  win="{{win}}" winSub="{{winSub}}" winStats="{{winStats}}" winNewBest="{{winNewBest}}" winQuote="{{winQuote}}"
+  bind:back="onBack" bind:reset="onReset" bind:hint="onHint" bind:home="onHome" bind:pause="onPause"
+  bind:again="onAgain" bind:winhome="onWinHome">
+  <view class="bk">
+
+    <view class="row bk__lv">
+      <view class="bk__lvb" bindtap="onPrevLevel">‹</view>
+      <view class="bk__lvinfo">
+        <text class="t-sm strong">第 {{level}} / {{maxLevel}} 关</text>
+        <text class="t-xs muted-2">{{levelLabel}} 方块阵</text>
+      </view>
+      <view class="bk__lvb" bindtap="onNextLevel">›</view>
+    </view>
+
+    <view class="bk__stage">
+      <canvas type="2d" id="cv" class="bk__cv" disable-scroll
+        bindtouchstart="onTouchMove" bindtouchmove="onTouchMove"></canvas>
+    </view>
+
+    <text class="t-xs muted-2 center mt-16">手指左右滑动控制挡板，打掉所有方块过关</text>
+    <text class="t-xs muted-2 center mt-8">带亮边的砖块要连打两下；越往后砖越多、球越快</text>
+  </view>
+</game-shell>

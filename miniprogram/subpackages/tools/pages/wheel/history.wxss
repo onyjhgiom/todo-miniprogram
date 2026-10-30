@@ -1,0 +1,250 @@
+/* subpackages/tools/pages/wheel/history.wxss
+ * 历史记录页：流水卡 + 统计条形图。*/
+
+.wr {
+  --wr-bg: #F5F1E8;
+  --wr-card: #FFFFFF;
+  --wr-ink: #2C2620;
+  --wr-ink-2: #7A6E62;
+  --wr-ink-3: #A99C8C;
+  --wr-line: #EDE6DA;
+  --wr-accent: #C08552;
+  --wr-accent-soft: rgba(192, 133, 82, 0.12);
+  --wr-shadow: 0 6rpx 20rpx rgba(90, 70, 45, 0.08);
+  min-height: 100vh;
+  background: var(--wr-bg);
+  color: var(--wr-ink);
+  padding: 20rpx 24rpx 60rpx;
+}
+
+.wr[data-theme='dark'],
+.wr[data-theme='rose'] {
+  --wr-bg: #17161A;
+  --wr-card: #222024;
+  --wr-ink: #F3EFE9;
+  --wr-ink-2: #A79E92;
+  --wr-ink-3: #6E665C;
+  --wr-line: #2E2B2F;
+  --wr-accent: #D8A771;
+  --wr-accent-soft: rgba(216, 167, 113, 0.16);
+}
+
+.wr__head {
+  margin-bottom: 18rpx;
+}
+
+.wr__segs {
+  display: flex;
+  padding: 6rpx;
+  border-radius: 999rpx;
+  background: var(--wr-card);
+  box-shadow: var(--wr-shadow);
+}
+
+.wr__seg {
+  flex: 1;
+  height: 68rpx;
+  line-height: 68rpx;
+  text-align: center;
+  border-radius: 999rpx;
+  font-size: 27rpx;
+  color: var(--wr-ink-2);
+}
+
+.wr__seg.is-on {
+  background: var(--wr-accent);
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.wr__filters {
+  width: 100%;
+  white-space: nowrap;
+  margin-top: 16rpx;
+}
+
+.wr__filtersIn {
+  display: inline-flex;
+}
+
+.wr__filter {
+  margin-right: 14rpx;
+  padding: 10rpx 22rpx;
+  border-radius: 999rpx;
+  background: var(--wr-card);
+  color: var(--wr-ink-2);
+  font-size: 24rpx;
+}
+
+.wr__filter.is-on {
+  background: var(--wr-accent-soft);
+  color: var(--wr-accent);
+  font-weight: 600;
+}
+
+.wr__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8rpx 14rpx;
+  font-size: 23rpx;
+  color: var(--wr-ink-3);
+}
+
+.wr__clear {
+  color: var(--wr-accent);
+}
+
+/* ===== 流水 ===== */
+
+.wr__item {
+  padding: 22rpx 24rpx;
+  margin-bottom: 16rpx;
+  border-radius: 24rpx;
+  background: var(--wr-card);
+  box-shadow: var(--wr-shadow);
+}
+
+.wr__itemTop {
+  display: flex;
+  align-items: center;
+}
+
+.wr__badge {
+  display: flex;
+  align-items: center;
+  padding: 12rpx 22rpx;
+  border-radius: 999rpx;
+  max-width: 320rpx;
+}
+
+.wr__badgeIcon {
+  font-size: 30rpx;
+  margin-right: 8rpx;
+}
+
+.wr__badgeText {
+  font-size: 30rpx;
+  font-weight: 700;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.wr__itemMeta {
+  flex: 1;
+  margin-left: 18rpx;
+  min-width: 0;
+}
+
+.wr__wheelName {
+  font-size: 25rpx;
+  color: var(--wr-ink-2);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.wr__gone {
+  margin-left: 8rpx;
+  font-size: 20rpx;
+  color: var(--wr-ink-3);
+}
+
+.wr__time {
+  margin-top: 4rpx;
+  font-size: 22rpx;
+  color: var(--wr-ink-3);
+}
+
+.wr__pool {
+  margin-top: 14rpx;
+  font-size: 22rpx;
+  color: var(--wr-ink-3);
+  line-height: 1.5;
+}
+
+/* ===== 统计 ===== */
+
+.wr__stat {
+  padding: 22rpx 24rpx;
+  margin-bottom: 16rpx;
+  border-radius: 24rpx;
+  background: var(--wr-card);
+  box-shadow: var(--wr-shadow);
+}
+
+.wr__statTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.wr__statName {
+  font-size: 28rpx;
+  font-weight: 600;
+  max-width: 60%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.wr__statNum {
+  font-size: 24rpx;
+  color: var(--wr-ink-2);
+}
+
+.wr__barBg {
+  margin-top: 14rpx;
+  height: 20rpx;
+  border-radius: 999rpx;
+  background: var(--wr-line);
+  overflow: hidden;
+}
+
+.wr__bar {
+  height: 100%;
+  border-radius: 999rpx;
+  transition: width 0.3s ease;
+}
+
+.wr__statFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10rpx;
+  font-size: 22rpx;
+  color: var(--wr-ink-3);
+}
+
+.wr__hot {
+  color: var(--wr-accent);
+}
+
+/* ===== 空态 ===== */
+
+.wr__empty {
+  padding: 120rpx 0;
+  text-align: center;
+}
+
+.wr__emptyIcon {
+  font-size: 88rpx;
+}
+
+.wr__emptyText {
+  margin-top: 16rpx;
+  font-size: 26rpx;
+  color: var(--wr-ink-3);
+}
+
+.wr__emptyBtn {
+  margin: 28rpx auto 0;
+  width: 260rpx;
+  height: 76rpx;
+  line-height: 76rpx;
+  border-radius: 999rpx;
+  background: var(--wr-accent);
+  color: #FFFFFF;
+  font-size: 27rpx;
+}

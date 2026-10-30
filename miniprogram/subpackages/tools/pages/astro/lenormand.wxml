@@ -1,0 +1,99 @@
+<!--pages/astro/lenormand.wxml
+  雷诺曼：模式 Tab（图鉴 / 占卜）+ 占卜（单张 / 3 张 / 5 张）+ 图鉴 36 牌
+  无正逆位，单张/线性/综合牌阵随机抽取
+-->
+<view class="astro-page">
+  <view class="astro-statusbar"></view>
+
+  <view class="astro-card">
+    <view class="horo-tab">
+      <view class="horo-tab__item {{mode === 'draw' ? 'is-active' : ''}}"
+        hover-class="horo-tab__item--hover" hover-stay-time="50"
+        bindtap="onSwitchMode" data-mode="draw">抽牌</view>
+      <view class="horo-tab__item {{mode === 'gallery' ? 'is-active' : ''}}"
+        hover-class="horo-tab__item--hover" hover-stay-time="50"
+        bindtap="onSwitchMode" data-mode="gallery">36 牌图鉴</view>
+    </view>
+  </view>
+
+  <block wx:if="{{mode === 'draw'}}">
+    <view class="astro-card">
+      <text class="astro-tag">选择牌阵</text>
+      <view class="layout-row">
+        <view wx:for="{{layouts}}" wx:key="key" class="layout-item {{layout === item.key ? 'is-active' : ''}}"
+          hover-class="layout-item--hover" hover-stay-time="50"
+          bindtap="onPickLayout" data-key="{{item.key}}">
+          <text class="layout-item__name">{{item.name}}</text>
+          <text class="layout-item__desc">{{item.desc}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{drawn.length === 0}}" class="astro-card">
+      <text class="astro-tag">抽牌仪式</text>
+      <text class="astro-body" style="display:block;margin-top:14rpx;">默念你的问题，然后点击下方「抽牌」按钮。</text>
+      <view class="astro-btn" style="margin-top:24rpx;" hover-class="astro-btn--hover" hover-stay-time="50"
+        bindtap="onDraw">抽 牌</view>
+    </view>
+    <view wx:else class="astro-card">
+      <text class="astro-tag">已抽到 {{drawn.length}} 张</text>
+      <view class="lnr-stage">
+        <view wx:for="{{drawn}}" wx:key="id" class="lnr-card"
+          hover-class="lnr-card--hover" hover-stay-time="50"
+          data-id="{{item.id}}" bindtap="onCardDetail">
+          <image class="lnr-card__img" src="{{item.image}}" mode="aspectFit"
+            binderror="onImgErr"></image>
+          <text class="lnr-card__name">{{item.name}}</text>
+          <text class="lnr-card__symbol">{{item.symbol}}</text>
+        </view>
+      </view>
+      <view class="astro-card" style="margin-top:18rpx;background:rgba(255,255,255,0.04);">
+        <text class="astro-tag">组合解读</text>
+        <view wx:for="{{combinationParts}}" wx:key="label" style="margin-top:16rpx;">
+          <text class="astro-tag" style="background:rgba(181,113,76,0.25);border:none;">{{item.label}}</text>
+          <text class="astro-body" style="display:block;margin-top:8rpx;">{{item.text}}</text>
+        </view>
+      </view>
+      <view style="display:flex;gap:14rpx;margin-top:18rpx;">
+        <view class="astro-btn" hover-class="astro-btn--hover" hover-stay-time="50"
+          bindtap="onSaveDraw">保存占卜</view>
+        <view class="astro-btn astro-btn--ghost" hover-class="astro-btn--hover" hover-stay-time="50"
+          bindtap="onRedraw">重新抽牌</view>
+      </view>
+    </view>
+
+    <view class="astro-card">
+      <text class="astro-tag" style="margin-bottom:14rpx;">占卜历史</text>
+      <view wx:if="{{history.length === 0}}" class="astro-empty">还没有占卜记录</view>
+      <view wx:else style="display:flex;flex-direction:column;gap:12rpx;">
+        <view wx:for="{{history}}" wx:key="id" class="astro-row"
+          hover-class="astro-row--hover" hover-stay-time="50"
+          data-id="{{item.id}}" bindtap="onDeleteHis">
+          <view style="flex:1;min-width:0;">
+            <text class="astro-body">{{item.title}}</text>
+            <text class="astro-muted">{{item.layoutLabel}} · {{item.timeLabel}}</text>
+          </view>
+          <text class="astro-tag">×</text>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="astro-card">
+      <view class="lnr-gallery">
+        <view wx:for="{{gallery}}" wx:key="id" class="lnr-gallery__item"
+          hover-class="lnr-gallery__item--hover" hover-stay-time="50"
+          data-id="{{item.id}}" bindtap="onCardDetail2">
+          <image class="lnr-gallery__img" src="{{item.image}}" mode="aspectFit"
+            binderror="onImgErr"></image>
+          <text class="lnr-gallery__name">{{item.name}}</text>
+          <text class="lnr-gallery__symbol">{{item.symbol}}</text>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <view class="astro-statusbar"></view>
+  <view style="padding:20rpx 32rpx calc(20rpx + env(safe-area-inset-bottom));font-size:22rpx;line-height:1.6;color:#94a3b8;text-align:center;">纯属娱乐，请勿过度相信 · 内容不构成任何人生建议</view>
+</view>

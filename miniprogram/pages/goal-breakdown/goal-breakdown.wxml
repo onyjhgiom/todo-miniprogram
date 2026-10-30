@@ -1,0 +1,335 @@
+<!--pages/goal-breakdown/goal-breakdown.wxml-->
+<view class="gb">
+
+  <!-- ===== 顶部 Hero：长期目标氛围（淡山峰 + 地平线） ===== -->
+  <view class="gb-hero">
+    <view class="gb-hero__slogan">
+      <text class="gb-hero__spark">✦</text>
+      <view class="gb-hero__slogantext">
+        <view>让每一步</view>
+        <view>都靠近目标</view>
+      </view>
+    </view>
+    <view class="gb-hero__title">目标拆解</view>
+    <view class="gb-hero__sub">把长期目标，变成今天可以完成的一步</view>
+  </view>
+
+  <view class="gb-body">
+
+    <!-- ===== 历史 ===== -->
+    <view wx:if="{{showHistory}}" class="gb-card hist">
+      <view class="hist__title">拆解历史</view>
+      <view wx:if="{{records.length === 0}}" class="gb-empty gb-empty--slim">
+        <text class="emo">🗂️</text>
+        <view>还没有拆解记录</view>
+        <view class="sub">生成一次后会自动保存在本机</view>
+      </view>
+      <view wx:for="{{records}}" wx:key="id" class="hist__row">
+        <view class="hist__main" data-id="{{item.id}}" bindtap="onOpenRecord" hover-class="press">
+          <view class="hist__goal">{{item.goal}}</view>
+          <view class="hist__meta">{{item.plan.milestones.length}} 个任务 · {{item.plan.total_days}} 天 · {{item.byAI ? 'AI' : '模板'}}</view>
+        </view>
+        <view class="hist__del" data-id="{{item.id}}" catchtap="onDeleteRecord">✕</view>
+      </view>
+    </view>
+
+    <block wx:if="{{!showHistory}}">
+
+      <!-- ===== 我的长期目标 ===== -->
+      <view class="gb-card goalcard">
+        <view class="goalcard__head">
+          <view class="goalcard__badge">🎯</view>
+          <view class="goalcard__ht">
+            <view class="goalcard__title">我的长期目标</view>
+            <view class="goalcard__sub">你想在未来一段时间完成什么？</view>
+          </view>
+          <view class="goalcard__hist" bindtap="onToggleHistory" hover-class="press">🕘 历史</view>
+        </view>
+
+        <textarea class="goalcard__area" placeholder="写下你想完成的事，一句话就够"
+          placeholder-class="goalcard__ph"
+          value="{{goal}}" bindinput="onGoal" maxlength="200" auto-height="{{false}}"
+          show-confirm-bar="{{false}}" />
+
+        <view class="goalcard__examples">
+          <text class="goalcard__exlabel">试试：</text>
+          <view wx:for="{{examples}}" wx:key="*this" class="goalcard__exchip"
+            data-text="{{item}}" catchtap="onExample" hover-class="press">{{item}}</view>
+        </view>
+
+        <view class="goalcard__foot">
+          <view class="goalcard__aim">AI 将根据目标自动判断：目标周期 · 难度 · 阶段 · 每日行动量</view>
+          <view class="goalcard__count">
+            <view class="goalcard__bar">
+              <view class="goalcard__bar-in" style="width:{{goal.length / 2}}%"></view>
+            </view>
+            <text class="goalcard__cnt">{{goal.length}}/200</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- ===== AI 实时理解 ===== -->
+      <view wx:if="{{aiState !== 'idle'}}" class="gb-card ai {{aiState === 'done' ? 'ai--done' : ''}}">
+        <view class="ai__head">
+          <text class="ai__spark">✦</text>
+          <text class="ai__title">{{aiState === 'done' ? 'AI 已理解' : 'AI 正在理解目标'}}</text>
+          <text wx:if="{{aiState === 'done' && insight}}" class="ai__src">{{insight.sourceNote}}</text>
+        </view>
+
+        <view wx:if="{{aiState === 'running'}}" class="ai__running">
+          <view class="ai__dot"></view>
+          <text class="ai__step">{{aiStep}}</text>
+        </view>
+
+        <block wx:if="{{aiState === 'done' && insight}}">
+          <view class="ai__grid">
+            <view class="ai__cell">
+              <view class="ai__lab">目标类型</view>
+              <view class="ai__val">{{insight.categoryIcon}} {{insight.category}}</view>
+            </view>
+            <view class="ai__cell">
+              <view class="ai__lab">预计周期</view>
+              <view class="ai__val">{{insight.weeksText}}</view>
+            </view>
+            <view class="ai__cell">
+              <view class="ai__lab">目标难度</view>
+              <view class="ai__val ai__stars">{{insight.starsText}}</view>
+            </view>
+            <view class="ai__cell">
+              <view class="ai__lab">建议执行频率</view>
+              <view class="ai__val">{{insight.freqText}}</view>
+            </view>
+            <view class="ai__cell ai__cell--wide">
+              <view class="ai__lab">预计每日投入</view>
+              <view class="ai__val">{{insight.dailyText}}</view>
+            </view>
+          </view>
+        </block>
+      </view>
+
+      <!-- ===== 目标结构预览 ===== -->
+      <view wx:if="{{insight}}" class="gb-card stages">
+        <view class="gb-modtitle"><text class="gb-modtitle__spark">✦</text>目标路径</view>
+        <view class="stages__chain">现在</view>
+        <view class="stages__list">
+          <view wx:for="{{stages}}" wx:key="title" class="stages__item">
+            <view class="stages__axis">
+              <view class="stages__dot">{{index + 1}}</view>
+              <view class="stages__line"></view>
+            </view>
+            <view class="stages__card">
+              <view class="stages__head">
+                <text class="stages__name">{{item.title}}</text>
+                <text class="stages__weeks">{{item.weeksLabel}}</text>
+              </view>
+              <view class="stages__desc">{{item.desc}}</view>
+            </view>
+          </view>
+        </view>
+        <view class="stages__end">
+          <view class="stages__goal">🎯</view>
+          <view class="stages__endtext">{{useDeadline ? deadlineCn : '预计完成'}}</view>
+        </view>
+      </view>
+
+      <!-- ===== 拆解策略 ===== -->
+      <view class="gb-card sec">
+        <view class="gb-modtitle gb-modtitle--plain">拆解策略</view>
+        <view class="styles">
+          <view wx:for="{{styleCards}}" wx:key="key"
+            class="styles__card {{style === item.key ? 'is-on' : ''}}"
+            data-key="{{item.key}}" bindtap="onStyle" hover-class="press">
+            <view wx:if="{{style === item.key}}" class="styles__check">✓</view>
+            <view class="styles__icon">{{item.icon}}</view>
+            <view class="styles__name">{{item.name}}</view>
+            <view class="styles__desc">{{item.desc}}</view>
+            <view wx:if="{{recoKey === item.key}}" class="styles__reco">AI 推荐</view>
+          </view>
+        </view>
+
+        <view wx:if="{{recoKey}}" class="sec__reco">
+          <text class="sec__recospark">✦</text>
+          <text class="sec__recotext">AI 推荐：{{recoTitle}}</text>
+          <text class="sec__why" catchtap="onToggleWhy">{{showWhy ? '收起' : '查看为什么'}}</text>
+        </view>
+        <view wx:if="{{showWhy && recoReasons.length}}" class="sec__whybox">
+          <view class="sec__whytitle">AI 判断依据</view>
+          <view wx:for="{{recoReasons}}" wx:key="*this" class="sec__whyrow">· {{item}}</view>
+        </view>
+      </view>
+
+      <!-- ===== 每日时间预算 ===== -->
+      <view class="gb-card sec">
+        <view class="gb-modtitle gb-modtitle--plain">每日时间预算</view>
+        <view class="budget__sub">告诉 AI，你每天真正能够投入多少时间</view>
+        <view class="budget__value">{{dailyMinutes}} <text class="budget__unit">分钟</text></view>
+        <slider class="budget__slider" min="15" max="240" step="15" value="{{dailyMinutes}}" block-size="22"
+          activeColor="#5E7FD8" backgroundColor="#D9E1EC"
+          show-value="{{false}}" bindchanging="onMinutes" bindchange="onMinutes" />
+        <view class="budget__ticks">
+          <text>15</text><text>30</text><text>60</text><text>90</text><text>120</text>
+        </view>
+        <view class="budget__hintrow">
+          <view class="budget__hint">💡 AI 会自动控制单日任务量，超出的任务自动分段</view>
+          <view class="budget__reco">推荐 45~90 分钟</view>
+        </view>
+      </view>
+
+      <!-- ===== 执行节奏 ===== -->
+      <view class="gb-card sec">
+        <view class="gb-modtitle gb-modtitle--plain">执行节奏</view>
+        <view class="modes">
+          <view wx:for="{{execModes}}" wx:key="key"
+            class="modes__item {{execMode === item.key ? 'is-on' : ''}}"
+            data-key="{{item.key}}" bindtap="onExecMode" hover-class="press">
+            <view class="modes__radio"></view>
+            <view class="modes__name">{{item.name}}</view>
+            <view class="modes__desc">{{item.desc}}</view>
+          </view>
+        </view>
+      </view>
+
+      <!-- ===== 目标截止日期 ===== -->
+      <view class="gb-card sec">
+        <view class="gb-modtitle gb-modtitle--plain">目标截止日期</view>
+        <view class="dlopts">
+          <view class="dlopts__item {{!useDeadline ? 'is-on' : ''}}" data-use="0" bindtap="onDeadlineToggle" hover-class="press">
+            <view class="dlopts__radio"></view>
+            <text>不设置截止日期</text>
+          </view>
+          <view class="dlopts__item {{useDeadline ? 'is-on' : ''}}" data-use="1" bindtap="onDeadlineToggle" hover-class="press">
+            <view class="dlopts__radio"></view>
+            <text>设置目标日期</text>
+          </view>
+        </view>
+        <picker wx:if="{{useDeadline}}" mode="date" value="{{deadline}}" start="{{minDate}}" bindchange="onDeadline">
+          <view class="dlopts__pick" hover-class="press">📅 {{deadlineCn || '选择日期'}} ▾</view>
+        </picker>
+        <view class="sec__hint">AI 会根据截止日期自动调整每周任务量</view>
+      </view>
+
+      <!-- ===== AI 可行性分析 ===== -->
+      <view wx:if="{{feas && insight}}" class="gb-card feas">
+        <view class="gb-modtitle"><text class="gb-modtitle__spark">✦</text>AI 可行性分析</view>
+        <view class="feas__goal">
+          <view class="feas__lab">当前目标</view>
+          <view class="feas__text">{{goal}}</view>
+        </view>
+        <view class="feas__bars">
+          <view class="feas__row">
+            <text class="feas__name">可执行程度</text>
+            <view class="feas__track"><view class="feas__fill feas__fill--ok" style="width:{{feas.execute}}%"></view></view>
+            <text class="feas__num">{{feas.execute}}</text>
+          </view>
+          <view class="feas__row">
+            <text class="feas__name">目标压力</text>
+            <view class="feas__track"><view class="feas__fill feas__fill--warn" style="width:{{feas.pressure}}%"></view></view>
+            <text class="feas__num">{{feas.pressure}}</text>
+          </view>
+          <view class="feas__row">
+            <text class="feas__name">时间匹配</text>
+            <view class="feas__track"><view class="feas__fill feas__fill--ok" style="width:{{feas.timeMatch}}%"></view></view>
+            <text class="feas__num">{{feas.timeMatch}}</text>
+          </view>
+        </view>
+        <view class="feas__notes">
+          <view wx:for="{{feas.notes}}" wx:key="text" class="feas__note {{item.level === 'warn' ? 'is-warn' : ''}}">
+            {{item.level === 'warn' ? '!' : '✓'}} {{item.text}}
+          </view>
+        </view>
+      </view>
+
+      <!-- ===== 降级提示 ===== -->
+      <view wx:if="{{notice}}" class="notice">⚠️ {{notice}}</view>
+
+      <!-- ===== CTA ===== -->
+      <view class="gb-cta {{generating ? 'is-busy' : ''}}" bindtap="onGenerate" hover-class="press">
+        <block wx:if="{{generating}}">⟳ {{genStep}}...</block>
+        <block wx:else>✦ 开始智能拆解 →</block>
+      </view>
+
+      <!-- ===== 结果区 ===== -->
+      <block wx:if="{{plan}}">
+        <view class="gb-card now">
+          <view class="now__tag">⚡ 现在就做</view>
+          <view class="now__text">{{plan.first_action}}</view>
+        </view>
+
+        <view class="gb-card summary">
+          <view class="summary__row">
+            <view class="summary__cell">
+              <view class="summary__num">{{plan.total_days}}</view>
+              <view class="summary__lab">总天数</view>
+            </view>
+            <view class="summary__cell">
+              <view class="summary__num">{{plan.milestones.length}}</view>
+              <view class="summary__lab">子任务</view>
+            </view>
+            <view class="summary__cell">
+              <view class="summary__num">{{totalMinutes}}</view>
+              <view class="summary__lab">总分钟</view>
+            </view>
+            <view class="summary__cell">
+              <view class="summary__num">{{byAI ? 'AI' : '模板'}}</view>
+              <view class="summary__lab">来源</view>
+            </view>
+          </view>
+          <view wx:if="{{plan.assumption}}" class="summary__assump">💡 {{plan.assumption}}</view>
+        </view>
+
+        <view class="tl">
+          <view wx:for="{{items}}" wx:key="key" class="tl__item">
+            <view class="tl__axis">
+              <view class="tl__dot">{{index + 1}}</view>
+              <view wx:if="{{index < items.length - 1}}" class="tl__line"></view>
+            </view>
+            <view class="gb-card tl__card">
+              <view class="tl__head">
+                <view class="tl__titlewrap">
+                  <text class="tl__title">{{item.title}}</text>
+                  <view class="tl__tags">
+                    <text class="tl__tag tl__tag--phase">{{item.phaseLabel}}</text>
+                    <text wx:if="{{item.priorityLabel}}" class="tl__tag tl__tag--pri tl__tag--{{item.priority}}">{{item.priorityLabel}}</text>
+                  </view>
+                </view>
+                <text class="tl__date">{{item.dateLabel}}</text>
+              </view>
+              <view class="tl__meta">
+                <text class="tl__chip">{{item.icon}} {{item.category}}</text>
+                <text class="tl__chip">{{item.durationLabel}}</text>
+                <text wx:if="{{item.repeatLabel}}" class="tl__chip tl__chip--repeat">{{item.repeatLabel}}</text>
+                <text class="tl__chip tl__chip--date">{{item.dateShort}}</text>
+              </view>
+              <view wx:if="{{item.resourcesText || item.dependsLabel}}" class="tl__extra">
+                <text wx:if="{{item.resourcesText}}" class="tl__extra-item">🧰 {{item.resourcesText}}</text>
+                <text wx:if="{{item.dependsLabel}}" class="tl__extra-item">↩ 依赖：{{item.dependsLabel}}</text>
+              </view>
+              <view wx:if="{{item.tip}}" class="tl__tip">→ {{item.tip}}</view>
+            </view>
+          </view>
+        </view>
+
+        <view wx:if="{{plan.risk_warning}}" class="gb-card risk">
+          <text class="risk__tag">风险提示</text>
+          <text class="risk__text">{{plan.risk_warning}}</text>
+        </view>
+
+        <view class="acts">
+          <view class="acts__main" bindtap="onAddToTodos" hover-class="press">一键加入待办</view>
+          <view class="acts__sub" bindtap="onReset" hover-class="press">重新拆解</view>
+        </view>
+      </block>
+
+      <view wx:if="{{!plan && !generating}}" class="gb-empty">
+        <text class="emo">🧩</text>
+        <view>写下目标，剩下的交给我</view>
+        <view class="sub">每个子任务都是动词开头、能立刻执行的具体动作</view>
+      </view>
+
+      <!-- 底部文案 -->
+      <view class="gb-footer">理性规划，持续行动</view>
+      <view class="gb-footer gb-footer--dots">目标 · 计划 · 行动 · 成长</view>
+
+    </block>
+  </view>
+</view>

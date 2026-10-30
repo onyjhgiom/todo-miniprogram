@@ -1,0 +1,9 @@
+{
+  "name": "asr",
+  "version": "1.0.0",
+  "description": "语音识别云函数（腾讯云一句话识别），不依赖小程序插件",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

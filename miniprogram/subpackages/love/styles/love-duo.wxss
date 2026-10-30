@@ -1,0 +1,550 @@
+/* ============================================================
+ * 爱遇小栈 · 双人空间共享样式（love-duo.wxss）
+ *
+ * 复用 love-common.wxss 的 --ay-* 变量与 .ay-card / .ay-btn / .ay-field 等基础件，
+ * 这里只补「双人」专属的形态：绑定条、邀请码、留言气泡、双人对照、清单、动态流。
+ * 颜色一律走变量，换肤自动跟随，不写死色值。
+ * ============================================================ */
+
+/* ---------- 未绑定提示条（贯穿所有双人页面顶部） ---------- */
+.duo-banner {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin: 0 24rpx 20rpx;
+  padding: 20rpx 22rpx;
+  border-radius: 20rpx;
+  background: linear-gradient(120deg, rgba(255, 159, 178, .16), rgba(255, 177, 153, .1));
+  border: 2rpx dashed var(--ay-primary, #FF7F9C);
+}
+.duo-banner__ico {
+  flex: none;
+  font-size: 40rpx;
+}
+.duo-banner__main {
+  flex: 1;
+  min-width: 0;
+}
+.duo-banner__t {
+  display: block;
+  font-size: 25rpx;
+  font-weight: 600;
+  color: var(--ay-text, #4A3238);
+}
+.duo-banner__d {
+  display: block;
+  margin-top: 4rpx;
+  font-size: 22rpx;
+  color: var(--ay-sub, #8A6E74);
+  line-height: 1.5;
+}
+.duo-banner__btn {
+  flex: none;
+  padding: 12rpx 24rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, var(--ay-primary, #FF7F9C), var(--ay-primary-2, #FFB199));
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+.duo-banner--ok {
+  background: linear-gradient(120deg, rgba(126, 200, 160, .14), rgba(126, 200, 160, .06));
+  border: 2rpx solid rgba(126, 200, 160, .45);
+}
+
+/* ---------- 邀请码 ---------- */
+.duo-code {
+  margin: 8rpx 0 20rpx;
+  padding: 34rpx 24rpx;
+  border-radius: 26rpx;
+  text-align: center;
+  background: var(--ay-chip, #FFECE6);
+  border: 2rpx dashed var(--ay-primary, #FF7F9C);
+}
+.duo-code__n {
+  display: block;
+  font-size: 68rpx;
+  font-weight: 800;
+  letter-spacing: 14rpx;
+  color: var(--ay-primary, #FF7F9C);
+  font-family: 'Courier New', monospace;
+}
+.duo-code__tip {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 22rpx;
+  color: var(--ay-sub, #8A6E74);
+}
+
+/* ---------- 双人对照（我 / TA 两栏） ---------- */
+.duo-pair {
+  display: flex;
+  gap: 16rpx;
+}
+.duo-pair__side {
+  flex: 1;
+  min-width: 0;
+  padding: 22rpx 16rpx;
+  border-radius: 22rpx;
+  background: var(--ay-chip, #FFECE6);
+  text-align: center;
+}
+.duo-pair__who {
+  display: block;
+  font-size: 22rpx;
+  color: var(--ay-sub, #8A6E74);
+}
+.duo-pair__emoji {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 56rpx;
+  line-height: 1.2;
+}
+.duo-pair__label {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 25rpx;
+  font-weight: 600;
+  color: var(--ay-text, #4A3238);
+}
+.duo-pair__note {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 21rpx;
+  color: var(--ay-sub, #8A6E74);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.duo-pair__side--empty .duo-pair__emoji { opacity: .3; }
+
+/* ---------- 快捷互动（戳一戳 / 晚安 / 夸一夸…） ---------- */
+.duo-acts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+}
+.duo-act {
+  padding: 22rpx 8rpx;
+  border-radius: 20rpx;
+  text-align: center;
+  background: var(--ay-card, #fff);
+  box-shadow: 0 4rpx 16rpx var(--ay-shadow, rgba(255, 127, 156, .12));
+  transition: transform 180ms cubic-bezier(.34, 1.56, .64, 1);
+}
+.duo-act__ico {
+  display: block;
+  font-size: 42rpx;
+}
+.duo-act__t {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 23rpx;
+  color: var(--ay-text, #4A3238);
+}
+.duo-act:active { transform: scale(.94); }
+
+/* ---------- 留言气泡 ---------- */
+.duo-msgs { padding: 4rpx 0; }
+.duo-bubble {
+  display: flex;
+  margin-bottom: 24rpx;
+}
+.duo-bubble--mine { justify-content: flex-end; }
+.duo-bubble__box {
+  max-width: 74%;
+  padding: 20rpx 24rpx;
+  border-radius: 24rpx;
+  background: var(--ay-card, #fff);
+  box-shadow: 0 4rpx 16rpx var(--ay-shadow, rgba(255, 127, 156, .12));
+}
+.duo-bubble--mine .duo-bubble__box {
+  background: linear-gradient(135deg, var(--ay-primary, #FF7F9C), var(--ay-primary-2, #FFB199));
+}
+.duo-bubble__text {
+  display: block;
+  font-size: 28rpx;
+  line-height: 1.7;
+  color: var(--ay-text, #4A3238);
+  word-break: break-all;
+}
+.duo-bubble--mine .duo-bubble__text { color: #fff; }
+.duo-bubble__meta {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 20rpx;
+  color: var(--ay-faint, #B79AA1);
+}
+.duo-bubble--mine .duo-bubble__meta { color: rgba(255, 255, 255, .8); }
+
+/* ---------- 输入区 ---------- */
+.duo-compose {
+  display: flex;
+  align-items: flex-end;
+  gap: 14rpx;
+  padding: 18rpx 24rpx calc(18rpx + env(safe-area-inset-bottom));
+  background: var(--ay-bg, #FFF6F3);
+  border-top: 2rpx solid var(--ay-line, #F8E3DC);
+}
+.duo-compose__input {
+  flex: 1;
+  min-height: 76rpx;
+  max-height: 220rpx;
+  padding: 18rpx 24rpx;
+  border-radius: 22rpx;
+  background: var(--ay-card, #fff);
+  font-size: 28rpx;
+  color: var(--ay-text, #4A3238);
+  box-sizing: border-box;
+}
+.duo-compose__send {
+  flex: none;
+  padding: 20rpx 30rpx;
+  border-radius: 22rpx;
+  background: linear-gradient(135deg, var(--ay-primary, #FF7F9C), var(--ay-primary-2, #FFB199));
+  color: #fff;
+  font-size: 27rpx;
+  font-weight: 600;
+}
+.duo-compose__send--off { opacity: .4; }
+
+/* ---------- 心情选择 ---------- */
+.duo-moods {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14rpx;
+}
+.duo-mood {
+  padding: 20rpx 4rpx;
+  border-radius: 20rpx;
+  text-align: center;
+  background: var(--ay-chip, #FFECE6);
+  border: 3rpx solid transparent;
+  transition: all 200ms ease;
+}
+.duo-mood.is-on {
+  border-color: var(--ay-primary, #FF7F9C);
+  background: var(--ay-card, #fff);
+  transform: translateY(-4rpx);
+}
+.duo-mood__e {
+  display: block;
+  font-size: 44rpx;
+}
+.duo-mood__t {
+  display: block;
+  margin-top: 4rpx;
+  font-size: 21rpx;
+  color: var(--ay-sub, #8A6E74);
+}
+
+/* ---------- 心情日历（近 N 天，两行：我 / TA） ---------- */
+.duo-cal { display: flex; flex-direction: column; gap: 12rpx; }
+.duo-cal__row {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+.duo-cal__who {
+  flex: none;
+  width: 60rpx;
+  font-size: 21rpx;
+  color: var(--ay-sub, #8A6E74);
+}
+.duo-cal__cells {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(14, 1fr);
+  gap: 6rpx;
+}
+.duo-cal__cell {
+  aspect-ratio: 1 / 1;
+  border-radius: 8rpx;
+  background: var(--ay-chip, #FFECE6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20rpx;
+}
+.duo-cal__cell--none { opacity: .35; }
+
+/* ---------- 纪念日 ---------- */
+.duo-anniv {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: 22rpx 0;
+  border-bottom: 2rpx solid var(--ay-line, #F8E3DC);
+}
+.duo-anniv:last-child { border-bottom: none; }
+.duo-anniv__days {
+  flex: none;
+  width: 120rpx;
+  text-align: center;
+}
+.duo-anniv__n {
+  display: block;
+  font-size: 44rpx;
+  font-weight: 800;
+  color: var(--ay-primary, #FF7F9C);
+  line-height: 1.1;
+}
+.duo-anniv__u {
+  display: block;
+  font-size: 20rpx;
+  color: var(--ay-sub, #8A6E74);
+}
+.duo-anniv__main { flex: 1; min-width: 0; }
+.duo-anniv__t {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--ay-text, #4A3238);
+}
+.duo-anniv__d {
+  display: block;
+  margin-top: 4rpx;
+  font-size: 22rpx;
+  color: var(--ay-sub, #8A6E74);
+}
+.duo-anniv__del {
+  flex: none;
+  padding: 8rpx 12rpx;
+  font-size: 24rpx;
+  color: var(--ay-faint, #B79AA1);
+}
+
+/* ---------- 通用清单（心愿 / 约定） ---------- */
+.duo-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 18rpx;
+  padding: 24rpx 0;
+  border-bottom: 2rpx solid var(--ay-line, #F8E3DC);
+}
+.duo-item:last-child { border-bottom: none; }
+.duo-item__check {
+  flex: none;
+  width: 44rpx;
+  height: 44rpx;
+  margin-top: 4rpx;
+  border-radius: 50%;
+  border: 3rpx solid var(--ay-primary, #FF7F9C);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26rpx;
+  color: #fff;
+}
+.duo-item__check.is-on {
+  background: linear-gradient(135deg, var(--ay-primary, #FF7F9C), var(--ay-primary-2, #FFB199));
+}
+.duo-item__main { flex: 1; min-width: 0; }
+.duo-item__t {
+  display: block;
+  font-size: 28rpx;
+  color: var(--ay-text, #4A3238);
+  line-height: 1.55;
+}
+.duo-item__t.is-done {
+  text-decoration: line-through;
+  color: var(--ay-faint, #B79AA1);
+}
+.duo-item__d {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: var(--ay-sub, #8A6E74);
+}
+.duo-item__del {
+  flex: none;
+  padding: 8rpx 10rpx;
+  font-size: 24rpx;
+  color: var(--ay-faint, #B79AA1);
+}
+.duo-item__prog {
+  margin-top: 14rpx;
+}
+.duo-item__pnum {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 21rpx;
+  color: var(--ay-sub, #8A6E74);
+}
+
+/* ---------- 归属标记（我 / TA） ---------- */
+.duo-who {
+  display: inline-block;
+  padding: 2rpx 12rpx;
+  border-radius: 999rpx;
+  font-size: 19rpx;
+  background: var(--ay-chip, #FFECE6);
+  color: var(--ay-sub, #8A6E74);
+}
+.duo-who--mine {
+  background: rgba(255, 127, 156, .18);
+  color: var(--ay-primary, #FF7F9C);
+}
+
+/* ---------- 动态流 ---------- */
+.duo-post {
+  padding: 26rpx 0;
+  border-bottom: 2rpx solid var(--ay-line, #F8E3DC);
+}
+.duo-post:last-child { border-bottom: none; }
+.duo-post__hd {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+.duo-post__kind {
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  font-size: 20rpx;
+  background: rgba(255, 127, 156, .14);
+  color: var(--ay-primary, #FF7F9C);
+}
+.duo-post__date {
+  font-size: 21rpx;
+  color: var(--ay-faint, #B79AA1);
+}
+.duo-post__title {
+  display: block;
+  margin-top: 14rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--ay-text, #4A3238);
+}
+.duo-post__text {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 27rpx;
+  line-height: 1.75;
+  color: var(--ay-text, #4A3238);
+  word-break: break-all;
+}
+.duo-post__photos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10rpx;
+  margin-top: 16rpx;
+}
+.duo-post__photo {
+  height: 180rpx;
+  border-radius: 14rpx;
+  background: var(--ay-chip, #FFECE6);
+}
+.duo-post__foot {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  margin-top: 16rpx;
+}
+.duo-post__act {
+  font-size: 23rpx;
+  color: var(--ay-sub, #8A6E74);
+}
+
+/* ---------- 评论 ---------- */
+.duo-cmts {
+  margin-top: 16rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 18rpx;
+  background: var(--ay-chip, #FFECE6);
+}
+.duo-cmt {
+  padding: 10rpx 0;
+}
+.duo-cmt__hd {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+.duo-cmt__name {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: var(--ay-primary, #FF7F9C);
+}
+.duo-cmt__at {
+  font-size: 20rpx;
+  color: var(--ay-faint, #B79AA1);
+}
+.duo-cmt__text {
+  display: block;
+  margin-top: 4rpx;
+  font-size: 26rpx;
+  line-height: 1.65;
+  color: var(--ay-text, #4A3238);
+  word-break: break-all;
+}
+.duo-cmt__del {
+  font-size: 20rpx;
+  color: var(--ay-faint, #B79AA1);
+}
+
+/* ---------- 标签页 ---------- */
+.duo-tabs {
+  display: flex;
+  gap: 12rpx;
+  margin-bottom: 20rpx;
+}
+.duo-tab {
+  flex: 1;
+  padding: 18rpx 0;
+  text-align: center;
+  border-radius: 18rpx;
+  font-size: 26rpx;
+  background: var(--ay-chip, #FFECE6);
+  color: var(--ay-sub, #8A6E74);
+  transition: all 200ms ease;
+}
+.duo-tab.is-on {
+  background: linear-gradient(135deg, var(--ay-primary, #FF7F9C), var(--ay-primary-2, #FFB199));
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ---------- 分区标题 ---------- */
+.duo-sec__hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+.duo-sec__t {
+  font-size: 29rpx;
+  font-weight: 600;
+  color: var(--ay-text, #4A3238);
+}
+.duo-sec__x {
+  font-size: 23rpx;
+  color: var(--ay-primary, #FF7F9C);
+}
+
+/* ---------- 空态小字 ---------- */
+.duo-hint {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 22rpx;
+  line-height: 1.6;
+  color: var(--ay-sub, #8A6E74);
+}
+
+/* ---------- 底部安全 ---------- */
+.duo-safe { height: 40rpx; }
+
+/* ---------- 带底部固定输入条的页面骨架 ---------- */
+/* .ay 默认有 180rpx 底部留白，这类页面改成弹性列布局：
+   中间滚动区吃掉剩余高度，输入条固定在底部，不会被顶飞。 */
+.duo-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-bottom: 0;
+}
+.duo-scroll {
+  flex: 1;
+  min-height: 0;
+  padding: 0 24rpx;
+  box-sizing: border-box;
+}

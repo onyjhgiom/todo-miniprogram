@@ -1,0 +1,9 @@
+{
+  "navigationStyle": "custom",
+  "navigationBarTitleText": "弹幕工作台",
+  "backgroundColor": "#0F1014",
+  "pageOrientation": "portrait",
+  "usingComponents": {
+    "danmaku-render": "/components/danmaku-render/danmaku-render"
+  }
+}

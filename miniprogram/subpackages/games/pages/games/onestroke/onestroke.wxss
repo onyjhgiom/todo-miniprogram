@@ -1,0 +1,13 @@
+.os { display: flex; flex-direction: column; }
+.os__nav { gap: 16rpx; }
+.os__navbtn { font-size: 26rpx; color: var(--clay); padding: 8rpx 20rpx; border-radius: 999rpx; background: var(--card-2); border: 2rpx solid var(--line); }
+.os__navbtn:active { opacity: .7; }
+.os__board {
+  margin-top: 24rpx; width: 100%; aspect-ratio: 1 / 1;
+  background: var(--card); border-radius: var(--r-lg); border: 2rpx solid var(--line);
+  box-shadow: var(--sd-1); overflow: hidden;
+}
+.os__cv { width: 100%; height: 100%; display: block; }
+.os__msg { margin-top: 20rpx; min-height: 38rpx; text-align: center; font-size: 26rpx; color: var(--ink-2); }
+.os__msg--ok { color: var(--mint-deep); font-weight: 600; }
+.os__msg--warn { color: var(--clay); }

@@ -1,0 +1,144 @@
+<!-- pages/love/wardrobe/wardrobe.wxml -->
+<view class="ay" data-skin="{{skin.key}}" style="{{skin.style}}">
+  <!-- 概览 -->
+  <view class="ay-card ay-anim">
+    <view class="ay-card__hd">
+      <text class="ay-card__title">🧺 我的衣橱（{{total}} 件）</text>
+      <view class="ay-btn ay-btn--sm" bindtap="onAdd">+ 添加单品</view>
+    </view>
+    <view class="ay-chips" wx:if="{{stats.length}}">
+      <view class="ay-chip" wx:for="{{stats}}" wx:key="cat">{{item.emoji}} {{item.text}} {{item.count}}</view>
+    </view>
+    <view class="ay-faint" wx:else>还没有单品。拍下你的衣服、裤子、鞋、耳环，就能自动搭出一整周。</view>
+  </view>
+
+  <!-- 添加 / 编辑表单 -->
+  <view class="ay-card ay-anim" wx:if="{{showForm}}">
+    <view class="ay-card__hd">
+      <text class="ay-card__title">{{editingId ? '编辑单品' : '添加单品'}}</text>
+      <text class="ay-card__more" bindtap="onCloseForm">收起</text>
+    </view>
+
+    <view class="wd-shot" bindtap="onPickImage">
+      <image wx:if="{{form.image || form.local}}" src="{{form.image || form.local}}" mode="aspectFill" class="wd-shot__img" />
+      <block wx:else>
+        <view class="wd-shot__ico">📷</view>
+        <view class="ay-faint">拍一张 / 从相册选</view>
+      </block>
+    </view>
+    <view class="ay-faint ay-mt" wx:if="{{form.local}}">已保存{{form.image ? '（云端 + 本地双份）' : '（仅本地）'}}，点图片可重选</view>
+
+    <view class="ay-card__hd" style="margin-top:16rpx"><text class="ay-card__title">品类</text></view>
+    <view class="ay-chips">
+      <view class="ay-chip {{form.cat===item.key?'ay-chip--on':''}}" wx:for="{{catList}}" wx:key="key"
+            data-v="{{item.key}}" bindtap="onFormCat">{{item.emoji}} {{item.label}}</view>
+    </view>
+
+    <view class="ay-field">
+      <text class="ay-field__label">名字</text>
+      <input class="ay-field__input" placeholder="如：米白针织开衫" value="{{form.name}}" bindinput="onFormName" />
+    </view>
+
+    <view class="ay-card__hd"><text class="ay-card__title">颜色</text></view>
+    <view class="ay-chips">
+      <view class="ay-chip {{form.color===item.key?'ay-chip--on':''}}" wx:for="{{colorList}}" wx:key="key"
+            data-v="{{item.key}}" bindtap="onFormColor">{{item.label}}</view>
+    </view>
+
+    <view class="ay-card__hd"><text class="ay-card__title">适合风格（最多 2 个）</text></view>
+    <view class="ay-chips">
+      <view class="ay-chip {{form.styles.indexOf(item.key)>=0?'ay-chip--on':''}}" wx:for="{{styleList}}" wx:key="key"
+            data-v="{{item.key}}" bindtap="onFormStyle">{{item.emoji}} {{item.key}}</view>
+    </view>
+
+    <view class="ay-card__hd"><text class="ay-card__title">季节</text></view>
+    <view class="ay-chips">
+      <view class="ay-chip {{form.seasons.indexOf(item)>=0?'ay-chip--on':''}}" wx:for="{{seasonList}}" wx:key="*this"
+            data-v="{{item}}" bindtap="onFormSeason">{{item}}</view>
+    </view>
+
+    <view class="ay-card__hd"><text class="ay-card__title">厚度（1 薄 → 5 厚）</text></view>
+    <view class="ay-chips">
+      <view class="ay-chip {{form.warmth===item?'ay-chip--on':''}}" wx:for="{{[1,2,3,4,5]}}" wx:key="*this"
+            data-v="{{item}}" bindtap="onFormWarmth">{{item}}</view>
+    </view>
+
+    <view class="ay-card__hd"><text class="ay-card__title">正式度（1 休闲 → 5 正式）</text></view>
+    <view class="ay-chips">
+      <view class="ay-chip {{form.formality===item?'ay-chip--on':''}}" wx:for="{{[1,2,3,4,5]}}" wx:key="*this"
+            data-v="{{item}}" bindtap="onFormFormality">{{item}}</view>
+    </view>
+
+    <view class="ay-field">
+      <text class="ay-field__label">备注</text>
+      <input class="ay-field__input" placeholder="如：只适合春秋 / 有点起球" value="{{form.note}}" bindinput="onFormNote" />
+    </view>
+
+    <view class="ay-between ay-mt">
+      <view class="ay-chip {{form.fav?'ay-chip--on':''}}" bindtap="onFormFav">⭐ 常用</view>
+      <view class="ay-btn" bindtap="onSaveItem">保存</view>
+    </view>
+  </view>
+
+  <!-- 单品网格 -->
+  <view class="wd-grid">
+    <view class="wd-item" wx:for="{{items}}" wx:key="id">
+      <image class="wd-item__img" src="{{item.src}}" mode="aspectFill" bindtap="onPreview" data-src="{{item.src}}" />
+      <view class="wd-item__body">
+        <view class="wd-item__name">{{item.name}}</view>
+        <view class="ay-faint">{{item.catIco}} {{item.catText}} · 厚{{item.warmth}} · 正式{{item.formality}}</view>
+        <view class="wd-item__ops">
+          <text class="wd-item__op" data-id="{{item.id}}" bindtap="onEdit">编辑</text>
+          <text class="wd-item__op wd-item__op--del" data-id="{{item.id}}" bindtap="onDelItem">删除</text>
+        </view>
+      </view>
+      <view class="wd-item__dot" style="background:{{item.colorHex}}"></view>
+      <view class="wd-item__fav" wx:if="{{item.fav}}">⭐</view>
+    </view>
+  </view>
+
+  <!-- 一周 OOTD -->
+  <view class="ay-card ay-anim">
+    <view class="ay-card__hd"><text class="ay-card__title">📅 一键搭一周</text></view>
+    <view class="ay-faint">按你的衣橱 + 温度 + 身形，自动排出周一到周日的搭配，尽量不重复。</view>
+    <input class="ay-field__input ay-mt" style="padding:16rpx;background:var(--ay-card-soft);border-radius:16rpx"
+           placeholder="这周大概多少度？（如 18）" type="number" value="{{temp}}" bindinput="onTemp" />
+    <view class="ay-btn ay-btn--block ay-mt {{generating?'ay-btn--off':''}}" bindtap="onGenWeek">
+      {{generating ? '搭配中…' : '✨ 生成这一周'}}
+    </view>
+  </view>
+
+  <block wx:if="{{plan}}">
+    <view class="ay-card ay-anim">
+      <view class="ay-between">
+        <view>
+          <view class="ay-card__title">本周衣橱覆盖率 {{plan.coverage}}%</view>
+          <view class="ay-faint">共 {{plan.days.length}} 天</view>
+        </view>
+        <view class="ay-btn ay-btn--sm ay-btn--line" bindtap="onClearPlan">收起</view>
+      </view>
+      <view class="ay-step__li" wx:for="{{plan.tips}}" wx:key="*this" style="padding-left:0">{{item}}</view>
+    </view>
+
+    <view class="ay-card ay-anim" wx:for="{{plan.days}}" wx:for-item="day" wx:key="label">
+      <view class="ay-card__hd">
+        <text class="ay-card__title">{{day.label}} · {{day.occasion}}</text>
+      </view>
+      <view class="wd-look">
+        <view class="wd-look__i" wx:for="{{day.items}}" wx:for-item="it" wx:key="id">
+          <image class="wd-look__img" src="{{it.image || it.local}}" mode="aspectFill" />
+          <view class="wd-look__n">{{it.name}}</view>
+        </view>
+        <view class="wd-look__i" wx:if="{{!day.items.length}}">
+          <view class="wd-look__empty">?</view>
+          <view class="wd-look__n">没有可搭的单品</view>
+        </view>
+      </view>
+      <view class="ay-t ay-mt">{{day.reason}}</view>
+      <view class="ay-faint">🎨 {{day.colorNote}}</view>
+      <view class="ay-faint" wx:if="{{day.missing.length}}" style="color:#C0524F">
+        缺：{{day.missing}} —— 补一件就能多出好几种搭配
+      </view>
+    </view>
+  </block>
+</view>

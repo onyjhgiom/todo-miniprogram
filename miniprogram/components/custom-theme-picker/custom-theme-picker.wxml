@@ -1,0 +1,55 @@
+<view class="ctp">
+  <!-- 实时预览卡 -->
+  <view class="ctp-preview" style="background: linear-gradient(135deg, {{custom.primary}} 0%, {{previewDeep}} 100%);">
+    <view class="ctp-preview-title">主题预览</view>
+    <view class="ctp-preview-row">
+      <view class="ctp-preview-btn">主要按钮</view>
+      <view class="ctp-preview-chip" style="background: rgba(255,255,255,0.22);">✓ 已完成</view>
+      <view class="ctp-preview-tag">待办</view>
+    </view>
+  </view>
+
+  <!-- 主题色 -->
+  <view class="ctp-label">主题色</view>
+  <view class="ctp-swatches">
+    <view
+      wx:for="{{primarySwatches}}"
+      wx:key="*this"
+      class="ctp-swatch {{custom.primary === item ? 'is-active' : ''}}"
+      style="background: {{item}};"
+      bindtap="onPickPrimary"
+      data-color="{{item}}"
+    >
+      <text wx:if="{{custom.primary === item}}" class="ctp-check">✓</text>
+    </view>
+  </view>
+
+  <!-- 明暗模式 -->
+  <view class="ctp-label">外观模式</view>
+  <view class="ctp-modes">
+    <view class="ctp-mode {{!custom.dark ? 'is-active' : ''}}" bindtap="onToggleMode">
+      <text class="ctp-mode-icon">☀️</text>
+      <text>浅色模式</text>
+    </view>
+    <view class="ctp-mode {{custom.dark ? 'is-active' : ''}}" bindtap="onToggleMode">
+      <text class="ctp-mode-icon">🌙</text>
+      <text>深色模式</text>
+    </view>
+  </view>
+
+  <!-- 背景色 -->
+  <view class="ctp-label">背景颜色{{custom.bg ? '' : '（当前跟随默认）'}}</view>
+  <view class="ctp-swatches">
+    <view
+      wx:for="{{bgSwatches}}"
+      wx:key="index"
+      class="ctp-swatch ctp-swatch--bg {{custom.bg === item ? 'is-active' : ''}}"
+      style="{{item ? 'background: ' + item + ';' : ''}}"
+      bindtap="onPickBg"
+      data-color="{{item}}"
+    >
+      <text wx:if="{{!item}}" class="ctp-auto">默认</text>
+      <text wx:elif="{{custom.bg === item}}" class="ctp-check ctp-check--dark">✓</text>
+    </view>
+  </view>
+</view>

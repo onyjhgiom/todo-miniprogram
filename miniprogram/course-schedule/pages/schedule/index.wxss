@@ -1,0 +1,395 @@
+@import "../../styles/themes.wxss";
+
+/* 颜色一律走 --cs-* 变量，切换皮肤时整页自动换装 */
+
+.page {
+  padding-bottom: calc(180rpx + env(safe-area-inset-bottom));
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  padding: 20rpx 24rpx;
+  background: var(--cs-card);
+  border-bottom: 2rpx solid var(--cs-card-line);
+}
+
+.nav-btn {
+  flex-shrink: 0;
+  width: 64rpx;
+  height: 64rpx;
+  margin-right: 8rpx;
+  line-height: 60rpx;
+  text-align: center;
+  font-size: 40rpx;
+  color: var(--cs-text-soft);
+  background: var(--cs-bg-soft);
+  border-radius: 12rpx;
+}
+
+.week-picker {
+  flex: 1;
+  text-align: center;
+}
+
+.week-text {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--cs-text);
+}
+
+.today-btn {
+  flex-shrink: 0;
+  margin-left: 8rpx;
+  padding: 0 22rpx;
+  height: 64rpx;
+  line-height: 64rpx;
+  font-size: 26rpx;
+  color: var(--cs-on-primary);
+  background: var(--cs-primary);
+  border-radius: 12rpx;
+}
+
+.today-btn-off {
+  color: var(--cs-text-soft);
+  background: var(--cs-bg-soft);
+}
+
+.btn-hover { opacity: 0.7; }
+
+.theme-slot {
+  flex-shrink: 0;
+  margin-left: 12rpx;
+}
+
+.conflict {
+  display: flex;
+  align-items: center;
+  margin: 20rpx 24rpx 0;
+  padding: 16rpx 20rpx;
+  background: var(--cs-danger-bg);
+  border-radius: 12rpx;
+}
+
+.conflict-dot {
+  flex-shrink: 0;
+  width: 32rpx;
+  height: 32rpx;
+  margin-right: 12rpx;
+  line-height: 32rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: var(--cs-danger-bg);
+  background: var(--cs-danger);
+  border-radius: 50%;
+}
+
+.conflict-text {
+  flex: 1;
+  font-size: 24rpx;
+  color: var(--cs-danger-text);
+}
+
+.board {
+  margin: 20rpx 24rpx;
+  padding: 16rpx;
+  background: var(--cs-card);
+  border-radius: var(--cs-radius);
+  box-shadow: var(--cs-shadow);
+}
+
+.row {
+  display: flex;
+  align-items: stretch;
+}
+
+.row-head {
+  margin-bottom: 8rpx;
+}
+
+.slot-col {
+  width: 84rpx;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8rpx 0;
+}
+
+.slot-label {
+  font-size: 20rpx;
+  color: var(--cs-text-soft);
+}
+
+.slot-time {
+  margin-top: 2rpx;
+  font-size: 18rpx;
+  color: var(--cs-text-mute);
+}
+
+/* 下课时间：接在上课时间下面，中间一条短横线连成区间，整体比上课时间淡一档 */
+.slot-sep {
+  width: 16rpx;
+  height: 1rpx;
+  margin: 3rpx auto 1rpx;
+  background: var(--cs-border);
+}
+
+.slot-end {
+  margin-top: 0;
+  opacity: 0.72;
+}
+
+.cell {
+  flex: 1;
+  min-width: 0;
+  padding: 4rpx;
+  min-height: 96rpx;
+}
+
+.head-cell {
+  min-height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.head-name {
+  font-size: 24rpx;
+  color: var(--cs-text-soft);
+}
+
+.head-today .head-name {
+  color: var(--cs-primary);
+  font-weight: 600;
+}
+
+/* 背景与左边条颜色由 .cs-c0~.cs-c5（themes.wxss）按课程名分配 */
+.course {
+  height: 100%;
+  padding: 10rpx 8rpx;
+  border-left: 6rpx solid transparent;
+  border-radius: 10rpx;
+  overflow: hidden;
+}
+
+.course-hover { opacity: 0.7; }
+
+.course-conflict {
+  background: var(--cs-danger-bg) !important;
+  border-left-color: var(--cs-danger) !important;
+}
+
+.course-title {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: var(--cs-text);
+  line-height: 30rpx;
+}
+
+.course-loc {
+  margin-top: 2rpx;
+  font-size: 18rpx;
+  color: var(--cs-text-soft);
+  line-height: 26rpx;
+}
+
+.course-week {
+  margin-top: 2rpx;
+  font-size: 18rpx;
+  color: var(--cs-text-mute);
+  line-height: 26rpx;
+}
+
+.course-flag {
+  display: inline-block;
+  margin-top: 4rpx;
+  padding: 0 8rpx;
+  font-size: 16rpx;
+  color: var(--cs-warn-text);
+  background: var(--cs-warn-bg);
+  border-radius: 4rpx;
+}
+
+/* 正在编辑的那张卡片：描个边提示"是你点的这张"，位置不动、不影响格子尺寸 */
+.course-editing {
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0 0 3rpx var(--cs-primary);
+}
+
+.course-teacher {
+  margin-top: 2rpx;
+  font-size: 18rpx;
+  color: var(--cs-text-mute);
+  line-height: 26rpx;
+}
+
+/* 底部悬浮按钮：flex 居中 + 内容自适应宽高，避免固定 height/line-height
+   在中英混排或 emoji 字体回退时把文字裁切。文字已改为纯中文四字，不换行、不截断。 */
+.fab {
+  position: fixed;
+  right: 32rpx;
+  bottom: calc(40rpx + env(safe-area-inset-bottom));
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 216rpx;
+  height: 88rpx;
+  padding: 0 40rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 2rpx;
+  white-space: nowrap;
+  overflow: visible;
+  color: var(--cs-on-primary);
+  background: var(--cs-primary);
+  border-radius: 16rpx;
+  box-shadow: var(--cs-shadow);
+}
+
+.fab-hover { opacity: 0.85; }
+
+.empty {
+  padding: 160rpx 60rpx;
+  text-align: center;
+}
+
+.empty-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: var(--cs-text);
+}
+
+.empty-sub {
+  margin-top: 12rpx;
+  font-size: 26rpx;
+  color: var(--cs-text-mute);
+}
+
+.empty-btn {
+  width: 320rpx;
+  height: 88rpx;
+  margin: 48rpx auto 0;
+  line-height: 88rpx;
+  font-size: 30rpx;
+  color: var(--cs-on-primary);
+  background: var(--cs-primary);
+  border-radius: 16rpx;
+}
+
+.empty-link {
+  margin-top: 24rpx;
+  font-size: 26rpx;
+  color: var(--cs-text-mute);
+  text-decoration: underline;
+}
+
+/* ---------------------------------------------------------------
+   就地编辑面板
+   格子只有约 88rpx 宽（7 列），原地塞输入框根本点不中，
+   所以面板用 fixed 浮在卡片位置上方：视觉上"就地展开"，
+   布局上不占文档流，格子和行高一动不动。
+   --------------------------------------------------------------- */
+
+/* 遮罩：点它 = 点空白处 = 保存并关闭 */
+.cs-mask {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 40;
+  background: var(--cs-overlay);
+}
+
+.cs-edit {
+  position: fixed;
+  z-index: 50;
+  box-sizing: border-box;
+  padding: 24rpx;
+  background: var(--cs-card);
+  border: 2rpx solid var(--cs-border);
+  border-radius: var(--cs-radius);
+  box-shadow: var(--cs-shadow);
+  font-family: var(--cs-font);
+}
+
+.cs-edit-title {
+  margin-bottom: 16rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--cs-text);
+}
+
+.cs-field {
+  margin-bottom: 16rpx;
+}
+
+.cs-field-label {
+  margin-bottom: 6rpx;
+  font-size: 20rpx;
+  color: var(--cs-text-soft);
+}
+
+.cs-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 72rpx;
+  padding: 0 16rpx;
+  font-size: 26rpx;
+  color: var(--cs-text);
+  background: var(--cs-input-bg);
+  border: 2rpx solid var(--cs-border);
+  border-radius: 10rpx;
+}
+
+.cs-input-ph {
+  color: var(--cs-text-mute);
+}
+
+.cs-edit-tip {
+  margin: 4rpx 0 16rpx;
+  font-size: 20rpx;
+  color: var(--cs-text-mute);
+}
+
+.cs-edit-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.cs-btn {
+  box-sizing: border-box;
+  height: 64rpx;
+  margin-left: 12rpx;
+  padding: 0 24rpx;
+  line-height: 60rpx;
+  font-size: 24rpx;
+  text-align: center;
+  border-radius: 10rpx;
+}
+
+.cs-btn-ghost {
+  color: var(--cs-text-soft);
+  background: var(--cs-bg-soft);
+  border: 2rpx solid var(--cs-border);
+}
+
+.cs-btn-primary {
+  color: var(--cs-on-primary);
+  background: var(--cs-primary);
+  border: 2rpx solid var(--cs-primary);
+}
+
+.cs-btn-hover {
+  opacity: 0.75;
+}

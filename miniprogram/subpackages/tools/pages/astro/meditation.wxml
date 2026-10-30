@@ -1,0 +1,98 @@
+<!--pages/astro/meditation.wxml
+  冥想训练：主题 5 类 + 时长选择 + 倒计时 + 引导词轮播 + 打卡统计
+-->
+<view class="astro-page">
+  <view class="astro-statusbar"></view>
+
+  <view class="astro-card">
+    <text class="astro-tag">选择主题</text>
+    <view class="layout-row">
+      <view wx:for="{{themes}}" wx:key="id" class="layout-item {{medId === item.id ? 'is-active' : ''}}"
+        hover-class="layout-item--hover" hover-stay-time="50"
+        bindtap="onPickTheme" data-id="{{item.id}}">
+        <text class="layout-item__name">{{item.name}}</text>
+        <text class="layout-item__desc">{{item.desc}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="astro-card">
+    <text class="astro-tag">时长</text>
+    <view class="duration-row">
+      <view wx:for="{{durations}}" wx:key="*this" class="dur {{duration === item ? 'is-active' : ''}}"
+        hover-class="dur--hover" hover-stay-time="50"
+        bindtap="onPickDuration" data-dur="{{item}}">{{item}} 分钟</view>
+    </view>
+  </view>
+
+  <!-- 环境白噪音：点击即循环播放，再次点击当前项停止；退出页面自动停止 -->
+  <view class="astro-card">
+    <text class="astro-tag">环境白噪音</text>
+    <view class="noise-row">
+      <view wx:for="{{noises}}" wx:key="key" class="noise-chip {{noiseKey === item.key ? 'is-active' : ''}}"
+        hover-class="dur--hover" hover-stay-time="50"
+        bindtap="onPickNoise" data-key="{{item.key}}">
+        <text class="noise-chip__icon">{{item.icon}}</text>
+        <text>{{item.label}}</text>
+        <text wx:if="{{noiseKey === item.key && item.key !== 'none'}}" class="noise-chip__eq">♪</text>
+      </view>
+    </view>
+    <text class="astro-muted" style="display:block;margin-top:10rpx;">无缝循环伴听 · 静音模式下也可播放 · 冥想结束后仍可继续，退出页面自动停止</text>
+  </view>
+
+  <view wx:if="{{running}}" class="astro-card astro-card--major">
+    <view class="med-stage">
+      <view class="med-ring {{ringPulse ? 'is-pulse' : ''}}">
+        <text class="med-ring__time">{{timeText}}</text>
+        <text class="med-ring__label">{{breathLabel}}</text>
+      </view>
+      <view class="med-prompts">
+        <text wx:for="{{promptsBatch}}" wx:key="i" class="med-prompt {{$index === activeIdx ? 'is-active' : ''}}">{{item}}</text>
+      </view>
+    </view>
+    <view style="display:flex;gap:14rpx;margin-top:18rpx;justify-content:center;">
+      <view wx:if="{{!paused}}" class="astro-btn astro-btn--ghost" hover-class="astro-btn--hover" hover-stay-time="50"
+        bindtap="onPauseMed">暂停</view>
+      <view wx:else class="astro-btn" hover-class="astro-btn--hover" hover-stay-time="50"
+        bindtap="onResumeMed">继续</view>
+      <view class="astro-btn astro-btn--ghost" hover-class="astro-btn--hover" hover-stay-time="50"
+        bindtap="onEndMed">结束</view>
+    </view>
+  </view>
+
+  <view wx:else class="astro-card astro-card--major">
+    <text class="astro-tag" style="margin-bottom:14rpx;">{{currentName}} · {{duration}} 分钟</text>
+    <text class="astro-body">{{currentDesc}}</text>
+    <view class="astro-btn" style="margin-top:24rpx;" hover-class="astro-btn--hover" hover-stay-time="50"
+      bindtap="onStartMed">开始冥想</view>
+  </view>
+
+  <view class="astro-card">
+    <view class="stat-row">
+      <view class="stat-cell">
+        <text class="astro-muted">总时长</text>
+        <text class="astro-title">{{stats.totalMinutes}} 分</text>
+      </view>
+      <view class="stat-cell">
+        <text class="astro-muted">总次数</text>
+        <text class="astro-title">{{stats.totalSessions}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="astro-card">
+    <text class="astro-tag" style="margin-bottom:14rpx;">打卡历史</text>
+    <view wx:if="{{history.length === 0}}" class="astro-empty">还没有打卡</view>
+    <view wx:else style="display:flex;flex-direction:column;gap:12rpx;">
+      <view wx:for="{{history}}" wx:key="id" class="astro-row">
+        <view style="flex:1;">
+          <text class="astro-body">{{item.label}}</text>
+          <text class="astro-muted">{{item.durationLabel}}</text>
+        </view>
+        <text class="astro-tag">{{item.timeLabel}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="astro-statusbar"></view>
+</view>

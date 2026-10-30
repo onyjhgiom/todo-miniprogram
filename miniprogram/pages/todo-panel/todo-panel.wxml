@@ -1,0 +1,289 @@
+<!--pages/todo-panel/todo-panel.wxml-->
+<!-- 待办清单（对齐参考稿 待办清单.html）
+     竖向结构：问候头 → Hero 汇总卡（进度环 / 四项数据 / 近 7 天）→ 下一件事
+     → 四维页签（滑动指示器）→ 区块标题 → 分组任务 → 悬浮新建 → 新建弹层 → Toast
+
+     三处刻意的技术取舍：
+      1. **进度环不用 SVG**：参考稿用内联 <svg> 描边圆，但小程序 WXML 不支持内联 <svg>
+        （<image> 只能加载 .svg 文件、无法内联渲染），改用 Canvas 2D 画弧，
+        线宽/圆头都可精确控制，且能跟随主题色；
+      2. **页签图标用 Canvas 组件**：同理由，小程序没有内联 SVG，
+        用 components/todo-glyph 画「太阳/日历/年历/分层」四枚线性图标；
+      3. **指示器用 transform 位移**：与参考稿同构，--i 由 JS 下发当前页签序号，
+        滑动动画交给 GPU 合成，不触发重排。 -->
+<view class="tl tshell {{shellClass}} {{bgClass}}" data-theme="{{theme}}" style="{{themeStyle}}; --u: {{uUnit}}">
+
+  <!-- ============ 问候头 ============ -->
+  <view class="tl__top">
+    <view class="tl__hello">
+      <text class="tl__date">{{dateText}}</text>
+      <text class="tl__greet">{{greetText}}</text>
+    </view>
+    <view class="tl__paint" hover-class="tl__paint--tap" hover-stay-time="60" bindtap="toggleStyleSheet">
+      <text class="tl__paint-g">🎨</text>
+    </view>
+  </view>
+
+  <!-- 质感面板 -->
+  <view wx:if="{{showStyleSheet}}" class="tl tl-sheet-card tl-card" catchtap="onStyleSheetStop">
+    <view class="tl-sheet-card__hd">
+      <text class="tl-sheet-card__t">外观</text>
+      <text class="tl-sheet-card__x" bindtap="toggleStyleSheet">✕</text>
+    </view>
+    <text class="tl-sheet-card__l">页面质感</text>
+    <view class="tl-sheet-card__row">
+      <view wx:for="{{pagePresets}}" wx:key="key" class="tl-chip {{pageStyle === item.key ? 'is-on' : ''}}" data-key="{{item.key}}" bindtap="onPageStyle">
+        <view class="tl-chip__dot" style="background:{{item.dot}}"></view>{{item.name}}
+      </view>
+    </view>
+    <text class="tl-sheet-card__l">背景氛围</text>
+    <view class="tl-sheet-card__row">
+      <view wx:for="{{bgPresets}}" wx:key="key" class="tl-chip {{bgStyle === item.key ? 'is-on' : ''}}" data-key="{{item.key}}" bindtap="onBgStyle">
+        <view class="tl-chip__dot" style="background:{{item.dot}}"></view>{{item.name}}
+      </view>
+    </view>
+  </view>
+
+  <!-- ============ Hero 汇总卡 ============ -->
+  <view wx:if="{{!showStyleSheet}}" class="tl tl-hero tl-card">
+    <view class="tl-hero__top">
+      <!-- 进度环：Canvas 画描边圆 + 中心数字 -->
+      <view class="tl-ring">
+        <canvas
+          id="ringCv" class="tl-ring__cv" type="2d"
+          style="width: calc(176 * var(--u, 1rpx)); height: calc(176 * var(--u, 1rpx));"
+          disable-scroll="{{true}}"
+        ></canvas>
+        <view class="tl-ring__tx">
+          <text class="tl-ring__n">{{pct}}<text class="tl-ring__s">%</text></text>
+          <text class="tl-ring__l">完成率</text>
+        </view>
+      </view>
+
+      <view class="tl-hero__tx">
+        <text class="tl-eye">今日进度</text>
+        <view class="tl-big">
+          <text class="tl-big__a">{{todayDone}}</text>
+          <text class="tl-big__b">/ {{todayTotal}}</text>
+          <text class="tl-big__em">件</text>
+        </view>
+        <text class="tl-hint">{{heroHint}}</text>
+      </view>
+    </view>
+
+    <!-- 四项数据 -->
+    <view class="tl-stats">
+      <view class="tl-stats__c">
+        <text class="tl-stats__n tl-stats__n--pend">{{summary.pending}}</text>
+        <text class="tl-stats__l">待处理</text>
+      </view>
+      <view class="tl-stats__c">
+        <text class="tl-stats__n tl-stats__n--done">{{summary.done}}</text>
+        <text class="tl-stats__l">已完成</text>
+      </view>
+      <view class="tl-stats__c">
+        <text class="tl-stats__n">{{summary.today}}</text>
+        <text class="tl-stats__l">今日</text>
+      </view>
+      <view class="tl-stats__c">
+        <text class="tl-stats__n tl-stats__n--late">{{summary.late}}</text>
+        <text class="tl-stats__l">已逾期</text>
+      </view>
+    </view>
+
+    <!-- 近 7 天完成：纯 view 柱状，高度由百分比决定 -->
+    <view>
+      <view class="tl-week__hd">
+        <text class="tl-eye">近 7 天完成</text>
+        <text class="tl-week__total">{{weekTotal}}</text>
+      </view>
+      <view class="tl-bars">
+        <view class="tl-bar {{item.isToday ? 'is-on' : ''}}" wx:for="{{weekBars}}" wx:key="key">
+          <view class="tl-bar__col" style="height: {{item.pct}}%"></view>
+          <text class="tl-bar__l">{{item.label}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ============ 今日聚焦 ============ -->
+  <view wx:if="{{!showStyleSheet && focusList.length}}" class="tl-focus3">
+    <view class="tl-focus3__hd">
+      <text class="tl-focus3__t">🌿 今天一定要做的 3 件事</text>
+      <text class="tl-focus3__c">{{focusList.length}}/{{focusMax}}</text>
+    </view>
+    <view
+      wx:for="{{focusList}}" wx:key="_id" wx:for-item="f"
+      class="tl-focus3__row"
+    >
+      <view class="tl-focus3__check" data-id="{{f._id}}" bindtap="onToggle" hover-class="tl-focus3__check--tap">
+        <text class="tl-focus3__tick">✓</text>
+      </view>
+      <text class="tl-focus3__content">{{f.content}}</text>
+      <text class="tl-focus3__x" data-id="{{f._id}}" bindtap="onUnfocus" hover-class="tl-focus3__x--tap">×</text>
+    </view>
+  </view>
+
+  <!-- ============ 低负反馈提示 ============ -->
+  <view wx:if="{{!showStyleSheet && lowFeedback}}" class="tl-soft" bindtap="onLowFeedbackClose">
+    <text class="tl-soft__emo">🤍</text>
+    <text class="tl-soft__t">{{lowFeedback}}</text>
+    <text class="tl-soft__x">×</text>
+  </view>
+
+  <!-- ============ 下一件事 ============ -->
+  <view wx:if="{{!showStyleSheet && focusRow}}" class="tl-focus">
+    <view class="tl-focus__check" hover-class="tl-focus__check--tap" hover-stay-time="60" bindtap="onToggleFocus">
+      <text class="tl-focus__tick">✓</text>
+    </view>
+    <view class="tl-focus__tx">
+      <text class="tl-focus__tag">{{focusTag}}</text>
+      <text class="tl-focus__t">{{focusRow.content}}</text>
+    </view>
+    <text class="tl-focus__when">{{focusWhen}}</text>
+  </view>
+
+  <!-- ============ 四维页签（滑动指示器） ============ -->
+  <view wx:if="{{!showStyleSheet}}" class="tl-tabs" style="--i: {{tabIndex}}">
+    <view class="tl-tabs__ind"></view>
+    <view
+      wx:for="{{dims}}" wx:key="key"
+      class="tl-tab {{activeDim === item.key ? 'is-on' : ''}}"
+      data-key="{{item.key}}" bindtap="onDim"
+      hover-class="tl-tab--tap" hover-stay-time="60"
+    >
+      <todo-glyph name="{{item.icon}}" size="46" color="{{activeDim === item.key ? accentInk : muted}}"></todo-glyph>
+      <text class="tl-tab__l">{{item.label}}</text>
+      <text class="tl-tab__badge" wx:if="{{dimBadges[item.key] > 0}}">{{dimBadges[item.key]}}</text>
+    </view>
+  </view>
+
+  <!-- ============ 区块标题 ============ -->
+  <view wx:if="{{!showStyleSheet}}" class="tl-sec">
+    <text class="tl-sec__t">{{secTitle}}</text>
+    <text class="tl-sec__c">{{secCount}}</text>
+  </view>
+
+  <!-- ============ 分组任务 ============ -->
+  <view wx:if="{{!loading && groups.length === 0}}" class="tl-empty">
+    <text class="tl-empty__emo">🌤️</text>
+    <text class="tl-empty__t">这个维度下暂无任务</text>
+    <text class="tl-empty__d">切换到其他维度，或点下方「新建待办」</text>
+  </view>
+
+  <block wx:for="{{groups}}" wx:key="key" wx:for-item="g">
+    <view class="tl-group">
+      <view wx:if="{{g.title}}" class="tl-glabel {{g.key === 'late' ? 'is-late' : ''}}">
+        <text class="tl-glabel__t">{{g.title}} {{g.count}}</text>
+      </view>
+
+      <view class="tl-list">
+      <view
+        wx:for="{{g.rows}}" wx:key="_id" wx:for-item="r"
+        class="tl tl-task tl-card {{r.done ? 'is-done' : ''}} {{r.overdue && !r.elastic ? 'is-late' : ''}} {{r.elastic ? 'is-elastic' : ''}} {{openId === r._id ? 'is-open' : ''}}"
+      >
+          <view class="tl-task__check {{r.done ? 'is-done' : ''}}" data-id="{{r._id}}" bindtap="onToggle" hover-class="tl-task__check--tap">
+            <text class="tl-task__tick">✓</text>
+          </view>
+
+          <view class="tl-task__bd" data-id="{{r._id}}" bindtap="onOpenDetail">
+            <text class="tl-task__title">{{r.content}}</text>
+            <view class="tl-task__meta">
+              <view class="tl-task__cat">
+                <view class="tl-task__cdot" style="background: {{r.catColor}}"></view>
+                <text class="tl-task__cat-l">{{r.catLabel}}</text>
+              </view>
+              <block wx:if="{{r.elastic}}">
+                <text class="tl-task__due is-elastic">🌿 已顺延{{r.snoozeCount}}次</text>
+              </block>
+              <text wx:else class="tl-task__due {{r.overdue ? 'is-late' : ''}}">{{r.dueText}}</text>
+              <text class="tl-task__pri" wx:if="{{r.priorityText}}">{{r.priorityText}}</text>
+              <text class="tl-task__scope" wx:if="{{r.showScope}}">{{r.scopeText}}</text>
+            </view>
+          </view>
+
+          <view class="tl-task__more" data-id="{{r._id}}" bindtap="onToggleTools" hover-class="tl-task__more--tap">
+            <text class="tl-task__more-g {{openId === r._id ? 'is-open' : ''}}">›</text>
+          </view>
+
+          <!-- 展开后的操作栏 -->
+          <view class="tl-tools" wx:if="{{openId === r._id}}">
+            <view class="tl-tools__b" wx:if="{{!r.done && r.hasDate}}" data-id="{{r._id}}" bindtap="onPostpone" hover-class="tl-tools__b--tap">{{r.overdue ? '移到今天' : '推迟一天'}}</view>
+            <view class="tl-tools__b tl-tools__b--del" data-id="{{r._id}}" bindtap="onDelete" hover-class="tl-tools__b--tap">删除</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ============ 悬浮新建 ============ -->
+  <view wx:if="{{!showStyleSheet}}" class="tl-fab" hover-class="tl-fab--tap" hover-stay-time="60" bindtap="onAddOpen">
+    <text class="tl-fab__ico">＋</text>
+    <text class="tl-fab__t">新建待办</text>
+  </view>
+
+  <!-- ============ 新建弹层 ============ -->
+  <view wx:if="{{showComposer}}" class="tl-mask" catchtap="onAddClose">
+    <view class="tl-sheet" catchtap="onSheetStop">
+      <view class="tl-sheet__grab"></view>
+      <input
+        class="tl-sheet__in" placeholder="要做什么？" placeholder-class="tl-sheet__ph"
+        value="{{quickText}}" bindinput="onQuickText" focus maxlength="60"
+        confirm-type="done" bindconfirm="onQuickSave"
+      />
+      <view class="tl-sheet__row">
+        <text class="tl-sheet__lb">类型</text>
+        <view class="tl-sheet__opts">
+          <view
+            wx:for="{{scopeOptions}}" wx:key="key"
+            class="tl-opt {{pickScope === item.key ? 'is-sel' : ''}}"
+            data-key="{{item.key}}" bindtap="onPickScope"
+          >{{item.label}}</view>
+        </view>
+      </view>
+      <view class="tl-sheet__row">
+        <text class="tl-sheet__lb">到期</text>
+        <view class="tl-sheet__opts">
+          <view
+            wx:for="{{dueOptions}}" wx:key="key"
+            class="tl-opt {{pickDue === item.key ? 'is-sel' : ''}}"
+            data-key="{{item.key}}" bindtap="onPickDue"
+          >{{item.label}}</view>
+        </view>
+      </view>
+      <view class="tl-sheet__row" wx:if="{{pickScope === 'day'}}">
+        <text class="tl-sheet__lb">时间</text>
+        <picker class="tl-sheet__time" mode="time" value="{{pickTime}}" bindchange="onPickTime">
+          <text class="tl-sheet__time-t">{{pickTime || '不提醒'}}</text>
+        </picker>
+      </view>
+      <view class="tl-sheet__row">
+        <text class="tl-sheet__lb">分类</text>
+        <view class="tl-sheet__opts">
+          <view
+            wx:for="{{catOptions}}" wx:key="key"
+            class="tl-chip2 {{pickCat === item.key ? 'is-sel' : ''}}"
+            data-key="{{item.key}}" bindtap="onPickCat"
+          >{{item.label}}</view>
+        </view>
+      </view>
+      <view class="tl-sheet__row">
+        <text class="tl-sheet__lb">优先</text>
+        <view class="tl-sheet__opts">
+          <view
+            wx:for="{{priOptions}}" wx:key="key"
+            class="tl-opt {{pickPri === item.key ? 'is-sel' : ''}}"
+            data-key="{{item.key}}" bindtap="onPickPri"
+          >{{item.label}}</view>
+        </view>
+      </view>
+      <view class="tl-sheet__submit" hover-class="tl-sheet__submit--tap" hover-stay-time="60" bindtap="onQuickSave">添加待办</view>
+    </view>
+  </view>
+
+  <!-- ============ 底部 Toast（带撤销） ============ -->
+  <view wx:if="{{toastText}}" class="tl-toast" bindtap="onUndo">
+    <text class="tl-toast__t">{{toastText}}</text>
+    <text class="tl-toast__b" wx:if="{{canUndo}}">撤销</text>
+  </view>
+</view>

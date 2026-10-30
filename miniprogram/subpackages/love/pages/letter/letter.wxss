@@ -1,0 +1,3 @@
+/* pages/love/letter/letter.wxss */
+@import "../../styles/love-common.wxss";
+@import "../../styles/love-duo.wxss";

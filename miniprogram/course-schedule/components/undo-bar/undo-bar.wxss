@@ -1,0 +1,51 @@
+/**
+ * 撤销条：底色取 --cs-text、文字取 --cs-bg，形成"正文色反色"的强对比浮层，
+ * 浅色皮肤下是深底浅字、深色皮肤下自动翻转为浅底深字，6 套皮肤都不用单独适配。
+ * 动作按钮用 primary 实心胶囊，文字用 on-primary，对比度在任何皮肤下都达标。
+ */
+.undo-bar {
+  position: fixed;
+  left: 24rpx;
+  right: 24rpx;
+  bottom: calc(32rpx + env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  padding: 20rpx 28rpx;
+  background: var(--cs-text, #2b2f36);
+  border-radius: 16rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.28);
+  z-index: 999;
+}
+
+.undo-text {
+  flex: 1;
+  font-size: 26rpx;
+  color: var(--cs-bg, #ffffff);
+  line-height: 36rpx;
+}
+
+.undo-action {
+  flex-shrink: 0;
+  padding: 6rpx 22rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--cs-on-primary, #ffffff);
+  background: var(--cs-primary, #3b6df6);
+  border-radius: 10rpx;
+  line-height: 40rpx;
+}
+
+.undo-action-hover { opacity: 0.7; }
+
+.undo-close {
+  flex-shrink: 0;
+  width: 44rpx;
+  margin-left: 8rpx;
+  text-align: center;
+  font-size: 32rpx;
+  color: var(--cs-bg, rgba(255, 255, 255, 0.55));
+  opacity: 0.55;
+  line-height: 44rpx;
+}
+
+.undo-close-hover { opacity: 0.4; }

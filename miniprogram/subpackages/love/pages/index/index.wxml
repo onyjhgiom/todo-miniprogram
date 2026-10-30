@@ -1,0 +1,221 @@
+<!-- pages/love/index/index.wxml -->
+<!-- 爱遇小栈 · 深空玻璃拟态重构版
+     根节点保留 data-skin / style 接入皮肤系统（gate 强校验），
+     视觉层全部走新增的 .ay-lg 深空玻璃命名空间，不改动共享样式。 -->
+<view class="ay ay-lg {{reducedMotion ? 'reduced' : ''}}" data-skin="{{skin.key}}" style="{{skin.style}}">
+
+  <!-- 动态流动背景层（固定铺底 + 四团 Bloomy 光斑缓慢游动） -->
+  <view class="ay-bg" style="transform: translateY({{bgShift}}rpx) scale(1.07);">
+    <view class="ay-blob ay-blob--1"></view>
+    <view class="ay-blob ay-blob--2"></view>
+    <view class="ay-blob ay-blob--3"></view>
+    <view class="ay-blob ay-blob--4"></view>
+    <view class="ay-glow"></view>
+  </view>
+
+  <!-- 顶栏：品牌 + 换肤入口 + 水晶球风格入口 -->
+  <view class="ay-top">
+    <view class="ay-top__brand">
+      <text class="ay-top__logo">♡</text>
+      <text class="ay-top__name">爱遇小栈</text>
+    </view>
+    <view class="ay-top__actions">
+      <view class="ay-top__pill ay-top__pill--theme" bindtap="onToggleThemePanel">
+        <text>{{themes[currentThemeIndex].emoji}}</text>
+        <text>{{coreThemeName}}</text>
+      </view>
+      <view class="ay-top__pill" bindtap="onQuick" data-k="skin">
+        <text>{{skin.emoji}} {{skin.name}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 3D 水晶球视觉风格选择面板 -->
+  <view class="ay-panel" wx:if="{{themePanel}}">
+    <view class="ay-panel__hd">
+      <text class="ay-panel__t">整体风格</text>
+      <text class="ay-panel__x" bindtap="onToggleThemePanel">✕</text>
+    </view>
+    <view class="ay-panel__hint">切换后整页配色 · 字体 · 圆角 · 间距会一起换掉</view>
+    <view class="ay-panel__grid">
+      <view class="ay-theme {{item.key === coreTheme ? 'on' : ''}}" wx:for="{{themes}}" wx:key="key"
+            data-key="{{item.key}}" bindtap="onPickTheme">
+        <view class="ay-theme__sw">
+          <view class="ay-theme__dot" style="background:{{item.sw[0]}}"></view>
+          <view class="ay-theme__dot" style="background:{{item.sw[1]}}"></view>
+        </view>
+        <text class="ay-theme__emo">{{item.emoji}}</text>
+        <view class="ay-theme__n">{{item.name}}</view>
+        <view class="ay-theme__tag">{{item.tag}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Hero：3D 爱情水晶球 + 能量注入 CTA -->
+  <view class="ay-hero2" style="transform: translateY({{heroShift}}rpx); opacity: {{heroFade}};">
+    <view class="ay-hero2__core">
+      <love-core
+        id="core"
+        level="{{heartLv}}"
+        theme="{{coreTheme}}"
+        primary="{{corePrimary}}"
+        accent="{{coreAccent}}"
+        reduced="{{reducedMotion}}"
+        paused="{{corePaused}}"
+        height="{{coreHeight}}"
+        hint="{{coreHint}}"
+        bind:pulse="onCorePulse"
+      ></love-core>
+    </view>
+    <view class="ay-hero2__sub">{{heroSub}}</view>
+
+    <view class="ay-energy" bindtap="onPulseTap">
+      <text class="ay-energy__heart">💗</text>
+      <text class="ay-energy__txt">爱情能量 {{heartTotal}} · 轻触注入心动</text>
+    </view>
+  </view>
+
+  <!-- StatsPanel 玻璃：四项数据（入场数字累加） -->
+  <view class="ay-stats ay-anim">
+    <view class="ay-stat" wx:for="{{stats}}" wx:key="k">
+      <text class="ay-stat__n">{{item.v}}</text>
+      <text class="ay-stat__l">{{item.l}}</text>
+    </view>
+  </view>
+
+  <!-- 在一起 -->
+  <view class="ay-card ay-glass ay-anim" wx:if="{{hasRelation}}">
+    <view class="ay-between">
+      <view>
+        <view class="ay-card__title">💞 {{togetherText}}</view>
+        <view class="ay-faint ay-mt">爱心：{{heartName}} · 已解锁 {{heartLv}} 种模式</view>
+      </view>
+      <view class="ay-btn ay-btn--sm ay-btn--ghost" bindtap="onQuick" data-k="profile">我们的档案</view>
+    </view>
+    <view class="ay-bar ay-mt"><view class="ay-bar__in" style="width:{{heartPercent}}%"></view></view>
+    <view class="ay-faint ay-mt">互动 {{interCount}} 条 · 回忆 {{memoryCount}} 条</view>
+  </view>
+
+  <!-- DailyInspiration：今日小确幸 -->
+  <view class="ay-card ay-glass ay-anim">
+    <view class="ay-card__hd">
+      <text class="ay-card__title">🌷 今天，先照顾好自己</text>
+    </view>
+    <view class="ay-t">{{careLine}}</view>
+    <view class="ay-hr"></view>
+    <view class="ay-row">
+      <text class="ay-row__ico">{{cycleIcon}}</text>
+      <view class="ay-row__main">
+        <view class="ay-row__t">{{cycleText}}</view>
+        <view class="ay-row__d">{{cycleSub}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- FeatureGrid 3×2：六大模块入口 -->
+  <view class="ay-grid">
+    <view class="ay-g" wx:for="{{entries}}" wx:key="key">
+      <view class="ay-g__in" bindtap="onEntry" data-key="{{item.key}}">
+        <view class="ay-g__ico">{{item.icon}}</view>
+        <view class="ay-g__name">{{item.name}}</view>
+        <view class="ay-g__desc">{{item.desc}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 双人空间：情侣绑定入口。未绑定时是引导态，已绑定时显示对方并直达 -->
+  <view class="ay-card ay-glass ay-anim" bindtap="onGoDuo">
+    <view class="ay-card__hd">
+      <text class="ay-card__title">💞 双人空间</text>
+      <text class="ay-card__more">进入 ›</text>
+    </view>
+    <view class="ay-row">
+      <text class="ay-row__ico">{{duo.icon}}</text>
+      <view class="ay-row__main">
+        <view class="ay-row__t">{{duo.title}}</view>
+        <view class="ay-row__d">{{duo.desc}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 快捷 -->
+  <view class="ay-card ay-glass">
+    <view class="ay-card__hd"><text class="ay-card__title">快捷</text></view>
+    <view class="ay-wrap">
+      <view class="ay-btn ay-btn--ghost ay-btn--sm" bindtap="onQuickInteract">➕ 记一次互动</view>
+      <view class="ay-btn ay-btn--ghost ay-btn--sm" bindtap="onQuick" data-k="memory">💫 心动时刻</view>
+      <view class="ay-btn ay-btn--ghost ay-btn--sm" bindtap="onQuick" data-k="profile">👤 我们的档案</view>
+      <view class="ay-btn ay-btn--ghost ay-btn--sm" bindtap="onQuick" data-k="share">🔗 共享与同步</view>
+    </view>
+  </view>
+
+  <!-- 想要准备的事 -->
+  <view class="ay-card ay-glass ay-anim">
+    <view class="ay-card__hd">
+      <text class="ay-card__title">🎁 想要准备的事</text>
+      <text class="ay-card__sub">同步到首页待办，不遗漏每个小惊喜</text>
+    </view>
+
+    <view class="ay-wrap ay-mt" wx:if="{{suggests.length}}">
+      <view class="ay-btn ay-btn--ghost ay-btn--sm" wx:for="{{suggests}}" wx:key="key" bindtap="onQuickPrep" data-key="{{item.key}}">{{item.label}}</view>
+    </view>
+
+    <view class="ay-prep-add ay-mt">
+      <input class="ay-prep-input" placeholder="想准备点什么？如：给他挑生日礼物" value="{{prepDraft}}" bindinput="onPrepInput" confirm-type="done" bindconfirm="onAddPrep" />
+      <picker mode="date" value="{{prepDue}}" bindchange="onPrepDue">
+        <view class="ay-prep-due {{prepDue ? 'is-set' : ''}}">{{prepDue ? prepDue : '不限时间'}}</view>
+      </picker>
+      <view class="ay-btn ay-btn--sm" bindtap="onAddPrep">添加</view>
+    </view>
+
+    <view class="ay-prep-list" wx:if="{{prepares.length}}">
+      <view class="ay-prep-item" wx:for="{{prepares}}" wx:key="id">
+        <view class="ay-prep-check {{item.done ? 'on' : ''}}" bindtap="onTogglePrep" data-id="{{item.id}}">{{item.done ? '✓' : ''}}</view>
+        <view class="ay-prep-main">
+          <view class="ay-prep-content {{item.done ? 'done' : ''}}">{{item.content}}</view>
+          <view class="ay-prep-meta" wx:if="{{item.due || item.person}}">
+            <text wx:if="{{item.due}}">🗓️ {{item.due}}</text>
+            <text wx:if="{{item.person}}">· {{item.person}}</text>
+          </view>
+        </view>
+        <view class="ay-prep-act">
+          <block wx:if="{{item.synced}}">
+            <text class="ay-prep-synced">已同步 ✓</text>
+            <text class="ay-prep-undo" bindtap="onUnsyncPrep" data-id="{{item.id}}">撤回</text>
+          </block>
+          <view wx:else class="ay-btn ay-btn--ghost ay-btn--xs" bindtap="onSyncPrep" data-id="{{item.id}}">同步待办</view>
+          <text class="ay-prep-del" bindtap="onDelPrep" data-id="{{item.id}}">✕</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="ay-mt" wx:if="{{prepares.length && unsyncedCount}}">
+      <view class="ay-btn ay-btn--ghost ay-btn--sm" bindtap="onSyncAll">一键全部同步（{{unsyncedCount}}）</view>
+    </view>
+    <view class="ay-faint ay-mt" wx:if="{{!prepares.length}}">还没有想准备的事，添加一件，或点上面的小建议 ♡</view>
+  </view>
+
+  <view class="ay-faint ay-center ay-foot">所有数据只存在你的手机里，不想分享的永远不会同步</view>
+
+  <!-- 轻触水晶球的脉冲反馈 -->
+  <view class="ay-pulsefx" wx:if="{{pulseFx}}">💗</view>
+
+  <!-- 底部 dock 导航 -->
+  <view class="ay-dock">
+    <view class="ay-dock__i {{dockActive === 'home' ? 'on' : ''}}" bindtap="onDock" data-k="home">
+      <text class="ay-dock__ic">🏠</text><text class="ay-dock__tx">首页</text>
+    </view>
+    <view class="ay-dock__i {{dockActive === 'memory' ? 'on' : ''}}" bindtap="onDock" data-k="memory">
+      <text class="ay-dock__ic">💫</text><text class="ay-dock__tx">心动</text>
+    </view>
+    <view class="ay-dock__i {{dockActive === 'love' ? 'on' : ''}}" bindtap="onDock" data-k="love">
+      <text class="ay-dock__ic">💞</text><text class="ay-dock__tx">能量站</text>
+    </view>
+    <view class="ay-dock__i {{dockActive === 'wardrobe' ? 'on' : ''}}" bindtap="onDock" data-k="wardrobe">
+      <text class="ay-dock__ic">👗</text><text class="ay-dock__tx">衣橱</text>
+    </view>
+    <view class="ay-dock__i {{dockActive === 'profile' ? 'on' : ''}}" bindtap="onDock" data-k="profile">
+      <text class="ay-dock__ic">👤</text><text class="ay-dock__tx">我的</text>
+    </view>
+  </view>
+</view>

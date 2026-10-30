@@ -1,0 +1,60 @@
+<view class="page tk {{themeCls}}">
+  <!-- 顶部标题 + slogan -->
+  <view class="card card--tint grain center mt-8 hero">
+    <view class="tape tape--gold"></view>
+    <text class="t-xxl serif heavy">闲趣游戏中心</text>
+    <text class="t-sm muted-2 mt-8">碎片时光，轻松益智，锻炼思维</text>
+  </view>
+
+  <!-- 数据统计 -->
+  <view class="row stat mt-24">
+    <view class="stat__cell card--flat">
+      <text class="t-xl serif heavy">{{stats.todayPlays}}</text>
+      <text class="t-xs muted-2 mt-8">今日游玩</text>
+    </view>
+    <view class="stat__cell card--flat">
+      <text class="t-xl serif heavy" style="color:var(--clay)">{{stats.bestScore}}</text>
+      <text class="t-xs muted-2 mt-8">最高得分</text>
+    </view>
+    <view class="stat__cell card--flat">
+      <text class="t-xl serif heavy" style="color:var(--mint-deep)">{{stats.totalTimeText}}</text>
+      <text class="t-xs muted-2 mt-8">累计时长</text>
+    </view>
+  </view>
+
+  <!-- 分类导航（横滑） -->
+  <scroll-view scroll-x class="cats mt-24" enhanced show-scrollbar="{{false}}">
+    <view class="cats__inner">
+      <view
+        wx:for="{{cats}}" wx:key="key"
+        class="chip cats__chip {{activeCat === item.key ? 'chip--active' : ''}}"
+        data-key="{{item.key}}" bindtap="onSelectCat"
+      >{{item.name}}</view>
+    </view>
+  </scroll-view>
+
+  <!-- 游戏卡片流（双列） -->
+  <view class="grid mt-24">
+    <view
+      wx:for="{{list}}" wx:key="id"
+      class="card gcard card--press gcard--{{item.tone}}"
+      data-id="{{item.id}}" bindtap="onPlay"
+    >
+      <view class="row row--between">
+        <view class="gcard__ic">{{item.icon}}</view>
+        <view class="chip chip--{{item.tone === 'mint' ? 'mint' : item.tone === 'gold' ? 'gold' : 'clay'}} gcard__diff">{{item.diff}}</view>
+      </view>
+      <text class="t-lg serif heavy mt-16">{{item.name}}</text>
+      <text class="t-xs muted-2 mt-8 clamp-2">{{item.desc}}</text>
+      <view class="row gcard__play mt-16">
+        <text class="t-sm strong" style="color:{{item.tone === 'mint' ? 'var(--mint-deep)' : item.tone === 'gold' ? 'var(--gold)' : 'var(--clay)'}}">开始游玩</text>
+        <view class="ic ic-arrow ic--sm" style="color:{{item.tone === 'mint' ? 'var(--mint-deep)' : item.tone === 'gold' ? 'var(--gold)' : 'var(--clay)'}}"></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="center foot muted-2 t-xs mt-32">全部游戏单机本地运行 · 无广告 · 无付费 · 无隐私授权</view>
+  <view class="center mt-16" bindtap="onClear">
+    <text class="t-xs" style="color:var(--ink-3);text-decoration:underline">清空游戏数据</text>
+  </view>
+</view>

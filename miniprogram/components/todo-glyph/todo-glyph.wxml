@@ -1,0 +1,9 @@
+<!--components/todo-glyph/todo-glyph.wxml-->
+<!-- 线性图标：Canvas 2D 绘制，边长由外部以 rpx 下发（走 --u 体系），宽度自适应容器 -->
+<canvas
+  id="glyphCv"
+  class="tg__cv"
+  type="2d"
+  style="width: calc({{size}} * var(--u, 1rpx)); height: calc({{size}} * var(--u, 1rpx));"
+  disable-scroll="{{true}}"
+></canvas>

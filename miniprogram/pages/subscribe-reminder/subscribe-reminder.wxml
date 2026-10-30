@@ -1,0 +1,209 @@
+<!--pages/subscribe-reminder/subscribe-reminder.wxml-->
+<!-- 订阅提醒 · 香槟金高级版：玻璃拟态 Hero + 金色筛选 + 空态插画 + 热门推荐 -->
+<view class="sr themed {{shellClass}} {{bgClass}}" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <!-- ===== 顶部标题栏 ===== -->
+  <view class="sr-nav">
+    <view class="sr-nav__back" bindtap="onBack" hover-stay-time="0">‹</view>
+    <view class="sr-nav__title">
+      <text class="sr-nav__t">订阅提醒</text>
+      <text class="sr-nav__s">重要事项 · 不再错过</text>
+    </view>
+    <view class="sr-nav__acts">
+      <view class="sr-circle" bindtap="openTemplateSheet" hover-stay-time="0">＋</view>
+      <view class="sr-circle" bindtap="toggleStyleSheet" hover-stay-time="0">•••</view>
+    </view>
+  </view>
+
+  <!-- ===== 页面质感 / 背景氛围（折叠面板，保留原有能力） ===== -->
+  <view wx:if="{{showStyleSheet}}" class="sr-sheet-scope sr-glass" catchtap="onStyleSheetStop">
+    <view class="sr-theme-row">
+      <text class="sr-theme-label">页面质感</text>
+      <view
+        wx:for="{{pagePresets}}" wx:key="key"
+        class="sr-theme-chip {{pageStyle === item.key ? 'is-on' : ''}}"
+        data-key="{{item.key}}" bindtap="onPageStyle"
+      ><view class="sr-theme-dot" style="background:{{item.dot}}"></view>{{item.name}}</view>
+    </view>
+    <view class="sr-theme-row">
+      <text class="sr-theme-label">背景氛围</text>
+      <view
+        wx:for="{{bgPresets}}" wx:key="key"
+        class="sr-theme-chip {{bgStyle === item.key ? 'is-on' : ''}}"
+        data-key="{{item.key}}" bindtap="onBgStyle"
+      ><view class="sr-theme-dot" style="background:{{item.dot}}"></view>{{item.name}}</view>
+    </view>
+  </view>
+
+  <!-- ===== Hero 玻璃卡 ===== -->
+  <view class="sr-hero sr-glass">
+    <view class="sr-hero__icon">🗓️</view>
+    <view class="sr-hero__main">
+      <view class="sr-hero__title">智能订阅提醒</view>
+      <view class="sr-hero__desc">设置周期提醒，让重要习惯自动发生。</view>
+    </view>
+    <view class="sr-hero__add" bindtap="openTemplateSheet" hover-class="press">＋ 添加</view>
+  </view>
+
+  <!-- ===== 分类筛选 ===== -->
+  <scroll-view class="sr-filters" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="sr-filters-in">
+      <view
+        wx:for="{{filters}}" wx:key="key"
+        class="sr-filter {{activeCat === item.key ? 'is-on' : ''}}"
+        data-key="{{item.key}}" bindtap="onCatFilter"
+      >
+        <text wx:if="{{item.icon}}" class="sr-filter__ico">{{item.icon}}</text>
+        <text class="sr-filter__t">{{item.label}}</text>
+        <text wx:if="{{item.key === 'all'}}" class="sr-filter__n"> · {{item.count}}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- ===== 订阅列表 ===== -->
+  <view wx:if="{{!loading && displaySubs.length > 0}}" class="sr-list">
+    <view wx:for="{{displaySubs}}" wx:key="id" class="sr-item sr-glass">
+      <view class="sr-item__top">
+        <view class="sr-item__icon">{{item.icon}}</view>
+        <view class="sr-item__main">
+          <view class="sr-item__row">
+            <text class="sr-item__title">{{item.title}}</text>
+            <view class="sr-switch {{item.enabled ? 'is-on' : ''}}" data-id="{{item.id}}" catchtap="onToggle">
+              <view class="sr-switch__knob"></view>
+            </view>
+          </view>
+          <view class="sr-item__meta">
+            <text class="sr-item__time">{{item.timeText}}</text>
+            <text class="sr-item__freq">{{item.freqLabel}}</text>
+          </view>
+          <view wx:if="{{item.note}}" class="sr-item__note">{{item.note}}</view>
+        </view>
+      </view>
+      <view class="sr-item__acts">
+        <view class="sr-act sr-act--primary" data-id="{{item.id}}" catchtap="onTestFire" hover-class="press">▶ 测试</view>
+        <view class="sr-act" data-id="{{item.id}}" catchtap="onEdit" hover-class="press">编辑</view>
+        <view class="sr-act sr-act--danger" data-id="{{item.id}}" catchtap="onDelete" hover-class="press">取消</view>
+      </view>
+    </view>
+    <view class="sr-main-add" bindtap="onAdd" hover-class="press">＋ 订阅新提醒</view>
+  </view>
+
+  <!-- ===== 空状态（日历插画 + 铃铛 + 轨道） ===== -->
+  <view wx:elif="{{!loading}}" class="sr-empty">
+    <view class="sr-ill">
+      <view class="sr-ill__orbit"></view>
+      <view class="sr-ill__cal">
+        <view class="sr-ill__ring sr-ill__ring--l"></view>
+        <view class="sr-ill__ring sr-ill__ring--r"></view>
+        <view class="sr-ill__check">✓</view>
+      </view>
+      <view class="sr-ill__bell"></view>
+    </view>
+    <view class="sr-empty__t">还没有订阅任何提醒</view>
+    <view class="sr-empty__s">
+      <text class="sr-empty__l">点击「＋ 添加」或从推荐模板中选择</text>
+      <text class="sr-empty__l">开启你的智能提醒之旅</text>
+    </view>
+    <view class="sr-main-add" bindtap="openTemplateSheet" hover-class="press">＋ 添加订阅　›</view>
+  </view>
+
+  <!-- ===== 热门推荐 ===== -->
+  <view class="sr-rec sr-glass">
+    <view class="sr-rec__hd">
+      <text class="sr-rec__t">✦ 热门推荐</text>
+      <text class="sr-rec__more" bindtap="openTemplateSheet">查看更多 ›</text>
+    </view>
+    <view class="sr-rec__grid">
+      <view
+        wx:for="{{recommend}}" wx:key="key"
+        class="sr-rec__item"
+        data-key="{{item.key}}" bindtap="onPickTemplate"
+      >
+        <view class="sr-rec__ico" style="background:{{item.tint}}">{{item.icon}}</view>
+        <text class="sr-rec__n">{{item.title}}</text>
+        <text class="sr-rec__d">{{item.desc}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ============ 模板选择弹层 ============ -->
+  <view wx:if="{{showTemplateSheet}}" class="sr-mask" catchtap="closeTemplateSheet">
+    <view class="sr-sheet" catchtap="onSheetStop">
+      <view class="sr-sheet__handle"></view>
+      <view class="sr-sheet__title">选择订阅模板</view>
+      <view class="sr-sheet__grid">
+        <view
+          wx:for="{{templates}}" wx:key="key"
+          class="sr-tpl"
+          data-key="{{item.key}}" catchtap="onPickTemplate"
+        >
+          <text class="sr-tpl__t">{{item.icon}} {{item.title}}</text>
+          <text class="sr-tpl__d">{{item.desc}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ============ 新建 / 编辑 弹层 ============ -->
+  <view wx:if="{{showEditor}}" class="sr-mask" catchtap="onEditorClose">
+    <view class="sr-sheet" catchtap="onSheetStop">
+      <view class="sr-sheet__handle"></view>
+      <view class="sr-sheet__title">{{editingId ? '编辑订阅' : '订阅新提醒'}}</view>
+
+      <view class="sr-field">
+        <text class="sr-field__label">订阅内容</text>
+        <input class="sr-field__input" placeholder="要定期提醒你做什么？" value="{{formTitle}}" bindinput="onTitle" maxlength="60" />
+      </view>
+
+      <view class="sr-field">
+        <text class="sr-field__label">备注（可选）</text>
+        <input class="sr-field__input" placeholder="补充说明" value="{{formNote}}" bindinput="onNote" maxlength="120" />
+      </view>
+
+      <view class="sr-field">
+        <text class="sr-field__label">分类</text>
+        <view class="sr-chips">
+          <view
+            wx:for="{{filters}}" wx:key="key"
+            wx:if="{{item.key !== 'all'}}"
+            class="sr-chip {{formCat === item.key ? 'is-on' : ''}}"
+            data-key="{{item.key}}" bindtap="onCatPick"
+          >{{item.icon}} {{item.label}}</view>
+        </view>
+      </view>
+
+      <view class="sr-field">
+        <text class="sr-field__label">提醒时刻</text>
+        <picker mode="time" value="{{formTime}}" bindchange="onTime">
+          <view class="sr-pick">{{formTime}} ▾</view>
+        </picker>
+      </view>
+
+      <view class="sr-field">
+        <view class="sr-field__label-row">
+          <text class="sr-field__label">提醒星期（默认每天）</text>
+          <text class="sr-link" bindtap="onEveryDay">每天</text>
+        </view>
+        <view class="sr-chips">
+          <view
+            wx:for="{{weekOptions}}" wx:key="key"
+            class="sr-chip {{weekdays.indexOf(item.key) >= 0 ? 'is-on' : ''}}"
+            data-key="{{item.key}}" bindtap="onWeek"
+          >周{{item.label}}</view>
+        </view>
+      </view>
+
+      <view class="sr-field">
+        <text class="sr-field__label">到点方式</text>
+        <view class="sr-chips">
+          <view class="sr-chip {{method === 'modal' ? 'is-on' : ''}}" data-key="modal" bindtap="onMethod">弹窗提醒</view>
+          <view class="sr-chip {{method === 'toast' ? 'is-on' : ''}}" data-key="toast" bindtap="onMethod">通知条</view>
+        </view>
+      </view>
+
+      <view wx:if="{{formError}}" class="sr-field__err">{{formError}}</view>
+
+      <view class="sr-sheet__save" bindtap="onSave" hover-class="press">{{editingId ? '保存修改' : '确认订阅'}}</view>
+    </view>
+  </view>
+</view>

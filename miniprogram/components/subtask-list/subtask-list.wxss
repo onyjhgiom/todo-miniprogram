@@ -1,0 +1,53 @@
+/* subtask-list */
+.subtask-list { padding: 8rpx 0; }
+.subtask-header { display: flex; align-items: center; gap: 16rpx; margin-bottom: 16rpx; }
+.subtask-title { font-size: 24rpx; color: var(--color-text-soft); font-weight: 500; white-space: nowrap; }
+.subtask-bar { flex: 1; height: 6rpx; background: var(--color-bg-soft); border-radius: 999rpx; overflow: hidden; }
+.subtask-bar-fill { height: 100%; background: linear-gradient(90deg, var(--color-primary), var(--color-accent)); transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1); }
+.subtask-items { display: flex; flex-direction: column; gap: 8rpx; }
+.subtask-item {
+  display: flex; align-items: center; gap: 16rpx;
+  padding: 14rpx 16rpx; border-radius: 12rpx;
+  background: var(--color-bg-soft); transition: all 200ms;
+}
+.subtask-item.is-done { opacity: 0.55; }
+.subtask-item.is-done .subtask-content { text-decoration: line-through; }
+.subtask-check {
+  width: 32rpx; height: 32rpx; border-radius: 50%;
+  border: 2rpx solid var(--color-border);
+  background: var(--color-card);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 200ms;
+}
+.subtask-item.is-done .subtask-check {
+  background: var(--color-primary); border-color: var(--color-primary);
+}
+.subtask-check-mark { color: #fff; font-size: 20rpx; font-weight: 700; }
+.subtask-content { flex: 1; font-size: 26rpx; color: var(--color-text); }
+.subtask-remove {
+  width: 40rpx; height: 40rpx;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-text-mute); font-size: 32rpx;
+  border-radius: 8rpx; transition: all 160ms;
+}
+.subtask-remove:active { background: var(--color-bg-soft); color: var(--color-danger); }
+.subtask-add { display: flex; align-items: center; gap: 12rpx; margin-top: 12rpx; }
+.subtask-input {
+  flex: 1; height: 64rpx; padding: 0 20rpx;
+  background: var(--color-bg-soft); border-radius: 32rpx;
+  font-size: 26rpx; color: var(--color-text);
+}
+.subtask-add-btn {
+  height: 64rpx; padding: 0 24rpx;
+  background: var(--color-primary); color: #fff;
+  border-radius: 32rpx; font-size: 24rpx;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 500;
+}
+.subtask-add-btn:active { transform: scale(0.96); }
+.subtask-clear {
+  margin-top: 16rpx; text-align: center;
+  font-size: 22rpx; color: var(--color-text-mute);
+  padding: 12rpx; border-radius: 8rpx;
+}
+.subtask-clear:active { background: var(--color-bg-soft); }

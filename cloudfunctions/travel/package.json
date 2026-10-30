@@ -1,0 +1,9 @@
+{
+  "name": "travel",
+  "version": "1.0.0",
+  "description": "旅行模式云端同步（行程 / 行李 / 日记 / 提醒，_openid 隔离）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

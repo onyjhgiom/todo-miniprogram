@@ -1,0 +1,105 @@
+<!--components/filter-bar/filter-bar.wxml-->
+<view class="filter">
+  <!-- 状态分段 -->
+  <view class="status-segment">
+    <view
+      wx:for="{{statusOptions}}"
+      wx:key="value"
+      class="status-segment__item {{filter === item.value ? 'status-segment__item--active' : ''}}"
+      data-value="{{item.value}}"
+      hover-class="fbar-press"
+      hover-stay-time="60"
+      bindtap="onChangeStatus"
+    >
+      <text class="status-segment__label">{{item.label}}</text>
+      <text wx:if="{{item.count > 0}}" class="status-segment__count">{{item.count}}</text>
+    </view>
+  </view>
+
+  <!-- 搜索 -->
+  <view class="search">
+    <view class="search__icon">
+      <text class="search__glyph">⌕</text>
+    </view>
+    <input
+      class="search__input"
+      placeholder="搜索内容、地点、人物、标签…"
+      placeholder-class="search__placeholder"
+      value="{{keyword}}"
+      confirm-type="search"
+      bindinput="onInputKeyword"
+    />
+    <view wx:if="{{keyword}}" class="search__clear" hover-class="fbar-press" hover-stay-time="60" bindtap="onClearKeyword">×</view>
+  </view>
+
+  <!-- 筛选条 -->
+  <scroll-view
+    class="chips"
+    scroll-x
+    enhanced
+    show-scrollbar="{{false}}"
+    enable-flex
+  >
+    <view class="chips__inner">
+      <view
+        class="chip-filter {{filters.priority ? 'chip-filter--active chip-filter--' + filters.priority : ''}}"
+        bindtap="onTapFilter"
+        hover-class="fbar-press"
+        hover-stay-time="60"
+        data-key="priority"
+      >
+        <text class="chip-filter__icon" wx:if="{{!filters.priority}}">·</text>
+        <text class="chip-filter__label">{{priorityLabel}}</text>
+        <text wx:if="{{filters.priority}}" class="chip-filter__x" catchtap="onClearFilter" data-key="priority">×</text>
+        <text wx:else class="chip-filter__caret">⌄</text>
+      </view>
+
+      <view
+        class="chip-filter {{filters.location ? 'chip-filter--active' : ''}}"
+        bindtap="onTapFilter"
+        hover-class="fbar-press"
+        hover-stay-time="60"
+        data-key="location"
+      >
+        <text class="chip-filter__icon" wx:if="{{!filters.location}}">⌖</text>
+        <text class="chip-filter__label">{{filters.location || '地点'}}</text>
+        <text wx:if="{{filters.location}}" class="chip-filter__x" catchtap="onClearFilter" data-key="location">×</text>
+        <text wx:else class="chip-filter__caret">⌄</text>
+      </view>
+
+      <view
+        class="chip-filter {{filters.person ? 'chip-filter--active' : ''}}"
+        bindtap="onTapFilter"
+        hover-class="fbar-press"
+        hover-stay-time="60"
+        data-key="person"
+      >
+        <text class="chip-filter__icon" wx:if="{{!filters.person}}">◉</text>
+        <text class="chip-filter__label">{{filters.person || '人物'}}</text>
+        <text wx:if="{{filters.person}}" class="chip-filter__x" catchtap="onClearFilter" data-key="person">×</text>
+        <text wx:else class="chip-filter__caret">⌄</text>
+      </view>
+
+      <view
+        class="chip-filter {{filters.tag ? 'chip-filter--active' : ''}}"
+        bindtap="onTapFilter"
+        hover-class="fbar-press"
+        hover-stay-time="60"
+        data-key="tag"
+      >
+        <text class="chip-filter__icon" wx:if="{{!filters.tag}}">#</text>
+        <text class="chip-filter__label">{{filters.tag || '标签'}}</text>
+        <text wx:if="{{filters.tag}}" class="chip-filter__x" catchtap="onClearFilter" data-key="tag">×</text>
+        <text wx:else class="chip-filter__caret">⌄</text>
+      </view>
+
+      <view
+        wx:if="{{hasAnyFilter}}"
+        class="chip-filter chip-filter--reset"
+        hover-class="fbar-press"
+        hover-stay-time="60"
+        bindtap="onResetAll"
+      >清除筛选</view>
+    </view>
+  </scroll-view>
+</view>

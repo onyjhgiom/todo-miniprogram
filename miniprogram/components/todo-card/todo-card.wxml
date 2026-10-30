@@ -1,0 +1,128 @@
+<!--components/todo-card/todo-card.wxml-->
+<view
+  class="todo {{todo.completed ? 'todo--done' : ''}} {{todo.priority ? 'todo--' + todo.priority : ''}}"
+  data-id="{{todo._id}}"
+>
+  <!-- 优先级色条（仅高/中优先级显示） -->
+  <view class="todo__bar" wx:if="{{todo.priority && todo.priority !== 'low' && !todo.completed}}"></view>
+
+  <!-- 勾选圆环 -->
+  <view
+    class="todo__check {{todo.completed ? 'todo__check--checked' : ''}}"
+    hover-class="todo__check--hover"
+    hover-stay-time="80"
+    bindtap="onCheckTap"
+  >
+    <text class="todo__check-icon" wx:if="{{todo.completed}}">✓</text>
+  </view>
+
+  <!-- 主体：可点击进入编辑 -->
+  <view
+    class="todo__body"
+    hover-class="todo__body--hover"
+    hover-stay-time="80"
+    bindtap="onContentTap"
+  >
+    <view class="todo__row todo__row--head">
+      <view class="todo__content {{todo.completed ? 'todo__content--done' : ''}}">
+        {{todo.content}}
+      </view>
+      <view class="todo__priority-dot todo__priority-dot--{{todo.priorityColor}}" wx:if="{{todo.priority && !todo.completed}}"></view>
+    </view>
+
+    <view
+      class="todo__meta"
+      wx:if="{{todo.countdown.key !== 'none' || todo.location || todo.avatars.length || (todo.tags && todo.tags.length)}}"
+    >
+      <!-- 倒计时 pill：未完成且有截止时间时显示精确剩余时间 -->
+      <view
+        wx:if="{{!todo.completed && todo.countdown.key !== 'none'}}"
+        class="todo__countdown todo__countdown--{{todo.countdown.key}}"
+      >
+        <text class="todo__countdown-icon" wx:if="{{todo.countdown.key === 'overdue'}}">!</text>
+        <text class="todo__countdown-icon" wx:elif="{{todo.countdown.key === 'today' || todo.countdown.key === 'tomorrow'}}">●</text>
+        <text class="todo__countdown-icon" wx:else>○</text>
+        <text class="todo__countdown-text">{{todo.countdown.text}}</text>
+      </view>
+
+      <!-- 地点 -->
+      <view wx:if="{{todo.location}}" class="todo__chip todo__chip--location">
+        <text class="todo__chip-glyph">⌖</text>
+        <text class="todo__chip-text">{{todo.location}}</text>
+      </view>
+
+      <!-- 人物 -->
+      <view wx:if="{{todo.avatars.length}}" class="todo__people">
+        <view
+          wx:for="{{todo.avatars}}"
+          wx:key="name"
+          class="todo__avatar todo__avatar--{{item.tone}}"
+        >{{item.initial}}</view>
+        <view
+          wx:if="{{todo.avatarOverflow}}"
+          class="todo__avatar todo__avatar--overflow"
+        >+{{todo.avatarOverflow}}</view>
+      </view>
+    </view>
+
+    <!-- 标签 -->
+    <view wx:if="{{todo.tags && todo.tags.length}}" class="todo__tags">
+      <view
+        wx:for="{{todo.tags}}"
+        wx:for-item="tag"
+        wx:key="*this"
+        class="todo__tag todo__tag--{{todo.tagTones[index]}}"
+      >#{{tag}}</view>
+    </view>
+
+    <!-- 附件缩略图（图片 / 视频，最多展示 3 个，点击预览全部） -->
+    <view
+      class="todo__photos"
+      wx:if="{{todo.attachments && todo.attachments.length}}"
+    >
+      <block
+        wx:for="{{todo.attachments}}"
+        wx:key="id"
+      >
+        <image
+          wx:if="{{item.type === 'image' && index < 3}}"
+          class="todo__photo"
+          src="{{item.url}}"
+          mode="aspectFill"
+          lazy-load="true"
+          data-src="{{item.url}}"
+          data-id="{{item.id}}"
+          catchtap="onMediaTap"
+        />
+        <!-- 视频：用封面当缩略图，叠播放角标；无封面时退化为深色占位块 -->
+        <view
+          wx:elif="{{item.type === 'video' && index < 3}}"
+          class="todo__photo todo__photo--video"
+          data-id="{{item.id}}"
+          catchtap="onMediaTap"
+        >
+          <image
+            wx:if="{{item.poster}}"
+            class="todo__photo-poster"
+            src="{{item.poster}}"
+            mode="aspectFill"
+            lazy-load="true"
+          />
+          <view class="todo__photo-play">▶</view>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 操作 -->
+  <view class="todo__actions">
+    <view
+      class="todo__icon"
+      hover-class="todo__icon--hover"
+      hover-stay-time="80"
+      catchtap="onDeleteTap"
+    >
+      <text class="todo__icon-glyph">×</text>
+    </view>
+  </view>
+</view>

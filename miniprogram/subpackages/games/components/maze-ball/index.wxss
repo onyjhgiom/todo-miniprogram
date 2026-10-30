@@ -1,0 +1,60 @@
+/* 迷宫小球（组件内样式）
+
+   三层各管一个 transform，互不覆盖：
+     外层 .mb        —— 位移（translate3d，独立合成层）
+     中层 .mb__bump  —— 撞墙顶墙回弹
+     内层 .mb__inner —— 动态尺寸 + 呼吸
+   颜色变量带字面量兜底，避免组件样式隔离下变量未继承时背景整体失效。 */
+
+.mb {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  z-index: 3;
+  /* 位移走独立合成层，避免与棋盘一起重绘 */
+  will-change: transform;
+  transition: transform 0.13s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.mb__bump {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.mb__bump.bx-t { animation: mbPushT 0.18s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+.mb__bump.bx-r { animation: mbPushR 0.18s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+.mb__bump.bx-b { animation: mbPushB 0.18s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+.mb__bump.bx-l { animation: mbPushL 0.18s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+
+@keyframes mbPushT { 0% { transform: translateY(0); } 35% { transform: translateY(-4rpx); } 100% { transform: translateY(0); } }
+@keyframes mbPushR { 0% { transform: translateX(0); } 35% { transform: translateX(4rpx); } 100% { transform: translateX(0); } }
+@keyframes mbPushB { 0% { transform: translateY(0); } 35% { transform: translateY(4rpx); } 100% { transform: translateY(0); } }
+@keyframes mbPushL { 0% { transform: translateX(0); } 35% { transform: translateX(-4rpx); } 100% { transform: translateX(0); } }
+
+.mb__inner {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 30%,
+    #b8d4b0,
+    var(--mint, #a8c0a0) 62%,
+    var(--mint-deep, #87a37f)
+  );
+  box-shadow: 0 4rpx 16rpx rgba(110, 142, 110, 0.35);
+  animation: mbBreathe 2s ease-in-out infinite;
+}
+
+@keyframes mbBreathe {
+  0%, 100% {
+    transform: scale(0.96);
+    box-shadow: 0 4rpx 16rpx rgba(110, 142, 110, 0.3);
+  }
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 6rpx 22rpx rgba(110, 142, 110, 0.45);
+  }
+}

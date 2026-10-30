@@ -1,0 +1,20 @@
+<view class="subtask-list">
+  <view class="subtask-header">
+    <text class="subtask-title">子任务 ({{doneCount}}/{{totalCount}})</text>
+    <view class="subtask-bar"><view class="subtask-bar-fill" style="width: {{progressPercent}}%"></view></view>
+  </view>
+  <view wx:if="{{items.length > 0}}" class="subtask-items">
+    <view wx:for="{{items}}" wx:key="_id" class="subtask-item {{item.completed ? 'is-done' : ''}}">
+      <view class="subtask-check" bindtap="onToggle" data-id="{{item._id}}" data-completed="{{!item.completed}}">
+        <view wx:if="{{item.completed}}" class="subtask-check-mark">✓</view>
+      </view>
+      <text class="subtask-content" bindtap="onEdit" data-id="{{item._id}}" data-content="{{item.content}}">{{item.content}}</text>
+      <view class="subtask-remove" bindtap="onRemove" data-id="{{item._id}}">×</view>
+    </view>
+  </view>
+  <view class="subtask-add">
+    <input class="subtask-input" placeholder="新增子任务…" value="{{newContent}}" bindinput="onInput" bindconfirm="onAdd" confirm-type="done" />
+    <view class="subtask-add-btn" bindtap="onAdd">添加</view>
+  </view>
+  <view wx:if="{{items.length > 0 && doneCount > 0}}" class="subtask-clear" bindtap="onClearDone">清除已完成 ({{doneCount}})</view>
+</view>

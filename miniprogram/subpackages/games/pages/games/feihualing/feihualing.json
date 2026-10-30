@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "国学飞花令",
+  "usingComponents": {
+    "game-shell": "/subpackages/games/components/game-shell/index"
+  },
+  "disableScroll": true
+}

@@ -1,0 +1,266 @@
+/* styles/tool-shell.wxss
+ * 工具中心各工具页的通用外壳样式（高级感 / 立体感 + 页面风格与背景风格切换）。
+ * 由各工具页 wxss 顶部 @import 引入。
+ * 依赖全局 CSS 变量（app.wxss 主题）与本页根 wrapper class 约定：
+ *   <view class="tshell themed" data-theme="{{theme}}" style="{{themeStyle}} {{bgInline}}">
+ * 其中 bgInline 由页面按 bgStyle 派生（见下 .tshell-bg-*）。
+ */
+
+/* ---------- 页面根：风格切换载体 ---------- */
+.tshell {
+  position: relative;
+  min-height: 100vh;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* 通用主题内容容器（居中定宽，留安全区） */
+.tshell__wrap {
+  position: relative;
+  z-index: 2;
+  padding: 24rpx 28rpx calc(40rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+/* ========== 背景风格：作为 .tshell 的伪背景装饰 ==========
+ * 设计要求（2026-10-07 用户反馈）：六种背景必须**一眼可辨**。
+ * 原方案各背景的渐变透明度只有 0.14~0.26，在浅色底 + 不透明卡片底下几乎看不出差别，
+ * 切了像没切。现在改为「底色 + 强图案」双层：底色明显偏移色相/明度，
+ * 图案层大幅提高不透明度并加入几何纹理，保证不透明卡片之间也能分辨。 */
+
+/* 纯净底色（唯一"什么都没有"，作为对照组要真的干净） */
+.tshell-bg-none {
+  background: var(--color-bg);
+}
+
+/* 暖晖流彩：三色大色块，暖橙 → 陶土 → 鼠尾草，饱和度明显提升 */
+.tshell-bg-aurora {
+  background:
+    radial-gradient(115% 85% at 12% -12%, rgba(232, 146, 62, 0.55), transparent 58%),
+    radial-gradient(105% 78% at 108% 6%, rgba(198, 104, 78, 0.48), transparent 55%),
+    radial-gradient(130% 92% at 48% 118%, rgba(126, 176, 138, 0.42), transparent 60%),
+    linear-gradient(168deg, #FDF3E6 0%, #F6E7DC 46%, #E9F0E7 100%);
+}
+
+/* 纸纹光斑：冷调弥散光晕，与 aurora 的暖调形成明显冷暖对比 */
+.tshell-bg-mesh {
+  background:
+    radial-gradient(85% 62% at 78% -6%, rgba(120, 156, 214, 0.50), transparent 62%),
+    radial-gradient(78% 66% at -6% 28%, rgba(150, 130, 200, 0.42), transparent 60%),
+    radial-gradient(110% 88% at 50% 116%, rgba(96, 178, 176, 0.38), transparent 62%),
+    linear-gradient(172deg, #EAF1FB 0%, #E4EAF6 52%, #E9F4F2 100%);
+}
+
+/* 暖晖光圈：上下两圈强光晕，中部留白，与 mesh 的"满铺光斑"形成对比 */
+.tshell-bg-halo {
+  background:
+    radial-gradient(100% 62% at 50% -14%, rgba(246, 178, 82, 0.62), transparent 62%),
+    radial-gradient(96% 58% at 50% 126%, rgba(214, 108, 96, 0.48), transparent 62%),
+    linear-gradient(180deg, #FDEED6 0%, #F7F3EC 52%, #F3E7E4 100%);
+}
+
+/* 月光栅格：网格线密度与对比都提高，卡片像压在网格纸上 */
+.tshell-bg-lattice {
+  background-color: #EEF1F7;
+  background-image:
+    linear-gradient(rgba(84, 106, 168, 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(84, 106, 168, 0.16) 1px, transparent 1px),
+    linear-gradient(rgba(84, 106, 168, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(84, 106, 168, 0.08) 1px, transparent 1px);
+  background-size: 72rpx 72rpx, 72rpx 72rpx, 18rpx 18rpx, 18rpx 18rpx;
+}
+
+/* 浮点粒子：点更大更密，双色错位排布 */
+.tshell-bg-dots {
+  background-color: #F4EFF6;
+  background-image:
+    radial-gradient(rgba(190, 96, 130, 0.34) 4rpx, transparent 4rpx),
+    radial-gradient(rgba(96, 128, 200, 0.28) 3rpx, transparent 3rpx);
+  background-size: 56rpx 56rpx, 56rpx 56rpx;
+  background-position: 0 0, 28rpx 28rpx;
+}
+
+/* ========== 页面风格：玻璃 / 磨砂 / 浮雕 对卡面与面板的差异化 ==========
+ * 设计要求（同上）：三种质感必须**一眼可辨**，不能只差一层阴影。
+ * 差异做在三个维度上，卡片一眼就能看出区别：
+ *   玻璃 glass —— 不透明纯白 + 大圆角 + 明显投影 + 顶部高光（最"亮"）
+ *   磨砂 frost —— 半透明 + 背景模糊 + 中圆角 + 描边（能透出下面的背景）
+ *   浮雕 relief —— 无投影 + 小圆角 + 内凹双高光（最"扁"，靠光影而非投影） */
+
+/* 立体玻璃（默认：通透白 + 明显高光 + 大圆角） */
+.tshell-ps-glass .ts-card {
+  background: var(--color-card);
+  border-radius: 34rpx;
+  box-shadow:
+    0 18rpx 40rpx -18rpx rgba(90, 74, 56, 0.20),
+    0 4rpx 14rpx rgba(90, 74, 56, 0.06),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.7);
+  border: 1rpx solid rgba(211, 202, 187, 0.5);
+}
+.tshell-ps-glass .ts-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), transparent 40%);
+  pointer-events: none;
+}
+
+/* 柔雾磨砂：半透明 + 真模糊，能透出底图；圆角收小、描边加重，
+   与玻璃的"不透明白"形成最直接的对比 */
+.tshell-ps-frost .ts-card {
+  background: rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(24rpx) saturate(160%);
+  -webkit-backdrop-filter: blur(24rpx) saturate(160%);
+  border-radius: 26rpx;
+  border: 2rpx solid rgba(255, 255, 255, 0.75);
+  box-shadow: 0 10rpx 30rpx rgba(60, 48, 36, 0.10);
+}
+/* 磨砂的表面高光：一条斜向柔光，进一步强化"雾面"观感 */
+.tshell-ps-frost .ts-card::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.42), transparent 46%);
+  pointer-events: none;
+}
+
+/* 丝绒浮雕：几乎不用外投影，靠内高光/内阴影表现"压印"；
+   圆角最小、描边最锐，视觉上明显更"平"更"硬" */
+.tshell-ps-relief .ts-card {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-radius: 18rpx;
+  border: 2rpx solid rgba(120, 100, 80, 0.26);
+  box-shadow:
+    inset 0 3rpx 0 rgba(255, 255, 255, 0.95),
+    inset 0 -4rpx 8rpx rgba(90, 74, 56, 0.14);
+}
+/* 浮雕的压印高光：顶部一条硬边亮线 */
+.tshell-ps-relief .ts-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  border-top: 3rpx solid rgba(255, 255, 255, 0.9);
+  pointer-events: none;
+}
+.tshell-ps-relief .tshell__wrap { padding-top: 30rpx; }
+
+/* ---------- 通用卡（需为 position:relative，供 ::before 定位） ---------- */
+.ts-card {
+  position: relative;
+  overflow: hidden;
+  padding: 24rpx;
+  box-sizing: border-box;
+}
+
+/* ========== 立体感通用交互件 ========== */
+/* 段式选择器（四维 / 子板块 tab 通用）：带内凹轨道 + 凸起滑块 */
+.ts-seg {
+  display: flex;
+  gap: 8rpx;
+  padding: 8rpx;
+  border-radius: 999rpx;
+  background: var(--color-bg-soft);
+  box-shadow: inset 0 2rpx 6rpx rgba(90, 74, 56, 0.08);
+}
+.ts-seg__item {
+  flex: 1;
+  text-align: center;
+  font-size: 26rpx;
+  color: var(--color-text-soft);
+  padding: 14rpx 0;
+  border-radius: 999rpx;
+  transition: all var(--duration-fast) var(--ease-out);
+  position: relative;
+}
+.ts-seg__item.is-on {
+  color: #fff;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-deep));
+  box-shadow: 0 6rpx 16rpx var(--color-primary-shadow);
+}
+.ts-seg__item .seg-count {
+  margin-left: 6rpx;
+  font-size: 20rpx;
+  opacity: 0.85;
+}
+
+/* 主按钮（立体凸起） */
+.ts-btn {
+  display: flex; align-items: center; justify-content: center;
+  gap: 8rpx;
+  font-size: 28rpx; font-weight: 600;
+  color: #fff;
+  border-radius: 999rpx;
+  padding: 20rpx 0;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-deep));
+  box-shadow: 0 12rpx 24rpx -10rpx var(--color-primary-shadow);
+}
+.ts-btn:active { transform: scale(0.97); }
+
+/* 次要（描边凸起） */
+.ts-btn--ghost {
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+  border: 1rpx solid var(--color-primary-soft);
+  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.6);
+}
+
+/* 小型 pill 操作钮 */
+.ts-pill {
+  display: inline-flex; align-items: center;
+  font-size: 22rpx; color: var(--color-text-soft);
+  background: var(--color-bg-soft);
+  padding: 8rpx 18rpx; border-radius: 999rpx;
+}
+.ts-pill--danger { color: var(--color-danger); background: rgba(239, 68, 68, 0.1); }
+.ts-pill--primary { color: var(--color-primary); background: var(--color-primary-soft); }
+
+/* 分组小标题 */
+.ts-sec-h {
+  font-size: 24rpx; color: var(--color-text-mute);
+  margin: 28rpx 6rpx 14rpx;
+  display: flex; align-items: center; gap: 8rpx;
+}
+
+/* ========== 风格 / 背景切换行 ========== */
+.ts-theme-row {
+  display: flex; align-items: center; gap: 12rpx;
+  flex-wrap: wrap;
+}
+.ts-theme-label { font-size: 22rpx; color: var(--color-text-mute); white-space: nowrap; }
+.ts-theme-chip {
+  display: flex; align-items: center; gap: 8rpx;
+  font-size: 22rpx;
+  padding: 10rpx 16rpx;
+  border-radius: 999rpx;
+  background: var(--color-bg-soft);
+  color: var(--color-text-soft);
+  border: 1rpx solid transparent;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+.ts-theme-chip .dot { width: 14rpx; height: 14rpx; border-radius: 50%; }
+.ts-theme-chip.is-on {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* 风格切换浮层卡片（顶部收纳） */
+.ts-theme-sheet {
+  margin: 0 0 18rpx;
+  padding: 20rpx;
+}
+.ts-theme-sheet__block { margin-bottom: 16rpx; }
+.ts-theme-sheet__block:last-child { margin-bottom: 0; }
+
+/* 空态 */
+.ts-empty {
+  text-align: center;
+  padding: 90rpx 0;
+  color: var(--color-text-mute);
+}
+.ts-empty .emo { font-size: 72rpx; display: block; margin-bottom: 18rpx; }
+.ts-empty .sub { font-size: 24rpx; color: var(--color-text-mute); margin-top: 8rpx; }

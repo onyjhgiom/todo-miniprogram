@@ -1,0 +1,36 @@
+/* template-picker */
+.template-picker { padding: 8rpx 0; }
+.tpl-scroll { white-space: nowrap; padding: 8rpx 4rpx; }
+.tpl-card {
+  display: inline-flex; flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  width: 200rpx; padding: 20rpx 16rpx;
+  background: var(--color-card);
+  border-radius: 16rpx;
+  margin-right: 16rpx;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  transition: all 200ms;
+}
+.tpl-card:active { transform: scale(0.96); box-shadow: var(--shadow-md); }
+.tpl-icon { font-size: 56rpx; line-height: 1; }
+.tpl-name {
+  font-size: 24rpx; color: var(--color-text); font-weight: 500;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 168rpx;
+}
+.tpl-count { font-size: 20rpx; color: var(--color-text-mute); }
+.tpl-del {
+  position: absolute; top: 6rpx; right: 6rpx;
+  width: 36rpx; height: 36rpx;
+  background: rgba(0, 0, 0, 0.5); color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24rpx;
+}
+/* 即时按压反馈（组件内样式隔离，需在组件内定义） */
+.tpl-press {
+  opacity: 0.74;
+  transform: scale(0.97);
+}

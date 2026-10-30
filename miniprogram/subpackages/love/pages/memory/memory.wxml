@@ -1,0 +1,339 @@
+<!-- pages/love/memory/memory.wxml -->
+<view class="ay" data-skin="{{skin.key}}" style="{{skin.style}}">
+
+  <!-- ==================== Hero：回忆 / 副标题 / 更多 ==================== -->
+  <view class="mm-hero">
+    <view class="mm-hero__l">
+      <text class="mm-hero__t">回忆</text>
+      <text class="mm-hero__s">我们的故事，正在发光 ♡</text>
+    </view>
+    <view class="mm-hero__more" bindtap="onMore" hover-class="mm-press">···</view>
+  </view>
+
+  <!-- ==================== 能量胶囊（玻璃） ==================== -->
+  <view class="mm-cap">
+    <text class="mm-cap__ico">♡</text>
+    <view class="mm-cap__main">
+      <view class="mm-cap__row">
+        <text class="mm-cap__t">爱情能量 {{total}}</text>
+        <text class="mm-cap__n" wx:if="{{nextName}}">/ {{capsuleGoal}}</text>
+      </view>
+      <view class="mm-cap__track">
+        <view class="mm-cap__fill" style="width:{{percent}}%"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ==================== 页签：互动 / 回忆 ==================== -->
+  <view class="mm-tabs">
+    <view class="mm-tab {{tab===item.key?'mm-tab--on':''}}" wx:for="{{tabs}}" wx:key="key"
+          data-key="{{item.key}}" bindtap="onTab" hover-class="mm-press">{{item.label}}</view>
+  </view>
+
+  <!-- ==================== 互动 ==================== -->
+  <block wx:if="{{tab==='inter'}}">
+    <view class="mm-card mm-anim">
+      <view class="mm-card__hd">
+        <text class="mm-card__title">记一次互动</text>
+        <text class="mm-card__more">爱心 Lv.{{lv}} · 总能量 {{total}}</text>
+      </view>
+
+      <view class="mm-chips">
+        <view class="mm-chip {{iType===item.key?'mm-chip--on':''}}" wx:for="{{types}}" wx:key="key"
+              data-v="{{item.key}}" bindtap="onType">{{item.emoji}} {{item.label}}</view>
+      </view>
+
+      <view class="mm-field">
+        <text class="mm-field__label">日期</text>
+        <picker mode="date" value="{{iDate}}" bindchange="onPickDate">
+          <view class="mm-field__input">{{iDate}}</view>
+        </picker>
+      </view>
+      <view class="mm-field">
+        <text class="mm-field__label">时长（分钟）</text>
+        <input class="mm-field__input" type="number" placeholder="填时长能量更高" placeholder-class="mm-ph" value="{{iMinutes}}" bindinput="onMinutes" />
+      </view>
+      <view class="mm-field">
+        <text class="mm-field__label">主题</text>
+        <input class="mm-field__input" placeholder="如：聊到凌晨两点" placeholder-class="mm-ph" value="{{iTitle}}" bindinput="onTitle" />
+      </view>
+      <view class="mm-field">
+        <text class="mm-field__label">想记的话</text>
+        <input class="mm-field__input" placeholder="他说了一句让我很安心的话…" placeholder-class="mm-ph" value="{{iNote}}" bindinput="onNote" />
+      </view>
+      <view class="mm-field">
+        <text class="mm-field__label">谁先找的谁</text>
+        <view class="mm-chips" style="flex:1">
+          <view class="mm-chip {{iFrom==='me'?'mm-chip--on':''}}" data-v="me" bindtap="onFrom">我找他</view>
+          <view class="mm-chip {{iFrom==='him'?'mm-chip--on':''}}" data-v="him" bindtap="onFrom">他找我</view>
+        </view>
+      </view>
+
+      <view class="mm-between mm-mt">
+        <view class="mm-t">这次注入 <text class="mm-strong">+{{previewEnergy}}</text> 能量</view>
+        <view class="mm-btn" bindtap="onSaveInter" hover-class="mm-press">记下来</view>
+      </view>
+    </view>
+
+    <view class="mm-card mm-anim">
+      <view class="mm-card__hd"><text class="mm-card__title">全部互动（{{list.length}}）</text></view>
+      <view class="mm-row" wx:for="{{list}}" wx:key="id">
+        <text class="mm-row__ico">{{item.emoji}}</text>
+        <view class="mm-row__main">
+          <view class="mm-row__t">{{item.label}} +{{item.energy}}</view>
+          <view class="mm-row__d">{{item.date}} · {{item.minutes}} 分钟 · {{item.from==='me'?'我找他':'他找我'}}</view>
+          <view class="mm-row__d" wx:if="{{item.title}}">{{item.title}}</view>
+          <view class="mm-row__d" wx:if="{{item.note}}">{{item.note}}</view>
+        </view>
+        <view class="mm-del" data-id="{{item.id}}" bindtap="onDelInter">删除</view>
+      </view>
+      <view class="mm-empty" wx:if="{{!list.length}}">
+        <view class="mm-empty__ico">💬</view>
+        <view class="mm-empty__t">还没有互动记录</view>
+        <view class="mm-empty__s">一次晚安电话，也值得记下来</view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ==================== 回忆 · 爱情球 ==================== -->
+  <block wx:if="{{tab==='memory'}}">
+
+    <!-- 3D 爱情记忆球舞台（真实 Canvas 引擎：拖拽旋转 / 轨道 / 粒子 / 飞入） -->
+    <view class="mm-stage" wx:if="{{view==='globe'}}">
+      <love-orb
+        id="orb"
+        wx:if="{{view==='globe'}}"
+        items="{{orbItems}}"
+        level="{{orbLevel}}"
+        primary="{{orbPrimary}}"
+        accent="{{orbAccent}}"
+        reduced="{{reducedMotion}}"
+        paused="{{paused}}"
+        height="680"
+        show-form="{{true}}"
+        hint=""
+        bind:select="onOrbSelect"
+        bind:arrive="onOrbArrive"
+        bind:levelup="onOrbLevelUp"
+      />
+
+      <!-- 左右悬浮提示（玻璃） -->
+      <view class="mm-stage__side mm-stage__side--l">
+        <text class="mm-stage__num">{{memories.length}} 条回忆</text>
+        <text class="mm-stage__sub">和你一起走过的日子</text>
+      </view>
+      <view class="mm-stage__side mm-stage__side--r">
+        <text class="mm-stage__num">拖动旋转球体</text>
+        <text class="mm-stage__sub">探索更多回忆</text>
+      </view>
+
+      <!-- 悬浮平台 · 能量环 -->
+      <view class="mm-stage__pad">
+        <view class="mm-stage__ring"></view>
+        <view class="mm-stage__core"></view>
+      </view>
+    </view>
+
+    <!-- 能量等级玻璃卡 -->
+    <view class="mm-energy">
+      <view class="mm-energy__l">
+        <text class="mm-energy__name">爱情能量</text>
+        <view class="mm-energy__lv">Lv.{{lv}}</view>
+      </view>
+      <view class="mm-energy__r">
+        <view class="mm-energy__nums">
+          <text class="mm-energy__cur">{{total}}</text>
+          <text class="mm-energy__goal" wx:if="{{nextName}}">/ {{capsuleGoal}}</text>
+        </view>
+        <view class="mm-energy__track">
+          <view class="mm-energy__fill" style="width:{{percent}}%"></view>
+        </view>
+        <text class="mm-energy__next" wx:if="{{nextName}}">下一阶段：{{nextName}} · 还差 {{toNext}}</text>
+        <text class="mm-energy__next" wx:else>已是最高等级 ♡</text>
+      </view>
+    </view>
+
+    <!-- 我们的回忆：标题 + 星球/列表切换 + 分类筛选 -->
+    <view class="mm-sec">
+      <view class="mm-sec__hd">
+        <text class="mm-sec__t">我们的回忆 <text class="mm-sec__n">{{memories.length}}</text></text>
+        <view class="mm-seg">
+          <view class="mm-seg__it {{view==='globe'?'mm-seg__it--on':''}}" data-v="globe" bindtap="onSetView">星球</view>
+          <view class="mm-seg__it {{view==='list'?'mm-seg__it--on':''}}" data-v="list" bindtap="onSetView">列表</view>
+        </view>
+      </view>
+
+      <scroll-view scroll-x class="mm-filters" wx:if="{{filters.length > 2}}">
+        <view class="mm-filters__in">
+          <view class="mm-chip mm-chip--sm {{mFilter===item.key?'mm-chip--on':''}}" wx:for="{{filters}}" wx:key="key"
+                data-key="{{item.key}}" bindtap="onFilter">{{item.label}}</view>
+        </view>
+      </scroll-view>
+
+      <!-- 回忆卡片（筛选结果） -->
+      <view class="mm-mem" wx:for="{{filteredMemories}}" wx:key="id" hover-class="mm-press"
+            data-id="{{item.id}}" bindtap="onOpenMemory">
+        <image class="mm-mem__img" wx:if="{{item.photos.length}}" src="{{item.photos[0]}}" mode="aspectFill"></image>
+        <view class="mm-mem__heart" wx:else>
+          <text class="mm-mem__heart-ico">💗</text>
+        </view>
+        <view class="mm-mem__main">
+          <view class="mm-mem__t">{{item.title}}</view>
+          <view class="mm-mem__meta">
+            <text class="mm-mem__tag" wx:if="{{item.tags.length}}">{{item.tags[0]}}</text>
+            <text class="mm-mem__date">{{item.date}}{{item.place ? ' · ' + item.place : ''}}</text>
+          </view>
+          <view class="mm-mem__note" wx:if="{{item.note}}">{{item.note}}</view>
+          <view class="mm-mem__foot">
+            <text class="mm-mem__energy">♡ +{{memoryEnergy}} 能量值</text>
+            <text class="mm-del" data-id="{{item.id}}" catchtap="onDelMemory">删除</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 空状态：引导记第一条 -->
+      <view class="mm-welcome" wx:if="{{!memories.length}}">
+        <view class="mm-welcome__orb">♡</view>
+        <view class="mm-welcome__t">还没有开始记录你们的回忆</view>
+        <view class="mm-welcome__s">记下第一条，它会化作光点飞进爱情球</view>
+        <view class="mm-btn mm-btn--block" bindtap="onToggleMForm" hover-class="mm-press">开始记录</view>
+      </view>
+
+      <!-- 筛选无结果 -->
+      <view class="mm-empty" wx:if="{{memories.length && !filteredMemories.length}}">
+        <view class="mm-empty__ico">🔍</view>
+        <view class="mm-empty__t">这个分类还没有回忆</view>
+        <view class="mm-empty__s">换一个分类看看，或记下新的一条</view>
+      </view>
+
+      <!-- 列表视图：完整信息卡（含标签全览） -->
+      <block wx:if="{{view==='list'}}">
+        <view class="mm-card mm-anim" wx:for="{{memories}}" wx:key="id">
+          <view class="mm-card__hd">
+            <text class="mm-card__title">{{item.title}}</text>
+            <text class="mm-card__more">{{item.date}}</text>
+          </view>
+          <image class="mm-mphoto" wx:if="{{item.photos.length}}" src="{{item.photos[0]}}" mode="aspectFill"></image>
+          <view class="mm-t">{{item.note}}</view>
+          <view class="mm-faint mm-mt" wx:if="{{item.place}}">📍 {{item.place}}</view>
+          <view class="mm-chips mm-mt" wx:if="{{item.tags.length}}">
+            <view class="mm-chip mm-chip--accent" wx:for="{{item.tags}}" wx:for-item="tg" wx:key="*this">{{tg}}</view>
+          </view>
+          <view class="mm-del mm-del--r" data-id="{{item.id}}" bindtap="onDelMemory">删除</view>
+        </view>
+      </block>
+    </view>
+  </block>
+
+  <!-- ==================== 水晶 FAB：记录回忆 ==================== -->
+  <view class="mm-fab" wx:if="{{tab==='memory' && !showMForm}}" bindtap="onToggleMForm" hover-class="mm-fab--press">
+    <text class="mm-fab__plus">＋</text>
+    <text class="mm-fab__t">记录回忆</text>
+  </view>
+
+  <!-- ==================== 底部 Dock ==================== -->
+  <view class="mm-dock">
+    <view class="mm-dock__it" data-url="/subpackages/love/pages/index/index" bindtap="onDock" hover-class="mm-press">
+      <text class="mm-dock__ico">🏠</text><text class="mm-dock__t">首页</text>
+    </view>
+    <view class="mm-dock__it mm-dock__it--on">
+      <text class="mm-dock__ico">💞</text><text class="mm-dock__t">回忆</text>
+    </view>
+    <view class="mm-dock__it" data-url="/subpackages/love/pages/love/love" bindtap="onDock" hover-class="mm-press">
+      <text class="mm-dock__ico">⚡</text><text class="mm-dock__t">能量站</text>
+    </view>
+    <view class="mm-dock__it" data-url="/subpackages/love/pages/outfit/outfit" bindtap="onDock" hover-class="mm-press">
+      <text class="mm-dock__ico">👗</text><text class="mm-dock__t">衣橱</text>
+    </view>
+    <view class="mm-dock__it" data-url="/subpackages/love/pages/profile/profile" bindtap="onDock" hover-class="mm-press">
+      <text class="mm-dock__ico">👤</text><text class="mm-dock__t">我的</text>
+    </view>
+  </view>
+
+  <!-- ==================== 写回忆 · 底部抽屉 ==================== -->
+  <view class="mm-mask" wx:if="{{showMForm}}" bindtap="onToggleMForm">
+    <view class="mm-sheet" catchtap="onNoop">
+      <view class="mm-sheet__grab"></view>
+      <view class="mm-card__hd">
+        <text class="mm-card__title">写一条回忆</text>
+        <text class="mm-card__more">放入球里 +{{memoryEnergy}} 能量</text>
+      </view>
+
+      <view class="mm-field">
+        <text class="mm-field__label">日期</text>
+        <picker mode="date" value="{{mDate}}" bindchange="onMPickDate">
+          <view class="mm-field__input">{{mDate}}</view>
+        </picker>
+      </view>
+      <view class="mm-field">
+        <text class="mm-field__label">标题</text>
+        <input class="mm-field__input" placeholder="如：第一次一起看的日出" placeholder-class="mm-ph" value="{{mTitle}}" bindinput="onMTitle" />
+      </view>
+      <view class="mm-field">
+        <text class="mm-field__label">地点</text>
+        <input class="mm-field__input" placeholder="城市 / 地方（可选）" placeholder-class="mm-ph" value="{{mPlace}}" bindinput="onMPlace" />
+      </view>
+      <view class="mm-field">
+        <text class="mm-field__label">想说的话</text>
+        <input class="mm-field__input" placeholder="那天发生了什么" placeholder-class="mm-ph" value="{{mNote}}" bindinput="onMNote" />
+      </view>
+
+      <view class="mm-card__hd"><text class="mm-card__title">标签</text></view>
+      <view class="mm-chips">
+        <view class="mm-chip {{mTags.indexOf(item)>=0?'mm-chip--on':''}}" wx:for="{{memoryTags}}" wx:key="*this"
+              data-v="{{item}}" bindtap="onMTag">{{item}}</view>
+      </view>
+
+      <!-- 配图：会成为球里的照片记忆节点 -->
+      <view class="mm-card__hd mm-mt">
+        <text class="mm-card__title">照片</text>
+        <text class="mm-card__more">{{mPhotos.length}}/3 · 缩略图</text>
+      </view>
+      <view class="mm-photos">
+        <view class="mm-photo" wx:for="{{mPhotos}}" wx:for-item="ph" wx:key="*this">
+          <image class="mm-photo__img" src="{{ph}}" mode="aspectFill"></image>
+          <view class="mm-photo__del" data-i="{{index}}" bindtap="onDelPhoto">×</view>
+        </view>
+        <view class="mm-photo mm-photo--add" wx:if="{{mPhotos.length<3}}" bindtap="onPickPhoto">＋</view>
+      </view>
+      <view class="mm-faint" wx:if="{{photoTip}}">{{photoTip}}</view>
+
+      <view class="mm-btn mm-btn--block mm-mt" id="putBtn" bindtap="onPutInOrb" hover-class="mm-press">放入我们的爱情球</view>
+    </view>
+  </view>
+
+  <!-- ==================== 回忆详情（点击记忆节点后浮出） ==================== -->
+  <view class="mm-mask mm-mask--center" wx:if="{{detail}}" bindtap="onCloseDetail">
+    <view class="mm-detail" catchtap="onNoop">
+      <image class="mm-detail__photo" wx:if="{{detailPhoto}}" src="{{detailPhoto}}" mode="aspectFill"></image>
+      <view class="mm-detail__halo" style="{{centerStyle}}"></view>
+      <view class="mm-detail__emoji" wx:if="{{!detailPhoto}}">{{detailEmoji}}</view>
+      <view class="mm-detail__title">{{detail.title}}</view>
+      <view class="mm-detail__meta">{{detail.date}}{{detail.place ? ' · ' + detail.place : ''}}</view>
+      <view class="mm-t mm-mt" wx:if="{{detail.note}}">{{detail.note}}</view>
+      <view class="mm-chips mm-mt" wx:if="{{detail.tags.length}}">
+        <view class="mm-chip mm-chip--accent" wx:for="{{detail.tags}}" wx:for-item="tg" wx:key="*this">{{tg}}</view>
+      </view>
+      <view class="mm-btn mm-btn--pill mm-mt" bindtap="onCloseDetail" hover-class="mm-press">收起星球</view>
+      <view class="mm-del mm-mt" data-id="{{detail.id}}" bindtap="onDelFromDetail">删除这条回忆</view>
+    </view>
+  </view>
+
+  <!-- ==================== 飞入中的「回忆卡片缩小」==================== -->
+  <view class="mm-ghost" wx:if="{{ghost}}" style="left:{{ghost.x}}px;top:{{ghost.y}}px">
+    <view class="mm-ghost__card">
+      <text class="mm-ghost__emoji">{{ghost.emoji}}</text>
+      <text class="mm-ghost__t">{{ghost.title}}</text>
+    </view>
+  </view>
+
+  <!-- ==================== 升级横幅 ==================== -->
+  <view class="mm-lvup" wx:if="{{levelUp}}">
+    <view class="mm-lvup__card">
+      <view class="mm-lvup__lv">Lv.{{levelUp.lv}}</view>
+      <view class="mm-lvup__name">{{levelUp.name}}</view>
+      <view class="mm-lvup__mode">新的爱情模式已解锁 ♡</view>
+      <view class="mm-lvup__desc">{{levelUp.desc}}</view>
+    </view>
+  </view>
+</view>

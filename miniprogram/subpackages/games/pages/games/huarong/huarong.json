@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "数字华容道",
+  "usingComponents": {
+    "game-shell": "/subpackages/games/components/game-shell/index"
+  },
+  "disableScroll": true
+}

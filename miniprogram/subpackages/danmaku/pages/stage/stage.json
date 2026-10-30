@@ -1,0 +1,8 @@
+{
+  "navigationStyle": "custom",
+  "disableScroll": true,
+  "pageOrientation": "auto",
+  "usingComponents": {
+    "danmaku-render": "/components/danmaku-render/danmaku-render"
+  }
+}

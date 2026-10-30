@@ -1,0 +1,250 @@
+<view class="pe themed" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <!-- ===== 步骤条 ===== -->
+  <view class="pe-steps">
+    <view
+      wx:for="{{steps}}"
+      wx:key="key"
+      class="pe-step {{stepIdx === index ? 'on' : ''}} {{stepIdx > index ? 'done' : ''}}"
+      data-i="{{index}}"
+      bindtap="onStepTap"
+    >
+      <view class="pe-step-dot">{{index + 1}}</view>
+      <view class="pe-step-n">{{item.label}}</view>
+    </view>
+  </view>
+
+  <!-- ===== 画布 ===== -->
+  <view class="pe-stage">
+    <canvas
+      type="2d"
+      id="pwCanvas"
+      class="pe-canvas"
+      style="width:{{canvasW}}px;height:{{canvasH}}px"
+      bindtouchstart="onCanvasTouchStart"
+      bindtouchmove="onCanvasTouchMove"
+      bindtouchend="onCanvasTouchEnd"
+    ></canvas>
+    <view wx:if="{{!photoCount}}" class="pe-stage-ph">
+      <view class="pe-stage-ic">{{shapeIcon}}</view>
+      <view class="pe-stage-t">添加照片后会自动排成「{{shapeName}}」</view>
+    </view>
+    <!-- 未凑齐固定张数：图形处于「未生成」状态，明确提示还差几张 -->
+    <view wx:if="{{needCount > 0 && photoCount > 0 && needGap > 0}}" class="pe-stage-gap">
+      <text class="pe-stage-gap-n">还差 {{needGap}} 张</text>
+      <text class="pe-stage-gap-s">凑够 {{needCount}} 张才能组成完整{{shapeName}}</text>
+    </view>
+    <view wx:if="{{hint}}" class="pe-hint">{{hint}}</view>
+  </view>
+
+  <!-- ===== 面板 ===== -->
+  <view class="pe-panel">
+
+    <!-- 1 选形状 -->
+    <view wx:if="{{step === 'shape'}}" class="pe-sec">
+      <view class="pe-shape-card">
+        <view class="pe-shape-ic">{{shapeIcon}}</view>
+        <view class="pe-shape-bd">
+          <view class="pe-shape-n">{{shapeName}}</view>
+          <view class="pe-shape-s" wx:if="{{needCount > 0}}">需正好 {{needCount}} 张照片组成完整图形</view>
+          <view class="pe-shape-s" wx:else>建议 {{shapeSuggest}} 张照片</view>
+        </view>
+        <view class="pe-shape-btn" bindtap="onPickShape">形状库</view>
+      </view>
+      <view class="pe-title-row">
+        <input
+          class="pe-title-input"
+          value="{{title}}"
+          maxlength="20"
+          placeholder="给作品起个名字"
+          placeholder-class="pe-ph"
+          bindinput="onTitleInput"
+        />
+      </view>
+      <view class="pe-tip">形状库里有心形、字母、数字、文字、节日、情侣、家庭等几十种形状，也可以自己上传 PNG 蒙版。</view>
+    </view>
+
+    <!-- 2 传图片 -->
+    <view wx:if="{{step === 'photos'}}" class="pe-sec">
+      <view class="pe-row-btns">
+        <view class="pe-mini main" bindtap="onAddPhoto">＋ 添加照片{{needGap > 0 ? '（还需 ' + needGap + ' 张）' : ''}}</view>
+        <view class="pe-mini" bindtap="onImportFromChat">聊天一次导入</view>
+        <view class="pe-mini" bindtap="onShufflePhotos">随机打乱</view>
+        <view class="pe-mini" bindtap="onClearPhotos">清空</view>
+      </view>
+      <view class="pe-thumbs">
+        <view wx:for="{{photos}}" wx:key="id" class="pe-thumb">
+          <image class="pe-thumb-img" src="{{item.src}}" mode="aspectFill" />
+          <view class="pe-thumb-x" data-idx="{{index}}" catchtap="onDelPhoto">×</view>
+        </view>
+      </view>
+      <view class="pe-tip" wx:if="{{needCount > 0}}">已选 {{photoCount}} / {{needCount}} 张 · 该图形需要正好 {{needCount}} 张照片，按顺序填入方块网格组成完整图形，每张只出现一次。</view>
+      <view class="pe-tip" wx:else>已选 {{photoCount}} / 100 张 · 点右上角 × 删除单张。默认每张照片只用一次，不会重复；想让形状更饱满可打开「铺满」。</view>
+      <view class="pe-tip">微信单次最多选 9 张，点「添加照片」会<text class="pe-strong">自动接力</text>连续弹选图直到凑够，中途取消不影响已选。照片很多时可点「聊天一次导入」：把照片先发到任意聊天（推荐文件传输助手），最多一次勾选 100 张。</view>
+    </view>
+
+    <!-- 3 自动排列 -->
+    <view wx:if="{{step === 'arrange'}}" class="pe-sec">
+      <view class="pe-ctl" wx:if="{{needCount > 0}}">
+        <view class="pe-ctl-h"><text>网格模板</text><text class="pe-ctl-v">{{tileCount}} 格 / {{photoCount}} 张</text></view>
+        <view class="pe-chips-wrap">
+          <view
+            wx:for="{{fillModes}}"
+            wx:key="key"
+            class="pe-chip {{fillMode === item.key ? 'on' : ''}}"
+            data-key="{{item.key}}"
+            bindtap="onFillMode"
+          >{{item.label}}风格</view>
+        </view>
+        <view class="pe-tip">{{fillMode === 'ring' ? '描边：只留形状边界一圈照片，内部留白，轮廓最利落（张数比实心少）。' : (fillMode === 'fade' ? '渐变：张数不变，内侧照片半透明，形状透气不糊。' : '实心：所有格子都放照片，形状最饱满。')}}</view>
+      </view>
+      <view class="pe-ctl" wx:if="{{needCount > 0}}">
+        <view wx:if="{{photoCount >= needCount}}" class="pe-tip">已组成完整图形：所有照片以统一尺寸的正方形、严格网格对齐{{fillMode === 'ring' ? '，仅铺在形状边界上' : ''}}，{{fillMode === 'fade' ? '外圈实、内侧渐透' : '实心无缝、中间不留空洞'}}。</view>
+        <view wx:else class="pe-tip">还差 {{needCount - photoCount}} 张照片。回到「传图片」补齐 {{needCount}} 张后，方块才会填满整个形状。</view>
+      </view>
+      <view class="pe-ctl" wx:else>
+        <view class="pe-ctl-h"><text>照片用法</text><text class="pe-ctl-v">{{tileCount}} 格 / {{photoCount}} 张</text></view>
+        <view class="pe-chips-wrap">
+          <view class="pe-chip {{autofill ? 'on' : ''}}" bindtap="onToggleAutofill">
+            {{autofill ? '铺满 · 会重复使用照片' : '每张照片只用一次（推荐）'}}
+          </view>
+        </view>
+        <view wx:if="{{!autofill}}" class="pe-tip">当前：一张照片一格，画面上不会出现重复的照片内容。照片越多，形状轮廓越清晰。</view>
+      </view>
+      <view class="pe-ctl" wx:if="{{needCount == 0}}">
+        <view class="pe-ctl-h"><text>轮廓密度</text><text class="pe-ctl-v">{{arrange.density}}%</text></view>
+        <slider min="60" max="160" value="{{arrange.density}}" data-key="density" bindchange="onArrangeSlider" activeColor="#B5714C" block-size="16" />
+      </view>
+      <view class="pe-ctl" wx:if="{{needCount == 0}}">
+        <view class="pe-ctl-h"><text>随机抖动</text><text class="pe-ctl-v">{{arrange.jitter}}%</text></view>
+        <slider min="0" max="100" value="{{arrange.jitter}}" data-key="jitter" bindchange="onArrangeSlider" activeColor="#B5714C" block-size="16" />
+      </view>
+      <view class="pe-ctl">
+        <view class="pe-ctl-h"><text>整体缩放</text><text class="pe-ctl-v">{{arrange.scale}}%</text></view>
+        <slider min="60" max="140" value="{{arrange.scale}}" data-key="scale" bindchange="onArrangeSlider" activeColor="#B5714C" block-size="16" />
+      </view>
+      <view class="pe-ctl">
+        <view class="pe-ctl-h"><text>整体旋转</text><text class="pe-ctl-v">{{arrange.rotate - 180}}°</text></view>
+        <slider min="0" max="360" value="{{arrange.rotate}}" data-key="rotate" bindchange="onArrangeSlider" activeColor="#B5714C" block-size="16" />
+      </view>
+      <view class="pe-ctl">
+        <view class="pe-ctl-h"><text>照片大小</text><text class="pe-ctl-v">{{arrange.photoSize}}%</text></view>
+        <slider min="50" max="150" value="{{arrange.photoSize}}" data-key="photoSize" bindchange="onArrangeSlider" activeColor="#B5714C" block-size="16" />
+      </view>
+      <view class="pe-row-btns">
+        <view class="pe-mini" bindtap="onRelayout">重新排列</view>
+        <view class="pe-mini" bindtap="onShufflePhotos">随机打乱</view>
+        <view class="pe-mini" bindtap="onResetArrange">重置</view>
+      </view>
+    </view>
+
+    <!-- 4 调整位置 -->
+    <view wx:if="{{step === 'edit'}}" class="pe-sec">
+      <view wx:if="{{selIndex < 0}}" class="pe-tip">在上方画布点选一张照片：单指拖动位置，双指缩放与旋转。</view>
+      <view wx:else class="pe-tip">已选中第 {{selIndex + 1}} 张 · 单指拖动，双指缩放旋转<block wx:if="{{autofill}}">（该照片的所有副本一起动）</block></view>
+      <view class="pe-acts">
+        <view class="pe-act" data-act="up" bindtap="onEditAction">置顶</view>
+        <view class="pe-act" data-act="down" bindtap="onEditAction">置底</view>
+        <view class="pe-act" data-act="flipH" bindtap="onEditAction">水平翻转</view>
+        <view class="pe-act" data-act="flipV" bindtap="onEditAction">垂直翻转</view>
+        <view class="pe-act" data-act="replace" bindtap="onEditAction">替换</view>
+        <view class="pe-act" data-act="reset" bindtap="onEditAction">复位</view>
+        <view class="pe-act danger" data-act="delete" bindtap="onEditAction">删除</view>
+      </view>
+    </view>
+
+    <!-- 5 样式 -->
+    <view wx:if="{{step === 'style'}}" class="pe-sec">
+      <view class="pe-lbl">主题模板</view>
+      <scroll-view class="pe-chips" scroll-x enable-flex>
+        <view wx:for="{{themes}}" wx:key="id" class="pe-chip {{style.theme === item.id ? 'on' : ''}}" data-id="{{item.id}}" bindtap="onTheme">{{item.name}}</view>
+      </scroll-view>
+
+      <view class="pe-lbl">画布比例</view>
+      <view class="pe-chips-wrap">
+        <view wx:for="{{ratios}}" wx:key="value" class="pe-chip {{style.ratio === item.value ? 'on' : ''}}" data-v="{{item.value}}" bindtap="onRatio">{{item.label}}</view>
+      </view>
+
+      <view class="pe-lbl">背景色</view>
+      <view class="pe-swatches">
+        <view wx:for="{{swatches}}" wx:key="*this" class="pe-sw {{style.bg === item ? 'on' : ''}}" style="background:{{item}}" data-c="{{item}}" bindtap="onColor"></view>
+      </view>
+      <view class="pe-row-btns">
+        <view class="pe-mini" bindtap="onBgImage">背景图</view>
+        <view wx:if="{{style.bgImage}}" class="pe-mini" bindtap="onClearBg">去掉背景图</view>
+      </view>
+
+      <view class="pe-ctl">
+        <view class="pe-ctl-h"><text>内边距</text><text class="pe-ctl-v">{{style.padding}}%</text></view>
+        <slider min="0" max="15" value="{{style.padding}}" data-key="padding" bindchange="onStyleSlider" activeColor="#B5714C" block-size="16" />
+      </view>
+      <view class="pe-ctl">
+        <view class="pe-ctl-h"><text>照片间距</text><text class="pe-ctl-v">{{style.gap}}%</text></view>
+        <slider min="0" max="30" value="{{style.gap}}" data-key="gap" bindchange="onStyleSlider" activeColor="#B5714C" block-size="16" />
+      </view>
+      <view class="pe-ctl">
+        <view class="pe-ctl-h"><text>圆角</text><text class="pe-ctl-v">{{style.radius}}%</text></view>
+        <slider min="0" max="50" value="{{style.radius}}" data-key="radius" bindchange="onStyleSlider" activeColor="#B5714C" block-size="16" />
+      </view>
+      <view class="pe-ctl">
+        <view class="pe-ctl-h"><text>边框宽度</text><text class="pe-ctl-v">{{style.borderW}}‰</text></view>
+        <slider min="0" max="24" value="{{style.borderW}}" data-key="borderW" bindchange="onStyleSlider" activeColor="#B5714C" block-size="16" />
+      </view>
+      <view class="pe-lbl">边框颜色</view>
+      <view class="pe-swatches">
+        <view wx:for="{{swatches}}" wx:key="*this" class="pe-sw {{style.borderColor === item ? 'on' : ''}}" style="background:{{item}}" data-c="{{item}}" bindtap="onBorderColor"></view>
+      </view>
+
+      <view class="pe-row-btns">
+        <view class="pe-mini {{style.shadow ? 'main' : ''}}" bindtap="onToggleShadow">阴影 {{style.shadow ? '开' : '关'}}</view>
+      </view>
+
+      <view class="pe-lbl">滤镜</view>
+      <view class="pe-chips-wrap">
+        <view wx:for="{{filters}}" wx:key="value" class="pe-chip {{style.filter === item.value ? 'on' : ''}}" data-v="{{item.value}}" bindtap="onFilter">{{item.label}}</view>
+      </view>
+
+      <view class="pe-lbl">装饰</view>
+      <view class="pe-chips-wrap">
+        <view wx:for="{{stickers}}" wx:key="*this" class="pe-chip pe-chip--emo" data-v="{{item}}" bindtap="onAddSticker">{{item}}</view>
+        <view class="pe-chip" bindtap="onAddText">＋ 文字</view>
+      </view>
+      <view wx:if="{{decors.length}}" class="pe-row-btns">
+        <view class="pe-mini danger" bindtap="onDelDecor">删除选中装饰</view>
+      </view>
+      <view class="pe-tip">装饰添加后可在画布上直接拖动摆放；先点选再删除。</view>
+    </view>
+
+    <!-- 6 导出 -->
+    <view wx:if="{{step === 'export'}}" class="pe-sec">
+      <view class="pe-lbl">导出分辨率（短边）</view>
+      <view class="pe-chips-wrap">
+        <view class="pe-chip {{exportPx === 1080 ? 'on' : ''}}" data-px="1080" bindtap="onExportPx">1080</view>
+        <view class="pe-chip {{exportPx === 1440 ? 'on' : ''}}" data-px="1440" bindtap="onExportPx">1440</view>
+        <view class="pe-chip {{exportPx === 2160 ? 'on' : ''}}" data-px="2160" bindtap="onExportPx">2160</view>
+      </view>
+      <view class="pe-lbl">格式</view>
+      <view class="pe-chips-wrap">
+        <view class="pe-chip {{exportType === 'jpg' ? 'on' : ''}}" data-t="jpg" bindtap="onExportType">JPG</view>
+        <view class="pe-chip {{exportType === 'png' ? 'on' : ''}}" data-t="png" bindtap="onExportType">PNG（透明底）</view>
+      </view>
+      <view class="pe-big" bindtap="onDoExport">{{exporting ? '正在生成…' : '生成图片'}}</view>
+
+      <view wx:if="{{exportPath}}" class="pe-result">
+        <image class="pe-result-img" src="{{exportPath}}" mode="widthFix" bindtap="onPreviewExport" />
+        <view class="pe-row-btns">
+          <view class="pe-mini main" bindtap="onSaveAlbum">保存到相册</view>
+          <view class="pe-mini" bindtap="onPreviewExport">全屏预览</view>
+        </view>
+        <view class="pe-tip">点图片可全屏查看；长按图片也能直接转发给好友。</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 底部操作栏 ===== -->
+  <view class="pe-foot">
+    <view class="pe-btn ghost" bindtap="onPrev">{{stepIdx === 0 ? '返回' : '上一步'}}</view>
+    <view class="pe-btn ghost" bindtap="onSaveDraft">存草稿</view>
+    <view class="pe-btn main" bindtap="onNext">{{stepIdx === 5 ? '完成' : '下一步'}}</view>
+  </view>
+</view>

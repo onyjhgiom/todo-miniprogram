@@ -1,0 +1,194 @@
+<!--pages/astro/sisterChat.wxml
+  知心姐姐：可切换的“姐姐”陪伴对话（本地模板拼接，非真实 LLM）
+  支持切换多位不同风格的姐姐，并以细腻语气/拟人化细节增强真实陪伴感
+  2026-09-29 升级：前两位姐姐为鞠婧祎 / 李知恩（IU），新增真人语音收发
+-->
+<view class="astro-page">
+  <view class="astro-statusbar"></view>
+
+  <!-- 当前姐姐资料卡 -->
+  <view class="astro-card sister-head">
+    <view style="display:flex;align-items:center;gap:18rpx;flex:1;min-width:0;">
+      <view class="sister-avatar-wrap">
+        <image class="sister-avatar" src="{{sister.avatar}}" data-url="{{sister.avatar}}" mode="aspectFill"
+          binderror="onImgErr" catchtap="onPreviewAvatar"></image>
+        <view class="sister-online"></view>
+      </view>
+      <view style="flex:1;min-width:0;">
+        <view style="display:flex;align-items:center;gap:10rpx;">
+          <text class="astro-title">{{sister.name}}</text>
+          <text class="sister-badge">在线</text>
+        </view>
+        <text class="astro-muted sister-tagline">{{sister.tagline}}</text>
+        <view wx:if="{{voiceLabel}}" class="sister-voice-row">
+          <text class="sister-voice-tag">🔊 {{voiceLabel}}</text>
+          <text class="sister-voice-try" catchtap="onPreviewVoice">试听</text>
+        </view>
+        <text wx:elif="{{sister.tone}}" class="sister-tone-tag">语气：{{sister.tone}}</text>
+      </view>
+    </view>
+    <view class="sister-switch-btn" hover-class="sister-switch-btn--hover" hover-stay-time="50"
+      bindtap="onOpenSwitch">换一位姐姐 ›</view>
+  </view>
+
+  <view class="astro-card">
+    <text class="astro-tag" style="margin-bottom:14rpx;">你想聊些什么？</text>
+    <view class="topic-row">
+      <view wx:for="{{topics}}" wx:key="key" class="topic-chip {{topic === item.key ? 'is-active' : ''}}"
+        hover-class="topic-chip--hover" hover-stay-time="50"
+        bindtap="onPickTopic" data-key="{{item.key}}">{{item.emoji}} {{item.label}}</view>
+    </view>
+    <text class="astro-tag" style="margin:16rpx 0 14rpx;display:inline-block;">心情</text>
+    <view class="mood-row">
+      <view wx:for="{{moods}}" wx:key="key" class="mood-chip {{mood === item.key ? 'is-active' : ''}}"
+        hover-class="mood-chip--hover" hover-stay-time="50"
+        bindtap="onPickMood" data-key="{{item.key}}">{{item.emoji}} {{item.label}}</view>
+    </view>
+  </view>
+
+  <view class="astro-card chat-card">
+    <!-- 语音状态条：自动朗读开关 + 合成/播放提示 -->
+    <view class="voice-head">
+      <view class="voice-toggle {{autoVoice ? 'is-on' : ''}}" hover-class="voice-toggle--hover" hover-stay-time="50"
+        bindtap="onToggleAutoVoice">
+        <text class="voice-toggle__dot"></text>
+        <text class="voice-toggle__text">{{autoVoice ? '自动朗读已开' : '自动朗读已关'}}</text>
+      </view>
+      <text wx:if="{{voiceTip}}" class="voice-tip">{{voiceTip}}</text>
+      <text wx:elif="{{!voiceReady}}" class="voice-tip is-warn">语音待部署</text>
+    </view>
+
+    <scroll-view class="chat-scroll" scroll-y="true" scroll-into-view="{{'msg-' + lastMsgId}}">
+      <block wx:for="{{messages}}" wx:key="id" wx:for-item="m">
+        <view wx:if="{{m.from === 'user'}}" class="chat-row chat-row--user" id="{{'msg-' + m.id}}">
+          <view wx:if="{{m.mood}}" class="chat-meta">情绪：{{m.mood}}</view>
+          <!-- 用户真人录音 -->
+          <view wx:if="{{m.audio}}" class="voice-bar voice-bar--user {{voiceBusyId === m.id ? 'is-playing' : ''}}"
+            hover-class="voice-bar--hover" hover-stay-time="50"
+            bindtap="onTapVoice" data-id="{{m.id}}">
+            <view class="voice-bar__icon">{{voiceBusyId === m.id ? '❚❚' : '▶'}}</view>
+            <view class="voice-bar__wave">
+              <view wx:for="{{waveBars}}" wx:key="*this" class="voice-bar__bar"></view>
+            </view>
+            <text class="voice-bar__dur">{{m.audio.durationSec}}″</text>
+          </view>
+          <view wx:if="{{m.text && m.text !== '[语音]'}}" class="chat-bubble chat-bubble--user">{{m.text}}</view>
+        </view>
+        <view wx:else class="chat-row chat-row--ai" id="{{'msg-' + m.id}}">
+          <image class="chat-avatar" src="{{m.avatar || sister.avatar}}" data-url="{{m.avatar || sister.avatar}}" mode="aspectFill"
+            binderror="onImgErr" catchtap="onPreviewAvatar"></image>
+          <view class="bubble-col">
+            <view class="chat-bubble chat-bubble--ai">{{m.text}}</view>
+            <!-- 姐姐语音条：每条都标注声音来源 -->
+            <block wx:if="{{m.voice && m.audio}}">
+              <view class="voice-bar {{voiceBusyId === m.id ? 'is-playing' : ''}}"
+                hover-class="voice-bar--hover" hover-stay-time="50"
+                bindtap="onTapVoice" data-id="{{m.id}}">
+                <view class="voice-bar__icon">{{voiceBusyId === m.id ? '❚❚' : '▶'}}</view>
+                <view class="voice-bar__wave">
+                  <view wx:for="{{waveBars}}" wx:key="*this" class="voice-bar__bar"></view>
+                </view>
+                <text class="voice-bar__dur">{{m.audio.durationSec}}″</text>
+                <view class="voice-bar__info" catchtap="onVoiceInfo" data-id="{{m.id}}">ⓘ</view>
+              </view>
+              <view class="voice-src">
+                <text class="voice-src__text">🔊 {{m.voice.label}} · {{m.voice.voiceName}}｜{{m.voice.fromLocalClip ? '真人录音包' : m.voice.engineName}}</text>
+              </view>
+            </block>
+          </view>
+        </view>
+      </block>
+      <!-- 姐姐正在输入 -->
+      <view wx:if="{{typing}}" class="chat-row chat-row--ai" id="msg-typing">
+        <image class="chat-avatar" src="{{sister.avatar}}" data-url="{{sister.avatar}}" mode="aspectFill" binderror="onImgErr" catchtap="onPreviewAvatar"></image>
+        <view class="chat-bubble chat-bubble--ai typing">
+          <view class="typing-dot"></view>
+          <view class="typing-dot"></view>
+          <view class="typing-dot"></view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <!-- 底部输入栏：文字 + 按住说话（真人录音） -->
+    <view class="input-row {{inputFocused ? 'is-focused' : ''}}">
+      <view class="voice-btn {{recording ? 'is-recording' : ''}}"
+        hover-class="voice-btn--hover" hover-stay-time="50"
+        bindtouchstart="onVoicePressStart" bindtouchend="onVoicePressEnd" bindtouchcancel="onVoicePressEnd">
+        <text class="voice-btn__icon">{{recording ? '●' : '🎤'}}</text>
+      </view>
+      <view class="input-box">
+        <textarea class="sister-textarea" placeholder="想对姐姐说点什么…" placeholder-class="sister-textarea__placeholder"
+          value="{{draft}}" bindinput="onInputDraft" bindfocus="onInputFocus" bindblur="onInputBlur"
+          bindconfirm="onSend" confirm-type="send" maxlength="200" auto-height show-confirm-bar="{{false}}"
+          cursor-spacing="16"></textarea>
+        <view wx:if="{{draft.length > 0}}" class="input-clear" hover-class="input-clear--hover" hover-stay-time="50"
+          bindtap="onClearDraft">
+          <text class="input-clear__icon">×</text>
+        </view>
+      </view>
+      <view class="send-btn {{draft.length === 0 || typing ? 'send-btn--disabled' : ''}}"
+        hover-class="{{draft.length === 0 || typing ? '' : 'send-btn--hover'}}" hover-stay-time="50"
+        bindtap="onSend">
+        <text wx:if="{{!typing}}">发送</text>
+        <text wx:else>发送中</text>
+      </view>
+    </view>
+    <view class="input-hint">
+      <text class="input-hint__text">按钮 🎤 按住说话可发真人语音；内容仅保存在本地</text>
+      <text class="input-hint__count {{draft.length > 160 ? 'is-near' : ''}}">{{draft.length}}/200</text>
+    </view>
+  </view>
+
+  <view class="astro-card">
+    <view style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14rpx;">
+      <text class="astro-tag">对话历史</text>
+      <view class="astro-btn astro-btn--ghost" style="padding:6rpx 16rpx;font-size:22rpx;"
+        hover-class="astro-btn--hover" hover-stay-time="50"
+        bindtap="onClear">清空</view>
+    </view>
+    <view wx:if="{{messages.length === 0}}" class="astro-empty">还没有对话</view>
+    <view wx:else style="display:flex;flex-direction:column;gap:10rpx;">
+      <view wx:for="{{messages}}" wx:key="id" wx:for-item="m">
+        <view wx:if="{{m.from === 'user'}}" class="astro-muted" style="font-size:20rpx;">
+          · {{m.text}}{{m.audio ? '（语音）' : ''}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="astro-statusbar"></view>
+
+  <!-- 录音浮层 -->
+  <view wx:if="{{recording}}" class="rec-mask">
+    <view class="rec-panel">
+      <view class="rec-wave">
+        <view wx:for="{{waveBars}}" wx:key="*this"
+          class="rec-wave__bar {{recordVol / 12 > item ? 'is-hot' : ''}}"></view>
+      </view>
+      <text class="rec-sec">{{recordSec}}″</text>
+      <text class="rec-tip">松开发送 · 姐姐会用声音回你</text>
+    </view>
+  </view>
+
+  <!-- 切换姐姐面板（页面顶层，避免被卡片层叠上下文裁剪） -->
+  <view wx:if="{{switchOpen}}" class="sister-mask" catchtap="onCloseSwitch">
+    <view class="sister-sheet" catchtap="noop">
+      <view class="sister-sheet__bar"></view>
+      <text class="sister-sheet__title">选择想陪你的姐姐</text>
+      <view class="sister-sheet__list">
+        <view wx:for="{{sisters}}" wx:key="key"
+          class="sister-opt {{sisterKey === item.key ? 'is-active' : ''}}"
+          hover-class="sister-opt--hover" hover-stay-time="50"
+          bindtap="onSelectSister" data-key="{{item.key}}">
+          <image class="sister-opt__avatar" src="{{item.avatar}}" data-url="{{item.avatar}}" mode="aspectFill" binderror="onImgErr" catchtap="onPreviewAvatar"></image>
+          <view class="sister-opt__info">
+            <text class="sister-opt__name">{{item.name}}</text>
+            <text class="sister-opt__tag">{{item.tagline}}</text>
+            <text wx:if="{{item.voice}}" class="sister-opt__voice">🔊 {{item.voice.label}} · {{item.voice.voiceName}}</text>
+          </view>
+          <view wx:if="{{sisterKey === item.key}}" class="sister-opt__check">✓</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

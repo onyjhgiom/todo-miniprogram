@@ -1,0 +1,7 @@
+<view class="bottom-tab safe-bottom">
+  <view wx:for="{{tabs}}" wx:key="key" class="tab-item {{current === item.key ? 'is-active' : ''}}" bindtap="onSelect" data-key="{{item.key}}">
+    <view class="tab-icon">{{item.icon}}</view>
+    <view class="tab-label">{{item.label}}</view>
+    <view wx:if="{{item.badge && item.badge > 0}}" class="tab-badge">{{item.badge}}</view>
+  </view>
+</view>

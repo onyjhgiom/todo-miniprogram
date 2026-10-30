@@ -1,0 +1,49 @@
+<!--pages/love/letter/letter.wxml-->
+<view class="ay duo-page" style="{{skin.style}}">
+
+  <!-- 未绑定提示 -->
+  <view class="duo-banner" wx:if="{{!bound}}">
+    <text class="duo-banner__ico">🔒</text>
+    <view class="duo-banner__main">
+      <text class="duo-banner__t">当前未绑定，留言仅自己可见</text>
+      <text class="duo-banner__d">绑定后，这里就是我们两个人的悄悄话</text>
+    </view>
+    <view class="duo-banner__btn" bindtap="onGoBind">去绑定</view>
+  </view>
+
+  <scroll-view class="duo-scroll" scroll-y enhanced show-scrollbar="{{false}}"
+               scroll-into-view="{{toView}}" scroll-with-animation>
+
+    <view class="duo-msgs" wx:if="{{msgs.length}}">
+      <view class="duo-bubble {{item.mine ? 'duo-bubble--mine' : ''}}"
+            id="m_{{item.id}}" wx:for="{{msgs}}" wx:key="id">
+        <view class="duo-bubble__box">
+          <text class="duo-bubble__text">{{item.text}}</text>
+          <text class="duo-bubble__meta">{{item.who}} · {{item.at}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="ay-empty" wx:else>
+      <view class="ay-empty__ico">💌</view>
+      <view class="ay-empty__t">还没有留言</view>
+      <view class="ay-empty__t" style="margin-top:8rpx">写下第一句，让 TA 一进来就看到</view>
+    </view>
+
+    <view class="duo-safe" />
+  </scroll-view>
+
+  <!-- 输入区 -->
+  <view class="duo-compose">
+    <textarea
+      class="duo-compose__input"
+      value="{{draft}}"
+      bindinput="onInput"
+      placeholder="想对 TA 说…"
+      placeholder-class="ay-field__ph"
+      maxlength="500"
+      auto-height
+      cursor-spacing="20" />
+    <view class="duo-compose__send {{draft ? '' : 'duo-compose__send--off'}}" bindtap="onSend">发送</view>
+  </view>
+</view>

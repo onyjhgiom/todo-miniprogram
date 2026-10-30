@@ -1,0 +1,514 @@
+<!--pages/index/index.wxml-->
+<!-- 番茄时钟 · 「个人专注成长中心」
+     竖向结构（2026-10-07 按参照图重排）：
+       顶部品牌区 → 今日目标 → 核心番茄钟（左：专注模式+激励语 / 右：模式切换）
+       → 开始专注 + 环境音 → 今日数据三列 → 今日成长计划 → 连续专注 → 底部导航
+
+     【三个构图决定 · 都是为了让「成长」当主线而不是「计时器」当主角】
+       1. 计时器不再独占整屏：左右两侧各挂一条窄栏（模式 / 模式切换），
+          环的空白四角被利用起来，纵向立刻省下 200u 以上；
+       2. 「今日目标」提到计时器之前 —— 用户一进来先知道「为什么开始」，
+          再看到「还剩多少分钟」，形成 目标→行动→反馈 的阅读顺序；
+       3. 底部四项导航用 position:fixed 贴安全区，主按钮与设置不再抢首屏。
+
+     【数据全部来自真实统计】统计 / 连续天数 / 成长计划节点 / 成就徽章
+     都由 utils/pomo-stats 与本地番茄日志推导，没有任何编造的比例或排名。
+
+     【宽窗（PC / 平板）双栏】由 .pd__cols / .pd__col 承载：手机端两个 col 都是
+     普通块级、自上而下堆叠；≥1080px 才变成左右两栏。换版式只改 CSS，不动结构。 -->
+<view class="pd {{reduced ? 'is-reduced' : ''}} {{zen ? 'is-zen' : ''}} {{focusing ? 'is-focusing' : ''}} {{wide ? 'is-wide' : ''}}" style="--u: {{uUnit}}">
+
+  <!-- 场景背景：base64 data URI 走内联 background-image（WXSS 不支持本地图片路径）。
+       上面再压一层极淡白纱，保证外部文字在画面任何位置都够对比度。 -->
+  <view class="pd__bg" style="background-image:url('{{bgUri}}')"></view>
+  <view class="pd__veil"></view>
+
+  <!-- ============ 顶部品牌区 ============ -->
+  <!-- navigationStyle:custom → 必须自绘返回键。放在 logo 左侧，与右侧「无干扰/设置」对称；
+       禅模式(zen)下保留：用户进禅模式就是为了沉浸，但随时能退出去更重要。 -->
+  <view class="hd" style="padding-top:{{headerPadTop}}px;padding-right:{{headerRightPad}}px">
+    <view class="hd__lead">
+      <view class="hd__back" hover-class="hd__back--tap" hover-stay-time="60" bindtap="onBack">
+        <view class="hd__back-ico"></view>
+      </view>
+      <view class="hd__brand">
+        <view class="hd__logo"><text class="hd__logo-tx">🍅</text></view>
+        <view class="hd__titles">
+          <text class="hd__t">番茄时钟</text>
+          <text class="hd__s">专注学习 · 遇见更好的自己</text>
+        </view>
+      </view>
+    </view>
+    <view class="hd__acts">
+      <view class="act {{zen ? 'is-on' : ''}}" hover-class="act--tap" hover-stay-time="60" bindtap="onZenToggle">无干扰</view>
+      <view class="act" hover-class="act--tap" hover-stay-time="60" bindtap="onOpenPanel" data-key="settings">设置</view>
+    </view>
+  </view>
+
+  <!-- 计时状态横幅 -->
+  <view class="banner" wx:if="{{banner}}">
+    <view class="banner__dot"></view>
+    <text class="banner__tx">{{banner}}</text>
+  </view>
+
+  <view class="pd__cols">
+    <!-- ---------------- 左栏：目标 + 计时器 ---------------- -->
+    <view class="pd__col pd__col--a">
+
+      <!-- 今日目标 -->
+      <view class="goal" wx:if="{{!zen}}">
+        <view class="goal__main">
+          <view class="goal__ico"><text class="goal__ico-g">◎</text></view>
+          <view class="goal__bd">
+            <text class="goal__t">今日目标</text>
+            <text class="goal__d">完成 {{goalTarget}} 轮专注，向更好的自己出发！</text>
+            <view class="goal__bar">
+              <view class="goal__bar-in" style="width: {{goalPct}}%"></view>
+            </view>
+          </view>
+          <text class="goal__n">{{goalDone}} / {{goalTarget}}</text>
+        </view>
+        <view class="goal__side">
+          <text class="goal__sico">✦</text>
+          <view class="goal__sbd">
+            <text class="goal__sk">{{goalSideK}}</text>
+            <text class="goal__sv">{{goalSideV}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 核心番茄钟：环居中，左右两条窄栏贴在圆外空白处 -->
+      <view class="core">
+        <view class="core__aside core__aside--l" wx:if="{{!zen}}">
+          <view class="mside">
+            <view class="mside__ico"><text class="mside__ico-g">◎</text></view>
+            <text class="mside__k">专注模式</text>
+            <text class="mside__v">{{modeLabel}}</text>
+          </view>
+          <text class="core__quote">“{{quote}}”</text>
+        </view>
+
+        <view class="core__ring">
+          <view class="core__stage">
+            <focus-ring
+              progress="{{progress}}"
+              mode="{{mode}}"
+              running="{{phase === 'running'}}"
+              reduced="{{reduced}}"
+              pulse="{{pulse}}"
+              size="{{ringSize}}"
+            ></focus-ring>
+            <!-- 环内文字用原生 WXML 而非 canvas 绘制：字体渲染更清晰，也方便无障碍 -->
+            <view class="core__center">
+              <text class="core__emoji">🍅</text>
+              <text class="core__mode">{{modeLabel}}</text>
+              <text class="core__time">{{timeText}}</text>
+              <text class="core__round">第 {{round}} / {{totalRounds}} 轮</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="core__aside core__aside--r" wx:if="{{!zen}}">
+          <focus-mode-tabs
+            value="{{mode}}"
+            list="{{modeList}}"
+            disabled="{{phase === 'running' || phase === 'paused'}}"
+            bind:change="onModeChange"
+          ></focus-mode-tabs>
+        </view>
+      </view>
+
+      <!-- 主按钮 + 环境音 -->
+      <view class="ctarow">
+        <view class="cta {{phase === 'running' ? 'is-running' : ''}}" hover-class="cta--tap" hover-stay-time="60" bindtap="onPrimary">
+          <text class="cta__ico">{{primaryIcon}}</text>
+          <text class="cta__label">{{primaryText}}</text>
+        </view>
+        <view class="amb {{ambientOn ? 'is-on' : ''}}" hover-class="amb--tap" hover-stay-time="60" bindtap="onToggleAmbient">
+          <text class="amb__g">♪</text>
+        </view>
+      </view>
+      <view class="cta__sub" wx:if="{{phase === 'running' || phase === 'paused'}}" bindtap="onAbandon">放弃本轮</view>
+
+    </view>
+
+    <!-- ---------------- 右栏：数据与成长 ---------------- -->
+    <view class="pd__col pd__col--b">
+
+      <!-- 今日数据三列 -->
+      <view class="stats3" wx:if="{{!zen}}">
+        <view class="stats3__col" wx:for="{{statCards}}" wx:key="key">
+          <view class="stats3__hd">
+            <view class="stats3__ico"><text class="stats3__ico-g">{{item.icon}}</text></view>
+            <text class="stats3__k">{{item.label}}</text>
+          </view>
+          <view class="stats3__vrow">
+            <text class="stats3__v">{{item.value}}</text>
+            <text class="stats3__u">{{item.unit}}</text>
+          </view>
+          <!-- 用 truthy 判断而不是 item.bar >= 0：WXML 属性里的 '>' 会被 wcc
+               当成标签结束符，导致后续 </view> 全部失配（end tag missing）。 -->
+          <view class="stats3__bar" wx:if="{{showBar}}">
+            <view class="stats3__bar-in" style="width: {{item.bar}}%"></view>
+          </view>
+          <text class="stats3__sub {{item.tone}}" wx:else>{{item.sub}}</text>
+        </view>
+      </view>
+
+      <!-- 当前任务（关联待办） -->
+      <view class="pd__sec" wx:if="{{!zen}}">
+        <task-card
+          title="{{taskTitle}}"
+          done="{{taskDone}}"
+          target="{{taskTarget}}"
+          locked="{{phase === 'running'}}"
+          bind:add="onTapTaskAdd"
+          bind:pick="onTapTaskPick"
+          bind:unbind="onUnbindTask"
+        ></task-card>
+      </view>
+
+      <!-- 专注数据图表：近 14 天柱状 / 24 小时分布曲线，全部来自真实日志 -->
+      <view class="chart" wx:if="{{!zen}}">
+        <view class="chart__hd">
+          <view class="chart__hd-l">
+            <view class="chart__ico"><text class="chart__ico-g">▥</text></view>
+            <view class="chart__titles">
+              <text class="chart__t">专注数据</text>
+              <text class="chart__s">{{chartSum}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="chart__tabs" wx:if="{{chartHasData}}">
+          <view class="chart__tab {{chartTab === 'day' ? 'is-on' : ''}}" hover-class="chart__tab--tap" hover-stay-time="60" bindtap="onChartTab" data-key="day">专注时长</view>
+          <view class="chart__tab {{chartTab === 'count' ? 'is-on' : ''}}" hover-class="chart__tab--tap" hover-stay-time="60" bindtap="onChartTab" data-key="count">完成轮数</view>
+          <view class="chart__tab {{chartTab === 'hour' ? 'is-on' : ''}}" hover-class="chart__tab--tap" hover-stay-time="60" bindtap="onChartTab" data-key="hour">时段分布</view>
+        </view>
+        <!-- 横轴单位：时段分布的刻度是「几点开始」，需要显式说明 -->
+        <text class="chart__axis-tip" wx:if="{{chartHasData && chartTab === 'hour'}}">横轴为该时段起始小时 · 每 3 小时聚合</text>
+
+        <!-- 有数据：画 canvas；无数据：组件内画居中提示，避免空网格 -->
+        <block wx:if="{{chartHasData}}">
+          <focus-chart
+            wx:if="{{chartTab === 'day'}}"
+            type="bar"
+            points="{{chartDays}}"
+            height="200"
+            unit=" 分钟"
+            emptyText="近 14 天还没有完成的专注记录"
+          ></focus-chart>
+          <focus-chart
+            wx:elif="{{chartTab === 'count'}}"
+            type="bar"
+            points="{{chartDayCounts}}"
+            height="200"
+            unit=" 轮"
+            emptyText="近 14 天还没有完成的专注记录"
+          ></focus-chart>
+          <focus-chart
+            wx:else
+            type="area"
+            points="{{chartHours}}"
+            height="200"
+            unit=" 轮"
+            emptyText="还没有带时段分布的专注记录"
+          ></focus-chart>
+        </block>
+
+        <!-- 最佳时段 + 高效候选：真实扫描 24 小时直方图的结果 -->
+        <view class="chart__foot" wx:if="{{chartHasData}}">
+          <view class="chart__best">
+            <text class="chart__best-k">最佳时段</text>
+            <text class="chart__best-v">{{bestWindowText}}</text>
+          </view>
+          <view class="chart__effs" wx:if="{{efficientWindows.length > 1}}">
+            <view class="chart__eff" wx:for="{{efficientWindows}}" wx:key="label">
+              <text class="chart__eff-l">{{item.label}}</text>
+              <text class="chart__eff-c">{{item.count}} 轮</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 12 周打卡热力：真实完成数分 5 级 -->
+      <view class="heat" wx:if="{{!zen}}">
+        <view class="heat__hd">
+          <text class="heat__t">打卡热力</text>
+          <text class="heat__s">{{heatSum}}</text>
+        </view>
+        <view class="heat__grid" wx:if="{{chartHasData}}">
+          <view class="heat__cell heat__cell--{{item.level}}" wx:for="{{heatCells}}" wx:key="key"></view>
+        </view>
+        <view class="heat__empty" wx:else>完成第一轮后这里会出现你的打卡足迹</view>
+        <view class="heat__legend" wx:if="{{chartHasData}}">
+          <text class="heat__lg-l">少</text>
+          <view class="heat__cell heat__cell--0"></view>
+          <view class="heat__cell heat__cell--1"></view>
+          <view class="heat__cell heat__cell--2"></view>
+          <view class="heat__cell heat__cell--3"></view>
+          <view class="heat__cell heat__cell--4"></view>
+          <text class="heat__lg-l">多</text>
+        </view>
+      </view>
+
+      <!-- 今日成长计划 -->
+      <view class="plan" wx:if="{{!zen}}">
+        <view class="plan__hd">
+          <view class="plan__hd-l">
+            <view class="plan__ico"><text class="plan__ico-g">▤</text></view>
+            <text class="plan__t">今日成长计划</text>
+          </view>
+          <view class="plan__more" hover-class="plan__more--tap" hover-stay-time="60" bindtap="onOpenPanel" data-key="stats">
+            <text class="plan__more-tx">查看全部</text>
+            <text class="plan__more-g">›</text>
+          </view>
+        </view>
+
+        <view class="plan__bd">
+          <view class="plan__list">
+            <view class="pnode pnode--{{item.state}}" wx:for="{{planNodes}}" wx:key="key">
+              <view class="pnode__rail">
+                <view class="pnode__dot"><text class="pnode__gl">{{item.glyph}}</text></view>
+                <view class="pnode__line" wx:if="{{index < planNodes.length - 1}}"></view>
+              </view>
+              <text class="pnode__tx">{{item.text}}</text>
+            </view>
+          </view>
+
+          <view class="plan__tip">
+            <text class="plan__tip-crown">♛</text>
+            <text class="plan__tip-tx">{{planTip}}</text>
+            <view class="plan__tip-btn" hover-class="plan__tip-btn--tap" hover-stay-time="60" bindtap="onPrimary">
+              <text class="plan__tip-btn-tx">继续加油</text>
+              <text class="plan__tip-btn-g">→</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 连续专注 -->
+      <view class="streakbar" wx:if="{{!zen}}" hover-class="streakbar--tap" hover-stay-time="60" bindtap="onOpenPanel" data-key="stats">
+        <view class="streakbar__medal"><text class="streakbar__medal-g">🏅</text></view>
+        <view class="streakbar__bd">
+          <text class="streakbar__t">连续专注 {{streakDays}} 天</text>
+          <text class="streakbar__s">{{streakMsg}}</text>
+        </view>
+        <text class="streakbar__g">›</text>
+      </view>
+
+    </view>
+  </view>
+
+  <view class="pd__foot" wx:if="{{!zen}}">一天一轮，一个月就是一轮新的自己</view>
+
+  <!-- ============ 底部导航（贴安全区，四项都是真实去处，不留死链） ============ -->
+  <view class="dock">
+    <view class="dock__item" hover-class="dock__item--tap" hover-stay-time="60" bindtap="onDockHome">
+      <view class="dock__ico"><text class="dock__g">⌂</text></view>
+      <text class="dock__l">首页</text>
+    </view>
+    <view class="dock__item {{dockActive === 'stats' ? 'is-on' : ''}}" hover-class="dock__item--tap" hover-stay-time="60" bindtap="onDockStats">
+      <view class="dock__ico"><text class="dock__g">▥</text></view>
+      <text class="dock__l">统计</text>
+    </view>
+    <view class="dock__item {{dockActive === 'achv' ? 'is-on' : ''}}" hover-class="dock__item--tap" hover-stay-time="60" bindtap="onDockAchv">
+      <view class="dock__ico"><text class="dock__g">☆</text></view>
+      <text class="dock__l">成就</text>
+    </view>
+    <view class="dock__item" hover-class="dock__item--tap" hover-stay-time="60" bindtap="onDockMe">
+      <view class="dock__ico"><text class="dock__g">⚇</text></view>
+      <text class="dock__l">我的</text>
+    </view>
+  </view>
+
+  <!-- ============ 完成庆祝 ============ -->
+  <view class="mask mask--center" wx:if="{{done}}" bindtap="onDismissDone">
+    <view class="done" catchtap="noop">
+      <text class="done__eyebrow">🎉 本轮专注完成</text>
+      <text class="done__t">{{done.title}}</text>
+      <view class="done__gains">
+        <view class="done__gain">
+          <text class="done__gain-n">+{{done.minutes}}</text>
+          <text class="done__gain-l">专注分钟</text>
+        </view>
+        <view class="done__gain" wx:if="{{done.rounds > 0}}">
+          <text class="done__gain-n">+{{done.rounds}}</text>
+          <text class="done__gain-l">完成轮次</text>
+        </view>
+      </view>
+      <text class="done__next">{{done.nextText}}</text>
+      <view class="done__btn" catchtap="onPrimary">继续</view>
+    </view>
+  </view>
+
+  <!-- ============ 任务选择 ============ -->
+  <view class="mask" wx:if="{{taskPicker}}" bindtap="onClosePicker">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet__hd">
+        <text class="sheet__t">选择今天要专注的任务</text>
+        <text class="sheet__x" bindtap="onClosePicker">✕</text>
+      </view>
+      <scroll-view class="sheet__list" scroll-y>
+        <view
+          wx:for="{{todoOptions}}"
+          wx:key="_id"
+          class="sheet__row"
+          hover-class="sheet__row--tap"
+          hover-stay-time="50"
+          data-id="{{item._id}}"
+          bindtap="onPickTodo"
+        >{{item.content}}</view>
+        <view class="sheet__empty" wx:if="{{!todoOptions.length}}">暂无进行中的待办，先去添加一条</view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- ============ 学习统计 ============ -->
+  <view class="mask" wx:if="{{panel === 'stats'}}" bindtap="onClosePanel">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet__hd">
+        <text class="sheet__t">学习统计</text>
+        <text class="sheet__x" bindtap="onClosePanel">✕</text>
+      </view>
+      <scroll-view class="sheet__list" scroll-y>
+      <view class="sheet__stats">
+        <view class="sheet__stat" wx:for="{{statsDetail}}" wx:key="label">
+          <text class="sheet__stat-k">{{item.label}}</text>
+          <text class="sheet__stat-v">{{item.value}}</text>
+        </view>
+      </view>
+      <view class="sheet__chart">
+        <text class="sheet__chart-t">近 14 天专注时长</text>
+        <focus-chart
+          type="bar"
+          points="{{chartDays}}"
+          height="200"
+          unit=" 分钟"
+          emptyText="还没有完成的专注记录"
+        ></focus-chart>
+      </view>
+      <view class="sheet__chart">
+        <text class="sheet__chart-t">时段分布（每 3 小时聚合）</text>
+        <focus-chart
+          type="area"
+          points="{{chartHours}}"
+          height="190"
+          unit=" 轮"
+          emptyText="还没有带时段分布的专注记录"
+        ></focus-chart>
+      </view>
+      <view class="sheet__chart">
+        <text class="sheet__chart-t">打卡热力（近 12 周）</text>
+        <view class="heat__grid" wx:if="{{chartHasData}}">
+          <view class="heat__cell heat__cell--{{item.level}}" wx:for="{{heatCells}}" wx:key="key"></view>
+        </view>
+        <view class="heat__empty" wx:else>完成第一轮后这里会出现你的打卡足迹</view>
+      </view>
+    </scroll-view>
+    </view>
+  </view>
+
+  <!-- ============ 成就（全部由真实统计推导） ============ -->
+  <view class="mask" wx:if="{{panel === 'achv'}}" bindtap="onClosePanel">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet__hd">
+        <text class="sheet__t">我的成就</text>
+        <text class="sheet__x" bindtap="onClosePanel">✕</text>
+      </view>
+      <scroll-view class="sheet__list" scroll-y>
+        <view class="achv">
+          <view class="achv__sum">
+            <view class="achv__sum-cell">
+              <text class="achv__sum-n">{{achvSummary.count}}</text>
+              <text class="achv__sum-l">累计轮次</text>
+            </view>
+            <view class="achv__sum-cell">
+              <text class="achv__sum-n">{{achvSummary.minutes}}</text>
+              <text class="achv__sum-l">累计分钟</text>
+            </view>
+            <view class="achv__sum-cell">
+              <text class="achv__sum-n">{{achvSummary.streak}}</text>
+              <text class="achv__sum-l">连续天数</text>
+            </view>
+          </view>
+          <view class="achv__grid">
+            <view class="achv__badge {{item.on ? 'is-on' : ''}}" wx:for="{{achvBadges}}" wx:key="key">
+              <text class="achv__badge-g">{{item.glyph}}</text>
+              <text class="achv__badge-t">{{item.label}}</text>
+              <text class="achv__badge-d">{{item.desc}}</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- ============ 设置 ============ -->
+  <view class="mask" wx:if="{{panel === 'settings'}}" bindtap="onClosePanel">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet__hd">
+        <text class="sheet__t">番茄设置</text>
+        <text class="sheet__x" bindtap="onClosePanel">✕</text>
+      </view>
+      <scroll-view class="sheet__list" scroll-y>
+        <view class="step">
+          <text class="step__k">专注时长</text>
+          <view class="step__v">
+            <view class="step__btn" data-key="focusSec" data-delta="-1" bindtap="onStepDuration">−</view>
+            <text class="step__n">{{settings.focusSec / 60}} 分钟</text>
+            <view class="step__btn" data-key="focusSec" data-delta="1" bindtap="onStepDuration">＋</view>
+          </view>
+        </view>
+        <view class="step">
+          <text class="step__k">短休息</text>
+          <view class="step__v">
+            <view class="step__btn" data-key="shortSec" data-delta="-1" bindtap="onStepDuration">−</view>
+            <text class="step__n">{{settings.shortSec / 60}} 分钟</text>
+            <view class="step__btn" data-key="shortSec" data-delta="1" bindtap="onStepDuration">＋</view>
+          </view>
+        </view>
+        <view class="step">
+          <text class="step__k">长休息</text>
+          <view class="step__v">
+            <view class="step__btn" data-key="longSec" data-delta="-1" bindtap="onStepDuration">−</view>
+            <text class="step__n">{{settings.longSec / 60}} 分钟</text>
+            <view class="step__btn" data-key="longSec" data-delta="1" bindtap="onStepDuration">＋</view>
+          </view>
+        </view>
+        <view class="step">
+          <text class="step__k">几轮后长休息</text>
+          <view class="step__v">
+            <view class="step__btn" data-delta="-1" bindtap="onStepLongEvery">−</view>
+            <text class="step__n">{{settings.longEvery}} 轮</text>
+            <view class="step__btn" data-delta="1" bindtap="onStepLongEvery">＋</view>
+          </view>
+        </view>
+        <view class="step">
+          <text class="step__k">今日目标</text>
+          <view class="step__v">
+            <view class="step__btn" data-delta="-1" bindtap="onStepGoal">−</view>
+            <text class="step__n">{{dailyTarget}} 轮</text>
+            <view class="step__btn" data-delta="1" bindtap="onStepGoal">＋</view>
+          </view>
+        </view>
+        <view class="swrow" data-key="autoCycle" bindtap="onToggleSetting">
+          <text class="swrow__k">完成后自动开始下一轮</text>
+          <view class="sw {{settings.autoCycle ? 'is-on' : ''}}"><view class="sw__dot"></view></view>
+        </view>
+        <view class="swrow" data-key="adaptive" bindtap="onToggleSetting">
+          <text class="swrow__k">智能休息（越久越累越加长）</text>
+          <view class="sw {{settings.adaptive ? 'is-on' : ''}}"><view class="sw__dot"></view></view>
+        </view>
+        <view class="swrow" data-key="vibrate" bindtap="onToggleSetting">
+          <text class="swrow__k">结束时振动</text>
+          <view class="sw {{settings.vibrate ? 'is-on' : ''}}"><view class="sw__dot"></view></view>
+        </view>
+        <view class="swrow" data-key="sound" bindtap="onToggleSetting">
+          <text class="swrow__k">结束提示音</text>
+          <view class="sw {{settings.sound ? 'is-on' : ''}}"><view class="sw__dot"></view></view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+</view>

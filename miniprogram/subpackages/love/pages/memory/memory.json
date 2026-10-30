@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "回忆",
+  "navigationBarBackgroundColor": "#0A0E24",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#070B1E",
+  "usingComponents": {
+    "love-orb": "../../components/love-orb/love-orb"
+  }
+}

@@ -1,0 +1,6 @@
+/* components/todo-glyph/todo-glyph.wxss */
+/* 图标只负责画布占位与横向铺满，配色/尺寸都在调用方控制，避免样式越界。 */
+.tg__cv {
+  display: block;
+  flex-shrink: 0;
+}

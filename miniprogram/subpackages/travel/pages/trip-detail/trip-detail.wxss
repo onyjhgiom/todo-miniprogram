@@ -1,0 +1,578 @@
+@import "../../../../styles/tool-shell.wxss";
+
+/* subpackages/travel/pages/trip-detail/trip-detail.wxss */
+
+.tshell__wrap {
+  padding-bottom: 160rpx;
+}
+
+/* ===== 封面 ===== */
+.hero {
+  position: relative;
+  height: 300rpx;
+  border-radius: var(--radius-lg, 24rpx);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.hero__emo {
+  font-size: 110rpx;
+}
+.hero__mask {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 24rpx;
+  background: linear-gradient(to top, rgba(53, 48, 42, 0.72), rgba(53, 48, 42, 0));
+}
+.hero__title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #fff;
+}
+.hero__sub {
+  margin-top: 6rpx;
+  font-size: 23rpx;
+  color: rgba(255, 255, 255, 0.86);
+}
+.hero__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 12rpx;
+}
+.hero__tag {
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 20rpx;
+}
+.hero__ops {
+  position: absolute;
+  top: 20rpx;
+  right: 20rpx;
+  display: flex;
+  gap: 10rpx;
+}
+.hero__op {
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.86);
+  color: #35302A;
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+/* ===== 天气 / 预算 / 行李 ===== */
+.board {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 12rpx;
+}
+.board__cell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6rpx;
+}
+.board__emo {
+  font-size: 36rpx;
+  line-height: 1;
+}
+.board__val {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.board__key {
+  font-size: 21rpx;
+  color: var(--color-text-mute);
+}
+.board__ring {
+  width: 72rpx;
+  height: 72rpx;
+}
+.board__line {
+  width: 1rpx;
+  height: 64rpx;
+  background: var(--color-border);
+}
+
+.tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+  padding: 20rpx 24rpx;
+}
+.tip__emo {
+  font-size: 26rpx;
+}
+.tip__text {
+  flex: 1;
+  font-size: 24rpx;
+  color: var(--color-text-soft);
+  line-height: 1.5;
+}
+.tip--warn {
+  background: rgba(192, 82, 47, 0.08);
+}
+.tip--warn .tip__text {
+  color: var(--color-danger, #C0522F);
+}
+
+/* ===== 清单联动 ===== */
+.sugg {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 20rpx 24rpx;
+}
+.sugg__text {
+  flex: 1;
+  font-size: 24rpx;
+  color: var(--color-text-soft);
+  line-height: 1.5;
+}
+.sugg__btn {
+  flex-shrink: 0;
+  padding: 12rpx 22rpx;
+  border-radius: 999rpx;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 23rpx;
+  font-weight: 600;
+}
+
+/* ===== 入口宫格 ===== */
+.entries {
+  display: flex;
+  padding: 18rpx 8rpx;
+}
+.entry {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6rpx;
+}
+.entry__emo {
+  font-size: 38rpx;
+  line-height: 1;
+}
+.entry__name {
+  font-size: 22rpx;
+  color: var(--color-text-soft);
+}
+.entry__val {
+  font-size: 20rpx;
+  color: var(--color-text-mute);
+}
+
+/* ===== 地图 ===== */
+.mapcard {
+  padding: 12rpx;
+}
+.map {
+  width: 100%;
+  height: 620rpx;
+  border-radius: var(--radius-md, 16rpx);
+}
+
+/* ===== 时间线 ===== */
+.tl__day {
+  position: relative;
+}
+.tl__head {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  padding: 22rpx 8rpx 14rpx;
+}
+.tl__dot {
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background: var(--color-primary);
+  flex-shrink: 0;
+}
+.tl__daytitle {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.tl__daydate {
+  flex: 1;
+  font-size: 22rpx;
+  color: var(--color-text-mute);
+}
+.tl__daycost {
+  font-size: 22rpx;
+  color: var(--color-primary);
+}
+.tl__fold {
+  font-size: 21rpx;
+  color: var(--color-text-mute);
+}
+
+.tl__body {
+  position: relative;
+  padding-left: 8rpx;
+}
+
+/* 单条：内容 + 底部左滑操作 */
+.tl__rowwrap {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md, 16rpx);
+  margin-bottom: 14rpx;
+}
+.tl__swipe {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 240rpx;
+  display: flex;
+}
+.tl__swbtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  color: #fff;
+}
+.tl__swbtn--done {
+  background: var(--color-success, #6E8E6E);
+}
+.tl__swbtn--copy {
+  background: var(--color-accent, #C09A5E);
+}
+.tl__swbtn--del {
+  background: var(--color-danger, #C0522F);
+}
+
+.tl__row {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: stretch;
+  gap: 14rpx;
+  background: var(--color-card);
+  transition: transform 0.18s ease;
+}
+.tl__rowwrap.is-drag .tl__row {
+  opacity: 0.45;
+}
+.tl__rowwrap.is-target .tl__row {
+  box-shadow: inset 0 0 0 2rpx var(--color-primary);
+}
+
+.tl__time {
+  width: 84rpx;
+  flex-shrink: 0;
+  padding-top: 18rpx;
+  text-align: right;
+  font-size: 23rpx;
+  color: var(--color-text-mute);
+}
+.tl__axis {
+  position: relative;
+  width: 24rpx;
+  flex-shrink: 0;
+}
+.tl__axis::before {
+  content: '';
+  position: absolute;
+  left: 11rpx;
+  top: 0;
+  bottom: 0;
+  width: 2rpx;
+  background: var(--color-border);
+}
+.tl__axisdot {
+  position: absolute;
+  left: 6rpx;
+  top: 22rpx;
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: var(--color-primary);
+  z-index: 1;
+}
+
+.tl__card {
+  flex: 1;
+  min-width: 0;
+  padding: 16rpx 20rpx;
+  border-radius: var(--radius-md, 16rpx);
+  border: 1rpx solid var(--color-border);
+  background: var(--color-bg-elevated);
+}
+.tl__card.is-done {
+  opacity: 0.55;
+}
+.tl__card.is-done .tl__content {
+  text-decoration: line-through;
+}
+.tl__line1 {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+.tl__icon {
+  font-size: 26rpx;
+  flex-shrink: 0;
+}
+.tl__content {
+  flex: 1;
+  min-width: 0;
+  font-size: 27rpx;
+  font-weight: 600;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tl__cost {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  color: var(--color-primary);
+}
+.tl__line2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+  margin-top: 8rpx;
+}
+.tl__meta {
+  font-size: 21rpx;
+  color: var(--color-text-mute);
+}
+.tl__meta--note {
+  color: var(--color-text-soft);
+}
+
+.tl__add {
+  margin: 4rpx 0 20rpx 122rpx;
+  padding: 16rpx;
+  border-radius: var(--radius-md, 16rpx);
+  border: 1rpx dashed var(--color-input-line);
+  text-align: center;
+  font-size: 24rpx;
+  color: var(--color-text-mute);
+}
+
+/* ===== 拖拽浮层 ===== */
+.ghost {
+  position: fixed;
+  left: 40rpx;
+  right: 40rpx;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 20rpx 24rpx;
+  border-radius: var(--radius-md, 16rpx);
+  background: var(--color-primary);
+  box-shadow: var(--shadow-md, 0 4rpx 16rpx rgba(0, 0, 0, 0.16));
+  pointer-events: none;
+}
+.ghost__emo {
+  font-size: 28rpx;
+}
+.ghost__text {
+  flex: 1;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ===== FAB ===== */
+.fab {
+  position: fixed;
+  right: 40rpx;
+  bottom: 60rpx;
+  z-index: 90;
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 52rpx;
+  line-height: 92rpx;
+  text-align: center;
+  box-shadow: var(--shadow-lg, 0 8rpx 24rpx rgba(0, 0, 0, 0.2));
+}
+
+/* ===== 弹层 ===== */
+.mask {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--color-overlay);
+  display: flex;
+  align-items: flex-end;
+}
+.sheet {
+  width: 100%;
+  max-height: 84vh;
+  overflow-y: auto;
+  padding: 32rpx 28rpx 40rpx;
+  border-radius: 28rpx 28rpx 0 0;
+  background: var(--color-bg-elevated);
+}
+.sheet__title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 24rpx;
+}
+.sheet__field {
+  margin-bottom: 22rpx;
+}
+.sheet__label {
+  display: block;
+  margin-bottom: 10rpx;
+  font-size: 23rpx;
+  color: var(--color-text-soft);
+}
+/* ⚠️ 原生 <input> 必须显式定高：box-sizing: border-box + 竖向 padding 会把 input
+ * 自带的默认高度吃光，占位文字被裁半截（详见 trip-edit.wxss 的注释）。 */
+.sheet__input {
+  width: 100%;
+  height: 88rpx;
+  box-sizing: border-box;
+  padding: 0 22rpx;
+  border-radius: var(--radius-md, 16rpx);
+  border: 1rpx solid var(--color-input-line);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 27rpx;
+}
+.sheet__input--flex {
+  width: auto;
+  flex: 1;
+  min-width: 0;
+}
+/* 占位文案走主题弱化色（input / textarea 共用） */
+.sheet__ph {
+  color: var(--color-text-mute);
+}
+/* textarea 要保留竖向 padding（多行文字需要行内留白），只把高度放宽一点 */
+.sheet__area {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 160rpx;
+  padding: 18rpx 20rpx;
+  border-radius: var(--radius-md, 16rpx);
+  border: 1rpx solid var(--color-input-line);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 27rpx;
+}
+.sheet__locrow {
+  display: flex;
+  gap: 12rpx;
+  align-items: center;
+}
+.sheet__pick {
+  flex: none;
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 26rpx;
+  border-radius: var(--radius-md, 16rpx);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 25rpx;
+  font-weight: 600;
+}
+.sheet__types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-bottom: 22rpx;
+}
+.sheet__type {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 12rpx 18rpx;
+  border-radius: 999rpx;
+  border: 1rpx solid var(--color-border);
+  background: var(--color-bg);
+}
+.sheet__type.is-on {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.sheet__type.is-on .sheet__typename {
+  color: #fff;
+}
+.sheet__typeico {
+  font-size: 24rpx;
+}
+.sheet__typename {
+  font-size: 23rpx;
+  color: var(--color-text-soft);
+}
+.sheet__row {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 22rpx;
+}
+.sheet__col {
+  flex: 1;
+  min-width: 0;
+}
+/* picker 是 <view>，定高后需自己居中；高度与 .sheet__input 对齐 */
+.sheet__picker {
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 22rpx;
+  border-radius: var(--radius-md, 16rpx);
+  border: 1rpx solid var(--color-input-line);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 27rpx;
+}
+.sheet__ops {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 30rpx;
+}
+.sheet__ops .ts-btn {
+  flex: 1;
+}
+
+/* 离屏画布 */
+.poster {
+  position: fixed;
+  left: -9999rpx;
+  top: -9999rpx;
+  width: 600px;
+  height: 860px;
+}
+
+.ts-empty--sm {
+  padding: 40rpx 0;
+}
+
+.press {
+  opacity: 0.86;
+}

@@ -1,0 +1,99 @@
+<!--pages/astro/wish.wxml
+  星愿：心愿增删改 + 状态切换 + 筛选 + 归档 + 星标置顶 + 目标时间倒数
+  仅本地 wx.storage
+-->
+<view class="astro-page">
+  <view class="astro-statusbar"></view>
+
+  <view class="astro-card">
+    <view style="display:flex;gap:10rpx;">
+      <view class="astro-btn" hover-class="astro-btn--hover" hover-stay-time="50"
+        bindtap="onNew" style="flex:1;">＋ 新建心愿</view>
+      <view class="astro-btn astro-btn--ghost" hover-class="astro-btn--hover" hover-stay-time="50"
+        bindtap="onToggleArchived" style="padding:18rpx 26rpx;">{{showArchived ? '隐藏归档' : '查看归档'}}</view>
+    </view>
+  </view>
+
+  <view class="astro-card">
+    <view class="layout-row">
+      <view wx:for="{{statusFilters}}" wx:key="key" class="filter-chip {{status === item.key ? 'is-active' : ''}}"
+        hover-class="filter-chip--hover" hover-stay-time="50"
+        bindtap="onPickStatus" data-key="{{item.key}}">{{item.label}}</view>
+    </view>
+  </view>
+
+  <block wx:if="{{filtered.length === 0}}">
+    <view class="astro-card">
+      <text class="astro-empty">还没有心愿，去点上方「＋ 新建心愿」吧 ✨</text>
+    </view>
+  </block>
+  <block wx:else>
+    <!-- 分页渲染：wx:for 用 visible（前 shown 条），触底自动加载下一页 -->
+    <view wx:for="{{visible}}" wx:key="id" class="astro-card wish-card {{item.pinned ? 'is-pinned' : ''}}"
+      hover-class="astro-card--hover" hover-stay-time="60">
+      <view class="wish-card__head">
+        <text class="astro-tag" style="background:linear-gradient(135deg,{{item.catColor}},{{item.catColor2}});border:none;">{{item.category}}</text>
+        <text wx:if="{{item.pinned}}" class="astro-tag" style="margin-left:8rpx;">★</text>
+        <view style="flex:1;text-align:right;">
+          <text class="astro-muted" wx:if="{{item.targetAt}}">目标：{{item.targetAt}}（{{item.targetLeft}}）</text>
+        </view>
+      </view>
+      <text class="astro-title wish-card__title">{{item.title}}</text>
+      <text class="astro-body wish-card__body">{{item.content}}</text>
+      <view class="wish-card__foot">
+        <text class="astro-muted">{{item.createAt}} · {{item.mood || '未选心情'}}</text>
+        <view style="display:flex;gap:8rpx;">
+          <text class="astro-tag" data-id="{{item.id}}" bindtap="onPin">置顶</text>
+          <text class="astro-tag" data-id="{{item.id}}" data-status="{{item.status === 'pending' ? 'done' : 'pending'}}" bindtap="onToggleStatus">
+            {{item.status === 'pending' ? '标记达成' : '重新启程'}}
+          </text>
+          <text class="astro-tag" data-id="{{item.id}}" data-status="{{item.status === 'archived' ? 'pending' : 'archived'}}" bindtap="onToggleStatus">
+            {{item.status === 'archived' ? '取消归档' : '归档'}}
+          </text>
+          <text class="astro-tag" data-id="{{item.id}}" bindtap="onEdit">编辑</text>
+          <text class="astro-tag" data-id="{{item.id}}" bindtap="onDelete">删除</text>
+        </view>
+      </view>
+    </view>
+    <!-- 触底加载提示 -->
+    <view wx:if="{{visible.length < filtered.length}}" class="astro-load-more">上拉加载更多心愿…</view>
+    <view wx:else class="astro-load-more astro-load-more--end">—— 全部 {{filtered.length}} 条心愿 ——</view>
+  </block>
+
+  <!-- 新建/编辑弹层 -->
+  <block wx:if="{{editorOpen}}">
+    <view class="astro-modal-mask" catchtap="onCloseEditor">
+      <view class="astro-modal" catchtap="noop">
+        <text class="astro-title" style="display:block;margin-bottom:14rpx;">{{editor.id ? '编辑心愿' : '新建心愿'}}</text>
+        <input class="astro-input" placeholder="心愿标题（必填）" placeholder-class="astro-input--placeholder"
+          value="{{editor.title}}" bindinput="onEditTitle" style="margin-bottom:12rpx;"></input>
+        <textarea class="astro-textarea" placeholder="写下详情，越具体越容易实现 ✨" placeholder-class="astro-input--placeholder"
+          value="{{editor.content}}" bindinput="onEditContent" style="margin-bottom:14rpx;"></textarea>
+        <text class="astro-muted" style="display:block;margin-bottom:6rpx;">分类</text>
+        <view class="layout-row" style="margin-bottom:12rpx;">
+          <view wx:for="{{categories}}" wx:key="key" class="filter-chip {{editor.category === item.key ? 'is-active' : ''}}"
+            hover-class="filter-chip--hover" hover-stay-time="50"
+            bindtap="onPickCategory" data-key="{{item.key}}">{{item.label}}</view>
+        </view>
+        <text class="astro-muted" style="display:block;margin-bottom:6rpx;">心情</text>
+        <view class="mood-row" style="margin-bottom:12rpx;">
+          <view wx:for="{{moods}}" wx:key="key" class="mood-chip {{editor.mood === item.key ? 'is-active' : ''}}"
+            hover-class="mood-chip--hover" hover-stay-time="50"
+            bindtap="onPickEditMood" data-key="{{item.key}}">{{item.emoji}} {{item.label}}</view>
+        </view>
+        <text class="astro-muted" style="display:block;margin-bottom:6rpx;">目标时间（可选，自动算倒数）</text>
+        <picker mode="datetime" value="{{editor.targetAt}}" bindchange="onPickTarget" class="astro-input">
+          <view class="astro-input" style="text-align:left;">{{editor.targetAt || '选择日期时间（可选）'}}</view>
+        </picker>
+        <view style="display:flex;gap:10rpx;margin-top:18rpx;">
+          <view class="astro-btn" hover-class="astro-btn--hover" hover-stay-time="50"
+            bindtap="onSaveWish" style="flex:1;">保存</view>
+          <view class="astro-btn astro-btn--ghost" hover-class="astro-btn--hover" hover-stay-time="50"
+            bindtap="onCloseEditor">取消</view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <view class="astro-statusbar"></view>
+</view>

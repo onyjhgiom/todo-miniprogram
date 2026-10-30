@@ -1,0 +1,61 @@
+<!--pages/year-review/year-review.wxml-->
+<view class="page yr" style="{{themeStyle}};{{bgStyle}}">
+  <!-- 顶部 hero 统计 -->
+  <view class="yr-hero">
+    <text class="yr-hero__year">{{stat.year}}</text>
+    <text class="yr-hero__lab">年度待办回忆录</text>
+    <view class="yr-hero__big">
+      <text class="yr-hero__n">{{stat.totalCompleted}}</text>
+      <text class="yr-hero__u">件已完成</text>
+    </view>
+    <view class="yr-hero__sub">
+      <text>坚持了 {{stat.activeDays}} 天</text>
+      <text class="yr-dot">·</text>
+      <text>最长连续 {{stat.longestStreak}} 天</text>
+    </view>
+  </view>
+
+  <!-- 每月完成分布 -->
+  <view class="yr-card">
+    <text class="yr-card__t">📅 每月完成</text>
+    <view class="yr-bars">
+      <view wx:for="{{stat.byMonth}}" wx:key="index" class="yr-bar">
+        <view class="yr-bar__col">
+          <view class="yr-bar__fill" style="height: {{item > 0 ? (item / monthMax * 180) : 3}}rpx;"></view>
+        </view>
+        <text class="yr-bar__m">{{index + 1}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 完成构成 -->
+  <view class="yr-card">
+    <text class="yr-card__t">🎯 完成构成</text>
+    <view class="yr-prios">
+      <view class="yr-prio yr-prio--h"><text class="yr-prio__n">{{stat.byPriority.high}}</text><text class="yr-prio__l">高优先</text></view>
+      <view class="yr-prio yr-prio--m"><text class="yr-prio__n">{{stat.byPriority.medium}}</text><text class="yr-prio__l">中优先</text></view>
+      <view class="yr-prio yr-prio--l"><text class="yr-prio__n">{{stat.byPriority.low}}</text><text class="yr-prio__l">低优先</text></view>
+      <view class="yr-prio yr-prio--n"><text class="yr-prio__n">{{stat.byPriority.none}}</text><text class="yr-prio__l">未设</text></view>
+    </view>
+  </view>
+
+  <!-- 高频标签 -->
+  <view class="yr-card" wx:if="{{stat.topTags.length}}">
+    <text class="yr-card__t">🏷️ 你常做这些</text>
+    <view class="yr-tags">
+      <view wx:for="{{stat.topTags}}" wx:key="tag" class="yr-tag">#{{item.tag}} {{item.count}}</view>
+    </view>
+  </view>
+
+  <!-- 治愈文案 -->
+  <view class="yr-quote">{{summary}}</view>
+
+  <!-- 操作 -->
+  <view class="yr-actions">
+    <button class="yr-btn" bindtap="onShareImage" wx:if="{{hasData}}">生成分享图</button>
+    <view wx:if="{{!hasData}}" class="yr-empty">今年还没有完成记录，先去完成一件小事吧～</view>
+  </view>
+
+  <!-- 离屏画布（生成分享图用） -->
+  <canvas canvas-id="shareCanvas" class="yr-canvas"></canvas>
+</view>

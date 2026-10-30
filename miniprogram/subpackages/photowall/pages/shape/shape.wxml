@@ -1,0 +1,93 @@
+<view class="ps themed" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <!-- 搜索 -->
+  <view class="ps-search">
+    <view class="ps-search-box">
+      <input
+        class="ps-search-input"
+        value="{{kw}}"
+        placeholder="搜索形状"
+        placeholder-class="ps-search-ph"
+        bindinput="onSearch"
+      />
+      <view wx:if="{{kw}}" class="ps-search-x" bindtap="onClearSearch">×</view>
+    </view>
+  </view>
+
+  <!-- 分类 -->
+  <scroll-view class="ps-cats" scroll-x enable-flex>
+    <view
+      wx:for="{{cats}}"
+      wx:key="key"
+      class="ps-cat {{cat === item.key ? 'on' : ''}}"
+      data-key="{{item.key}}"
+      bindtap="onCat"
+    >{{item.label}}</view>
+  </scroll-view>
+
+  <!-- 最近使用 -->
+  <view wx:if="{{recent.length && !kw}}" class="ps-block">
+    <view class="ps-block-t">最近使用</view>
+    <scroll-view class="ps-recent" scroll-x enable-flex>
+      <view wx:for="{{recent}}" wx:key="id" class="ps-recent-i" data-id="{{item.id}}" bindtap="onPickRecent">
+        <view class="ps-recent-ic">{{item.icon}}</view>
+        <view class="ps-recent-n">{{item.name}}</view>
+        <view class="ps-shape-cnt">{{item.cnt}}</view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 形状网格 -->
+  <view wx:if="{{list.length}}" class="ps-grid">
+    <view wx:for="{{list}}" wx:key="id" class="ps-cell">
+      <view class="ps-shape" data-id="{{item.id}}" bindtap="onPick">
+        <view class="ps-shape-ic">{{item.icon}}</view>
+        <view class="ps-shape-n">{{item.name}}</view>
+        <view class="ps-shape-cnt">{{item.cnt}}</view>
+      </view>
+      <view class="ps-fav {{item.fav ? 'on' : ''}}" data-id="{{item.id}}" catchtap="onFav">★</view>
+    </view>
+  </view>
+
+  <!-- 文字形状 -->
+  <view wx:if="{{cat === 'text'}}" class="ps-block">
+    <view class="ps-block-t">输入文字</view>
+    <view class="ps-text">
+      <textarea
+        class="ps-textarea"
+        value="{{text}}"
+        maxlength="12"
+        placeholder="如 LOVE、2026、生日快乐（最多 12 字）"
+        placeholder-class="ps-search-ph"
+        bindinput="onTextInput"
+      ></textarea>
+      <view class="ps-tip">支持中英文、数字、符号；系统会按字的笔画排布照片</view>
+      <view class="ps-btn" bindtap="onUseText">使用这个文字形状</view>
+    </view>
+  </view>
+
+  <!-- 自定义蒙版 -->
+  <view wx:if="{{cat === 'custom'}}" class="ps-block">
+    <view class="ps-block-t">自定义形状（PNG 蒙版）</view>
+    <view class="ps-tip">上传一张 PNG，系统会识别其中「非透明」的区域并按该形状排列照片。背景透明的剪影效果最好。</view>
+    <view class="ps-btn ps-btn--ghost" bindtap="onPickMask">上传 PNG 蒙版</view>
+
+    <view wx:if="{{masks.length}}" class="ps-masks">
+      <view wx:for="{{masks}}" wx:key="id" class="ps-mask" data-id="{{item.id}}" bindtap="onUseMask">
+        <image class="ps-mask-img" src="{{item.path}}" mode="aspectFit" />
+        <view class="ps-mask-n">{{item.name}}</view>
+        <view class="ps-mask-x" data-id="{{item.id}}" catchtap="onDelMask">×</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{!list.length && cat !== 'text' && cat !== 'custom'}}" class="ps-empty">
+    <view class="ps-empty-ic">🔍</view>
+    <view class="ps-empty-t">没有找到形状</view>
+    <view class="ps-empty-s">换个关键词或切换分类试试</view>
+  </view>
+
+  <view class="ps-foot">
+    <view class="ps-back" bindtap="onBack">返回</view>
+  </view>
+</view>

@@ -1,0 +1,160 @@
+<!--pages/travel/trip-summary：旅行复盘-->
+<view class="tshell themed" data-theme="{{theme}}" style="{{themeStyle}}">
+  <view class="tshell__wrap" wx:if="{{s}}">
+
+    <view class="ts-card hero">
+      <view class="hero__emo">📖</view>
+      <view class="hero__texts">
+        <view class="hero__title">{{s.trip.title}} · 复盘</view>
+        <view class="hero__sub">📍 {{s.trip.destination}} · {{s.totalDays}} 天 · {{s.trip.startDate}}</view>
+      </view>
+    </view>
+
+    <!-- 核心数字 -->
+    <view class="ts-card nums">
+      <view class="num">
+        <view class="num__v">{{s.itemDone}}/{{s.itemTotal}}</view>
+        <view class="num__k">行程完成</view>
+      </view>
+      <view class="num">
+        <view class="num__v">¥{{s.costTotal}}</view>
+        <view class="num__k">总花费</view>
+      </view>
+      <view class="num">
+        <view class="num__v">{{s.packingPercent}}%</view>
+        <view class="num__k">行李打包</view>
+      </view>
+      <view class="num">
+        <view class="num__v num__v--sm">{{budgetLeftText}}</view>
+        <view class="num__k">预算</view>
+      </view>
+    </view>
+
+    <!-- 去过的地方 -->
+    <view class="ts-sec-h">去过的地方</view>
+    <view class="ts-card">
+      <view wx:if="{{places.length === 0}}" class="ts-empty ts-empty--sm">
+        <view class="sub">还没有带地点的行程条目</view>
+      </view>
+      <view class="places">
+        <view wx:for="{{places}}" wx:key="name" class="place">
+          <text class="place__emo">📍</text>
+          <text class="place__name">{{item.name}}</text>
+          <text wx:if="{{item.count > 1}}" class="place__n">{{item.count}} 次</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 花费分类 -->
+    <view class="ts-sec-h">花费构成</view>
+    <view class="ts-card">
+      <view wx:if="{{costs.length === 0}}" class="ts-empty ts-empty--sm">
+        <view class="sub">还没有记录花费</view>
+      </view>
+      <view wx:for="{{costs}}" wx:key="category" class="cost">
+        <view class="cost__head">
+          <text class="cost__cat">{{item.category}}</text>
+          <text class="cost__amt">¥{{item.amount}}</text>
+        </view>
+        <view class="cost__bar">
+          <view class="cost__fill" style="width:{{item.percent}}%"></view>
+        </view>
+        <view class="cost__meta">{{item.percent}}% · {{item.count}} 笔</view>
+      </view>
+    </view>
+
+    <!-- 没用到 / 忘了带 -->
+    <view class="ts-sec-h">行李复盘</view>
+    <view class="ts-card">
+      <view class="rev__title">🧳 带了没用上（下次可以不带）</view>
+      <view wx:if="{{unused.length === 0}}" class="rev__empty">没有明显闲置物品， packing 很精准 👍</view>
+      <view wx:for="{{unused}}" wx:key="_id" class="rev__row">
+        <text class="rev__name">{{item.name}}</text>
+        <text class="rev__cat">{{item.category}}</text>
+      </view>
+    </view>
+
+    <view class="ts-card">
+      <view class="rev__title">❗ 必备但没带（下次记得加）</view>
+      <view wx:if="{{missing.length === 0}}" class="rev__empty">必备物品都已打包 ✅</view>
+      <view wx:for="{{missing}}" wx:key="_id" class="rev__row rev__row--warn">
+        <text class="rev__name">{{item.name}}</text>
+        <text class="rev__cat">{{item.category}}</text>
+      </view>
+      <view class="rev__go" bindtap="onOpenPacking" hover-class="press">去行李清单补齐 →</view>
+    </view>
+
+    <!-- 计划 vs 实际 -->
+    <view class="ts-sec-h">计划 vs 实际</view>
+    <view class="ts-card">
+      <view class="cmp">
+        <view class="cmp__cell">
+          <view class="cmp__k">计划游玩时长</view>
+          <view class="cmp__v">{{plannedHoursText}}</view>
+        </view>
+        <view class="cmp__cell">
+          <view class="cmp__k">计划花费</view>
+          <view class="cmp__v">¥{{s.plannedCost}}</view>
+        </view>
+        <view class="cmp__cell">
+          <view class="cmp__k">条目完成率</view>
+          <view class="cmp__v">{{s.completionPercent}}%</view>
+        </view>
+      </view>
+      <view class="cmp__tip">勾选完成的条目即视为「实际走过」，可在行程详情里补勾。</view>
+    </view>
+
+    <!-- 日记归档 -->
+    <view class="ts-sec-h">旅行日记</view>
+    <view class="ts-card">
+      <view wx:if="{{notes.length === 0}}" class="ts-empty ts-empty--sm">
+        <text class="emo">📔</text>
+        <view>还没写日记</view>
+        <view class="sub">记录当天见闻，配上照片，自动生成旅行回忆</view>
+      </view>
+      <view wx:for="{{notes}}" wx:key="_id" class="note">
+        <view class="note__head">
+          <text class="note__day">{{item.dayText}}</text>
+          <text class="note__del" data-id="{{item._id}}" bindtap="onDeleteNote">删除</text>
+        </view>
+        <view class="note__text">{{item.text}}</view>
+        <view wx:if="{{item.photoCount > 0}}" class="note__photos">
+          <image wx:for="{{item.photos}}" wx:for-item="ph" wx:key="*this" class="note__photo"
+            src="{{ph}}" mode="aspectFill" data-url="{{ph}}" bindtap="onPreviewPhoto" />
+        </view>
+      </view>
+      <view class="note__add" bindtap="onOpenNoteEditor" hover-class="press">＋ 写一天日记</view>
+    </view>
+
+    <!-- 操作 -->
+    <view class="ts-card">
+      <view class="ops">
+        <view class="ts-btn ts-btn--primary" bindtap="onCloneAsTemplate" hover-class="press">复制为下次模板</view>
+        <view class="ts-btn ts-btn--ghost" bindtap="onArchive" hover-class="press">{{s.trip.archived ? '取消归档' : '归档行程'}}</view>
+      </view>
+    </view>
+
+  </view>
+
+  <!-- 日记编辑 -->
+  <view wx:if="{{showNoteEditor}}" class="mask" bindtap="onCloseNoteEditor">
+    <view class="sheet" catchtap="onNoop">
+      <view class="sheet__title">写一天日记</view>
+      <view class="sheet__field">
+        <text class="sheet__label">选择哪一天</text>
+        <picker mode="selector" range="{{dayTabs}}" range-key="label" bindchange="onNoteDay">
+          <view class="sheet__picker">Day {{noteDay}}</view>
+        </picker>
+      </view>
+      <view class="sheet__field">
+        <text class="sheet__label">今天发生了什么</text>
+        <textarea class="sheet__area sheet__area--tall" placeholder="见闻、心情、好吃的、坑……"
+          value="{{noteText}}" bindinput="onNoteText" maxlength="1000" auto-height="{{false}}" />
+      </view>
+      <view class="sheet__ops">
+        <view class="ts-btn ts-btn--ghost" bindtap="onAddPhoto" hover-class="press">加照片</view>
+        <view class="ts-btn ts-btn--primary" bindtap="onSaveNote" hover-class="press">保存</view>
+      </view>
+    </view>
+  </view>
+</view>

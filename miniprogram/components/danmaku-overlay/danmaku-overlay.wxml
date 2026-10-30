@@ -1,0 +1,18 @@
+<!-- 弹幕浮层：可嵌入任意页面。覆盖在内容之上，但不拦截交互（pointer-events:none），
+     仅右下角开关按钮可点击，用于一键开启/关闭弹幕。 -->
+<view class="dm-overlay-root">
+  <view wx:if="{{visible}}" class="dm-layer">
+    <danmaku-render
+      config="{{config}}"
+      playing="{{true}}"
+      drawBackground="{{false}}"
+      loop="{{true}}"
+      quality="auto"
+    ></danmaku-render>
+  </view>
+
+  <view class="dm-toggle" catchtap="onToggle">
+    <text class="dm-toggle-icon">{{visible ? '弹' : '弹'}}</text>
+    <text class="dm-toggle-text">{{visible ? '关弹幕' : '开弹幕'}}</text>
+  </view>
+</view>

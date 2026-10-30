@@ -1,0 +1,285 @@
+/* subpackages/tools/pages/civil/track.wxss */
+
+.ct { min-height: 100vh; padding-bottom: 150rpx; }
+
+/* ===== 赛道头 ===== */
+.ct__hero {
+  padding: 40rpx 32rpx 30rpx;
+  color: #fff;
+  border-bottom-left-radius: 32rpx;
+  border-bottom-right-radius: 32rpx;
+}
+.ct__hero-top { display: flex; align-items: center; gap: 20rpx; }
+.ct__hero-icon {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44rpx;
+  flex-shrink: 0;
+}
+.ct__hero-main { flex: 1; min-width: 0; }
+.ct__hero-name { font-size: 42rpx; font-weight: 800; letter-spacing: 2rpx; }
+.ct__hero-tag { font-size: 23rpx; opacity: 0.9; display: block; margin-top: 8rpx; }
+.ct__hero-meta { display: flex; flex-wrap: wrap; gap: 14rpx; margin-top: 24rpx; }
+.ct__hero-chip {
+  font-size: 21rpx;
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ===== 卡片 ===== */
+.ct__card {
+  margin: 22rpx 24rpx 0;
+  background: var(--color-card);
+  border: 2rpx solid var(--color-border);
+  border-radius: 22rpx;
+  padding: 24rpx;
+}
+.ct__card--desc { padding: 22rpx 24rpx; }
+.ct__card--flush { padding: 6rpx 24rpx; }
+.ct__card--warn { background: rgba(220, 38, 38, 0.06); border-color: rgba(220, 38, 38, 0.28); }
+.themed[data-theme='dark'] .ct__card--warn,
+.themed[data-theme='rose'] .ct__card--warn { background: rgba(220, 38, 38, 0.14); border-color: rgba(255, 155, 145, 0.35); }
+.ct__desc { font-size: 25rpx; color: var(--color-text-soft); line-height: 1.75; }
+
+.ct__sec {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-text);
+  padding: 32rpx 28rpx 6rpx;
+}
+
+/* ===== 通用条目 ===== */
+.ct__li { display: flex; gap: 12rpx; padding: 10rpx 0; }
+.ct__bullet { font-size: 22rpx; color: var(--color-primary); flex-shrink: 0; line-height: 1.7; }
+.ct__li-t { flex: 1; font-size: 25rpx; color: var(--color-text-soft); line-height: 1.72; }
+
+/* ===== 流程步骤 ===== */
+.ct__step { display: flex; gap: 16rpx; padding: 12rpx 0; align-items: flex-start; }
+.ct__step-no {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 999rpx;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 22rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2rpx;
+}
+.ct__step-t { flex: 1; font-size: 25rpx; color: var(--color-text-soft); line-height: 1.7; }
+
+/* ===== 折叠策略 ===== */
+.ct__acc { border-bottom: 2rpx solid var(--color-border); }
+.ct__acc:last-child { border-bottom: none; }
+.ct__acc-head {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 24rpx 0;
+}
+.ct__acc-title { flex: 1; font-size: 26rpx; font-weight: 700; color: var(--color-text); line-height: 1.55; }
+.ct__acc-arrow { font-size: 26rpx; color: var(--color-primary); flex-shrink: 0; }
+.ct__acc-body { padding-bottom: 16rpx; }
+.ct__press { opacity: 0.72; }
+
+/* ===== 科目 ===== */
+.ct__subj { padding: 16rpx 0; border-bottom: 2rpx solid var(--color-border); }
+.ct__subj:last-child { border-bottom: none; }
+.ct__subj-top { display: flex; align-items: baseline; justify-content: space-between; gap: 16rpx; }
+.ct__subj-n { font-size: 26rpx; font-weight: 700; color: var(--color-text); flex: 1; }
+.ct__subj-w { font-size: 21rpx; color: var(--color-primary); flex-shrink: 0; }
+.ct__subj-note { font-size: 22rpx; color: var(--color-text-mute); display: block; margin-top: 8rpx; line-height: 1.6; }
+
+/* ===== 工具入口 ===== */
+.ct__entries { padding: 0 24rpx; }
+.ct__entry {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  background: var(--color-card);
+  border: 2rpx solid var(--color-border);
+  border-radius: 20rpx;
+  padding: 22rpx;
+  margin-bottom: 16rpx;
+}
+.ct__entry-icon { font-size: 40rpx; flex-shrink: 0; }
+.ct__entry-main { flex: 1; min-width: 0; }
+.ct__entry-title { font-size: 27rpx; font-weight: 700; color: var(--color-text); }
+.ct__entry-desc { font-size: 21rpx; color: var(--color-text-mute); margin-top: 6rpx; display: block; line-height: 1.5; }
+.ct__entry-arrow { font-size: 34rpx; color: var(--color-text-mute); }
+
+/* ===== 搜索 ===== */
+.ct__search { margin: 0 24rpx 16rpx; position: relative; }
+.ct__search-icon {
+  position: absolute;
+  left: 24rpx;
+  top: 0;
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  font-size: 26rpx;
+  pointer-events: none;
+}
+.ct__search-input {
+  height: 88rpx;
+  box-sizing: border-box;
+  padding: 0 68rpx 0 66rpx;
+  background: var(--color-bg-soft);
+  border: 2rpx solid transparent;
+  border-radius: 999rpx;
+  font-size: 28rpx;
+  color: var(--color-text);
+}
+.ct__search-clear {
+  position: absolute;
+  right: 16rpx;
+  top: 0;
+  height: 88rpx;
+  width: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  color: var(--color-text-mute);
+}
+
+/* ===== 编制 tabs ===== */
+.ct__tabs { white-space: nowrap; padding: 0 24rpx 14rpx; }
+.ct__tab {
+  display: inline-block;
+  font-size: 24rpx;
+  padding: 12rpx 22rpx;
+  margin-right: 12rpx;
+  border-radius: 999rpx;
+  background: var(--color-bg-soft);
+  color: var(--color-text-soft);
+}
+.ct__tab--on { background: var(--color-primary); color: #fff; font-weight: 600; }
+.ct__tab-n { font-size: 19rpx; opacity: 0.75; margin-left: 8rpx; }
+
+/* ===== 开关行 ===== */
+.ct__switches { display: flex; align-items: center; gap: 14rpx; padding: 0 24rpx 8rpx; }
+.ct__sw {
+  font-size: 22rpx;
+  padding: 10rpx 20rpx;
+  border-radius: 999rpx;
+  border: 2rpx solid var(--color-border);
+  color: var(--color-text-soft);
+  background: transparent;
+}
+.ct__sw--on { border-color: var(--color-primary); color: var(--color-primary); background: var(--color-primary-soft); font-weight: 600; }
+.ct__sw-reset { font-size: 22rpx; color: var(--color-text-mute); margin-left: auto; padding: 10rpx 6rpx; }
+
+/* ===== 岗位卡片 ===== */
+.ct__jobs { padding: 8rpx 24rpx 0; }
+.ct__job {
+  background: var(--color-card);
+  border: 2rpx solid var(--color-border);
+  border-radius: 20rpx;
+  padding: 22rpx;
+  margin-bottom: 16rpx;
+}
+.ct__job-head { display: flex; align-items: center; gap: 12rpx; }
+.ct__job-title { font-size: 28rpx; font-weight: 700; color: var(--color-text); flex: 1; min-width: 0; }
+.ct__job-unit { font-size: 22rpx; color: var(--color-text-soft); display: block; margin-top: 8rpx; }
+.ct__job-tags { display: flex; flex-wrap: wrap; gap: 10rpx; margin-top: 12rpx; }
+.ct__jt {
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  background: var(--color-bg-soft);
+  color: var(--color-text-mute);
+}
+.ct__jt--hi { background: var(--color-primary-soft); color: var(--color-primary); }
+.ct__job-foot { display: flex; flex-wrap: wrap; gap: 18rpx; margin-top: 12rpx; }
+.ct__jf { font-size: 21rpx; color: var(--color-text-mute); }
+.ct__job-salary { font-size: 22rpx; color: var(--color-text-soft); display: block; margin-top: 10rpx; }
+
+/* ===== 岗位卡上的官方报名入口 ===== */
+.ct__job-apply {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-top: 12rpx;
+  padding-top: 12rpx;
+  border-top: 2rpx solid var(--color-border);
+}
+.ct__apply-badge {
+  flex: none;
+  font-size: 19rpx;
+  font-weight: 700;
+  color: #15803d;
+  background: rgba(21, 128, 61, 0.12);
+  border-radius: 6rpx;
+  padding: 3rpx 10rpx;
+}
+.ct__apply-name {
+  flex: none;
+  max-width: 220rpx;
+  font-size: 21rpx;
+  font-weight: 700;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ct__apply-host {
+  flex: 1;
+  min-width: 0;
+  font-size: 21rpx;
+  color: var(--color-text-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ct__apply-copy {
+  flex: none;
+  font-size: 20rpx;
+  font-weight: 800;
+  color: #15803d;
+  border: 2rpx solid rgba(21, 128, 61, 0.35);
+  border-radius: 999rpx;
+  padding: 4rpx 14rpx;
+}
+
+.ct__more {
+  margin: 8rpx 24rpx 0;
+  text-align: center;
+  font-size: 25rpx;
+  color: var(--color-primary);
+  padding: 24rpx 0;
+  border-radius: 18rpx;
+  border: 2rpx dashed var(--color-border);
+}
+.ct__empty { padding: 70rpx 40rpx; text-align: center; }
+.ct__empty-t { font-size: 27rpx; color: var(--color-text-soft); display: block; }
+.ct__empty-s { font-size: 22rpx; color: var(--color-text-mute); display: block; margin-top: 12rpx; line-height: 1.6; }
+
+/* ===== 底部固定复制条 ===== */
+.ct__bottom {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
+  background: var(--color-bg-elevated);
+  border-top: 2rpx solid var(--color-border);
+}
+.ct__copy {
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #fff;
+  border-radius: 20rpx;
+  background: var(--gradient-primary);
+}

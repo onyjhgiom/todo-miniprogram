@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "待办清单",
+  "navigationBarBackgroundColor": "#15110D",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#15110D",
+  "usingComponents": {
+    "todo-glyph": "/components/todo-glyph/todo-glyph"
+  }
+}

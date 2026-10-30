@@ -1,0 +1,6 @@
+{
+  "component": true,
+  "usingComponents": {
+    "attachment-bar": "/components/attachment-bar/attachment-bar"
+  }
+}

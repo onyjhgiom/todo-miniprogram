@@ -1,0 +1,12 @@
+{
+  "name": "helperChat",
+  "version": "1.0.0",
+  "description": "小助手 AI 对话：调用智谱/兼容大模型，返回结构化回复与可执行动作",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  },
+  "permissions": {
+    "openapi": []
+  }
+}

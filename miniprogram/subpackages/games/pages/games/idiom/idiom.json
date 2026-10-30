@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "成语接龙",
+  "usingComponents": {
+    "game-shell": "/subpackages/games/components/game-shell/index"
+  },
+  "disableScroll": true
+}

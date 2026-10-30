@@ -1,0 +1,51 @@
+/* recurrence-editor */
+.recurrence { padding: 8rpx 0; display: flex; flex-direction: column; gap: 16rpx; }
+.recur-type { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.recur-chip {
+  padding: 12rpx 20rpx;
+  background: var(--color-bg-soft);
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  color: var(--color-text-soft);
+  transition: all 200ms;
+}
+.recur-chip.is-active {
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 500;
+}
+.recur-interval {
+  display: flex; align-items: center; gap: 12rpx;
+  padding: 16rpx;
+  background: var(--color-bg-soft); border-radius: 12rpx;
+}
+.recur-num {
+  width: 96rpx; height: 56rpx; padding: 0 16rpx;
+  background: var(--color-card); border-radius: 12rpx;
+  font-size: 28rpx; text-align: center;
+}
+.recur-weekdays { display: flex; gap: 8rpx; flex-wrap: wrap; }
+.weekday-chip {
+  width: 64rpx; height: 64rpx;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--color-bg-soft);
+  border-radius: 50%;
+  font-size: 22rpx;
+  color: var(--color-text-soft);
+  transition: all 200ms;
+}
+.weekday-chip.is-active {
+  background: var(--color-primary);
+  color: #fff;
+}
+.recur-end { display: flex; align-items: center; gap: 12rpx; padding: 0 8rpx; }
+.recur-end-label { font-size: 24rpx; color: var(--color-text-soft); }
+.recur-end-picker { flex: 1; }
+.recur-end-value {
+  display: inline-block; padding: 12rpx 20rpx;
+  background: var(--color-bg-soft);
+  border-radius: 12rpx;
+  font-size: 24rpx; color: var(--color-primary);
+}
+.recur-end-clear { font-size: 22rpx; color: var(--color-text-mute); padding: 8rpx; }
+.recur-end-clear:active { color: var(--color-danger); }

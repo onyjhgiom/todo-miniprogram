@@ -1,0 +1,286 @@
+<!-- 弹幕工作台（对齐「高级弹幕工作台」设计稿） -->
+<view class="editor">
+
+  <!-- 自定义顶栏 -->
+  <view class="topbar" style="padding-top:{{statusBarH}}px;">
+    <view class="tb-back" bindtap="onBack" hover-class="press">‹</view>
+    <view class="tb-mid">
+      <view class="tb-title">弹幕工作台</view>
+      <view class="tb-sub">PREMIUM DANMAKU STUDIO</view>
+    </view>
+    <view class="tb-more" bindtap="onMore" hover-class="press">•••</view>
+  </view>
+
+  <!-- 实时预览：城市天际线 + 弹幕 -->
+  <view class="preview" style="background:linear-gradient(150deg,{{config.bg.color}} 0%,{{config.bg.color2}} 100%);">
+    <view class="pv-glow"></view>
+    <view class="pv-fx"></view>
+    <view class="pv-city"></view>
+    <danmaku-render
+      id="preview"
+      class="pv-canvas"
+      config="{{config}}"
+      playing="{{playing}}"
+      drawBackground="{{false}}"
+      loop="{{true}}"
+      quality="auto"
+    ></danmaku-render>
+    <view class="pv-live"><view class="dot"></view>实时预览　▶</view>
+    <view class="preview-bar">
+      <view class="pb-btn" bindtap="onTogglePlay" hover-class="press">{{playing ? '⏸' : '▶'}}</view>
+      <view class="pb-btn" bindtap="onReset" hover-class="press">↺</view>
+      <view class="pb-name">{{name}}</view>
+    </view>
+  </view>
+
+  <scroll-view class="body" scroll-y>
+
+    <!-- ═══ 弹幕内容 ═══ -->
+    <view class="card">
+      <view class="sec-title">💬 弹幕内容<text class="sec-extra">{{items.length}} 条</text></view>
+
+      <view class="input-bar" bindtap="onAddItem" hover-class="press">
+        <text class="input-ph">✎　输入一句想说的话…</text>
+        <text class="input-count">0/50</text>
+      </view>
+
+      <!-- 分类 tabs -->
+      <view class="tabs">
+        <view class="tab {{activeTab===item?'active':''}}" wx:for="{{tabList}}" wx:key="*this"
+              data-tab="{{item}}" bindtap="onSelectTab" hover-class="press">{{item}}</view>
+      </view>
+
+      <!-- 模板瓦片：emoji 大字 + 文字小字 -->
+      <view class="tpl-grid">
+        <block wx:for="{{tplTiles}}" wx:for-item="grp" wx:key="label">
+          <block wx:if="{{grp.label===activeTab}}">
+            <view class="template" wx:for="{{grp.tiles}}" wx:for-item="t" wx:key="full"
+                  data-text="{{t.full}}" bindtap="onTemplate" hover-class="press">
+              <text wx:if="{{t.emoji}}" class="tpl-emoji">{{t.emoji}}</text>
+              <text class="tpl-text">{{t.text}}</text>
+            </view>
+          </block>
+        </block>
+      </view>
+
+      <!-- 灵感推荐 -->
+      <view class="suggestion">
+        <view class="chip chip-ai">✦ 灵感推荐 AI</view>
+        <view class="chip" data-text="梦想不止，步履不停" bindtap="onTemplate" hover-class="press">梦想不止，步履不停</view>
+        <view class="chip" data-text="今天也要开心呀！💜" bindtap="onTemplate" hover-class="press">今天也要开心呀！💜</view>
+      </view>
+
+      <!-- 已添加弹幕列表 -->
+      <view class="item-list" wx:if="{{items.length}}">
+        <view class="item-row" wx:for="{{items}}" wx:key="id">
+          <view class="item-text" bindtap="onEditItem" data-index="{{index}}">
+            <text class="item-pin" wx:if="{{item.pinned}}">★</text>{{item.text}}
+          </view>
+          <view class="item-ops">
+            <text class="op {{item.pinned?'on':''}}" bindtap="onTogglePin" data-index="{{index}}">置顶</text>
+            <text class="op" bindtap="onEditItem" data-index="{{index}}">改</text>
+            <text class="op del" bindtap="onRemoveItem" data-index="{{index}}">删</text>
+          </view>
+        </view>
+      </view>
+      <view wx:else class="empty-hint">还没有弹幕，点上方输入框或选模板开始</view>
+
+      <view class="row-btns">
+        <view class="add-btn" bindtap="onAddItem" hover-class="press">＋ 添加弹幕</view>
+        <view class="add-btn ghost" bindtap="onBatchImport" hover-class="press">粘贴多行导入</view>
+      </view>
+    </view>
+
+    <!-- ═══ 表情弹幕 ═══ -->
+    <view class="card">
+      <view class="sec-title">😊 表情弹幕<text class="sec-extra link" bindtap="onMore">更多 ›</text></view>
+      <view class="emoji-grid">
+        <view class="emoji {{stickerActive===item?'active':''}}" wx:for="{{stickers}}" wx:key="*this"
+              data-text="{{item}}" bindtap="onSticker" hover-class="press">{{item}}</view>
+      </view>
+    </view>
+
+    <!-- ═══ 文字样式 ═══ -->
+    <view class="card">
+      <view class="sec-title">T　文字样式<text class="sec-extra">实时预览 ›</text></view>
+
+      <view class="style-row">
+        <view class="row-label">颜色</view>
+        <view class="swatches">
+          <view class="swatch {{config.style.color===item?'active':''}}" wx:for="{{colors}}" wx:key="*this"
+                style="background:{{item}};" data-color="{{item}}" bindtap="onSelectColor" hover-class="press"></view>
+          <view class="swatch more" bindtap="onOpenColorPanel" hover-class="press">＋</view>
+        </view>
+      </view>
+
+      <view class="style-row">
+        <view class="row-label">字号</view>
+        <view class="pills">
+          <view class="pill {{config.style.size===item.value?'active':''}}" wx:for="{{sizes}}" wx:key="value"
+                data-value="{{item.value}}" bindtap="onSelectSize" hover-class="press">{{item.label}}</view>
+        </view>
+      </view>
+
+      <view class="style-row">
+        <view class="row-label">字体</view>
+        <view class="pills">
+          <view class="pill {{config.style.font===item.value?'active':''}}" wx:for="{{fonts}}" wx:key="value"
+                data-value="{{item.value}}" bindtap="onSelectFont" hover-class="press">{{item.label}}</view>
+        </view>
+      </view>
+
+      <view class="style-row">
+        <view class="row-label">特效</view>
+        <view class="pills">
+          <view class="pill {{config.style.fontEffect===item.value?'active':''}}" wx:for="{{effects}}" wx:key="value"
+                data-value="{{item.value}}" bindtap="onSelectEffect" hover-class="press">{{item.label}}</view>
+        </view>
+      </view>
+
+      <view class="style-row">
+        <view class="row-label">底衬</view>
+        <view class="pills">
+          <view class="pill {{config.style.bgMode===item.value?'active':''}}" wx:for="{{bgModes}}" wx:key="value"
+                data-value="{{item.value}}" bindtap="onSelectBgMode" hover-class="press">{{item.label}}</view>
+        </view>
+      </view>
+
+      <view class="toggles">
+        <view class="tog {{config.style.bold?'on':''}}" bindtap="onToggleBold" hover-class="press">粗体</view>
+        <view class="tog {{config.style.italic?'on':''}}" bindtap="onToggleItalic" hover-class="press">斜体</view>
+        <view class="tog {{config.style.border?'on':''}}" bindtap="onToggleBorder" hover-class="press">描边</view>
+        <view class="tog {{config.style.shadow?'on':''}}" bindtap="onToggleShadow" hover-class="press">阴影</view>
+      </view>
+    </view>
+
+    <!-- ═══ 动画 ═══ -->
+    <view class="card">
+      <view class="sec-title">✧　动画效果</view>
+      <view class="style-row">
+        <view class="row-label">模式</view>
+        <view class="pills">
+          <view class="pill {{config.anim.mode===item.value?'active':''}}" wx:for="{{modeOptions}}" wx:key="value"
+                data-value="{{item.value}}" bindtap="onSelectMode" hover-class="press">{{item.label}}</view>
+        </view>
+      </view>
+      <view class="style-row" wx:if="{{config.anim.mode==='scroll'}}">
+        <view class="row-label">速度</view>
+        <view class="pills">
+          <view class="pill {{config.anim.speed===item.value?'active':''}}" wx:for="{{speedOptions}}" wx:key="value"
+                data-value="{{item.value}}" bindtap="onSelectSpeed" hover-class="press">{{item.label}}</view>
+        </view>
+      </view>
+      <view class="style-row" wx:if="{{config.anim.mode==='pop'}}">
+        <view class="row-label">方向</view>
+        <view class="pills">
+          <view class="pill {{config.anim.popFrom===item.value?'active':''}}" wx:for="{{popFromOptions}}" wx:key="value"
+                data-value="{{item.value}}" bindtap="onSelectPopFrom" hover-class="press">{{item.label}}</view>
+        </view>
+      </view>
+      <view class="style-row">
+        <view class="row-label">粒子</view>
+        <view class="pills">
+          <view class="pill {{config.anim.particle===item.value?'active':''}}" wx:for="{{particles}}" wx:key="value"
+                data-value="{{item.value}}" bindtap="onSelectParticle" hover-class="press">{{item.label}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- ═══ 布局与密度 ═══ -->
+    <view class="card">
+      <view class="sec-title">▦　布局与密度</view>
+      <view class="control-grid">
+        <view class="cg-col">
+          <view class="mini-title">密度</view>
+          <view class="pills vertical">
+            <view class="pill {{config.layout.density===item.value?'active':''}}" wx:for="{{densityOptions}}" wx:key="value"
+                  data-value="{{item.value}}" bindtap="onSelectDensity" hover-class="press">{{item.label}}</view>
+          </view>
+        </view>
+        <view class="cg-col">
+          <view class="mini-title">出现区域</view>
+          <view class="pills vertical">
+            <view class="pill {{config.layout.area===item.value?'active':''}}" wx:for="{{areaOptions}}" wx:key="value"
+                  data-value="{{item.value}}" bindtap="onSelectArea" hover-class="press">{{item.label}}</view>
+          </view>
+        </view>
+        <view class="cg-col">
+          <view class="mini-title">置顶</view>
+          <view class="crown {{config.layout.pinImportant?'active':''}}" bindtap="onTogglePinImportant" hover-class="press">👑</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- ═══ 节日皮肤 + 预览背景 ═══ -->
+    <view class="card">
+      <view class="sec-title">✦　节日皮肤<text class="sec-extra link" bindtap="onMore">更多 ›</text></view>
+      <view class="skin-grid">
+        <view class="skin {{config.skin===item.value?'active':''}}" wx:for="{{skinsView}}" wx:key="value"
+              style="background:linear-gradient(135deg,{{item.bgColor}},{{item.bgColor2}});"
+              data-value="{{item.value}}" bindtap="onSelectSkin" hover-class="press">
+          <text class="skin-emoji" wx:if="{{item.emoji}}">{{item.emoji}}</text>
+          <text class="skin-label">{{item.label}}</text>
+        </view>
+      </view>
+      <view class="style-row" style="margin-top:20rpx;">
+        <view class="row-label">背景</view>
+        <view class="swatches">
+          <view class="bg-chip {{config.bg.color===item.color && config.bg.color2===item.color2?'active':''}}"
+                wx:for="{{bgPresets}}" wx:key="label"
+                style="background:linear-gradient(135deg,{{item.color}},{{item.color2}});"
+                data-color="{{item.color}}" data-color2="{{item.color2}}" bindtap="onSelectBg" hover-class="press"></view>
+        </view>
+      </view>
+    </view>
+
+    <view class="tail-space"></view>
+  </scroll-view>
+
+  <!-- 底部操作栏 -->
+  <view class="ab-hint">全屏播放支持竖屏 / 横屏：横屏自动进入全屏，点击画面可呼出控件</view>
+  <view class="action-bar">
+    <view class="ab-btn" bindtap="onSave" hover-class="press">保存</view>
+    <view class="ab-btn {{favorite?'faved':''}}" bindtap="onToggleFavorite" hover-class="press">{{favorite?'★ 收藏':'☆ 收藏'}}</view>
+    <view class="ab-btn" bindtap="onExportGif" hover-class="press">GIF 导出</view>
+    <view class="ab-btn primary" bindtap="onOpenStage" hover-class="press">▶ 全屏播放</view>
+  </view>
+
+  <!-- 条目编辑弹窗 -->
+  <view wx:if="{{showItemEditor}}" class="modal-mask" bindtap="onCancelItem">
+    <view class="modal" catchtap="noop">
+      <view class="modal-title">{{editIndex>=0?'编辑弹幕':'新增弹幕'}}</view>
+      <textarea class="item-input" value="{{editText}}" bindinput="onItemEditorInput"
+                maxlength="50" placeholder="输入弹幕内容（最多 50 字）" auto-focus></textarea>
+      <view class="modal-btns">
+        <view class="mb cancel" bindtap="onCancelItem">取消</view>
+        <view class="mb ok" bindtap="onSaveItem">确定</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 取色面板 -->
+  <view wx:if="{{showColorPanel}}" class="modal-mask" bindtap="onCloseColorPanel">
+    <view class="modal" catchtap="noop">
+      <view class="modal-title">自定义颜色</view>
+      <view class="picker-grid">
+        <view class="pc" wx:for="{{picker}}" wx:for-item="row" wx:for-index="ri" wx:key="ri">
+          <view class="pc-cell" wx:for="{{row}}" wx:for-item="c" wx:key="*this"
+                style="background:{{c}};" data-color="{{c}}" bindtap="onPickMatrix"></view>
+        </view>
+      </view>
+      <view class="modal-btns">
+        <view class="mb ok" bindtap="onCloseColorPanel">完成</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 导出进度 -->
+  <view wx:if="{{exporting}}" class="modal-mask2">
+    <view class="export-box">
+      <view class="export-hint">{{exportHint}}</view>
+      <view class="progress-track"><view class="progress-fill" style="width:{{progress}}%;"></view></view>
+      <view class="export-pct">{{progress}}%</view>
+    </view>
+  </view>
+
+</view>

@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "个人资料",
+  "navigationBarBackgroundColor": "#15110D",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#15110D",
+  "usingComponents": {
+    "fx-stage": "/components/fx-stage/fx-stage"
+  }
+}

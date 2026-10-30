@@ -1,0 +1,43 @@
+<!--pages/guaxiang/library.wxml-->
+<view class="page themed" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <view class="head">
+    <view class="head__bar" style="background:{{heroGradient}}">
+      <text class="head__title">六十四卦速查</text>
+      <text class="head__sub">《周易》卦序 · 点击查看卦象详解</text>
+    </view>
+  </view>
+
+  <scroll-view class="body" scroll-y enhanced show-scrollbar="{{false}}">
+
+    <view class="search">
+      <input
+        class="search__input"
+        placeholder="搜索卦名或序号"
+        value="{{keyword}}"
+        bindinput="onSearch"
+        confirm-type="search"
+      />
+      <view class="search__clear" wx:if="{{keyword}}" hover-class="press" bindtap="onClearSearch">✕</view>
+    </view>
+
+    <view class="grid" wx:if="{{list.length}}">
+      <view
+        class="cell"
+        wx:for="{{list}}" wx:key="num"
+        hover-class="cell--hover" hover-stay-time="60"
+        bindtap="onOpen" data-num="{{item.num}}"
+      >
+        <text class="cell__num">{{item.num}}</text>
+        <text class="cell__name">{{item.name}}</text>
+        <text class="cell__nature">{{item.nature}}</text>
+      </view>
+    </view>
+
+    <view class="empty" wx:else>没有找到对应的卦</view>
+
+    <view class="safe-bottom" />
+  </scroll-view>
+
+  <view class="disclaimer">{{disclaimer}}</view>
+</view>

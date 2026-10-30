@@ -1,0 +1,196 @@
+.mz { display: flex; flex-direction: column; align-items: center; gap: 14rpx; width: 100%; overflow: hidden; }
+
+/* 关卡切换条 */
+.mz__lv {
+  width: 100%; gap: 14rpx;
+  background: var(--card); border: 2rpx solid var(--line); border-radius: var(--r-lg);
+  padding: 12rpx 16rpx;
+}
+.mz__lvb {
+  width: 56rpx; height: 56rpx; flex: 0 0 auto; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32rpx; color: var(--clay);
+  background: var(--card-2); border: 2rpx solid var(--line);
+  transition: transform .08s ease, background .15s ease;
+}
+.mz__lvb:active { transform: scale(.92); background: var(--paper-2); }
+.mz__lvinfo { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6rpx; }
+.mz__bar { width: 100%; align-items: center; }
+
+/* 难度选择（编织度） + 换一张新图 */
+.mz__diffrow { width: 100%; align-items: center; }
+.mz__seg {
+  display: flex; align-items: center; gap: 4rpx;
+  padding: 4rpx; border-radius: 999rpx;
+  background: var(--card-2); border: 2rpx solid var(--line);
+}
+.mz__seg-item {
+  padding: 8rpx 22rpx; border-radius: 999rpx;
+  font-size: 22rpx; color: var(--ink-3);
+  transition: background .15s ease, color .15s ease;
+}
+.mz__seg-item.is-on {
+  background: var(--card); color: var(--clay);
+  font-weight: 600; box-shadow: var(--sd-1);
+}
+.mz__seg-hover { opacity: .8; }
+.mz__regen {
+  padding: 10rpx 20rpx; border-radius: 999rpx;
+  font-size: 22rpx; color: var(--clay);
+  background: var(--card-2); border: 2rpx solid var(--line);
+  transition: transform .08s ease;
+}
+.mz__regen:active { transform: scale(.95); }
+.mz__regen-hover { opacity: .82; }
+
+/* 步数进度：起点 → 当前进度 → 终点 */
+.mz__progress { align-items: center; gap: 10rpx; }
+.mz__dot {
+  width: 14rpx; height: 14rpx; border-radius: 50%;
+  background: var(--ink-4); border: 2rpx solid var(--line-2);
+}
+.mz__dot--start { background: var(--mint); border-color: var(--mint-deep); }
+.mz__dot--end { background: var(--clay); border-color: rgba(181, 113, 76, .45); }
+.mz__track {
+  width: 140rpx; height: 10rpx; border-radius: 999rpx;
+  background: var(--card-3); border: 2rpx solid var(--line); overflow: hidden;
+}
+.mz__fill {
+  width: 100%; height: 100%; border-radius: 999rpx;
+  background: linear-gradient(90deg, var(--mint), var(--mint-deep));
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  /* 只动 transform：不触发布局与重绘，比原来的 width 过渡省得多 */
+  transition: transform .25s ease;
+}
+
+/* 棋盘 */
+.mz__board {
+  position: relative; /* 玩家小球以此为定位基准 */
+  width: 100%; display: grid; gap: 0;
+  background: var(--card); padding: 8rpx; border-radius: var(--r-lg); border: 2rpx solid var(--line);
+  box-shadow: var(--sd-1); overflow: hidden; box-sizing: border-box;
+}
+.mz__cell {
+  position: relative;
+  aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center;
+  border: 0; box-sizing: border-box;
+  transition: background-color .15s ease;
+}
+
+/* 墙壁 */
+.w-t { border-top: 6rpx solid var(--ink-3); }
+.w-r { border-right: 6rpx solid var(--ink-3); }
+.w-b { border-bottom: 6rpx solid var(--ink-3); }
+.w-l { border-left: 6rpx solid var(--ink-3); }
+
+/* 提示路径 */
+.mz__cell--hint { background: rgba(246, 237, 218, .55); }
+.mz__hintDot {
+  width: 16rpx; height: 16rpx; border-radius: 50%;
+  background: #D4B36A; opacity: .78;
+  animation: hintPulse 1.6s ease-in-out infinite;
+}
+
+/* 最优路径演示：逐格点亮的金色轨迹 */
+.mz__demoDot {
+  width: 22rpx; height: 22rpx; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #F2D896, #D4B36A 70%);
+  box-shadow: 0 0 10rpx rgba(212, 179, 106, .55);
+  animation: demoPop .3s ease-out both;
+}
+@keyframes demoPop {
+  from { transform: scale(.3); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* 走过的面包屑：淡色小点，帮助回忆来路 */
+.mz__crumb {
+  width: 12rpx; height: 12rpx; border-radius: 50%;
+  background: rgba(184, 212, 176, .55);
+}
+
+/* 玩家小球已迁到 maze-ball 组件（渲染隔离：走一步不再重渲染整块棋盘）
+   原来的 .mz__player / .mz__player__inner / bump 关键帧随之移到组件内 */
+
+/* 终点：陶土色小旗 */
+.mz__cell--e { background: transparent; }
+.mz__flag {
+  position: absolute; left: 50%; top: 50%;
+  width: 68%; height: 68%;
+  margin-left: -34%; margin-top: -34%;
+  border-radius: 10rpx;
+  background: var(--clay-soft);
+  border: 2rpx solid rgba(181, 113, 76, .35);
+  display: flex; align-items: center; justify-content: center;
+}
+.mz__flag::after {
+  content: '◆';
+  font-size: 26rpx;
+  color: var(--clay);
+}
+
+/* 提示点动画 */
+@keyframes hintPulse {
+  0%, 100% { transform: scale(.85); opacity: .55; }
+  50% { transform: scale(1.15); opacity: .9; }
+}
+
+/* 控制区 */
+.mz__ctrls {
+  width: 100%;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-top: 0;
+}
+
+/* 撤销 / 演示 竖排 */
+.mz__side { display: flex; flex-direction: column; gap: 12rpx; }
+
+/* 撤销 */
+.mz__undo {
+  display: flex; flex-direction: column; align-items: center; gap: 4rpx;
+  padding: 10rpx 14rpx; border-radius: var(--r-md);
+  color: var(--clay); background: var(--card-2); border: 2rpx solid var(--line);
+  transition: transform .08s ease, opacity .15s ease;
+}
+.mz__undo:active { transform: scale(.95); }
+.mz__undo--disabled { opacity: .42; pointer-events: none; }
+.mz__undoIcon { font-size: 32rpx; line-height: 1; }
+
+/* 方向键 */
+.mz__dir {
+  display: flex; flex-direction: column; align-items: center; gap: 12rpx;
+}
+.mz__dir .row { gap: 12rpx; }
+.mz__d {
+  width: 92rpx; height: 92rpx; border-radius: 50%; background: var(--card);
+  display: flex; align-items: center; justify-content: center;
+  border: 2rpx solid var(--line); box-shadow: var(--sd-1);
+  transition: transform .08s ease, background .12s ease, box-shadow .12s ease;
+}
+.mz__d:active {
+  transform: scale(.93);
+  background: var(--card-2);
+  box-shadow: inset 0 4rpx 12rpx rgba(90, 74, 56, .08);
+}
+.mz__arrow {
+  width: 0; height: 0;
+  border-style: solid;
+  border-color: transparent;
+}
+.mz__arrow--up {
+  border-width: 0 18rpx 26rpx 18rpx;
+  border-bottom-color: var(--clay);
+}
+.mz__arrow--down {
+  border-width: 26rpx 18rpx 0 18rpx;
+  border-top-color: var(--clay);
+}
+.mz__arrow--left {
+  border-width: 18rpx 26rpx 18rpx 0;
+  border-right-color: var(--clay);
+}
+.mz__arrow--right {
+  border-width: 18rpx 0 18rpx 26rpx;
+  border-left-color: var(--clay);
+}

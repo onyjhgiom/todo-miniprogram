@@ -1,0 +1,619 @@
+<!--pages/wish/wish.wxml-->
+<!-- 愿望清单 2.0：低饱和暮色 · 个人愿景空间 -->
+<view class="page themed" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <!-- 暮色氛围层（纯 CSS：天空 / 落日 / 海面 / 雾气） -->
+  <view class="dusk" aria-hidden="true">
+    <view class="dusk__sun"></view>
+    <view class="dusk__glow"></view>
+    <view class="dusk__sea"></view>
+    <view class="dusk__haze"></view>
+  </view>
+
+  <!-- 头部 -->
+  <view class="wh__head">
+    <view class="wh__head-main">
+      <text class="wh__title">愿望清单</text>
+      <text class="wh__hand">让每一个愿望，都有回响 ♡</text>
+    </view>
+    <view class="wh__actions">
+      <view class="wh__icon-btn" bindtap="onReportOpen">📊</view>
+      <view class="wh__icon-btn" bindtap="onSettingsOpen">⚙️</view>
+    </view>
+  </view>
+  <view class="wh__poem">
+    <text>愿你所愿</text>
+    <text>皆能如愿</text>
+  </view>
+
+  <!-- 我的愿景 -->
+  <view class="vision" hover-class="press" bindtap="onVisionOpen">
+    <view class="vision__thumb">🪽</view>
+    <view class="vision__main">
+      <text class="vision__title">✦ 我的愿景</text>
+      <text class="vision__quote">「我想成为怎样的人？」</text>
+      <text class="vision__sub">{{vision || '写下未来的自己……'}}</text>
+    </view>
+    <text class="vision__arrow">›</text>
+  </view>
+
+  <!-- 统计 -->
+  <view class="wh__stat">
+    <view class="wh__stat-item">
+      <text class="wh__stat-ico wh__stat-ico--pink">♡</text>
+      <text class="wh__stat-num">{{stat.total}}</text>
+      <text class="wh__stat-label">心愿</text>
+    </view>
+    <view class="wh__stat-item">
+      <text class="wh__stat-ico wh__stat-ico--purple">✦</text>
+      <text class="wh__stat-num">{{stat.doing}}</text>
+      <text class="wh__stat-label">进行中</text>
+    </view>
+    <view class="wh__stat-item">
+      <text class="wh__stat-ico wh__stat-ico--green">✓</text>
+      <text class="wh__stat-num">{{stat.done}}</text>
+      <text class="wh__stat-label">已实现</text>
+    </view>
+    <view class="wh__stat-item">
+      <text class="wh__stat-ico wh__stat-ico--gold">¥</text>
+      <text class="wh__stat-num wh__stat-num--money">{{stat.spent}}</text>
+      <text class="wh__stat-label">已花费</text>
+    </view>
+  </view>
+
+  <!-- 实现率 -->
+  <view class="rate">
+    <view class="rate__head">
+      <text class="rate__title">🌱 我的愿望实现率</text>
+      <text class="rate__pct">{{rate}}%</text>
+    </view>
+    <view class="rate__bar">
+      <view class="rate__fill" style="width: {{rate}}%;"></view>
+    </view>
+    <view class="rate__sub">
+      <text>已经实现 {{stat.done}} 个愿望</text>
+      <text class="rate__sub-r">继续向前一点点 ✦</text>
+    </view>
+  </view>
+
+  <!-- 搜索 -->
+  <view class="wh__search">
+    <text class="wh__search-icon">🔍</text>
+    <input class="wh__search-input" value="{{keyword}}" placeholder="搜索心愿、标签、备注……" bindinput="onSearch" />
+    <view class="wh__chip wh__chip--ghost" bindtap="onToggleArchived">
+      {{showArchived ? '返回清单' : '✦ 心愿墙'}}
+    </view>
+  </view>
+
+  <!-- 分类筛选 -->
+  <scroll-view class="wh__chips" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="wh__chips-track">
+      <view class="wh__chip {{activeCat === 'all' ? 'is-active' : ''}}" data-id="all" bindtap="onCategory">全部</view>
+      <view
+        wx:for="{{categories}}"
+        wx:key="id"
+        class="wh__chip {{activeCat === item.id ? 'is-active' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="onCategory"
+      >
+        <text class="wh__chip-dot" style="background: {{item.color}};"></text>{{item.icon}} {{item.name}}
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 状态 + 排序 -->
+  <view class="wh__row">
+    <scroll-view class="wh__chips wh__chips--grow" scroll-x enhanced show-scrollbar="{{false}}">
+      <view class="wh__chips-track">
+        <view class="wh__chip wh__chip--sm {{activeStatus === 'all' ? 'is-active' : ''}}" data-id="all" bindtap="onStatus">全部状态</view>
+        <view
+          wx:for="{{statuses}}"
+          wx:key="id"
+          class="wh__chip wh__chip--sm {{activeStatus === item.id ? 'is-active' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="onStatus"
+        >
+          <text class="wh__chip-dot" style="background: {{item.color}};"></text>{{item.name}}
+        </view>
+      </view>
+    </scroll-view>
+    <view class="wh__sort">
+      <text
+        class="wh__sort-item {{sortMode === 'smart' ? 'is-active' : ''}}"
+        data-mode="smart"
+        bindtap="onSort"
+      >智能</text>
+      <text
+        class="wh__sort-item {{sortMode === 'star' ? 'is-active' : ''}}"
+        data-mode="star"
+        bindtap="onSort"
+      >心动</text>
+      <text
+        class="wh__sort-item {{sortMode === 'date' ? 'is-active' : ''}}"
+        data-mode="date"
+        bindtap="onSort"
+      >日期</text>
+      <text
+        class="wh__sort-item {{sortMode === 'price' ? 'is-active' : ''}}"
+        data-mode="price"
+        bindtap="onSort"
+      >金额</text>
+    </view>
+  </view>
+
+  <!-- 愿望列表（横向卡片） -->
+  <view class="wh__list" wx:if="{{wishes.length}}">
+    <view
+      wx:for="{{wishes}}"
+      wx:key="_id"
+      class="wcard {{item.isDoneKind ? 'is-done' : ''}} {{item.urgency === 'overdue' ? 'is-overdue' : ''}}"
+      data-id="{{item._id}}"
+      bindtap="onWishTap"
+      bindlongpress="onWishLongPress"
+      hover-class="wcard--hover"
+      hover-stay-time="60"
+    >
+      <!-- 左：缩略图 -->
+      <view class="wcard__thumb">
+        <image wx:if="{{item.cover}}" class="wcard__img" src="{{item.cover}}" mode="aspectFill" />
+        <view wx:else class="wcard__thumb-ph" style="background: {{item.catColor}}1f; color: {{item.catColor}};">{{item.catIcon}}</view>
+      </view>
+
+      <!-- 中：内容 -->
+      <view class="wcard__body">
+        <view class="wcard__top">
+          <view class="wcard__cat" style="background: {{item.catColor}}17; color: {{item.catColor}};">
+            {{item.catIcon}} {{item.catName}}
+          </view>
+          <view class="wcard__more" data-id="{{item._id}}" catchtap="onWishLongPress">⋯</view>
+        </view>
+        <text class="wcard__title">{{item.title}}</text>
+        <text wx:if="{{item.noteText}}" class="wcard__note">{{item.noteText}}</text>
+        <view class="wcard__tags" wx:if="{{item.tagChips.length}}">
+          <text wx:for="{{item.tagChips}}" wx:for-item="tg" wx:key="*this" class="wcard__tag">#{{tg}}</text>
+        </view>
+        <view class="wcard__progress">
+          <text class="wcard__status" style="background: {{item.statusColor}}1a; color: {{item.statusColor}};">{{item.statusName}}</text>
+          <view class="wcard__bar">
+            <view class="wcard__bar-fill" style="width: {{item.progressPct}}%;"></view>
+          </view>
+          <text class="wcard__pct">{{item.progressPct}}%</text>
+        </view>
+      </view>
+
+      <!-- 右：日期 -->
+      <view class="wcard__side">
+        <text wx:if="{{item.dateText}}" class="wcard__date">📅 {{item.dateText}}</text>
+        <text wx:if="{{item.daysText}}" class="wcard__days wcard__days--{{item.urgency}}">{{item.daysText}}</text>
+        <text wx:if="{{item.priceText}}" class="wcard__price">{{item.priceText}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="wh__empty" wx:else>
+    <view class="empty">
+      <view class="empty__sky">
+        <text class="empty__cloud">☁</text>
+        <view class="empty__row"><text class="empty__spark">✦</text><text class="empty__heart">♡</text><text class="empty__spark">✦</text></view>
+      </view>
+      <text class="empty__title">{{showArchived ? '心愿墙还是空的' : '还没有心愿'}}</text>
+      <view class="empty__desc">
+        <text>写下你的第一个愿望，</text>
+        <text>让未来变得值得期待。</text>
+      </view>
+      <view class="empty__btn" bindtap="onFab">＋ 新建心愿</view>
+      <text class="empty__quote">所有美好的生活，都曾经只是一个愿望。</text>
+    </view>
+  </view>
+
+  <view class="wh__fab" bindtap="onFab">＋</view>
+</view>
+
+<!-- ===== 模板选择 ===== -->
+<view class="mask" wx:if="{{templateOpen}}" bindtap="onTemplateClose">
+  <view class="sheet" catchtap="onSheetStop">
+    <view class="sheet__head">
+      <text class="sheet__title">从模板开始</text>
+      <text class="sheet__close" catchtap="onTemplateClose">✕</text>
+    </view>
+    <view class="tpl">
+      <view class="tpl__item" data-id="__blank__" catchtap="onBlankWish">
+        <text class="tpl__icon">✨</text>
+        <text class="tpl__name">空白心愿</text>
+        <text class="tpl__desc">从零开始创建</text>
+      </view>
+      <view
+        wx:for="{{templates}}"
+        wx:key="id"
+        class="tpl__item"
+        data-id="{{item.id}}"
+        catchtap="onTemplatePick"
+      >
+        <text class="tpl__icon">{{item.icon}}</text>
+        <text class="tpl__name">{{item.name}}</text>
+        <text class="tpl__desc">{{item.subTasks.length ? item.subTasks.length + ' 个步骤' : item.desc}}</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- ===== 心愿编辑器 ===== -->
+<view class="mask mask--full" wx:if="{{editorOpen}}">
+  <view class="editor" catchtap="onSheetStop">
+    <view class="editor__head">
+      <text class="editor__close" catchtap="onEditorClose">✕</text>
+      <text class="editor__title">{{editorMode === 'create' ? '新建心愿' : '编辑心愿'}}</text>
+      <text class="editor__save" catchtap="onEditorSave">保存</text>
+    </view>
+
+    <scroll-view class="editor__body" scroll-y enhanced show-scrollbar="{{false}}">
+      <!-- 名称 -->
+      <input class="ei__title" value="{{draft.title}}" placeholder="心愿名称" data-key="title" bindinput="onDraftInput" />
+
+      <!-- 为什么想实现它 -->
+      <view class="ei__label">为什么想实现它？</view>
+      <textarea class="ei__textarea" value="{{draft.reason}}" placeholder="因为我想去一个更大的城市，看看不一样的生活……" data-key="reason" bindinput="onDraftInput" />
+
+      <!-- 分类 -->
+      <view class="ei__label">分类</view>
+      <view class="ei__wrap">
+        <view
+          wx:for="{{categories}}"
+          wx:key="id"
+          class="ei__chip {{draft.categoryId === item.id ? 'is-active' : ''}}"
+          style="{{draft.categoryId === item.id ? 'background:' + item.color + ';color:#fff;' : 'color:' + item.color + ';'}}"
+          data-key="categoryId"
+          data-v="{{item.id}}"
+          catchtap="onDraftPick"
+        >{{item.icon}} {{item.name}}</view>
+      </view>
+
+      <!-- 状态 -->
+      <view class="ei__label">状态（状态流）</view>
+      <view class="ei__wrap">
+        <view
+          wx:for="{{statuses}}"
+          wx:key="id"
+          class="ei__chip {{draft.statusId === item.id ? 'is-active' : ''}}"
+          style="{{draft.statusId === item.id ? 'background:' + item.color + ';color:#fff;' : 'color:' + item.color + ';'}}"
+          data-key="statusId"
+          data-v="{{item.id}}"
+          catchtap="onDraftPick"
+        >{{item.name}}</view>
+      </view>
+
+      <!-- 心动值 -->
+      <view class="ei__label">心动值</view>
+      <view class="ei__stars">
+        <text
+          wx:for="{{[1,2,3,4,5]}}"
+          wx:for-item="s"
+          wx:key="*this"
+          class="ei__star {{draft.star >= s ? 'is-on' : ''}}"
+          data-v="{{s}}"
+          catchtap="onStarPick"
+        >★</text>
+      </view>
+
+      <!-- 进度模式 -->
+      <view class="ei__label">进度方式</view>
+      <view class="ei__wrap">
+        <view class="ei__chip {{draft.progressMode === 'checklist' ? 'is-active' : ''}}" data-key="progressMode" data-v="checklist" catchtap="onDraftPick">勾选清单</view>
+        <view class="ei__chip {{draft.progressMode === 'counter' ? 'is-active' : ''}}" data-key="progressMode" data-v="counter" catchtap="onDraftPick">计数器</view>
+        <view class="ei__chip {{draft.progressMode === 'bar' ? 'is-active' : ''}}" data-key="progressMode" data-v="bar" catchtap="onDraftPick">进度条</view>
+        <view class="ei__chip {{draft.progressMode === 'percent' ? 'is-active' : ''}}" data-key="progressMode" data-v="percent" catchtap="onDraftPick">百分比</view>
+      </view>
+
+      <!-- 目标值 / 当前值（非清单模式） -->
+      <view class="ei__two" wx:if="{{draft.progressMode !== 'checklist'}}">
+        <view class="ei__field">
+          <text class="ei__field-label">目标值</text>
+          <input class="ei__input" type="digit" value="{{draft.targetText}}" data-key="targetText" bindinput="onDraftInput" />
+        </view>
+        <view class="ei__field">
+          <text class="ei__field-label">当前值</text>
+          <input class="ei__input" type="digit" value="{{draft.currentText}}" data-key="currentText" bindinput="onDraftInput" />
+        </view>
+      </view>
+
+      <!-- 子任务（多级） -->
+      <view wx:if="{{draft.progressMode === 'checklist'}}">
+        <view class="ei__label">
+          子任务
+          <text class="ei__label-extra">{{draftSubStat.done}}/{{draftSubStat.total}}</text>
+        </view>
+        <view class="sub">
+          <block wx:for="{{draft.subTasks}}" wx:key="id">
+            <template is="subtask" data="{{item: item}}" />
+          </block>
+        </view>
+        <view class="ei__add" catchtap="onSubAdd">＋ 添加子任务</view>
+      </view>
+
+      <!-- 自定义字段 -->
+      <view class="ei__label">自定义字段</view>
+      <view class="ei__fields">
+        <view wx:for="{{fields}}" wx:key="id" class="ei__field-row">
+          <text class="ei__field-label">
+            {{item.name}}<text wx:if="{{item.required}}" class="ei__req">*</text>
+          </text>
+          <input
+            wx:if="{{item.type === 'text' || item.type === 'link'}}"
+            class="ei__input"
+            value="{{draft.fieldValues[item.id]}}"
+            placeholder="请输入"
+            data-id="{{item.id}}"
+            bindinput="onFieldInput"
+          />
+          <input
+            wx:elif="{{item.type === 'number' || item.type === 'money' || item.type === 'star'}}"
+            class="ei__input"
+            type="digit"
+            value="{{draft.fieldValues[item.id]}}"
+            placeholder="{{item.type === 'money' ? '元' : '数字'}}"
+            data-id="{{item.id}}"
+            bindinput="onFieldInput"
+          />
+          <picker
+            wx:elif="{{item.type === 'date'}}"
+            mode="date"
+            value="{{draft.fieldValues[item.id]}}"
+            data-id="{{item.id}}"
+            bindchange="onFieldInput"
+          >
+            <view class="ei__input ei__input--pick">{{draft.fieldValues[item.id] || '选择日期'}}</view>
+          </picker>
+          <picker
+            wx:elif="{{item.type === 'select'}}"
+            mode="selector"
+            range="{{item.options}}"
+            data-id="{{item.id}}"
+            bindchange="onFieldSelect"
+          >
+            <view class="ei__input ei__input--pick">{{draft.fieldValues[item.id] || '请选择'}}</view>
+          </picker>
+          <switch
+            wx:elif="{{item.type === 'checkbox'}}"
+            checked="{{draft.fieldValues[item.id] === 'true'}}"
+            data-id="{{item.id}}"
+            bindchange="onFieldInput"
+          />
+        </view>
+      </view>
+
+      <!-- 基础信息 -->
+      <view class="ei__two">
+        <view class="ei__field">
+          <text class="ei__field-label">预估花费（元）</text>
+          <input class="ei__input" type="digit" value="{{draft.priceText}}" placeholder="0" data-key="priceText" bindinput="onDraftInput" />
+        </view>
+        <view class="ei__field">
+          <text class="ei__field-label">期望日期</text>
+          <picker mode="date" value="{{draft.targetDateText}}" bindchange="onDatePick">
+            <view class="ei__input ei__input--pick">{{draft.targetDateText || '不限'}}</view>
+          </picker>
+          <text wx:if="{{draftDaysText}}" class="ei__days">{{draftDaysText}}</text>
+        </view>
+      </view>
+
+      <view class="ei__field">
+        <text class="ei__field-label">链接</text>
+        <input class="ei__input" value="{{draft.link}}" placeholder="商品/攻略链接" data-key="link" bindinput="onDraftInput" />
+      </view>
+
+      <view class="ei__field">
+        <text class="ei__field-label">标签（空格分隔）</text>
+        <input class="ei__input" value="{{draft.tagsText}}" placeholder="如：旅行 夏天" data-key="tagsText" bindinput="onDraftInput" />
+      </view>
+
+      <view class="ei__field">
+        <text class="ei__field-label">备注</text>
+        <textarea class="ei__textarea" value="{{draft.note}}" placeholder="想说的话…" data-key="note" bindinput="onDraftInput" />
+      </view>
+
+      <!-- 高级：周期 / 预算联动 / 私密 -->
+      <view class="ei__label">高级</view>
+      <view class="ei__switch-row">
+        <text class="ei__switch-text">周期心愿（完成后自动开启新一轮）</text>
+        <switch checked="{{draft.cycleEnabled}}" data-key="cycleEnabled" bindchange="onDraftSwitch" />
+      </view>
+      <view class="ei__wrap" wx:if="{{draft.cycleEnabled}}">
+        <view class="ei__chip {{draft.cyclePeriod === 'week' ? 'is-active' : ''}}" data-key="cyclePeriod" data-v="week" catchtap="onDraftPick">每周</view>
+        <view class="ei__chip {{draft.cyclePeriod === 'month' ? 'is-active' : ''}}" data-key="cyclePeriod" data-v="month" catchtap="onDraftPick">每月</view>
+        <view class="ei__chip {{draft.cyclePeriod === 'quarter' ? 'is-active' : ''}}" data-key="cyclePeriod" data-v="quarter" catchtap="onDraftPick">每季</view>
+        <view class="ei__chip {{draft.cyclePeriod === 'year' ? 'is-active' : ''}}" data-key="cyclePeriod" data-v="year" catchtap="onDraftPick">每年</view>
+      </view>
+
+      <view class="ei__field">
+        <text class="ei__field-label">预算联动（关联记账分类）</text>
+        <input class="ei__input" value="{{draft.budgetCategory}}" placeholder="如：购物" data-key="budgetCategory" bindinput="onDraftInput" />
+      </view>
+      <view class="ei__field" wx:if="{{draft.budgetCategory}}">
+        <text class="ei__field-label">月度预算（元）</text>
+        <input class="ei__input" type="digit" value="{{draft.budgetMonthlyText}}" placeholder="0" data-key="budgetMonthlyText" bindinput="onDraftInput" />
+      </view>
+
+      <view class="ei__switch-row">
+        <text class="ei__switch-text">私密心愿</text>
+        <switch checked="{{draft.isPrivate}}" data-key="isPrivate" bindchange="onDraftSwitch" />
+      </view>
+      <view class="ei__switch-row">
+        <text class="ei__switch-text">置顶</text>
+        <switch checked="{{draft.isPinned}}" data-key="isPinned" bindchange="onDraftSwitch" />
+      </view>
+
+      <view class="ei__add" catchtap="onSaveAsTemplate">📦 另存为模板</view>
+      <view class="ei__placeholder"></view>
+    </scroll-view>
+  </view>
+</view>
+
+<!-- ===== 设置：分类 / 状态 / 字段 ===== -->
+<view class="mask" wx:if="{{settingsOpen}}" bindtap="onSettingsClose">
+  <view class="sheet" catchtap="onSheetStop">
+    <view class="sheet__head">
+      <text class="sheet__title">自定义</text>
+      <text class="sheet__close" catchtap="onSettingsClose">✕</text>
+    </view>
+    <view class="seg">
+      <text class="seg__item {{settingsTab === 'category' ? 'is-active' : ''}}" data-tab="category" catchtap="onSettingsTab">分类</text>
+      <text class="seg__item {{settingsTab === 'status' ? 'is-active' : ''}}" data-tab="status" catchtap="onSettingsTab">状态流</text>
+      <text class="seg__item {{settingsTab === 'field' ? 'is-active' : ''}}" data-tab="field" catchtap="onSettingsTab">字段</text>
+    </view>
+
+    <scroll-view class="sheet__body" scroll-y>
+      <!-- 分类 -->
+      <block wx:if="{{settingsTab === 'category'}}">
+        <view wx:for="{{categories}}" wx:key="id" class="cfg">
+          <view class="cfg__dot" style="background: {{item.color}};"></view>
+          <view class="cfg__main">
+            <text class="cfg__name">{{item.icon}} {{item.name}}</text>
+            <text class="cfg__desc">{{item.isPrivate ? '私密' : '公开'}}</text>
+          </view>
+          <view class="cfg__act" data-id="{{item.id}}" catchtap="onCatTogglePrivate">🔒</view>
+          <view class="cfg__act" data-id="{{item.id}}" catchtap="onCatRemove">✕</view>
+        </view>
+        <view class="sheet__add" catchtap="onCatAdd">＋ 新建分类</view>
+      </block>
+
+      <!-- 状态 -->
+      <block wx:elif="{{settingsTab === 'status'}}">
+        <view wx:for="{{statuses}}" wx:key="id" class="cfg">
+          <view class="cfg__dot" style="background: {{item.color}};"></view>
+          <view class="cfg__main">
+            <text class="cfg__name">{{item.name}}</text>
+            <text class="cfg__desc">{{item.kind}}</text>
+          </view>
+          <view class="cfg__act" data-id="{{item.id}}" catchtap="onStatusKind">语义</view>
+          <view class="cfg__act" data-id="{{item.id}}" catchtap="onStatusRemove">✕</view>
+        </view>
+        <view class="sheet__add" catchtap="onStatusAdd">＋ 新建状态</view>
+      </block>
+
+      <!-- 字段 -->
+      <block wx:else>
+        <view wx:for="{{fields}}" wx:key="id" class="cfg">
+          <view class="cfg__main">
+            <text class="cfg__name">{{item.name}}<text wx:if="{{item.required}}" class="ei__req">*</text></text>
+            <text class="cfg__desc">{{item.type}}</text>
+          </view>
+          <view class="cfg__act" data-id="{{item.id}}" data-dir="-1" catchtap="onFieldMove">↑</view>
+          <view class="cfg__act" data-id="{{item.id}}" data-dir="1" catchtap="onFieldMove">↓</view>
+          <view class="cfg__act" data-id="{{item.id}}" catchtap="onFieldToggleRequired">必填</view>
+          <view class="cfg__act" data-id="{{item.id}}" catchtap="onFieldRemove">✕</view>
+        </view>
+        <view class="sheet__add" catchtap="onFieldAdd">＋ 新建字段</view>
+      </block>
+    </scroll-view>
+  </view>
+</view>
+
+<!-- ===== 年度报告 ===== -->
+<view class="mask" wx:if="{{reportOpen}}" bindtap="onReportClose">
+  <view class="sheet" catchtap="onSheetStop">
+    <view class="sheet__head">
+      <text class="sheet__title">年度报告</text>
+      <text class="sheet__close" catchtap="onReportClose">✕</text>
+    </view>
+    <view class="rp__year">
+      <text class="rp__year-arrow" data-dir="-1" catchtap="onYearChange">‹</text>
+      <text class="rp__year-text">{{reportYear}}</text>
+      <text class="rp__year-arrow" data-dir="1" catchtap="onYearChange">›</text>
+    </view>
+    <scroll-view class="sheet__body" scroll-y>
+      <view class="rp__grid">
+        <view class="rp__cell"><text class="rp__num">{{report.achieved}}</text><text class="rp__label">已实现</text></view>
+        <view class="rp__cell"><text class="rp__num">{{report.dropped}}</text><text class="rp__label">已放弃</text></view>
+        <view class="rp__cell"><text class="rp__num">{{report.doing}}</text><text class="rp__label">进行中</text></view>
+        <view class="rp__cell"><text class="rp__num rp__num--money">{{stat.spent}}</text><text class="rp__label">总花费</text></view>
+      </view>
+      <view class="rp__line">平均实现周期：{{report.avgDays}} 天</view>
+
+      <view class="rp__label">月度实现分布</view>
+      <view class="rp__months">
+        <view wx:for="{{report.byMonth}}" wx:key="*this" class="rp__month">
+          <view class="rp__month-bar" style="height: {{item * 18 + 4}}rpx;"></view>
+          <text class="rp__month-text">{{index + 1}}</text>
+        </view>
+      </view>
+
+      <view class="rp__label">分类分布</view>
+      <view wx:for="{{report.byCategory}}" wx:key="id" class="rp__cat">
+        <text class="rp__cat-icon">{{item.icon}}</text>
+        <text class="rp__cat-name">{{item.name}}</text>
+        <view class="rp__cat-bar"><view class="rp__cat-fill" style="width: {{item.count * 30}}rpx; background: {{item.color}};"></view></view>
+        <text class="rp__cat-num">{{item.count}}</text>
+      </view>
+    </scroll-view>
+  </view>
+</view>
+
+<!-- ===== 归档复盘 ===== -->
+<view class="mask" wx:if="{{reviewOpen}}" bindtap="onReviewCancel">
+  <view class="sheet" catchtap="onSheetStop">
+    <view class="sheet__head">
+      <text class="sheet__title">归档复盘</text>
+      <text class="sheet__close" catchtap="onReviewCancel">✕</text>
+    </view>
+    <view class="rv">
+      <textarea class="rv__input" value="{{reviewText}}" placeholder="写点复盘：为什么实现/没实现？下次怎么改进？" bindinput="onReviewInput" />
+      <view class="rv__btn" catchtap="onReviewConfirm">归档</view>
+    </view>
+  </view>
+</view>
+
+<!-- ===== 我的愿景 ===== -->
+<view class="mask" wx:if="{{visionOpen}}" bindtap="onVisionClose">
+  <view class="sheet" catchtap="onSheetStop">
+    <view class="sheet__head">
+      <text class="sheet__title">✦ 我的愿景</text>
+      <text class="sheet__close" catchtap="onVisionClose">✕</text>
+    </view>
+    <view class="vision-ed">
+      <text class="vision-ed__ask">2027，我希望成为怎样的人？</text>
+      <textarea class="vision-ed__input" value="{{visionDraft}}" bindinput="onVisionInput"
+        placeholder="我希望自己可以……&#10;&#10;拥有喜欢的工作&#10;去喜欢的城市&#10;遇见喜欢的人&#10;拥有健康的生活&#10;有能力照顾自己和家人"
+        maxlength="800" />
+      <text class="vision-ed__foot">未来的我，正在慢慢靠近这里。</text>
+      <view class="vision-ed__btn" catchtap="onVisionSave">保存愿景</view>
+    </view>
+  </view>
+</view>
+
+<!-- ===== 愿望实现庆祝 ===== -->
+<view class="mask mask--center" wx:if="{{celebrateOpen}}" bindtap="onCelebrateClose">
+  <view class="celebrate" catchtap="onSheetStop">
+    <view class="celebrate__stars">
+      <text class="celebrate__spark s1">✦</text>
+      <text class="celebrate__spark s2">✧</text>
+      <text class="celebrate__spark s3">✦</text>
+    </view>
+    <text class="celebrate__emoji">✨</text>
+    <text class="celebrate__title">愿望实现啦</text>
+    <view class="celebrate__desc">
+      <text>曾经想过很多次的事情，</text>
+      <text>终于成为了现实。</text>
+    </view>
+    <text class="celebrate__date">{{celebrate.date}}</text>
+    <text class="celebrate__wish">「{{celebrate.title}}」</text>
+    <view class="celebrate__btn" catchtap="onCelebrateClose">留下这一刻</view>
+  </view>
+</view>
+
+<!-- 子任务递归模板 -->
+<template name="subtask">
+  <view class="sub__node {{item.done ? 'is-done' : ''}}">
+    <view class="sub__row">
+      <view class="sub__check" data-id="{{item.id}}" catchtap="onSubToggle">{{item.done ? '☑' : '☐'}}</view>
+      <input class="sub__title" value="{{item.title}}" data-id="{{item.id}}" bindinput="onSubTitle" />
+      <view class="sub__act" data-id="{{item.id}}" catchtap="onSubAddChild">＋</view>
+      <view class="sub__act" data-id="{{item.id}}" catchtap="onSubRemove">✕</view>
+    </view>
+    <view wx:if="{{item.children.length}}" class="sub__children">
+      <block wx:for="{{item.children}}" wx:key="id">
+        <template is="subtask" data="{{item: item}}" />
+      </block>
+    </view>
+  </view>
+</template>

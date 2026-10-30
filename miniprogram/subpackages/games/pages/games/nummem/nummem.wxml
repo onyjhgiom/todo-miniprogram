@@ -1,0 +1,14 @@
+<game-shell title="{{title}}" timeText="{{timeText}}" statText="{{statText}}" paused="{{paused}}"
+  bind:back="onBack" bind:reset="onReset" bind:hint="onHint" bind:home="onHome" bind:pause="onPause">
+  <view class="nm">
+    <view class="nm__show">
+      <text wx:if="{{phase==='show'}}" class="nm__num serif">{{show}}</text>
+      <text wx:else class="nm__ph serif">{{input || '请输入'}}</text>
+    </view>
+    <text class="t-xs muted-2 center mt-16">{{phase==='show' ? '记住这串数字…' : '凭记忆输入刚才的数字'}}</text>
+    <view class="nm__pad">
+      <view wx:for="{{[1,2,3,4,5,6,7,8,9,0]}}" wx:key="*this" class="nm__n" data-n="{{item}}" bindtap="onNum">{{item}}</view>
+      <view class="nm__n nm__n--del" bindtap="onDel">⌫</view>
+    </view>
+  </view>
+</game-shell>

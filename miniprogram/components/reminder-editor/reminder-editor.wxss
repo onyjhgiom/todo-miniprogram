@@ -1,0 +1,118 @@
+/* reminder-editor */
+.reminder-editor { padding: 8rpx 0; }
+.reminder-list { display: flex; flex-direction: column; gap: 8rpx; }
+.reminder-item {
+  display: flex; flex-direction: column; gap: 4rpx;
+  padding: 14rpx 16rpx;
+  background: var(--color-bg-soft);
+  border-radius: 12rpx;
+}
+.reminder-row { display: flex; align-items: center; gap: 12rpx; }
+
+/* ---- 重复周期 / 提醒方式 配置行 ---- */
+.reminder-config {
+  display: flex; align-items: center;
+  padding-left: 40rpx;
+}
+.reminder-config__picker { flex: 1; }
+.reminder-config__value {
+  display: flex; align-items: center; gap: 12rpx;
+  padding: 8rpx 4rpx;
+}
+.reminder-config__label {
+  font-size: 20rpx; color: var(--color-text-mute);
+  background: var(--color-bg);
+  padding: 2rpx 10rpx;
+  border-radius: 999rpx;
+}
+.reminder-config__text { font-size: 22rpx; color: var(--color-text); }
+.reminder-config__arrow {
+  font-size: 26rpx; color: var(--color-text-mute);
+  transform: rotate(90deg);
+  margin-left: auto;
+}
+.reminder-config__divider {
+  width: 2rpx; height: 24rpx;
+  background: var(--color-border);
+  margin: 0 16rpx;
+}
+.reminder-icon { font-size: 28rpx; }
+.reminder-picker { flex: 1; min-width: 0; }
+.reminder-time { font-size: 26rpx; color: var(--color-text); font-weight: 500; }
+.reminder-sent {
+  font-size: 20rpx; color: var(--color-success);
+  background: var(--color-primary-soft);
+  padding: 4rpx 10rpx;
+  border-radius: 999rpx;
+}
+.reminder-del {
+  width: 40rpx; height: 40rpx;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-text-mute); font-size: 32rpx;
+}
+.reminder-del:active { color: var(--color-danger); }
+.reminder-empty {
+  text-align: center; padding: 32rpx;
+  color: var(--color-text-mute); font-size: 24rpx;
+}
+.reminder-add {
+  display: flex; align-items: center; gap: 8rpx;
+  padding: 16rpx;
+  border: 2rpx dashed var(--color-border);
+  border-radius: 12rpx;
+  margin-top: 12rpx;
+  color: var(--color-primary);
+  font-size: 24rpx;
+  justify-content: center;
+  transition: all 200ms;
+}
+.reminder-add:active { background: var(--color-primary-soft); }
+.reminder-add-icon {
+  width: 36rpx; height: 36rpx;
+  border-radius: 50%;
+  background: var(--color-primary-soft);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28rpx;
+}
+
+/* ---- 微信通知授权开关 ---- */
+.reminder-sub {
+  display: flex; align-items: center; gap: 12rpx;
+  padding: 16rpx;
+  margin-top: 12rpx;
+  background: var(--color-bg-soft);
+  border-radius: 12rpx;
+  transition: background 200ms;
+}
+.reminder-sub:active { background: var(--color-primary-soft); }
+.reminder-sub.is-busy { opacity: 0.55; }
+.reminder-sub__icon { font-size: 28rpx; }
+.reminder-sub__body {
+  display: flex; flex-direction: column; gap: 2rpx;
+  flex: 1; min-width: 0;
+}
+.reminder-sub__title {
+  font-size: 26rpx; color: var(--color-text); font-weight: 500;
+}
+.reminder-sub__desc {
+  font-size: 20rpx; color: var(--color-text-mute);
+}
+.reminder-sub.is-on .reminder-sub__desc { color: var(--color-primary); }
+.reminder-sub__switch {
+  width: 76rpx; height: 44rpx;
+  padding: 4rpx;
+  border-radius: 999rpx;
+  background: var(--color-border);
+  display: flex; align-items: center;
+  flex-shrink: 0;
+  transition: background 200ms;
+}
+.reminder-sub.is-on .reminder-sub__switch { background: var(--color-primary); }
+.reminder-sub__knob {
+  width: 36rpx; height: 36rpx;
+  border-radius: 50%;
+  background: var(--color-bg-elevated);
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.16);
+  transition: transform 200ms;
+}
+.reminder-sub.is-on .reminder-sub__knob { transform: translateX(32rpx); }

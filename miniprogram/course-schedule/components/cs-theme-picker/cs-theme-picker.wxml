@@ -1,0 +1,38 @@
+<!-- 入口按钮 -->
+<view class="cs-tp-entry" bindtap="open" hover-class="cs-tp-entry-hover" hover-start-time="0" hover-stay-time="60">
+  <text class="cs-tp-entry-icon">🎨</text>
+  <text class="cs-tp-entry-text" wx:if="{{label}}">{{label}}</text>
+</view>
+
+<!-- 选择弹层 -->
+<view class="cs-tp-mask" wx:if="{{visible}}" bindtap="close">
+  <view class="cs-tp-sheet" catchtap="noop">
+    <view class="cs-tp-head">
+      <view class="cs-tp-head-left">
+        <view class="cs-tp-title">课表皮肤</view>
+        <view class="cs-tp-sub">当前 · {{currentName}}</view>
+      </view>
+      <view class="cs-tp-close" bindtap="close" hover-class="cs-tp-entry-hover">✕</view>
+    </view>
+
+    <view class="cs-tp-grid">
+      <view
+        class="cs-tp-opt {{item.key === currentKey ? 'is-on' : ''}}"
+        wx:for="{{themes}}"
+        wx:key="key"
+        data-key="{{item.key}}"
+        bindtap="pick"
+        hover-class="cs-tp-opt-hover"
+        hover-start-time="0"
+        hover-stay-time="60">
+        <view class="cs-tp-swatch" style="background: {{item.preview}};">
+          <view class="cs-tp-dot" style="background: {{item.dot}};"></view>
+          <view class="cs-tp-tag">{{item.dark ? '深色' : '浅色'}}</view>
+        </view>
+        <view class="cs-tp-name">{{item.name}}</view>
+        <view class="cs-tp-desc">{{item.desc}}</view>
+        <view class="cs-tp-check" wx:if="{{item.key === currentKey}}">✓</view>
+      </view>
+    </view>
+  </view>
+</view>

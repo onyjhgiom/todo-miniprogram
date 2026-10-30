@@ -1,0 +1,6 @@
+/* pages/love/couple/couple.wxss */
+@import "../../styles/love-common.wxss";
+@import "../../styles/love-duo.wxss";
+
+/* 头部统计在只有 1 项时也能撑住宽度 */
+.ay-hero__stat-n { font-size: 30rpx; }

@@ -1,0 +1,24 @@
+
+.hero { padding: 40rpx 32rpx; }
+.hero .tape { top: -10rpx; left: 50%; margin-left: -66rpx; }
+
+.stat { gap: 20rpx; }
+.stat__cell { flex: 1; border-radius: var(--r-md); padding: 24rpx 12rpx; display: flex; flex-direction: column; align-items: center; }
+
+.cats { width: 100%; white-space: nowrap; }
+.cats__inner { display: inline-flex; gap: 16rpx; padding: 4rpx 2rpx; }
+.cats__chip { height: 60rpx; padding: 0 30rpx; font-size: 26rpx; border-radius: 999rpx; }
+
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24rpx; }
+.foot { padding: 0 24rpx; line-height: 1.6; }
+.gcard { display: flex; flex-direction: column; min-height: 250rpx; }
+.gcard--clay { border-color: rgba(190,111,68,.3); }
+.gcard--gold { border-color: rgba(201,162,94,.3); }
+.gcard--mint { border-color: rgba(169,204,182,.5); }
+.gcard__ic {
+  width: 84rpx; height: 84rpx; border-radius: 22rpx;
+  display: flex; align-items: center; justify-content: center; font-size: 46rpx;
+  background: var(--card-2); border: 2rpx solid var(--line);
+}
+.gcard__diff { height: 40rpx; font-size: 20rpx; }
+.gcard__play { gap: 6rpx; margin-top: auto; }

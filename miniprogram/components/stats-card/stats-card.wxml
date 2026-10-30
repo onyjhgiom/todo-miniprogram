@@ -1,0 +1,49 @@
+<!--components/stats-card/stats-card.wxml-->
+<view class="hero {{(theme === 'dark' || theme === 'rose' || theme === 'light') ? 'hero--dark' : ''}} {{theme === 'deepsea' ? 'hero--deepsea' : ''}} {{theme === 'liquid' ? 'hero--glass' : ''}}" style="{{heroBgStyle}}">
+  <!-- 装饰光斑（缓慢漂移） -->
+  <view class="hero__halo hero__halo--1"></view>
+  <view class="hero__halo hero__halo--2"></view>
+  <!-- 高光扫过层 -->
+  <view class="hero__shine"></view>
+
+  <!-- 深海蓝金：面板底部的极淡上海天际线轮廓 + 暖金地平线（城市环境氛围，非旅游式元素） -->
+  <block wx:if="{{theme === 'deepsea'}}">
+    <view class="hero__skyline"></view>
+    <view class="hero__horizon"></view>
+  </block>
+
+  <view class="hero__head">
+    <view>
+      <view class="hero__greet">{{greet}} · {{dateText}}</view>
+      <view class="hero__title">你的待办清单</view>
+      <view class="hero__sub" wx:if="{{theme === 'deepsea'}}">把今天该做的事，一件一件完成。</view>
+    </view>
+    <view class="hero__streak" wx:if="{{streak > 0}}">
+      <text class="hero__streak-icon">▲</text>
+      <text class="hero__streak-num font-num">{{streak}}</text>
+      <text class="hero__streak-unit">天连续</text>
+    </view>
+  </view>
+
+  <view class="hero__stats">
+    <view class="hero__stat hero__stat--main">
+      <view class="hero__stat-num font-num">{{active}}</view>
+      <view class="hero__stat-label">进行中</view>
+    </view>
+    <view class="hero__divider"></view>
+    <view class="hero__stat">
+      <view class="hero__stat-num font-num">{{todayDone}}</view>
+      <view class="hero__stat-label">今日完成</view>
+    </view>
+    <view class="hero__divider"></view>
+    <view class="hero__stat">
+      <view class="hero__stat-num font-num">{{weekDone}}</view>
+      <view class="hero__stat-label">本周完成</view>
+    </view>
+    <view class="hero__divider"></view>
+    <view class="hero__stat">
+      <view class="hero__stat-num font-num">{{totalDone}}</view>
+      <view class="hero__stat-label">已完成</view>
+    </view>
+  </view>
+</view>

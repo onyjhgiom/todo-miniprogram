@@ -1,0 +1,31 @@
+<view class="tpl-page themed" data-theme="{{theme}}" style="{{themeStyle}};{{bgStyle}}">
+  <!-- 电影级舞台背景：随主题切换场景图/场景动画（src 为空时走 CSS 场景） -->
+  <fx-stage mode="{{fxMode}}" src="{{fxSrc}}" full="{{fxFull}}" rays="{{true}}" dust="{{false}}" topglow="{{true}}" level="{{fxLevel}}" />
+  <view class="tpl-hero" style="background: {{heroGradient}};">
+    <view class="tpl-hero-title">模板库</view>
+    <view class="tpl-hero-sub">选择模板一键生成任务列表</view>
+  </view>
+
+  <!-- 系统模板：按分类分组 -->
+  <view class="tpl-section" wx:for="{{groups}}" wx:for-item="group" wx:key="category">
+    <view class="tpl-section-title">{{group.category}}</view>
+    <template-picker templates="{{group.items}}" bind:apply="onApply" />
+  </view>
+
+  <view class="tpl-section" wx:if="{{userTpls.length > 0}}">
+    <view class="tpl-section-title">我的模板</view>
+    <template-picker templates="{{userTpls}}" bind:apply="onApply" bind:delete="onDelete" />
+  </view>
+
+  <view wx:if="{{groups.length === 0 && userTpls.length === 0 && !loading}}" class="tpl-empty">
+    <empty-state icon="📚" title="暂无模板" subtitle="点击右下角新建你的第一个自定义模板" />
+  </view>
+
+  <view class="tpl-footer" wx:if="{{groups.length === 0 && !loading}}">
+    <view class="tpl-footer-btn" hover-class="tap-press" hover-stay-time="60" bindtap="onSeed">导入系统模板</view>
+  </view>
+
+  <view class="tpl-fab" hover-class="tap-press" hover-stay-time="60" bindtap="onNew">
+    <text>+</text>
+  </view>
+</view>

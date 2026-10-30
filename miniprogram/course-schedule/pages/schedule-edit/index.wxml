@@ -1,0 +1,199 @@
+<!-- 根容器绑定皮肤：cs-theme-* 类一变，整页 CSS 变量级联刷新 -->
+<view class="cs-root cs-theme-{{csTheme}}">
+
+  <view class="page">
+
+    <!-- 页头 -->
+    <view class="page-head">
+      <view class="page-head-main">
+        <view class="page-title">课表小助手</view>
+        <view class="page-sub">改课表指令，一句话搞定</view>
+      </view>
+      <cs-theme-picker current="{{csTheme}}" bind:change="onCsThemeChange" />
+    </view>
+
+    <!-- ==================== 对话流 ==================== -->
+    <view class="feed" wx:if="{{feed.length}}">
+
+      <view wx:for="{{feed}}" wx:key="id" wx:for-item="msg" wx:for-index="mi">
+
+        <!-- 用户消息 -->
+        <view class="msg msg-user" wx:if="{{msg.role === 'user'}}">
+          <view class="bubble bubble-user">{{msg.text}}</view>
+        </view>
+
+        <!-- 助手消息 -->
+        <view class="msg msg-ai" wx:else>
+          <view class="ai-avatar">🤖</view>
+          <view class="bubble bubble-ai">
+
+            <!-- 纯文本回答（提问 / 分析 / 建议 / 兜底说明） -->
+            <block wx:if="{{msg.kind === 'text'}}">
+              <view class="ai-text">{{msg.text}}</view>
+            </block>
+
+            <!-- 编辑结果 -->
+            <block wx:else>
+              <view class="ai-text" wx:if="{{msg.text}}">{{msg.text}}</view>
+
+              <!-- 执行成功 -->
+              <block wx:if="{{msg.applied.length}}">
+                <view class="res-title">✅ 已执行 {{msg.applied.length}} 项</view>
+                <view class="line" wx:for="{{msg.applied}}" wx:key="index" wx:for-item="ap">
+                  <view class="dot dot-ok"></view>
+                  <view class="line-text">{{ap.detail || ap.operation}}</view>
+                </view>
+              </block>
+
+              <!-- 需要确认（unknown / 缺参数） -->
+              <block wx:if="{{msg.skipped.length}}">
+                <view class="res-title">⚠️ 需要你确认</view>
+                <view class="ask" wx:for="{{msg.skipped}}" wx:key="index" wx:for-item="sk">
+                  <view class="ask-text">{{sk.reason}}</view>
+                  <view class="ask-btn" bindtap="onOpenAdd" hover-class="btn-hover">新增这门课</view>
+                </view>
+              </block>
+
+              <!-- 二选一 -->
+              <block wx:if="{{msg.candidates.length}}">
+                <view class="res-title">{{msg.question || '这条指令有两种理解，选一个'}}</view>
+                <view
+                  class="candidate"
+                  wx:for="{{msg.candidates}}"
+                  wx:key="index"
+                  wx:for-item="cand"
+                  wx:for-index="ci"
+                  data-mi="{{mi}}"
+                  data-ci="{{ci}}"
+                  bindtap="onPickCandidate"
+                  hover-class="btn-hover">
+                  <view class="candidate-text">{{cand.interpretation}}</view>
+                  <view class="candidate-arrow">›</view>
+                </view>
+              </block>
+
+              <!-- 冲突 -->
+              <block wx:if="{{msg.conflicts.length}}">
+                <view class="res-title">🔴 时间冲突</view>
+                <view class="conflict-item" wx:for="{{msg.conflicts}}" wx:key="index" wx:for-item="cf" wx:for-index="ci">
+                  <view class="conflict-text">{{cf.detail}}（第 {{cf.weeks[0]}}-{{cf.weeks[cf.weeks.length - 1]}} 周）</view>
+                  <view class="conflict-actions" wx:if="{{!cf.done}}">
+                    <view class="mini-btn" data-mi="{{mi}}" data-ci="{{ci}}" bindtap="onKeepBoth">保留两者</view>
+                    <view class="mini-btn mini-btn-danger" data-mi="{{mi}}" data-ci="{{ci}}" bindtap="onOverwrite">删除旧课</view>
+                  </view>
+                  <view class="conflict-done" wx:else>{{cf.done}}</view>
+                </view>
+              </block>
+
+              <view class="note" wx:if="{{msg.note}}">{{msg.note}}</view>
+            </block>
+
+          </view>
+        </view>
+
+      </view>
+
+      <!-- 解析中占位 -->
+      <view class="msg msg-ai" wx:if="{{sending}}">
+        <view class="ai-avatar">🤖</view>
+        <view class="bubble bubble-ai">
+          <view class="typing">
+            <view class="typing-dot"></view>
+            <view class="typing-dot"></view>
+            <view class="typing-dot"></view>
+          </view>
+        </view>
+      </view>
+
+    </view>
+
+    <!-- ==================== 空态引导 ==================== -->
+    <view class="intro" wx:if="{{!feed.length}}">
+      <view class="intro-icon">✏️</view>
+      <view class="intro-title">课表小助手</view>
+      <view class="intro-sub">一句话改课表，说清楚周次与课程就行</view>
+
+      <view class="intro-cards">
+        <view class="intro-card">
+          <view class="intro-card-t">✏️ 改课表</view>
+          <view class="intro-card-d">"第6周周五嵌入式停课"</view>
+        </view>
+        <view class="intro-card">
+          <view class="intro-card-t">📅 调课程</view>
+          <view class="intro-card-d">"操作系统调到周五 5-6 节"</view>
+        </view>
+        <view class="intro-card">
+          <view class="intro-card-t">🏫 换教室</view>
+          <view class="intro-card-d">"把计算机网络教室改成博文北302"</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 对话流底部留白 -->
+    <view class="feed-foot" wx:if="{{feed.length}}"></view>
+
+  </view>
+
+  <!-- ==================== 底部输入栏 ==================== -->
+  <view class="dock">
+    <!-- 示例指令 -->
+    <scroll-view class="chips" scroll-x wx:if="{{!feed.length}}">
+      <view class="chip" wx:for="{{chips}}" wx:key="*this" data-text="{{item}}" bindtap="onChip">{{item}}</view>
+    </scroll-view>
+
+    <view class="composer">
+      <textarea
+        class="input"
+        value="{{input}}"
+        bindinput="onInput"
+        placeholder="比如：第6周周五嵌入式停课"
+        placeholder-class="input-ph"
+        maxlength="200"
+        auto-height
+        show-confirm-bar="{{false}}"
+        confirm-type="send"
+        bindconfirm="onSend" />
+      <view class="composer-bar">
+        <view class="undo-inline {{canUndo ? '' : 'undo-inline-off'}}" bindtap="onUndo">撤销上一步</view>
+        <view class="composer-right">
+          <view class="clear-btn" wx:if="{{feed.length}}" bindtap="onClearFeed">清空</view>
+          <view class="send {{sending ? 'send-off' : ''}}" bindtap="onSend" hover-class="btn-hover">{{sending ? '思考中' : '发送'}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ==================== 新增课程弹层 ==================== -->
+  <view class="mask" wx:if="{{showAdd}}" bindtap="onCancelAdd">
+    <view class="sheet" catchtap="__noop">
+      <view class="sheet-title">新增课程</view>
+      <input
+        class="sheet-input"
+        value="{{addTitle}}"
+        bindinput="onAddTitle"
+        placeholder="课程名"
+        placeholder-class="input-ph"
+        maxlength="15" />
+      <view class="sheet-row">
+        <picker mode="selector" range="{{weekdayOptions}}" value="{{addWeekdayIndex}}" bindchange="onAddWeekday">
+          <view class="sheet-picker">{{weekdayOptions[addWeekdayIndex]}} ▾</view>
+        </picker>
+        <picker mode="selector" range="{{slotOptions}}" value="{{addSlotIndex}}" bindchange="onAddSlot">
+          <view class="sheet-picker">{{slotOptions[addSlotIndex]}} ▾</view>
+        </picker>
+      </view>
+      <view class="sheet-actions">
+        <view class="sheet-btn sheet-btn-ghost" bindtap="onCancelAdd" hover-class="btn-hover">取消</view>
+        <view class="sheet-btn sheet-btn-primary" bindtap="onConfirmAdd" hover-class="btn-hover">确定</view>
+      </view>
+    </view>
+  </view>
+
+  <undo-bar
+    text="{{undoText}}"
+    visible="{{undoVisible}}"
+    duration="{{5000}}"
+    bind:undo="onUndo"
+    bind:close="onUndoClose" />
+
+</view>

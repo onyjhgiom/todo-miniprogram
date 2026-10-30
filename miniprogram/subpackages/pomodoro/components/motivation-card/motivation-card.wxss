@@ -1,0 +1,28 @@
+/* components/motivation-card/motivation-card.wxss
+ * 左右内边距 24u：与 task / focus-stats / streak 卡一致，保证全页卡片文字左边线重合。
+ * 底色比其他卡更淡（0.62）—— 这是「今日激励语」要轻量的刻意安排，不是不一致。
+ * 2026-10-06 收紧：padding 20/28u → 14/24u，圆角 32u → 24u，正文 23u → 20u。 */
+.moti {
+  display: flex;
+  align-items: center;
+  gap: calc(12 * var(--u, 1rpx));
+  box-sizing: border-box;
+  padding: calc(11 * var(--u, 1rpx)) calc(22 * var(--u, 1rpx));
+  border-radius: calc(24 * var(--u, 1rpx));
+  background: rgba(255, 255, 255, 0.62);
+  border: calc(1 * var(--u, 1rpx)) solid rgba(120, 140, 170, 0.08);
+}
+.moti__bar {
+  flex-shrink: 0;
+  width: calc(5 * var(--u, 1rpx));
+  height: calc(21 * var(--u, 1rpx));
+  border-radius: calc(999 * var(--u, 1rpx));
+  background: linear-gradient(180deg, #8298D1, #D9E5FF);
+}
+.moti__tx {
+  flex: 1;
+  font-size: calc(19 * var(--u, 1rpx));
+  line-height: 1.5;
+  letter-spacing: 0;
+  color: #6E7B92;
+}

@@ -1,0 +1,5 @@
+<view class="undo-bar" wx:if="{{visible}}">
+  <view class="undo-text">{{text}}</view>
+  <view class="undo-action" bindtap="onUndo" hover-class="undo-action-hover">撤销</view>
+  <view class="undo-close" bindtap="onClose" hover-class="undo-close-hover">×</view>
+</view>

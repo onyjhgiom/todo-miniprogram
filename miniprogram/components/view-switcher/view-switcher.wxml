@@ -1,0 +1,9 @@
+<view class="view-switcher">
+  <view class="view-track">
+    <view wx:for="{{views}}" wx:key="key" class="view-item {{current === item.key ? 'is-active' : ''}}" bindtap="onSelect" data-key="{{item.key}}">
+      <text class="view-icon">{{item.icon}}</text>
+      <text class="view-label">{{item.label}}</text>
+    </view>
+    <view class="view-thumb" style="transform: translateX({{thumbX}}); width: {{thumbWidth}};"></view>
+  </view>
+</view>

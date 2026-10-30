@@ -1,0 +1,197 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/calendar/calendar",
+    "pages/kanban/kanban",
+    "pages/templates/templates",
+    "pages/settings/settings",
+    "pages/detail/detail",
+    "pages/tools/tools",
+    "pages/note/note",
+    "pages/wish/wish",
+    "pages/ledger/ledger",
+    "pages/memo/memo",
+    "pages/group-reminder/group-reminder",
+    "pages/subscribe-reminder/subscribe-reminder",
+    "pages/todo-panel/todo-panel",
+    "pages/goal-breakdown/goal-breakdown",
+    "pages/year-review/year-review",
+    "pages/profile/profile",
+    "course-schedule/pages/schedule/index",
+    "course-schedule/pages/schedule-import/index",
+    "course-schedule/pages/schedule-edit/index"
+  ],
+  "subpackages": [
+    {
+      "root": "subpackages/games",
+      "pages": [
+        "pages/center/center",
+        "pages/games/huarong/huarong",
+        "pages/games/merge2048/merge2048",
+        "pages/games/sudoku/sudoku",
+        "pages/games/memory/memory",
+        "pages/games/flash/flash",
+        "pages/games/nummem/nummem",
+        "pages/games/puzzle/puzzle",
+        "pages/games/match3/match3",
+        "pages/games/feihualing/feihualing",
+        "pages/games/classicqa/classicqa",
+        "pages/games/point24/point24",
+        "pages/games/idiom/idiom",
+        "pages/games/onestroke/onestroke",
+        "pages/games/schulte/schulte",
+        "pages/games/tetris/tetris",
+        "pages/games/teaser/teaser",
+        "pages/games/breakout/breakout",
+        "pages/games/maze/maze"
+      ]
+    },
+    {
+      "root": "subpackages/travel",
+      "pages": [
+        "pages/index/index",
+        "pages/trip-edit/trip-edit",
+        "pages/trip-detail/trip-detail",
+        "pages/packing/packing",
+        "pages/trip-summary/trip-summary",
+        "pages/inspiration/inspiration"
+      ]
+    },
+    {
+      "root": "subpackages/tools",
+      "pages": [
+        "pages/astro/index",
+        "pages/astro/horoscope",
+        "pages/astro/tarot",
+        "pages/astro/lenormand",
+        "pages/astro/starCalendar",
+        "pages/astro/sisterChat",
+        "pages/astro/meditation",
+        "pages/astro/wish",
+        "pages/astro/treehole",
+        "pages/folklore/index",
+        "pages/folklore/module",
+        "pages/guaxiang/index",
+        "pages/guaxiang/library",
+        "pages/guaxiang/draw/draw",
+        "pages/guaxiang/daily/daily",
+        "pages/civil/civil",
+        "pages/civil/track",
+        "pages/civil/job",
+        "pages/civil/compare",
+        "pages/civil/timeline",
+        "pages/civil/plan",
+        "pages/civil/decision",
+        "pages/asset-ledger/asset-ledger",
+        "pages/wheel/index",
+        "pages/wheel/edit",
+        "pages/wheel/history"
+      ]
+    },
+    {
+      "root": "subpackages/photowall",
+      "pages": [
+        "pages/index/index",
+        "pages/shape/shape",
+        "pages/editor/editor",
+        "pages/detail/detail"
+      ]
+    },
+    {
+      "root": "subpackages/danmaku",
+      "pages": [
+        "pages/editor/editor",
+        "pages/stage/stage",
+        "pages/history/history"
+      ]
+    },
+    {
+      "root": "subpackages/recruit",
+      "pages": [
+        "pages/recruit/recruit",
+        "pages/recruit/detail",
+        "pages/recruit/resource",
+        "pages/recruit/calendar",
+        "pages/recruit/analysis",
+        "pages/recruit/openings",
+        "pages/recruit/resume"
+      ]
+    },
+    {
+      "root": "subpackages/love",
+      "pages": [
+        "pages/index/index",
+        "pages/couple/couple",
+        "pages/letter/letter",
+        "pages/mood/mood",
+        "pages/anniv/anniv",
+        "pages/plan/plan",
+        "pages/moment/moment",
+        "pages/cycle/cycle",
+        "pages/makeup/makeup",
+        "pages/outfit/outfit",
+        "pages/wardrobe/wardrobe",
+        "pages/love/love",
+        "pages/memory/memory",
+        "pages/profile/profile",
+        "pages/share/share",
+        "pages/skin/skin"
+      ]
+    },
+    {
+      "root": "subpackages/pomodoro",
+      "pages": [
+        "pages/index/index"
+      ]
+    },
+    {
+      "root": "subpackages/toolbox",
+      "pages": [
+        "pages/tool/tool",
+        "pages/little-helper/little-helper",
+        "pages/important-day/important-day"
+      ]
+    }
+  ],
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于在地图模式展示行程地点，以及选择目的地时定位"
+    }
+  },
+  "requiredPrivateInfos": [
+    "chooseLocation",
+    "getLocation"
+  ],
+  "preloadRule": {
+    "pages/tools/tools": {
+      "network": "all",
+      "packages": [
+        "subpackages/tools",
+        "subpackages/danmaku"
+      ]
+    },
+    "pages/index/index": {
+      "network": "all",
+      "packages": [
+        "subpackages/tools"
+      ]
+    },
+    "pages/calendar/calendar": {
+      "network": "all",
+      "packages": [
+        "subpackages/tools"
+      ]
+    }
+  },
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#15110D",
+    "navigationBarTitleText": "待办清单",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#15110D"
+  },
+  "style": "v2",
+  "componentFramework": "glass-easel",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

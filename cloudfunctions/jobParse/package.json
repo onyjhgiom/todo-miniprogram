@@ -1,0 +1,9 @@
+{
+  "name": "jobParse",
+  "version": "1.0.0",
+  "description": "粘贴招聘网页链接，自动提取公司 / 岗位 / 工作地 / 薪资 / 经验 / 学历",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

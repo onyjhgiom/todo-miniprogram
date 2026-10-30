@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "路径迷宫",
+  "disableScroll": true,
+  "usingComponents": {
+    "game-shell": "/subpackages/games/components/game-shell/index",
+    "maze-ball": "/subpackages/games/components/maze-ball/index"
+  }
+}

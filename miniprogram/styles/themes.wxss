@@ -1,0 +1,49 @@
+/**
+ * 主题外观：4 套低饱和侘寂配色
+ * 仅微调中性底色 / 辉光 / 墨色，主色（陶土·旧金·鼠尾草）保持恒定
+ * → 切换时是"气质"变化，而非满屏花哨颜色；纯视觉
+ * 用法：在页/组件根节点加 class="... tk theme-xxx"，本文件同时注入变量与 .page 背景
+ */
+
+/* 暖陶（默认）：暖灰宣纸 */
+.tk.theme-warm {
+  --paper: #F0EDE6; --paper-2: #E9E5DC; --card: #FCFBF8; --card-2: #F6F3EC; --card-3: #EDE8DE;
+  --ink: #35302A; --ink-2: #6E6558; --ink-3: #9E9384; --ink-4: #C4BAAB;
+  --line: #E4DED2; --line-2: #D3CABB;
+  --glow-1: #FAF7F0; --glow-2: #F1EDE3;
+}
+
+/* 素白：更通透清亮的米白 */
+.tk.theme-plain {
+  --paper: #F7F5F0; --paper-2: #F0EDE5; --card: #FFFFFF; --card-2: #F8F5EF; --card-3: #F0ECE2;
+  --ink: #35302A; --ink-2: #6E6558; --ink-3: #9E9384; --ink-4: #C6BCAD;
+  --line: #E7E1D6; --line-2: #D6CDBE;
+  --glow-1: #FCFAF5; --glow-2: #F3EFE6;
+}
+
+/* 墨韵：更深沉的纸墨对比，石墨调 */
+.tk.theme-ink {
+  --paper: #E7DFD0; --paper-2: #DED4C0; --card: #F4EEE1; --card-2: #ECE4D2; --card-3: #E3D8C1;
+  --ink: #2C2722; --ink-2: #645A4C; --ink-3: #9A8D79; --ink-4: #BCAE97;
+  --line: #DDD0B8; --line-2: #CCBA9C;
+  --glow-1: #F0E8D7; --glow-2: #E4D8C0;
+}
+
+/* 黛青：偏冷的青绿调，鼠尾草更突出 */
+.tk.theme-qing {
+  --paper: #E9EFE7; --paper-2: #E0E8DE; --card: #FAFCF8; --card-2: #F1F5EF; --card-3: #E7EEE5;
+  --ink: #333A34; --ink-2: #66705F; --ink-3: #98A294; --ink-4: #BBC3B5;
+  --line: #DCE5D9; --line-2: #CAD5C7;
+  --glow-1: #F3F8F1; --glow-2: #E5EDE3;
+}
+
+/* 页面背景：用辉光变量替换硬编码色，使主题能联动背景 */
+.page.theme-warm,
+.page.theme-plain,
+.page.theme-ink,
+.page.theme-qing {
+  background:
+    radial-gradient(120% 55% at 12% -8%, var(--glow-1) 0%, rgba(0, 0, 0, 0) 62%),
+    radial-gradient(95% 45% at 100% 2%, var(--glow-2) 0%, rgba(0, 0, 0, 0) 58%),
+    var(--paper);
+}

@@ -1,0 +1,52 @@
+/* pages/astro/starCalendar.wxss */
+@import "../../styles/astro-common.wxss";
+
+.moon-hero { width: 140rpx; height: 140rpx; flex-shrink: 0; }
+
+.cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16rpx; }
+.cal-head .astro-title { font-size: 30rpx; }
+
+.cal-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 8rpx;
+  font-size: 22rpx;
+  color: rgba(200, 210, 240, 0.6);
+  text-align: center;
+}
+.cal-week__cell { padding: 8rpx 0; }
+.cal-week__cell.is-rest { color: rgba(244, 114, 182, 0.7); }
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8rpx;
+}
+.cal-cell {
+  position: relative;
+  aspect-ratio: 1 / 1.1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  border-radius: 12rpx;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1rpx solid rgba(255, 255, 255, 0.05);
+  transition: all 200ms ease;
+}
+.cal-cell.is-out { opacity: 0.35; }
+.cal-cell--hover { transform: scale(0.95); background: rgba(255, 255, 255, 0.08); }
+.cal-cell.is-selected {
+  background: linear-gradient(135deg, #96573A, #C08468);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4rpx 12rpx rgba(99, 102, 241, 0.4);
+}
+.cal-cell__num { font-size: 24rpx; font-weight: 600; }
+.cal-cell__lunar { font-size: 16rpx; color: rgba(200, 210, 240, 0.55); margin-top: 2rpx; }
+.cal-cell.is-selected .cal-cell__lunar { color: rgba(255, 255, 255, 0.85); }
+.cal-cell__dot {
+  position: absolute; top: 6rpx; right: 6rpx;
+  width: 8rpx; height: 8rpx;
+  border-radius: 50%;
+  background: #C09A5E;
+  box-shadow: 0 0 6rpx rgba(245, 158, 11, 0.6);
+}

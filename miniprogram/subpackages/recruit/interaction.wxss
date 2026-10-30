@@ -1,0 +1,130 @@
+/* ============================================================
+ * 秋招助手 · 通用交互反馈层（interaction.wxss）
+ *
+ * 这一层只做「交互反馈」，不定义任何业务配色与布局，
+ * 因此可以被各页面安全 @import 而不改变现有视觉。
+ *
+ * 覆盖四类反馈：
+ *   1) 按压 / 悬停：点击后 100ms 内必须有视觉回执（移动端 :active，桌面端 :hover）
+ *   2) 忙碌 / 禁用：操作进行中禁止重复触发，按钮给出明确的不可用观感
+ *   3) 加载 / 骨架：数据未就绪时占位，避免白屏与「点了没反应」
+ *   4) 弹层 / 入场：遮罩淡入、面板上滑、卡片轻微上浮，消除硬切的突变感
+ * ============================================================ */
+
+/* ---------- 1. 按压反馈 ---------- */
+/* 作为 hover-class 使用，或直接给元素挂上：按下即缩放 + 微透明 */
+.ix-press {
+  opacity: 0.72;
+  transform: scale(0.96);
+}
+.ix-press--card {
+  opacity: 0.9;
+  transform: scale(0.985);
+}
+.ix-press--flat {
+  opacity: 0.62;
+}
+
+/* 统一过渡：写在需要反馈的元素上，避免生硬跳变 */
+.ix-ease {
+  transition: transform 160ms ease, opacity 160ms ease, box-shadow 160ms ease;
+}
+
+/* ---------- 2. 忙碌 / 禁用 ---------- */
+/* 禁用态：视觉上明确「点不动」，并配合 JS 侧防连点 */
+.ix-disabled {
+  opacity: 0.42;
+}
+.ix-disabled:active {
+  opacity: 0.42;
+  transform: none;
+}
+
+/* 忙碌态：保留可辨识的形状，只降饱和，避免误以为被禁用 */
+.ix-busy {
+  opacity: 0.6;
+}
+
+/* ---------- 3. 加载 / 骨架 ---------- */
+@keyframes ix-shimmer {
+  0% { background-position: -360rpx 0; }
+  100% { background-position: 360rpx 0; }
+}
+.ix-skeleton {
+  background: linear-gradient(90deg, #eef2f7 25%, #e2e8f0 37%, #eef2f7 63%);
+  background-size: 720rpx 100%;
+  animation: ix-shimmer 1.4s ease-in-out infinite;
+  border-radius: 12rpx;
+}
+.ix-skeleton--line { height: 28rpx; margin-bottom: 16rpx; }
+.ix-skeleton--line-short { width: 46%; }
+.ix-skeleton--title { height: 36rpx; width: 58%; margin-bottom: 20rpx; }
+.ix-skeleton--block { height: 180rpx; border-radius: 20rpx; margin-bottom: 20rpx; }
+
+@keyframes ix-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.ix-spin {
+  animation: ix-spin 800ms linear infinite;
+}
+
+/* ---------- 4. 弹层 / 入场过渡 ---------- */
+@keyframes ix-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes ix-sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes ix-pop-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes ix-rise {
+  from { opacity: 0; transform: translateY(16rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ix-mask { animation: ix-fade-in 180ms ease both; }
+.ix-sheet { animation: ix-sheet-up 260ms cubic-bezier(0.22, 0.61, 0.36, 1) both; }
+.ix-pop { animation: ix-pop-in 200ms cubic-bezier(0.22, 0.61, 0.36, 1) both; }
+.ix-rise { animation: ix-rise 260ms ease both; }
+.ix-rise-d1 { animation-delay: 50ms; }
+.ix-rise-d2 { animation-delay: 100ms; }
+.ix-rise-d3 { animation-delay: 150ms; }
+
+/* ---------- 5. 表单校验提示 ---------- */
+.ix-err {
+  display: block;
+  font-size: 22rpx;
+  color: #C0522F;
+  margin-top: 8rpx;
+  line-height: 1.5;
+}
+@keyframes ix-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8rpx); }
+  75% { transform: translateX(8rpx); }
+}
+/* 校验失败时轻抖一下，比单纯变红更容易被注意到 */
+.ix-shake { animation: ix-shake 260ms ease both; }
+
+/* ---------- 6. 桌面端悬停 ---------- */
+/* 只在「真有鼠标」的设备生效；触屏设备不会残留 hover 态，
+   因此移动端观感完全不受影响，桌面端才有悬停高亮。 */
+@media (hover: hover) and (pointer: fine) {
+  .ix-hover {
+    transition: transform 160ms ease, box-shadow 160ms ease;
+  }
+  .ix-hover:hover {
+    box-shadow: 0 10rpx 28rpx rgba(15, 23, 42, 0.12);
+    transform: translateY(-2rpx);
+  }
+  .ix-hover-flat {
+    transition: background-color 160ms ease, opacity 160ms ease;
+  }
+  .ix-hover-flat:hover {
+    opacity: 0.86;
+  }
+}

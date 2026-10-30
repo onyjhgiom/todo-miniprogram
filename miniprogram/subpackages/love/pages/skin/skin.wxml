@@ -1,0 +1,60 @@
+<!-- pages/love/skin/skin.wxml -->
+<view class="ay" data-skin="{{skin.key}}" style="{{skin.style}}">
+  <!-- 当前皮肤预览 -->
+  <view class="sk-preview">
+    <view class="ay-hero" style="margin:0;border-radius:28rpx">
+      <view class="ay-hero__row">
+        <view>
+          <view class="ay-hero__title">{{skin.emoji}} {{skin.name}}</view>
+          <view class="ay-hero__sub">当前皮肤 · 全部页面同步</view>
+        </view>
+        <view class="ay-hero__badge">{{skin.dark ? '深色' : '浅色'}}</view>
+      </view>
+    </view>
+    <view class="sk-preview__body">
+      <view class="ay-card" style="margin:20rpx 0 0;box-shadow:none">
+        <view class="ay-card__hd"><text class="ay-card__title">预览</text></view>
+        <view class="ay-t">文字、卡片、按钮、标签都会跟着皮肤变。</view>
+        <view class="ay-chips ay-mt">
+          <view class="ay-chip ay-chip--on">主色标签</view>
+          <view class="ay-chip">普通标签</view>
+          <view class="ay-chip ay-chip--accent">点缀</view>
+        </view>
+        <view class="ay-bar ay-mt"><view class="ay-bar__in" style="width:62%"></view></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="ay-card ay-anim">
+    <view class="ay-between">
+      <view>
+        <view class="ay-card__title">🎨 换一套</view>
+        <view class="ay-faint">按取向分了四组，凭感觉选就行</view>
+      </view>
+      <view class="ay-btn ay-btn--sm ay-btn--line" bindtap="onRandom">🎲 随便</view>
+    </view>
+  </view>
+
+  <view class="ay-card ay-anim" wx:for="{{groups}}" wx:for-item="g" wx:key="family">
+    <view class="ay-card__hd"><text class="ay-card__title">{{g.family}}</text></view>
+    <view class="sk-item" wx:for="{{g.skins}}" wx:for-item="s" wx:key="key"
+          data-v="{{s.key}}" bindtap="onPick" style="{{s.previewStyle}}">
+      <view class="sk-swatch">
+        <view class="sk-swatch__c" style="background:{{s.swatch[0]}}"></view>
+        <view class="sk-swatch__c" style="background:{{s.swatch[1]}}"></view>
+      </view>
+      <view class="sk-item__main">
+        <view class="sk-item__name">{{s.emoji}} {{s.name}}</view>
+        <view class="sk-item__tag">{{s.tag}}</view>
+      </view>
+      <view class="sk-item__state {{s.on?'sk-item__state--on':''}}">{{s.on ? '使用中' : '换这套'}}</view>
+    </view>
+  </view>
+
+  <view class="ay-card ay-card--soft ay-anim">
+    <view class="ay-faint">
+      皮肤只影响爱遇小栈内部，不会改动待办清单的全局主题——它是一个自成氛围的私密小屋。
+      切换后所有页面（养护 / 妆造 / 衣橱 / 能量站）立即生效并记住。
+    </view>
+  </view>
+</view>

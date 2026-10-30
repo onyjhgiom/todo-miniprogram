@@ -1,0 +1,110 @@
+/* components/task-card/task-card.wxss
+ * 卡片统一规格（需求二十一）：白底 82% + 24rpx 圆角 + 极淡描边 + 柔和阴影。
+ * 全项目卡片共用这一套，避免出现「硬边框 + 强阴影」的廉价感。
+ * 【统一内边距】左右 24u / 上下 18u —— task / stats / streak / moti 四张卡同值，
+ * 保证文字左边线与卡片内文字位置逐张对齐。
+ * 【2026-10-06 收紧】内边距、圆角、标题字号（31u → 26u）、添加按钮高度（76u → 56u）
+ * 全部同步下调，否则这张卡在收紧后的页面里会显得格外笨重。 */
+.task {
+  box-sizing: border-box;
+  padding: calc(14 * var(--u, 1rpx)) calc(22 * var(--u, 1rpx));
+  border-radius: calc(24 * var(--u, 1rpx));
+  background: rgba(255, 255, 255, 0.82);
+  border: calc(1 * var(--u, 1rpx)) solid rgba(120, 140, 170, 0.08);
+  box-shadow: 0 calc(8 * var(--u, 1rpx)) calc(28 * var(--u, 1rpx)) rgba(60, 80, 120, 0.06);
+}
+.task__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.task__cap {
+  font-size: calc(19 * var(--u, 1rpx));
+  letter-spacing: 0;
+  color: #7C8AA2;
+  white-space: nowrap;
+}
+.task__unbind {
+  box-sizing: border-box;
+  padding: calc(5 * var(--u, 1rpx)) calc(14 * var(--u, 1rpx));
+  border-radius: calc(999 * var(--u, 1rpx));
+  font-size: calc(19 * var(--u, 1rpx));
+  color: #647BB9;
+  background: rgba(100, 123, 185, 0.08);
+}
+.task__unbind--tap {
+  opacity: 0.6;
+}
+
+.task__title-wrap {
+  margin-top: calc(8 * var(--u, 1rpx));
+}
+.task__title-wrap--tap {
+  opacity: 0.7;
+}
+.task__title {
+  font-size: calc(24 * var(--u, 1rpx));
+  font-weight: 600;
+  line-height: 1.4;
+  color: #2E3644;
+}
+
+.task__bar {
+  box-sizing: border-box;
+  height: calc(8 * var(--u, 1rpx));
+  margin-top: calc(10 * var(--u, 1rpx));
+  border-radius: calc(999 * var(--u, 1rpx));
+  background: #EDF1F7;
+  overflow: hidden;
+}
+.task__bar-in {
+  height: 100%;
+  border-radius: calc(999 * var(--u, 1rpx));
+  background: linear-gradient(90deg, #7188D1, #8EA6E8);
+  transition: width 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.task__meta {
+  display: flex;
+  align-items: center;
+  gap: calc(10 * var(--u, 1rpx));
+  margin-top: calc(8 * var(--u, 1rpx));
+}
+.task__meta-k {
+  font-size: calc(19 * var(--u, 1rpx));
+  color: #7C8AA2;
+  white-space: nowrap;
+}
+.task__meta-v {
+  font-size: calc(21 * var(--u, 1rpx));
+  font-weight: 600;
+  color: #5F76BE;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.task__empty {
+  display: block;
+  margin-top: calc(8 * var(--u, 1rpx));
+  font-size: calc(23 * var(--u, 1rpx));
+  color: #8A97AC;
+}
+.task__add {
+  margin-top: calc(10 * var(--u, 1rpx));
+  height: calc(48 * var(--u, 1rpx));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: calc(28 * var(--u, 1rpx));
+  border: calc(1 * var(--u, 1rpx)) solid rgba(100, 123, 185, 0.24);
+  background: rgba(217, 229, 255, 0.24);
+  transition: transform 200ms ease, opacity 200ms ease;
+}
+.task__add--tap {
+  transform: scale(0.98);
+  opacity: 0.75;
+}
+.task__add-tx {
+  font-size: calc(22 * var(--u, 1rpx));
+  letter-spacing: 0;
+  color: #647BB9;
+}

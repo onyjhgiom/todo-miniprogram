@@ -1,0 +1,400 @@
+@import "../../../../styles/tool-shell.wxss";
+
+/* subpackages/travel/pages/trip-edit/trip-edit.wxss */
+
+.tshell__wrap {
+  padding-bottom: 60rpx;
+}
+
+/* ===== 表单 ===== */
+/* 控件统一 88rpx 高。
+ *
+ * ⚠️ 踩过的坑（2026-09-19）：微信原生 <input> 自带一个默认高度（约 1.4rem），
+ * 一旦同时写了 box-sizing: border-box + 竖向 padding 却不给 height，
+ * 竖向 padding 会把内容区压到几 rpx，占位文字/输入内容被直接裁掉半截。
+ * 对比：同页的 .field__picker 是 <view> 且没写 border-box（默认 content-box），
+ * padding 正常撑高，所以日期框一直好好的 —— 差异就在这儿。
+ *
+ * 结论：用 input 就必须「显式 height + 竖向 padding 归零」，横向 padding 照留。
+ * 项目里 course-schedule/schedule-edit 的 .sheet-input 也是这个写法。 */
+.field {
+  margin-bottom: 30rpx;
+}
+.field:last-child {
+  margin-bottom: 0;
+}
+.field__label {
+  display: block;
+  margin-bottom: 14rpx;
+  font-size: 24rpx;
+  color: var(--color-text-soft);
+}
+.field__input,
+.field__picker {
+  width: 100%;
+  height: 88rpx;
+  box-sizing: border-box;
+  padding: 0 24rpx;
+  border-radius: var(--radius-md, 16rpx);
+  border: 1rpx solid var(--color-input-line);
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  font-size: 28rpx;
+}
+/* picker 是 <view>，定高后得自己居中；<input> 原生就会垂直居中 */
+.field__picker {
+  display: flex;
+  align-items: center;
+}
+/* 占位文案统一走主题弱化色：默认灰在深色主题下对比度不够。
+ * 只覆盖颜色，字号继承 input 自身，因此各类输入框可以共用这一个类。 */
+.field__ph {
+  color: var(--color-text-mute);
+}
+.field__row {
+  display: flex;
+  gap: 14rpx;
+  align-items: center;
+}
+.field__input--flex {
+  width: auto;
+  flex: 1;
+  min-width: 0; /* flex 子项里的 input 不写它，窄屏会被内容撑破 */
+}
+.field__pick {
+  flex: none;
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 0 28rpx;
+  border-radius: var(--radius-md, 16rpx);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+/* ===== 封面 ===== */
+.cover__preview {
+  height: 220rpx;
+  border-radius: var(--radius-md, 16rpx);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+.cover__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.cover__emo {
+  font-size: 92rpx;
+}
+.cover__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-top: 20rpx;
+}
+.cover__cell {
+  width: calc(25% - 12rpx);
+  height: 116rpx;
+  border-radius: var(--radius-md, 16rpx);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+  opacity: 0.62;
+  border: 2rpx solid transparent;
+}
+.cover__cell.is-on {
+  opacity: 1;
+  border-color: var(--color-primary);
+}
+.cover__cellemo {
+  font-size: 34rpx;
+}
+.cover__cellname {
+  font-size: 20rpx;
+  color: #fff;
+  text-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.35);
+}
+.cover__cell--add {
+  background: var(--color-bg-soft);
+  border-color: var(--color-border);
+}
+.cover__cell--add .cover__cellname {
+  color: var(--color-text-soft);
+  text-shadow: none;
+}
+
+/* ===== 场景 chips ===== */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 14rpx 22rpx;
+  border-radius: 999rpx;
+  border: 1rpx solid var(--color-border);
+  background: var(--color-bg-elevated);
+  font-size: 24rpx;
+  color: var(--color-text-soft);
+}
+.chip.is-on {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+.chip__emo {
+  font-size: 26rpx;
+}
+.chip__name {
+  font-size: 24rpx;
+}
+
+/* ===== 路线 ===== */
+.hint {
+  font-size: 24rpx;
+  color: var(--color-primary);
+  margin-bottom: 18rpx;
+}
+.hint--mute {
+  color: var(--color-text-mute);
+}
+.routes {
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+}
+.route {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  padding: 22rpx;
+  border-radius: var(--radius-md, 16rpx);
+  border: 1rpx solid var(--color-border);
+  background: var(--color-bg-elevated);
+}
+.route.is-on {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+.route__name {
+  font-size: 27rpx;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.route__budget {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  color: var(--color-text-mute);
+}
+
+/* ===== 底部按钮 ===== */
+.actions {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 36rpx;
+}
+.actions .ts-btn {
+  flex: 1;
+}
+
+.ts-empty--sm {
+  padding: 24rpx 0;
+}
+
+/* ===== AI 智能规划卡片 ===== */
+/* 说明：.ai-card / .ai-off 仅为语义标记类，视觉由 .ts-card / .ai-off__txt 承担，无需单独规则 */
+.ai-sec {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ai-count {
+  font-size: 22rpx;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.ai-off__txt {
+  display: block;
+  font-size: 24rpx;
+  color: var(--color-text-soft);
+  line-height: 1.6;
+  margin-bottom: 22rpx;
+}
+.ai-btn {
+  width: 100%;
+}
+.ai-loading {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  font-size: 26rpx;
+  color: var(--color-text-soft);
+}
+.ai-loading__dot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  background: var(--color-primary);
+  animation: aiPulse 1s infinite ease-in-out;
+}
+@keyframes aiPulse {
+  0%,
+  100% {
+    transform: scale(0.6);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.ai-day {
+  margin-top: 24rpx;
+}
+.ai-day:first-child {
+  margin-top: 6rpx;
+}
+.ai-day__h {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 14rpx;
+  padding-left: 4rpx;
+  border-left: 6rpx solid var(--color-primary);
+}
+.ai-row {
+  background: var(--color-bg-elevated);
+  border: 1rpx solid var(--color-input-line);
+  border-radius: var(--radius-md, 16rpx);
+  padding: 18rpx 20rpx;
+  margin-bottom: 14rpx;
+}
+.ai-row__top {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+.ai-time {
+  flex: none;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 16rpx;
+  border-radius: 10rpx;
+  background: var(--color-bg-soft);
+  color: var(--color-text);
+  font-size: 24rpx;
+  font-variant-numeric: tabular-nums;
+}
+.ai-type {
+  flex: none;
+  height: 52rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 18rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #fff;
+  background: var(--color-text-mute);
+}
+/* 注意：类选择器只能 ASCII，中文类型通过 typeCls 映射为下面这些后缀 */
+.ai-type--traffic {
+  background: #4a90d9;
+}
+.ai-type--spot {
+  background: #3aa76d;
+}
+.ai-type--food {
+  background: #e8923a;
+}
+.ai-type--hotel {
+  background: #8a6fd1;
+}
+.ai-type--shop {
+  background: #d9536b;
+}
+.ai-type--custom {
+  background: #8a8f99;
+}
+/* AI 预览行的输入框：显式定高（理由同 .field__input），顺带把触控区从默认 ~44rpx 提到 60rpx */
+.ai-content {
+  flex: 1;
+  min-width: 0;
+  height: 60rpx;
+  padding: 0 4rpx;
+  font-size: 27rpx;
+  color: var(--color-text);
+}
+.ai-del {
+  flex-shrink: 0;
+  width: 44rpx;
+  height: 44rpx;
+  line-height: 40rpx;
+  text-align: center;
+  border-radius: 50%;
+  background: var(--color-bg-soft);
+  color: var(--color-text-mute);
+  font-size: 34rpx;
+}
+.ai-row__sub {
+  display: flex;
+  gap: 12rpx;
+  margin-top: 14rpx;
+}
+.ai-place {
+  flex: 1;
+  min-width: 0;
+  height: 72rpx;
+  box-sizing: border-box;
+  padding: 0 16rpx;
+  border-radius: 10rpx;
+  border: 1rpx solid var(--color-input-line);
+  background: var(--color-bg);
+  font-size: 24rpx;
+  color: var(--color-text);
+}
+.ai-cost {
+  width: 170rpx;
+  flex: none;
+  height: 72rpx;
+  box-sizing: border-box;
+  padding: 0 16rpx;
+  border-radius: 10rpx;
+  border: 1rpx solid var(--color-input-line);
+  background: var(--color-bg);
+  font-size: 24rpx;
+  color: var(--color-text);
+}
+.ai-add {
+  text-align: center;
+  font-size: 24rpx;
+  color: var(--color-primary);
+  padding: 16rpx 0 4rpx;
+}
+.ai-actions {
+  display: flex;
+  gap: 20rpx;
+  margin: 24rpx 0 16rpx;
+}
+.ai-actions .ts-btn {
+  flex: 1;
+}
+
+.press {
+  opacity: 0.86;
+}

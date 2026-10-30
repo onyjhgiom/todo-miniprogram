@@ -1,0 +1,77 @@
+<!-- subpackages/tools/pages/wheel/history.wxml
+     历史记录页：模式切换（流水 / 次数统计）+ 转盘筛选 + 记录列表。-->
+<view class="wr" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <!-- ===== 模式与筛选 ===== -->
+  <view class="wr__head">
+    <view class="wr__segs">
+      <view class="wr__seg {{mode === 'list' ? 'is-on' : ''}}" data-v="list" bindtap="onMode">抽奖流水</view>
+      <view class="wr__seg {{mode === 'stat' ? 'is-on' : ''}}" data-v="stat" bindtap="onMode">次数统计</view>
+    </view>
+    <scroll-view class="wr__filters" scroll-x show-scrollbar="{{false}}">
+      <view class="wr__filtersIn">
+        <view class="wr__filter {{activeFilter === item.key ? 'is-on' : ''}}" wx:for="{{filters}}" wx:key="key"
+              data-key="{{item.key}}" bindtap="onFilter">{{item.label}}</view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- ===== 流水模式 ===== -->
+  <block wx:if="{{mode === 'list'}}">
+    <view class="wr__meta">
+      <text>共 {{total}} 条记录（本地保留最近 100 条）</text>
+      <text class="wr__clear" bindtap="onClearAll">清空</text>
+    </view>
+
+    <view class="wr__list" wx:if="{{!empty}}">
+      <view class="wr__item" wx:for="{{records}}" wx:key="id" data-id="{{item.id}}" bindtap="onRecordTap">
+        <view class="wr__itemTop">
+          <view class="wr__badge" style="background:{{item.color}};color:{{item.ink}}">
+            <text class="wr__badgeIcon" wx:if="{{item.resultIcon}}">{{item.resultIcon}}</text>
+            <text class="wr__badgeText">{{item.result}}</text>
+          </view>
+          <view class="wr__itemMeta">
+            <view class="wr__wheelName">
+              {{item.wheelName}}
+              <text class="wr__gone" wx:if="{{item.deleted}}">已删除的转盘</text>
+            </view>
+            <view class="wr__time">{{item.time}}</view>
+          </view>
+        </view>
+        <view class="wr__pool">选项池：{{item.pool}}</view>
+      </view>
+    </view>
+
+    <view class="wr__empty" wx:else>
+      <view class="wr__emptyIcon">🎡</view>
+      <view class="wr__emptyText">还没有抽奖记录</view>
+      <view class="wr__emptyBtn" bindtap="onGoWheel">去转一次</view>
+    </view>
+  </block>
+
+  <!-- ===== 统计模式 ===== -->
+  <block wx:else>
+    <view class="wr__meta">
+      <text>共抽取 {{statTotal}} 次</text>
+    </view>
+    <view class="wr__stats">
+      <view class="wr__stat" wx:for="{{stats}}" wx:key="text">
+        <view class="wr__statTop">
+          <text class="wr__statName">{{item.icon}}{{item.text}}</text>
+          <text class="wr__statNum">{{item.count}} 次 · {{item.ratio}}</text>
+        </view>
+        <view class="wr__barBg">
+          <view class="wr__bar" style="width:{{item.width}}%;background:{{item.color}}"></view>
+        </view>
+        <view class="wr__statFoot">
+          <text>权重期望 {{item.expect}}</text>
+          <text class="wr__hot" wx:if="{{item.hot}}">它是不是一直在赢？</text>
+        </view>
+      </view>
+    </view>
+    <view class="wr__empty" wx:if="{{!stats.length}}">
+      <view class="wr__emptyText">暂无统计数据</view>
+    </view>
+  </block>
+
+</view>

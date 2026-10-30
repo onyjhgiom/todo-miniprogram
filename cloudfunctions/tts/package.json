@@ -1,0 +1,9 @@
+{
+  "name": "tts",
+  "version": "1.0.0",
+  "description": "语音合成云函数（腾讯云 TextToVoice），为知心姐姐等角色提供音色化真人质感语音",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

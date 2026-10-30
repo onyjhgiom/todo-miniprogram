@@ -1,0 +1,666 @@
+/* pages/love/index/index.wxss */
+@import "../../styles/love-common.wxss";
+
+/* ============================================================
+ * 深空玻璃拟态视觉层（仅作用于本页，新增命名空间 .ay-lg）
+ * 不改动共享样式；在共享层之上叠加流动背景 + 玻璃卡 + 微粒光斑。
+ *
+ * 【整页换装机制】
+ * 本页所有「配色 / 字体 / 圆角 / 间距」都不再写死，一律走 --t-* 变量，
+ * 变量由所选「整体风格」内联注入到根节点（utils/love-core-themes.ts 的
+ * buildCorePageStyle）。切风格 = 换一组变量 = 整页换装。
+ * 每个 var() 都带兜底值 = 星河紫梦（galaxy），
+ * 因此 data 里的初始 skin.style='' 那一帧、或注入意外缺失时，页面仍是原版观感，
+ * 不会出现「无背景 / 无光斑 / 字体回退」的裸奔态。改配色时记得同步兜底值。
+ *
+ * 【为什么不用属性选择器 / 不写进共享层】
+ * 1) 属性选择器在 glass-easel / Skyline / WebView 表现不一致；
+ * 2) 共享层管的是所有页面，本页的「深空玻璃」是页级皮肤，不应污染别页；
+ * 3) 内联变量天然最高优先级，改哪套风格只动数据、不动样式结构。
+ *
+ * 【硬约束】本文件不得出现写死的颜色 / 字体 / 圆角 / 间距。
+ * 新增样式一律引用 --t-*，否则该元素在切风格时不换装 = 破坏「整页一起换」的效果。
+ * ============================================================ */
+
+.ay-lg {
+  overflow-x: hidden;
+  padding-bottom: 260rpx;
+  background: transparent;          /* 让 .ay-bg 的渐变透出来 */
+  color: var(--t-text, #FFFFFF);
+  /* 字体样式随风格走：衬线 ↔ 无衬线，是全页最易察觉的差异之一 */
+  font-family: var(--t-font, -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif);
+  letter-spacing: var(--t-ls, 0.5rpx);
+}
+/* ============================================================
+ * box-sizing 必须逐个选择器显式声明
+ * ============================================================
+ * 【坑】WXSS 编译器不支持通配符 `*`，所以不能写 `.ay-lg * { box-sizing: border-box }`。
+ * 而小程序**并非**默认 border-box（app.wxss 里的 box-sizing 只挂在 .themed 类上，
+ * 对本模块无效；共享层 .ay-entry 也是显式写的）。
+ * 缺失后果：宫格 .ay-g(width:33.3333% + padding) 实际宽度溢出 → 一行只放得下 2 个，
+ *          3×2 塌成 2×3，右侧还可能出横向滚动。
+ * 【正解】把下面这组选择器挂到 app.wxss 的 page 级，或在本文件逐个声明 —— 本文件用后者。
+ */
+.ay-lg,
+.ay-top,
+.ay-top__brand,
+.ay-top__actions,
+.ay-panel,
+.ay-panel__hd,
+.ay-panel__hint,
+.ay-panel__grid,
+.ay-theme,
+.ay-theme__sw,
+.ay-top__pill,
+.ay-hero2,
+.ay-hero2__core,
+.ay-hero2__sub,
+.ay-energy,
+.ay-stats,
+.ay-stat,
+.ay-glass,
+.ay-grid,
+.ay-g,
+.ay-g__in,
+.ay-g__ico,
+.ay-g__name,
+.ay-g__desc,
+.ay-dock,
+.ay-dock__i,
+.ay-foot,
+.ay-pulsefx,
+.ay-empty,
+.ay-row,
+.ay-prep-add,
+.ay-prep-input,
+.ay-prep-due,
+.ay-prep-item,
+.ay-prep-check,
+.ay-prep-act,
+.ay-wrap,
+.ay-btn,
+.ay-bar,
+.ay-bar__in,
+.ay-tabs,
+.ay-tab {
+  box-sizing: border-box;
+}
+/* input / button 类原生控件另需显式声明 */
+input,
+picker,
+button {
+  box-sizing: border-box;
+}
+
+/* ---------- 动态流动背景（配色随风格） ---------- */
+.ay-bg {
+  position: fixed;
+  left: 0; right: 0; top: 0; bottom: 0;
+  z-index: -2;
+  pointer-events: none;
+  overflow: hidden;
+  background: var(--t-bg, radial-gradient(125% 85% at 50% -12%, #2A1C5E 0%, #1B1240 40%, #120E2E 100%));
+  will-change: transform;
+}
+.ay-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(38rpx);
+  opacity: 0.5;
+  will-change: transform;
+}
+.ay-blob--1 {
+  width: 540rpx; height: 540rpx;
+  left: -130rpx; top: 90rpx;
+  background: var(--t-blob-a, radial-gradient(circle, #8B5CF6 0%, rgba(0,0,0,0) 70%));
+  animation: ay-blob1 19s ease-in-out infinite;
+}
+.ay-blob--2 {
+  width: 460rpx; height: 460rpx;
+  right: -120rpx; top: 60rpx;
+  background: var(--t-blob-b, radial-gradient(circle, #7DD3FC 0%, rgba(0,0,0,0) 70%));
+  animation: ay-blob2 24s ease-in-out infinite;
+}
+.ay-blob--3 {
+  width: 420rpx; height: 420rpx;
+  left: 30rpx; top: 520rpx;
+  background: var(--t-blob-c, radial-gradient(circle, #F5A7D7 0%, rgba(0,0,0,0) 70%));
+  animation: ay-blob3 30s ease-in-out infinite;
+}
+.ay-blob--4 {
+  width: 360rpx; height: 360rpx;
+  right: 10rpx; bottom: 220rpx;
+  background: var(--t-blob-d, radial-gradient(circle, #FFFFFF 0%, rgba(0,0,0,0) 70%));
+  opacity: 0.28;
+  animation: ay-blob4 36s ease-in-out infinite;
+}
+/* 顶部主光晕：把水晶球「托」在一团柔光里 */
+.ay-glow {
+  position: absolute;
+  left: 50%; top: 200rpx;
+  width: 620rpx; height: 620rpx;
+  margin-left: -310rpx;
+  border-radius: 50%;
+  background: var(--t-glow, radial-gradient(circle, rgba(192,132,252,0.30) 0%, rgba(139,92,246,0.12) 38%, rgba(139,92,246,0) 68%));
+}
+
+@keyframes ay-blob1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(70rpx, 50rpx) scale(1.14); }
+}
+@keyframes ay-blob2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-60rpx, 70rpx) scale(1.10); }
+}
+@keyframes ay-blob3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(60rpx, -50rpx) scale(1.16); }
+}
+@keyframes ay-blob4 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-50rpx, -40rpx) scale(1.12); }
+}
+
+/* ---------- 顶栏 ---------- */
+.ay-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 26rpx 32rpx 4rpx;
+  /* 沉浸式（自定义导航）时才有安全区需求；此处保留一行 env 兜底，低版本不识别时忽略即可 */
+  padding-top: calc(env(safe-area-inset-top) + 26rpx);
+}
+.ay-top__brand {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+.ay-top__actions {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+.ay-top__logo {
+  font-size: 38rpx;
+  line-height: 1;
+  color: var(--t-1, #F5A7D7);
+  text-shadow: 0 0 18rpx var(--t-glowc, rgba(245, 167, 215, 0.8));
+}
+.ay-top__name {
+  font-size: 36rpx;
+  font-weight: var(--t-fw, 700);
+  letter-spacing: var(--t-lst, 4rpx);
+  color: var(--t-text, #fff);
+  /* 阴影跟随风格：深色风格用近黑影托白字，浅色风格用淡蓝影托深字，
+     写死黑色会让 aurora/sakura/quartz 的深色标题发灰、显脏。 */
+  text-shadow: 0 2rpx 12rpx var(--t-shadow, rgba(8, 6, 26, 0.45));
+}
+.ay-top__pill {
+  display: flex;
+  align-items: center;
+  padding: 12rpx 24rpx;
+  border-radius: 999rpx;
+  background: var(--t-glass, rgba(255, 255, 255, 0.12));
+  border: 1rpx solid var(--t-line, rgba(255, 255, 255, 0.18));
+  backdrop-filter: var(--t-blur, blur(18px));
+  -webkit-backdrop-filter: var(--t-blur, blur(18px));
+  color: var(--t-text, rgba(255, 255, 255, 0.9));
+  font-size: 24rpx;
+  letter-spacing: 0.5rpx;
+  transition: transform 160ms ease;
+}
+.ay-top__pill:active { transform: scale(0.95); }
+/* 风格胶囊：与皮肤胶囊区分，描一圈强调边提示「可点开更多」 */
+.ay-top__pill--theme {
+  border-color: var(--t-2, rgba(192, 132, 252, 0.45));
+  box-shadow: 0 0 18rpx var(--t-glowc, rgba(139, 92, 246, 0.28));
+}
+
+/* ---------- Hero ---------- */
+.ay-hero2 {
+  position: relative;
+  padding: 8rpx 0 0;
+  will-change: transform, opacity;
+}
+.ay-hero2__core {
+  width: 100%;
+  /* 水晶球画布自带顶部安全留白（球心在 0.44H、底座在下方），
+     这里再给一点上边距，避免球体被顶栏压住 */
+  padding-top: 16rpx;
+}
+.ay-hero2__sub {
+  text-align: center;
+  /* 不再用负边距上提：会把标语压到能量胶囊上（真机实测重叠）。
+     改为规整的正间距，标语与胶囊各自独立成行。 */
+  margin-top: 4rpx;
+  font-size: 26rpx;
+  letter-spacing: var(--t-ls, 1rpx);
+  line-height: 1.5;
+  color: var(--t-sub, rgba(255, 255, 255, 0.68));
+}
+
+/* 能量注入 CTA */
+.ay-energy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  width: fit-content;
+  margin: 20rpx auto 0;
+  padding: 16rpx 34rpx;
+  border-radius: 999rpx;
+  background: var(--t-glass, rgba(255, 255, 255, 0.10));
+  border: 1rpx solid var(--t-line, rgba(255, 255, 255, 0.20));
+  backdrop-filter: var(--t-blur, blur(18px));
+  -webkit-backdrop-filter: var(--t-blur, blur(18px));
+  box-shadow: 0 8rpx 24rpx var(--t-shadow-2, rgba(139, 92, 246, 0.22));
+  color: var(--t-text, #fff);
+  font-size: 26rpx;
+  transition: transform 160ms ease;
+}
+.ay-energy:active { transform: scale(0.96); }
+.ay-energy__heart {
+  font-size: 30rpx;
+  filter: drop-shadow(0 0 8rpx var(--t-glowc, rgba(192, 132, 252, 0.55)));
+}
+
+/* ---------- 玻璃通用 ---------- */
+.ay-glass {
+  background: var(--t-glass, rgba(255, 255, 255, 0.08)) !important;
+  border: 1rpx solid var(--t-line, rgba(255, 255, 255, 0.16)) !important;
+  backdrop-filter: var(--t-blur, blur(18px));
+  -webkit-backdrop-filter: var(--t-blur, blur(18px));
+  box-shadow: 0 10rpx 32rpx var(--t-shadow, rgba(8, 6, 26, 0.45)) !important;
+  color: var(--t-text, #F3F0FF);
+}
+/* 卡片内边距/圆角由风格决定（紧凑 ↔ 疏朗、直角 ↔ 大圆），六个模块节奏一致 */
+.ay-glass {
+  margin-left: 24rpx;
+  margin-right: 24rpx;
+  padding: var(--t-pad, 30rpx 28rpx);
+  border-radius: var(--t-r, 30rpx);
+}
+.ay-glass .ay-card__title,
+.ay-glass .ay-t { color: var(--t-text, #fff); }
+.ay-glass .ay-faint { color: var(--t-faint, rgba(255, 255, 255, 0.56)); }
+.ay-glass .ay-sub { color: var(--t-sub, rgba(255, 255, 255, 0.72)); }
+.ay-glass .ay-card__sub { color: var(--t-faint, rgba(255, 255, 255, 0.5)); }
+.ay-glass .ay-btn--ghost {
+  background: var(--t-glass-2, rgba(255, 255, 255, 0.12));
+  color: var(--t-text, #fff);
+}
+/* 卡片标题行：加大标题、拉开与正文的距离，形成清晰的两级层次 */
+.ay-glass .ay-card__hd {
+  margin-bottom: 22rpx;
+}
+.ay-glass .ay-card__title {
+  font-size: 32rpx;
+  font-weight: var(--t-fw, 700);
+  letter-spacing: var(--t-lst, 0.5rpx);
+  line-height: 1.4;
+}
+/* 正文行高放宽，长文案不挤 */
+.ay-glass .ay-t {
+  font-size: 28rpx;
+  line-height: 1.75;
+}
+/* 列表行：上下留白加大，行间用发丝线分隔 */
+.ay-glass .ay-row {
+  padding: 22rpx 0;
+}
+.ay-glass .ay-row__t {
+  font-size: 28rpx;
+  line-height: 1.4;
+}
+.ay-glass .ay-row__d { color: var(--t-sub, rgba(255, 255, 255, 0.68)); }
+.ay-glass .ay-row { border-bottom-color: var(--t-line-2, rgba(255, 255, 255, 0.12)); }
+.ay-glass .ay-hr { background: var(--t-line-2, rgba(255, 255, 255, 0.14)); }
+
+.ay-glass .ay-prep-input,
+.ay-glass .ay-prep-due {
+  background: var(--t-glass-2, rgba(255, 255, 255, 0.10));
+  color: var(--t-text, #fff);
+}
+.ay-glass .ay-prep-input { color: var(--t-text, #fff); }
+.ay-glass .ay-prep-due { color: var(--t-sub, rgba(255, 255, 255, 0.6)); }
+.ay-glass .ay-prep-due.is-set { color: var(--t-1, #F5A7D7); }
+.ay-glass .ay-prep-item {
+  background: var(--t-glass-2, rgba(255, 255, 255, 0.10));
+}
+.ay-glass .ay-prep-content { color: var(--t-text, #fff); }
+.ay-glass .ay-prep-meta { color: var(--t-sub, rgba(255, 255, 255, 0.55)); }
+
+/* ---------- StatsPanel ---------- */
+.ay-stats {
+  display: flex;
+  /* 与卡片组同一条 24rpx 基线；纵向间距随风格（紧凑 ↔ 疏朗） */
+  margin: var(--t-gap, 26rpx) 24rpx 0;
+  padding: 34rpx 8rpx;
+  border-radius: var(--t-r, 30rpx);
+  background: var(--t-glass, rgba(255, 255, 255, 0.08));
+  border: 1rpx solid var(--t-line, rgba(255, 255, 255, 0.16));
+  backdrop-filter: var(--t-blur, blur(18px));
+  -webkit-backdrop-filter: var(--t-blur, blur(18px));
+  box-shadow: 0 10rpx 32rpx var(--t-shadow, rgba(8, 6, 26, 0.45));
+}
+.ay-stat {
+  flex: 1;
+  position: relative;
+  text-align: center;
+  padding: 0 4rpx;
+}
+/* 分隔竖线：让四项读起来是「一组数据」而不是四个孤立数字 */
+.ay-stat + .ay-stat::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 1rpx;
+  height: 44rpx;
+  margin-top: -22rpx;
+  background: var(--t-line, rgba(255, 255, 255, 0.14));
+}
+.ay-stat__n {
+  display: block;
+  font-size: 46rpx;
+  font-weight: 800;
+  line-height: 1.05;
+  /* WXSS 对 -webkit-text-fill-color/background-clip:text 支持不稳定，
+     用「强调色主体 + 辉光」实现接近渐变的观感，保证任何环境都能显色 */
+  color: var(--t-1, #F5A7D7);
+  text-shadow: 0 0 18rpx var(--t-glowc, rgba(192, 132, 252, 0.55));
+}
+.ay-stat__l {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 22rpx;
+  letter-spacing: 1rpx;
+  color: var(--t-sub, rgba(255, 255, 255, 0.62));
+}
+
+/* ---------- FeatureGrid 3×2 ---------- */
+.ay-grid {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 14rpx 12rpx 0;
+  margin: var(--t-gap, 26rpx) 12rpx 0;
+}
+.ay-g {
+  width: 33.3333%;
+  padding: 12rpx;
+}
+.ay-g__in {
+  position: relative;
+  height: 100%;
+  padding: 28rpx 20rpx 24rpx;
+  border-radius: var(--t-rs, 28rpx);
+  background: var(--t-glass, rgba(255, 255, 255, 0.08));
+  border: 1rpx solid var(--t-line, rgba(255, 255, 255, 0.16));
+  backdrop-filter: var(--t-blur, blur(18px));
+  -webkit-backdrop-filter: var(--t-blur, blur(18px));
+  box-shadow: 0 8rpx 24rpx var(--t-shadow, rgba(8, 6, 26, 0.35));
+  overflow: hidden;
+  transition: transform 180ms ease, box-shadow 180ms ease, background 220ms ease;
+}
+/* 顶部一道极细高光，模拟玻璃边缘反光，卡片更「有厚度」 */
+.ay-g__in::before {
+  content: '';
+  position: absolute;
+  left: 16rpx;
+  right: 16rpx;
+  top: 0;
+  height: 1rpx;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, var(--t-2, rgba(255, 255, 255, 0.55)) 50%, rgba(0, 0, 0, 0) 100%);
+}
+.ay-g__in:active {
+  transform: translateY(-6rpx) scale(1.02);
+  background: var(--t-glass-2, rgba(255, 255, 255, 0.15));
+  box-shadow: 0 14rpx 34rpx var(--t-shadow-2, rgba(139, 92, 246, 0.34));
+}
+/* 图标底座：让六个入口的 emoji 有容器感，整齐划一 */
+.ay-g__ico {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: var(--t-rs, 24rpx);
+  font-size: 38rpx;
+  background: var(--t-ico, linear-gradient(150deg, rgba(192,132,252,0.28) 0%, rgba(245,167,215,0.20) 100%));
+  border: 1rpx solid var(--t-line, rgba(255, 255, 255, 0.16));
+  box-shadow: inset 0 1rpx 0 var(--t-2, rgba(255, 255, 255, 0.28));
+}
+.ay-g__name {
+  margin-top: 16rpx;
+  font-size: 27rpx;
+  font-weight: var(--t-fw, 700);
+  letter-spacing: var(--t-lst, 0.5rpx);
+  line-height: 1.3;
+  color: var(--t-text, #fff);
+}
+.ay-g__desc {
+  margin-top: 6rpx;
+  font-size: 21rpx;
+  line-height: 1.45;
+  color: var(--t-sub, rgba(255, 255, 255, 0.62));
+}
+
+/* ---------- 脚部文案 ---------- */
+.ay-foot {
+  margin-top: var(--t-gap, 30rpx);
+  padding: 0 40rpx;
+  color: var(--t-faint, rgba(255, 255, 255, 0.45));
+}
+
+/* ---------- 整体风格选择面板 ---------- */
+.ay-panel {
+  margin: 16rpx 24rpx 0;
+  padding: 28rpx 24rpx 24rpx;
+  border-radius: var(--t-r, 30rpx);
+  background: var(--t-panel, rgba(28, 22, 62, 0.92));
+  border: 1rpx solid var(--t-panel-line, rgba(192, 132, 252, 0.28));
+  backdrop-filter: var(--t-blur, blur(18px));
+  -webkit-backdrop-filter: var(--t-blur, blur(18px));
+  box-shadow: 0 16rpx 48rpx var(--t-shadow, rgba(8, 6, 26, 0.6));
+  animation: ay-panel-in 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes ay-panel-in {
+  from { opacity: 0; transform: translateY(-16rpx) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.ay-panel__hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6rpx;
+}
+.ay-panel__t {
+  font-size: 30rpx;
+  font-weight: var(--t-fw, 700);
+  letter-spacing: var(--t-lst, 1rpx);
+  color: var(--t-text, #fff);
+}
+.ay-panel__hint {
+  margin-bottom: 20rpx;
+  font-size: 21rpx;
+  line-height: 1.5;
+  color: var(--t-faint, rgba(255, 255, 255, 0.5));
+}
+.ay-panel__x {
+  width: 56rpx;
+  height: 56rpx;
+  line-height: 52rpx;
+  text-align: center;
+  border-radius: 50%;
+  font-size: 26rpx;
+  color: var(--t-sub, rgba(255, 255, 255, 0.7));
+  background: var(--t-glass-2, rgba(255, 255, 255, 0.10));
+}
+.ay-panel__x:active { transform: scale(0.9); }
+.ay-panel__grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+/* 2 列网格：8 套风格 = 4 行，一屏能看完 */
+.ay-theme {
+  position: relative;
+  width: 50%;
+  padding: 20rpx 18rpx;
+  border-radius: var(--t-rs, 24rpx);
+  background: var(--t-glass-2, rgba(255, 255, 255, 0.06));
+  border: 1rpx solid var(--t-line-2, rgba(255, 255, 255, 0.12));
+  transition: transform 160ms ease, background 200ms ease, border-color 200ms ease;
+}
+/* 子元素不单独响应点击，整卡作为点击热区（避免点了没反应） */
+/* 注意：WXSS 不支持通用选择器 *，必须枚举子元素类（与 SKILL 约定一致） */
+.ay-theme > .ay-theme__sw,
+.ay-theme > .ay-theme__emo,
+.ay-theme > .ay-theme__n,
+.ay-theme > .ay-theme__tag { pointer-events: none; }
+.ay-theme:active { transform: scale(0.96); }
+.ay-theme.on {
+  background: var(--t-glass, rgba(255, 255, 255, 0.14));
+  border-color: var(--t-1, #F5A7D7);
+  box-shadow: inset 0 0 0 2rpx var(--t-1, #F5A7D7), 0 0 22rpx var(--t-glowc, rgba(192, 132, 252, 0.30));
+}
+/* 色卡：面板上就能一眼看出「这几套真的不一样」 */
+.ay-theme__sw {
+  display: flex;
+  gap: 8rpx;
+  margin-bottom: 12rpx;
+}
+.ay-theme__dot {
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+  /* 用 --t-faint 而非写死白色：浅色风格（aurora/sakura/quartz）下面板是白的，
+     白色内描边会完全看不见，导致色卡像没画。 */
+  box-shadow: inset 0 0 0 1rpx var(--t-faint, rgba(255, 255, 255, 0.56));
+}
+.ay-theme__emo {
+  display: block;
+  font-size: 40rpx;
+  line-height: 1.1;
+}
+.ay-theme__n {
+  margin-top: 10rpx;
+  font-size: 27rpx;
+  font-weight: 700;
+  color: var(--t-text, #fff);
+}
+.ay-theme__tag {
+  margin-top: 4rpx;
+  font-size: 20rpx;
+  line-height: 1.4;
+  color: var(--t-sub, rgba(255, 255, 255, 0.58));
+}
+/* 选中角标 */
+.ay-theme.on::after {
+  content: '✓';
+  position: absolute;
+  right: 16rpx;
+  top: 14rpx;
+  font-size: 24rpx;
+  color: var(--t-1, #F5A7D7);
+  text-shadow: 0 0 10rpx var(--t-glowc, rgba(245, 167, 215, 0.8));
+}
+.ay-lg.reduced .ay-panel {
+  animation: none !important;
+}
+
+/* ---------- 脉冲反馈 ---------- */
+.ay-pulsefx {
+  position: fixed;
+  left: 50%;
+  top: 42%;
+  z-index: 60;
+  transform: translate(-50%, -50%);
+  font-size: 90rpx;
+  pointer-events: none;
+  animation: ay-pulsefx 720ms ease-out forwards;
+}
+@keyframes ay-pulsefx {
+  0%   { opacity: 0; transform: translate(-50%, -30%) scale(0.6); }
+  28%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -130%) scale(1.35); }
+}
+
+/* ---------- 底部 dock ---------- */
+.ay-dock {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 50;
+  display: flex;
+  padding: 12rpx 8rpx 12rpx;
+  /* 单独一行：低版本不识别 env() 时上面的 padding 仍然生效，不会整条塌掉 */
+  padding-bottom: calc(env(safe-area-inset-bottom) + 12rpx);
+  background: var(--t-dock, rgba(18, 14, 46, 0.82));
+  border-top: 1rpx solid var(--t-line-2, rgba(255, 255, 255, 0.12));
+  /* 上浮阴影 + 顶部一道亮线，让 dock 与内容「浮」起来而不是贴在屏幕上 */
+  box-shadow: 0 -10rpx 32rpx var(--t-shadow, rgba(8, 6, 26, 0.5));
+  backdrop-filter: var(--t-blur, blur(18px));
+  -webkit-backdrop-filter: var(--t-blur, blur(18px));
+}
+.ay-dock::before {
+  content: '';
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: 0;
+  height: 1rpx;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, var(--t-2, rgba(255, 255, 255, 0.45)) 50%, rgba(0, 0, 0, 0) 100%);
+}
+.ay-dock__i {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6rpx;
+  padding: 8rpx 0 4rpx;
+  color: var(--t-faint, rgba(255, 255, 255, 0.5));
+  font-size: 20rpx;
+  letter-spacing: 0.5rpx;
+  transition: transform 140ms ease, color 200ms ease;
+}
+.ay-dock__i:active { transform: scale(0.9); }
+.ay-dock__ic { font-size: 40rpx; line-height: 1; }
+.ay-dock__i.on {
+  color: var(--t-1, #F5A7D7);
+  text-shadow: 0 0 14rpx var(--t-glowc, rgba(245, 167, 215, 0.6));
+}
+/* 选中项加一个高亮圆点，位置感更明确 */
+.ay-dock__i.on::after {
+  content: '';
+  position: absolute;
+  top: 2rpx;
+  left: 50%;
+  width: 8rpx;
+  height: 8rpx;
+  margin-left: -4rpx;
+  border-radius: 50%;
+  background: var(--t-1, #F5A7D7);
+  box-shadow: 0 0 10rpx var(--t-glowc, rgba(245, 167, 215, 0.9));
+}
+
+/* ---------- 入场错落（在共享 ay-anim 之上补延迟） ---------- */
+/* 只对确定存在的类加延迟；避免 nth-of-type（WXSS 支持不可靠） */
+.ay-stats.ay-anim { animation-delay: 60ms; }
+.ay-grid { animation: ay-up 420ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* ---------- 无障碍：减弱动态 ----------
+   不依赖 @media (prefers-reduced-motion)（WXSS 对该媒体查询支持不完整）：
+   改由 index.ts 读 wx.getSystemSetting().reducedMotion，
+   为根节点追加 .reduced class，在这里按 class 关闭所有装饰性动画。 */
+.ay-lg.reduced .ay-blob,
+.ay-lg.reduced .ay-glow,
+.ay-lg.reduced .ay-grid,
+.ay-lg.reduced .ay-stats,
+.ay-lg.reduced .ay-card,
+.ay-lg.reduced .ay-g__in,
+.ay-lg.reduced .ay-energy,
+.ay-lg.reduced .ay-dock__i,
+.ay-lg.reduced .ay-pulsefx {
+  animation: none !important;
+  transition: none !important;
+}

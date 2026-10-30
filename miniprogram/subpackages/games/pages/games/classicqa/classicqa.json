@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "典籍常识问答",
+  "usingComponents": {
+    "game-shell": "/subpackages/games/components/game-shell/index"
+  },
+  "disableScroll": true
+}

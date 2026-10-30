@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "星语星球",
+  "navigationBarBackgroundColor": "#080A1C",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#080A1C",
+  "backgroundTextStyle": "light",
+  "usingComponents": {
+    "astro-sphere": "/subpackages/tools/components/astro-sphere/astro-sphere"
+  }
+}

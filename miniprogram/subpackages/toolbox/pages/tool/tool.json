@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "工具",
+  "navigationBarBackgroundColor": "#15110D",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#15110D",
+  "usingComponents": {
+    "flip-digit": "/components/flip-digit/flip-digit"
+  }
+}

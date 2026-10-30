@@ -1,0 +1,9 @@
+{
+  "name": "love",
+  "version": "1.0.0",
+  "description": "爱遇小栈云端支撑（房间配对共享同步 / 双方城市天气），密钥仅存服务端",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

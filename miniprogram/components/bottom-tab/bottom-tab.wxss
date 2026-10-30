@@ -1,0 +1,139 @@
+/* bottom-tab —— 中古侘寂 · 剧场版
+ * 保留原类名与结构（首页 index.wxml 依赖），在此基础上叠四层「高级感」：
+ *   ① dock 本体实体化：顶缘冠光 + 落地投影 + 内收暗线 → 像一块悬浮玉牌
+ *   ② 选中态聚光衬垫：一团柔光从中心绽开，替掉干瘪的单色条
+ *   ③ 渐变指示胶囊 + 图标微弹，焦点明确
+ *   ④ 徽标柔光描边 + 轻脉动，未读更抓眼
+ * 圆角 / 主阴影继续由 --home-bar-* 提供，保证「主页风格」维度仍然生效。
+ */
+
+.bottom-tab {
+  position: fixed;
+  left: 28rpx;
+  right: 28rpx;
+  bottom: calc(18rpx + env(safe-area-inset-bottom));
+  display: flex;
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 2rpx solid var(--glass-border);
+  border-radius: var(--home-bar-r);
+  padding: 14rpx 8rpx 12rpx;
+  z-index: 100;
+  /* 复合阴影：本体投影 + 顶缘金光 + 底缘暗线 */
+  box-shadow:
+    var(--home-bar-shadow),
+    inset 0 2rpx 0 rgba(255, 233, 198, .14),
+    inset 0 -1rpx 0 rgba(0, 0, 0, .3);
+  animation: btab-in .56s cubic-bezier(.16, .84, .28, 1) both;
+}
+
+@keyframes btab-in {
+  from { opacity: 0; transform: translate3d(0, 48rpx, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+.tab-item {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 4rpx;
+  position: relative;
+  transition: transform 240ms cubic-bezier(.16, .84, .28, 1);
+  border-radius: 999rpx;
+}
+
+/* ① 聚光衬垫：选中时从中心绽开的一团柔光 */
+.tab-item::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 112rpx;
+  height: 92rpx;
+  transform: translate(-50%, -50%) scale(.5);
+  border-radius: 34rpx;
+  background: radial-gradient(ellipse at center, var(--color-primary-soft), rgba(0, 0, 0, 0) 72%);
+  opacity: 0;
+  transition:
+    opacity 260ms cubic-bezier(.16, .84, .28, 1),
+    transform 420ms cubic-bezier(.34, 1.56, .64, 1);
+  pointer-events: none;
+}
+.tab-item.is-active::before {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.tab-icon {
+  font-size: 40rpx;
+  line-height: 1;
+  filter: grayscale(0.85);
+  opacity: 0.6;
+  transition:
+    filter 220ms,
+    opacity 220ms,
+    transform 380ms cubic-bezier(.34, 1.56, .64, 1);
+  position: relative;
+  z-index: 1;
+}
+.tab-label {
+  font-size: 20rpx;
+  letter-spacing: 1rpx;
+  color: var(--color-text-mute);
+  transition: color 220ms;
+  position: relative;
+  z-index: 1;
+}
+
+/* ② 激活态：图标抬起着色 + 文案加重 */
+.tab-item.is-active .tab-icon {
+  filter: grayscale(0);
+  opacity: 1;
+  transform: translate3d(0, -6rpx, 0) scale(1.16);
+}
+.tab-item.is-active .tab-label { color: var(--color-primary-deep); font-weight: 600; }
+
+/* ③ 指示条 → 渐变胶囊，带落地光与展开动画 */
+.tab-item.is-active::after {
+  content: '';
+  position: absolute;
+  bottom: 2rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36rpx;
+  height: 8rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  box-shadow: 0 4rpx 12rpx var(--color-primary-shadow);
+  animation: btab-dot 420ms cubic-bezier(.34, 1.56, .64, 1) both;
+}
+
+@keyframes btab-dot {
+  from { width: 0; opacity: 0; }
+  to { width: 36rpx; opacity: 1; }
+}
+
+/* ④ 徽标：柔光描边 + 轻脉动 */
+.tab-badge {
+  position: absolute; top: 0; right: 28%;
+  min-width: 28rpx; height: 28rpx;
+  padding: 0 8rpx;
+  background: linear-gradient(135deg, var(--color-danger), #D06B49);
+  color: #F7F2E8;
+  border-radius: 999rpx;
+  font-size: 18rpx;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600;
+  border: 2rpx solid var(--color-card);
+  box-shadow: 0 4rpx 10rpx rgba(192, 82, 47, .34);
+  animation: btab-badge 2.6s ease-in-out infinite;
+  z-index: 2;
+}
+
+@keyframes btab-badge {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* 按压：下沉 + 回弹，而非单纯缩小 */
+.tab-item:active { transform: translate3d(0, 3rpx, 0) scale(.94); }

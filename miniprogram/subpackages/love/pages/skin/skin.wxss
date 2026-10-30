@@ -1,0 +1,68 @@
+/* pages/love/skin/skin.wxss */
+@import "../../styles/love-common.wxss";
+
+.sk-preview {
+  margin: 22rpx 24rpx 0;
+  padding: 18rpx;
+  border-radius: 32rpx;
+  background: var(--ay-card, #fff);
+  box-shadow: 0 10rpx 30rpx var(--ay-shadow, rgba(255, 127, 156, 0.16));
+}
+.sk-preview__body {
+  padding: 0 4rpx;
+}
+
+/* 皮肤卡片：卡片内部直接用该皮肤自己的变量，所见即所得 */
+.sk-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 18rpx;
+  margin-bottom: 16rpx;
+  border-radius: 22rpx;
+  background: var(--ay-card-soft, #FFF1EC);
+  transition: transform 160ms ease;
+}
+.sk-item:active {
+  transform: scale(0.98);
+}
+.sk-swatch {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  width: 76rpx;
+  height: 76rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+}
+.sk-swatch__c {
+  flex: 1;
+}
+.sk-item__main {
+  flex: 1;
+  min-width: 0;
+  padding: 0 18rpx;
+}
+.sk-item__name {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--ay-text, #4A3238);
+}
+.sk-item__tag {
+  margin-top: 4rpx;
+  font-size: 22rpx;
+  color: var(--ay-sub, #8A6E74);
+}
+.sk-item__state {
+  flex: none;
+  padding: 8rpx 20rpx;
+  border-radius: 999rpx;
+  font-size: 23rpx;
+  color: var(--ay-primary, #FF7F9C);
+  border: 2rpx solid var(--ay-primary, #FF7F9C);
+}
+.sk-item__state--on {
+  background: var(--ay-primary, #FF7F9C);
+  color: #fff;
+  border-color: transparent;
+  font-weight: 700;
+}

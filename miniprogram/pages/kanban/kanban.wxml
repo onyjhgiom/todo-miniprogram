@@ -1,0 +1,82 @@
+<view class="kb-page themed" data-theme="{{theme}}" style="{{themeStyle}};{{bgStyle}}">
+  <!-- 电影级舞台背景：随主题切换场景图/场景动画（src 为空时走 CSS 场景） -->
+  <fx-stage mode="{{fxMode}}" src="{{fxSrc}}" full="{{fxFull}}" rays="{{true}}" dust="{{false}}" topglow="{{true}}" level="{{fxLevel}}" />
+  <view class="kb-header">
+    <view class="kb-title">四象限看板</view>
+    <view class="kb-sub">按重要 × 紧急 分类</view>
+  </view>
+
+  <view class="kb-grid">
+    <view class="kb-quadrant kb-q1" style="--kb-color: #ef4444;">
+      <view class="kb-q-header">
+        <view class="kb-q-dot"></view>
+        <text class="kb-q-title">🔥 重要 + 紧急</text>
+        <text class="kb-q-count">{{columns.q1.length}}</text>
+        <view class="kb-q-add" hover-class="tap-press" hover-stay-time="60" catchtap="onAddTo" data-q="1">＋</view>
+      </view>
+      <view class="kb-q-body">
+        <view wx:for="{{columns.q1}}" wx:key="_id" class="kb-card" hover-class="tap-press" hover-stay-time="60" bindtap="onOpen" data-id="{{item._id}}">
+          <text class="kb-card-text">{{item.content}}</text>
+          <view wx:if="{{item.dueDateText}}" class="kb-card-meta">{{item.dueDateText}}</view>
+          <view class="kb-card-done" catchtap="onCompleteTap" data-id="{{item._id}}">✓</view>
+        </view>
+        <view wx:if="{{columns.q1.length === 0}}" class="kb-q-empty">拖到这里立即处理</view>
+      </view>
+    </view>
+
+    <view class="kb-quadrant kb-q2" style="--kb-color: #f59e0b;">
+      <view class="kb-q-header">
+        <view class="kb-q-dot"></view>
+        <text class="kb-q-title">📌 重要 + 不紧急</text>
+        <text class="kb-q-count">{{columns.q2.length}}</text>
+        <view class="kb-q-add" hover-class="tap-press" hover-stay-time="60" catchtap="onAddTo" data-q="2">＋</view>
+      </view>
+      <view class="kb-q-body">
+        <view wx:for="{{columns.q2}}" wx:key="_id" class="kb-card" hover-class="tap-press" hover-stay-time="60" bindtap="onOpen" data-id="{{item._id}}">
+          <text class="kb-card-text">{{item.content}}</text>
+          <view wx:if="{{item.dueDateText}}" class="kb-card-meta">{{item.dueDateText}}</view>
+          <view class="kb-card-done" catchtap="onCompleteTap" data-id="{{item._id}}">✓</view>
+        </view>
+        <view wx:if="{{columns.q2.length === 0}}" class="kb-q-empty">规划时间做</view>
+      </view>
+    </view>
+
+    <view class="kb-quadrant kb-q3" style="--kb-color: #3b82f6;">
+      <view class="kb-q-header">
+        <view class="kb-q-dot"></view>
+        <text class="kb-q-title">⚡ 紧急 + 不重要</text>
+        <text class="kb-q-count">{{columns.q3.length}}</text>
+        <view class="kb-q-add" hover-class="tap-press" hover-stay-time="60" catchtap="onAddTo" data-q="3">＋</view>
+      </view>
+      <view class="kb-q-body">
+        <view wx:for="{{columns.q3}}" wx:key="_id" class="kb-card" hover-class="tap-press" hover-stay-time="60" bindtap="onOpen" data-id="{{item._id}}">
+          <text class="kb-card-text">{{item.content}}</text>
+          <view wx:if="{{item.dueDateText}}" class="kb-card-meta">{{item.dueDateText}}</view>
+          <view class="kb-card-done" catchtap="onCompleteTap" data-id="{{item._id}}">✓</view>
+        </view>
+        <view wx:if="{{columns.q3.length === 0}}" class="kb-q-empty">尽快处理或委派</view>
+      </view>
+    </view>
+
+    <view class="kb-quadrant kb-q4" style="--kb-color: #9ca3af;">
+      <view class="kb-q-header">
+        <view class="kb-q-dot"></view>
+        <text class="kb-q-title">☁️ 不重要 + 不紧急</text>
+        <text class="kb-q-count">{{columns.q4.length}}</text>
+        <view class="kb-q-add" hover-class="tap-press" hover-stay-time="60" catchtap="onAddTo" data-q="4">＋</view>
+      </view>
+      <view class="kb-q-body">
+        <view wx:for="{{columns.q4}}" wx:key="_id" class="kb-card" hover-class="tap-press" hover-stay-time="60" bindtap="onOpen" data-id="{{item._id}}">
+          <text class="kb-card-text">{{item.content}}</text>
+          <view wx:if="{{item.dueDateText}}" class="kb-card-meta">{{item.dueDateText}}</view>
+          <view class="kb-card-done" catchtap="onCompleteTap" data-id="{{item._id}}">✓</view>
+        </view>
+        <view wx:if="{{columns.q4.length === 0}}" class="kb-q-empty">有空再说</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="kb-tip">
+    <text>💡 点「＋」快速添加；点卡片可查看详情 / 编辑 / 移动象限 / 完成 / 删除。未手动设置时按优先级与截止时间自动归类</text>
+  </view>
+</view>

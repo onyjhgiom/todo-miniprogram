@@ -1,0 +1,1325 @@
+/* pages/astro/index.wxss —— 星语星球 · 沉浸式 3D 星象仪表盘
+ *
+ * 【与 astro-common.wxss 的关系】
+ * 本页做了整页重构，视觉自成体系（.astro-home 命名空间 + --a-* 变量），
+ * 因此这里**不再 @import astro-common**：既避免它与本页的 .astro-banner / .astro-page
+ * 旧规则互相打架，也让本页样式表更小。
+ * 其它 astro 子页（horoscope / tarot / …）仍照旧 import，astro-common.wxss 不孤立。
+ *
+ * 【硬约束（踩过的坑）】
+ *  1. WXSS 不支持通用选择器 `*`，box-sizing 必须逐个选择器显式声明；
+ *  2. 小程序**不默认** box-sizing: border-box；
+ *  3. 不支持 @media (prefers-reduced-motion)，减弱动效一律用 `.is-reduced` 类驱动；
+ *  4. 不用 conic-gradient（Skyline 不支持），进度一律用「条宽百分比」表达；
+ *  5. 背景动画周期 20~40s，禁快速动画（需求一）；
+ *  6. **尺寸一律写 calc(N * var(--u))，不写裸 rpx**：rpx 只与视口宽成正比，
+ *     一旦按宽度改列数，卡片内部尺寸就会与新卡宽错配（图标撑爆、标题折行）。
+ *     --u 让「列数」和「尺寸」用同一套参考系，手机端取 rpx、宽窗端取固定 px。
+ *     详见 .astro-home 里 --u 的定义注释。
+ *  7. 响应式**不用 @media**，改由 ts 按 windowWidth 挂 `.is-wide` 类
+ *     （小程序 px 媒体查询在真机会误命中，见文末「响应式」节的详细说明）。
+ */
+
+/* ============================ 视觉变量（需求十一） ============================ */
+.astro-home {
+  --a-bg: #080A1C;
+  --a-primary: #6D5CE7;
+  --a-secondary: #8B7CF6;
+  --a-deep: #30265C;
+  --a-gold: #D8B66A;
+  --a-white: #F7F7FF;
+  --a-sub: #9FA3C4;
+  --a-glass: rgba(255, 255, 255, 0.08);
+  --a-border: rgba(255, 255, 255, 0.12);
+
+  /* ------------------------------------------------------------
+   * --u：本页的「缩放单位」（全文尺寸都写成 calc(N * var(--u))）
+   * ------------------------------------------------------------
+   * 为什么不用 rpx：
+   *   rpx 是**视口比例单位**（750rpx 恒等于视口宽），尺寸只跟视口宽度成正比，
+   *   与「一行放几个」无关。一旦在宽窗上把功能网格从 2 列改成 4 列，
+   *   卡片宽度变成视口的 ~23%，而图标/字号仍是按视口算的固定比例（100rpx = 13.3%），
+   *   于是图标占卡片宽度的比例从 31% 暴涨到 58% —— 卡片被挤爆，标题被迫折行。
+   *   这也是「改列数」必然踩的坑：**列数与尺寸必须用同一套参考系**。
+   *
+   * 解法：把参考系抽象成 --u，手机端取 rpx（与原样逐像素等价），
+   *   宽窗端取固定 px（见文末「响应式」节），于是列数与内部尺寸同时可控。
+   * ------------------------------------------------------------ */
+  /* 仅作 JS 未注入前的兜底：真机上自定义属性里的 rpx 可能不被转换（按 1px），
+     导致整页放大挤爆 flex 行。运行时 applyLayout() 会在根节点 style 内联
+     真实 px 值覆盖这里 —— 改缩放逻辑请去 index.ts 的 applyLayout()。 */
+  --u: 1rpx;
+
+  position: relative;
+  min-height: 100vh;
+  padding: 0 calc(24 * var(--u)) calc(240 * var(--u));
+  box-sizing: border-box;
+  background: var(--a-bg);
+  color: var(--a-white);
+  overflow-x: hidden;
+}
+
+/* box-sizing 分组声明（WXSS 无通配符，必须枚举） */
+.astro-home,
+.cbg,
+.cbg__nebula,
+.cbg__dust,
+.cbg__glow,
+.cbg__horizon,
+.hero,
+.hero__canvas,
+.hero__text,
+.hero__note,
+.hero__hint,
+.zodiac,
+.zodiac__inner,
+.zodiac__item,
+.zodiac__icon,
+.energy,
+.energy__hd,
+.energy__tag,
+.energy__body,
+.ring,
+.ring__inner,
+.energy__right,
+.dims,
+.dim,
+.dim__bar,
+.dim__in,
+.energy__foot,
+.ai,
+.ai__hd,
+.ai__avatar,
+.ai__meta,
+.ai__moon,
+.ai__quote,
+.ai__scores,
+.ai__score,
+.ai__cta,
+.feats,
+.feats__hd,
+.fgroup,
+.fgroup__hd,
+.fgroup__bar,
+.fgrid,
+.fcard,
+.fcard__ico,
+.fcard__glyph,
+.fcard__shine,
+.cta,
+.cta__orb,
+.cta__body,
+.cta__btn,
+.recent,
+.recent__list,
+.recent__row,
+.recent__body,
+.astro-foot,
+.bnav,
+.bnav__i,
+.mask,
+.detail,
+.detail__bar,
+.detail__bin,
+.detail__acts,
+.detail__btn {
+  box-sizing: border-box;
+}
+
+/* ============================ 一、CosmicBackground ============================ */
+.cbg {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 50% -10%, #1A1440 0%, #0D0B26 42%, #080A1C 100%);
+}
+
+/* 星云 1（紫，左上 → 缓慢漂移） */
+.cbg__nebula--1 {
+  position: absolute;
+  left: -22%;
+  top: -8%;
+  width: 118%;
+  height: 62%;
+  border-radius: 50%;
+  filter: blur(calc(70 * var(--u)));
+  opacity: 0.5;
+  background: radial-gradient(circle at 50% 50%, rgba(109, 92, 231, 0.55) 0%, rgba(109, 92, 231, 0) 68%);
+  animation: cbgDriftA 28s ease-in-out infinite;
+}
+
+/* 星云 2（金+蓝，右下 → 反向漂移，与 1 形成呼吸差拍） */
+.cbg__nebula--2 {
+  position: absolute;
+  right: -26%;
+  bottom: 4%;
+  width: 108%;
+  height: 58%;
+  border-radius: 50%;
+  filter: blur(calc(80 * var(--u)));
+  opacity: 0.42;
+  background: radial-gradient(circle at 50% 50%, rgba(91, 141, 239, 0.40) 0%, rgba(216, 182, 106, 0.09) 42%, rgba(216, 182, 106, 0) 70%);
+  animation: cbgDriftB 34s ease-in-out infinite;
+}
+
+/* 星尘（细密点阵，极慢上浮） */
+.cbg__dust {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  top: -10%;
+  bottom: -10%;
+  opacity: 0.55;
+  background-image:
+    radial-gradient(calc(1.6 * var(--u)) calc(1.6 * var(--u)) at 12% 18%, rgba(247, 247, 255, 0.9) 50%, transparent 51%),
+    radial-gradient(calc(1.4 * var(--u)) calc(1.4 * var(--u)) at 28% 62%, rgba(139, 124, 246, 0.9) 50%, transparent 51%),
+    radial-gradient(calc(1.8 * var(--u)) calc(1.8 * var(--u)) at 46% 34%, rgba(247, 247, 255, 0.8) 50%, transparent 51%),
+    radial-gradient(calc(1.3 * var(--u)) calc(1.3 * var(--u)) at 62% 76%, rgba(216, 182, 106, 0.85) 50%, transparent 51%),
+    radial-gradient(calc(1.7 * var(--u)) calc(1.7 * var(--u)) at 78% 26%, rgba(247, 247, 255, 0.85) 50%, transparent 51%),
+    radial-gradient(calc(1.4 * var(--u)) calc(1.4 * var(--u)) at 88% 58%, rgba(139, 124, 246, 0.85) 50%, transparent 51%),
+    radial-gradient(calc(1.5 * var(--u)) calc(1.5 * var(--u)) at 36% 88%, rgba(247, 247, 255, 0.7) 50%, transparent 51%),
+    radial-gradient(calc(1.3 * var(--u)) calc(1.3 * var(--u)) at 70% 8%, rgba(216, 182, 106, 0.7) 50%, transparent 51%);
+  background-size: calc(340 * var(--u)) calc(340 * var(--u));
+  background-repeat: repeat;
+  animation: cbgDust 40s linear infinite;
+}
+
+/* 环境辉光（整体明暗呼吸，24s） */
+.cbg__glow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 66%;
+  background: radial-gradient(70% 60% at 50% 0%, rgba(139, 124, 246, 0.20) 0%, rgba(139, 124, 246, 0) 70%);
+  animation: cbgGlow 24s ease-in-out infinite;
+}
+
+/* 地平线暖光（替代写实山脉剪影：安全、不依赖 clip-path）
+   刻意压得很淡 —— 之前用 0.24 金色时整条带在深底上会显成一片灰褐「泥」，很脏。 */
+.cbg__horizon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 46%;
+  height: 34%;
+  background:
+    radial-gradient(78% 100% at 50% 118%, rgba(216, 182, 106, 0.14) 0%, rgba(216, 182, 106, 0) 60%),
+    radial-gradient(60% 90% at 50% 130%, rgba(139, 124, 246, 0.13) 0%, rgba(139, 124, 246, 0) 60%);
+  pointer-events: none;
+}
+
+@keyframes cbgDriftA {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(4%, 3%, 0) scale(1.08); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes cbgDriftB {
+  0%   { transform: translate3d(0, 0, 0) scale(1.04); }
+  50%  { transform: translate3d(-5%, -4%, 0) scale(1); }
+  100% { transform: translate3d(0, 0, 0) scale(1.04); }
+}
+@keyframes cbgDust {
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(calc(-340 * var(--u)), calc(-340 * var(--u)), 0); }
+}
+@keyframes cbgGlow {
+  0%   { opacity: 0.7; }
+  50%  { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
+/* ============================ 二、Hero：标题 + 星球 ============================ */
+.hero {
+  position: relative;
+  z-index: 1;
+  padding-top: calc(12 * var(--u));
+}
+
+.hero__canvas {
+  /* 星球偏右，给左侧标题让位（贴近设计稿构图） */
+  margin-left: 14%;
+  opacity: 0;
+  transform: scale(0.86);
+  transition: opacity 900ms cubic-bezier(0.22, 1, 0.36, 1), transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hero.is-on .hero__canvas {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.hero__text {
+  position: absolute;
+  left: 0;
+  top: calc(26 * var(--u));
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(calc(26 * var(--u)));
+  transition: opacity 640ms cubic-bezier(0.22, 1, 0.36, 1), transform 640ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hero__text.is-on {
+  opacity: 1;
+  transform: none;
+}
+.hero__sub {
+  font-size: calc(22 * var(--u));
+  letter-spacing: calc(2 * var(--u));
+  color: var(--a-sub);
+}
+.hero__title {
+  margin-top: calc(10 * var(--u));
+  font-size: calc(64 * var(--u));
+  font-weight: 800;
+  letter-spacing: calc(6 * var(--u));
+  color: var(--a-white);
+  text-shadow: 0 0 calc(40 * var(--u)) rgba(139, 124, 246, 0.75), 0 0 calc(12 * var(--u)) rgba(247, 247, 255, 0.5);
+}
+
+.hero__note {
+  position: absolute;
+  right: 0;
+  top: calc(190 * var(--u));
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none;
+  font-size: calc(22 * var(--u));
+  line-height: 1.6;
+  letter-spacing: calc(2 * var(--u));
+  color: rgba(216, 182, 106, 0.85);
+  opacity: 0;
+  transform: translateX(calc(18 * var(--u)));
+  transition: opacity 700ms ease 120ms, transform 700ms ease 120ms;
+}
+.hero__note.is-on {
+  opacity: 1;
+  transform: none;
+}
+
+.hero__hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(4 * var(--u));
+  z-index: 2;
+  text-align: center;
+  font-size: calc(20 * var(--u));
+  letter-spacing: calc(1 * var(--u));
+  color: rgba(159, 163, 196, 0.75);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 800ms ease 300ms;
+}
+.hero__hint.is-on {
+  opacity: 1;
+}
+
+/* ============================ 本命星座选择器 ============================ */
+.zodiac {
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+  margin: calc(6 * var(--u)) 0 calc(22 * var(--u));
+  opacity: 0;
+  transform: translateY(calc(20 * var(--u)));
+  transition: opacity 560ms cubic-bezier(0.22, 1, 0.36, 1), transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.zodiac.is-on {
+  opacity: 1;
+  transform: none;
+}
+.zodiac__inner {
+  display: inline-flex;
+  gap: calc(12 * var(--u));
+  /* 左右留出与页面一致的呼吸位，首/末张卡不会贴着屏幕边缘被硬切 */
+  padding: calc(6 * var(--u)) calc(24 * var(--u));
+}
+.zodiac__item {
+  flex-shrink: 0;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(8 * var(--u));
+  width: calc(112 * var(--u));
+  padding: calc(12 * var(--u)) calc(8 * var(--u)) calc(14 * var(--u));
+  border-radius: calc(20 * var(--u));
+  background: var(--a-glass);
+  border: calc(1 * var(--u)) solid var(--a-border);
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), background 220ms ease, box-shadow 220ms ease;
+}
+.zodiac__item.is-active {
+  background: linear-gradient(160deg, rgba(109, 92, 231, 0.55), rgba(139, 124, 246, 0.34));
+  border-color: rgba(216, 182, 106, 0.55);
+  box-shadow: 0 calc(6 * var(--u)) calc(22 * var(--u)) rgba(109, 92, 231, 0.5), inset 0 calc(1 * var(--u)) 0 rgba(255, 255, 255, 0.16);
+  transform: translateY(calc(-4 * var(--u)));
+}
+.zodiac__item--hover {
+  transform: translateY(calc(2 * var(--u))) scale(0.97);
+}
+.zodiac__icon {
+  width: calc(62 * var(--u));
+  height: calc(62 * var(--u));
+  border-radius: 50%;
+}
+.zodiac__name {
+  font-size: calc(20 * var(--u));
+  letter-spacing: calc(1 * var(--u));
+  color: rgba(233, 236, 255, 0.88);
+}
+
+/* ============================ 五、DailyEnergy ============================ */
+.energy {
+  position: relative;
+  z-index: 1;
+  padding: calc(26 * var(--u)) calc(24 * var(--u)) calc(22 * var(--u));
+  border-radius: calc(30 * var(--u));
+  background: linear-gradient(165deg, rgba(48, 38, 92, 0.62) 0%, rgba(13, 11, 38, 0.72) 100%);
+  border: calc(1 * var(--u)) solid var(--a-border);
+  box-shadow: 0 calc(16 * var(--u)) calc(44 * var(--u)) rgba(0, 0, 0, 0.5), inset 0 calc(1 * var(--u)) 0 rgba(255, 255, 255, 0.07);
+  opacity: 0;
+  transform: translateY(calc(28 * var(--u)));
+  transition: opacity 620ms cubic-bezier(0.22, 1, 0.36, 1), transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.energy.is-on {
+  opacity: 1;
+  transform: none;
+}
+
+.energy__hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: calc(20 * var(--u));
+}
+.energy__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(8 * var(--u));
+  flex-shrink: 0;
+  /* 标签与日期同处一行：禁止收缩与换行，否则窄屏会把「2026-10-04」折成两行 */
+  white-space: nowrap;
+  padding: calc(6 * var(--u)) calc(18 * var(--u));
+  border-radius: calc(999 * var(--u));
+  font-size: calc(22 * var(--u));
+  letter-spacing: calc(1 * var(--u));
+  color: var(--a-white);
+  background: rgba(109, 92, 231, 0.28);
+  border: calc(1 * var(--u)) solid rgba(139, 124, 246, 0.42);
+}
+.energy__spark {
+  color: var(--a-gold);
+}
+.energy__date {
+  flex-shrink: 0;
+  margin-left: calc(12 * var(--u));
+  white-space: nowrap;
+  font-size: calc(22 * var(--u));
+  letter-spacing: calc(1 * var(--u));
+  color: var(--a-gold);
+}
+
+.energy__body {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: calc(26 * var(--u));
+}
+
+/* 综合运势环 */
+.ring {
+  position: relative;
+  flex-shrink: 0;
+  width: calc(226 * var(--u));
+  height: calc(226 * var(--u));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(70% 70% at 50% 34%, rgba(247, 247, 255, 0.18) 0%, rgba(109, 92, 231, 0.34) 46%, rgba(48, 38, 92, 0.62) 100%);
+  border: calc(2 * var(--u)) solid rgba(216, 182, 106, 0.45);
+  box-shadow: 0 0 calc(46 * var(--u)) rgba(139, 124, 246, 0.5), inset 0 0 calc(34 * var(--u)) rgba(139, 124, 246, 0.34);
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.ring--hover {
+  transform: scale(0.97);
+}
+/* 外圈虚线（缓慢自转，暗示「能量在流动」） */
+.ring::after {
+  content: '';
+  position: absolute;
+  left: calc(-14 * var(--u));
+  right: calc(-14 * var(--u));
+  top: calc(-14 * var(--u));
+  bottom: calc(-14 * var(--u));
+  border-radius: 50%;
+  border: calc(1 * var(--u)) dashed rgba(216, 182, 106, 0.34);
+  animation: ringSpin 26s linear infinite;
+}
+.ring__glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 120%;
+  height: 120%;
+  margin-left: -60%;
+  margin-top: -60%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 124, 246, 0.30) 0%, rgba(139, 124, 246, 0) 66%);
+  animation: ringPulse 3s ease-in-out infinite;
+}
+.ring__inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.ring__num {
+  font-size: calc(68 * var(--u));
+  font-weight: 800;
+  line-height: 1;
+  color: var(--a-white);
+  text-shadow: 0 0 calc(24 * var(--u)) rgba(216, 182, 106, 0.7);
+}
+.ring__unit {
+  font-size: calc(20 * var(--u));
+  letter-spacing: calc(1 * var(--u));
+  color: rgba(247, 247, 255, 0.7);
+  margin-top: calc(2 * var(--u));
+}
+.ring__label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(22 * var(--u));
+  text-align: center;
+  font-size: calc(20 * var(--u));
+  letter-spacing: calc(2 * var(--u));
+  color: rgba(216, 182, 106, 0.9);
+}
+
+@keyframes ringSpin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes ringPulse {
+  0%   { opacity: 0.5; transform: scale(0.94); }
+  50%  { opacity: 1; transform: scale(1.06); }
+  100% { opacity: 0.5; transform: scale(0.94); }
+}
+
+.energy__right {
+  /* 兜底：文案列保底 300u 宽。空间不够时（flex-wrap 已开）整列换行到
+     运势环下方占满整行，而不是被压成一两个字宽的竖排（真机已复现） */
+  flex: 1 1 calc(300 * var(--u));
+  min-width: calc(300 * var(--u));
+}
+.energy__summary {
+  display: block;
+  font-size: calc(26 * var(--u));
+  line-height: 1.62;
+  letter-spacing: calc(0.5 * var(--u));
+  color: rgba(233, 236, 255, 0.94);
+  margin-bottom: calc(16 * var(--u));
+}
+
+.dims {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: calc(12 * var(--u)) calc(16 * var(--u));
+}
+.dim__hd {
+  display: flex;
+  align-items: center;
+  gap: calc(6 * var(--u));
+  margin-bottom: calc(6 * var(--u));
+}
+.dim__ico {
+  font-size: calc(20 * var(--u));
+}
+.dim__label {
+  flex: 1;
+  font-size: calc(20 * var(--u));
+  color: var(--a-sub);
+  letter-spacing: calc(0.5 * var(--u));
+}
+.dim__val {
+  font-size: calc(22 * var(--u));
+  font-weight: 700;
+  color: var(--a-white);
+}
+.dim__bar {
+  height: calc(8 * var(--u));
+  border-radius: calc(999 * var(--u));
+  background: rgba(255, 255, 255, 0.10);
+  overflow: hidden;
+}
+.dim__in {
+  height: 100%;
+  border-radius: calc(999 * var(--u));
+  background: linear-gradient(90deg, var(--a-primary), var(--a-secondary));
+  box-shadow: 0 0 calc(12 * var(--u)) rgba(139, 124, 246, 0.7);
+  transition: width 720ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.energy__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: calc(18 * var(--u));
+  padding-top: calc(14 * var(--u));
+  border-top: calc(1 * var(--u)) solid rgba(255, 255, 255, 0.07);
+  font-size: calc(20 * var(--u));
+  color: rgba(159, 163, 196, 0.75);
+}
+.energy__pulse {
+  color: var(--a-gold);
+}
+
+/* ============================ 七、AIInsight ============================ */
+.ai {
+  position: relative;
+  z-index: 1;
+  margin-top: calc(20 * var(--u));
+  padding: calc(26 * var(--u)) calc(24 * var(--u));
+  border-radius: calc(30 * var(--u));
+  background: linear-gradient(160deg, rgba(109, 92, 231, 0.20) 0%, rgba(13, 11, 38, 0.76) 62%);
+  border: calc(1 * var(--u)) solid rgba(139, 124, 246, 0.28);
+  box-shadow: 0 calc(14 * var(--u)) calc(40 * var(--u)) rgba(0, 0, 0, 0.46), inset 0 calc(1 * var(--u)) 0 rgba(255, 255, 255, 0.07);
+  opacity: 0;
+  transform: translateY(calc(28 * var(--u)));
+  transition: opacity 620ms cubic-bezier(0.22, 1, 0.36, 1), transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.ai.is-on {
+  opacity: 1;
+  transform: none;
+}
+
+.ai__hd {
+  display: flex;
+  align-items: center;
+  /* 兜底：月相胶囊放不下时换行，别挤压中间的标题/副标题列 */
+  flex-wrap: wrap;
+  gap: calc(16 * var(--u));
+  margin-bottom: calc(18 * var(--u));
+}
+.ai__avatar {
+  flex-shrink: 0;
+  width: calc(68 * var(--u));
+  height: calc(68 * var(--u));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(32 * var(--u));
+  color: var(--a-white);
+  background: radial-gradient(circle at 36% 30%, rgba(247, 247, 255, 0.42), rgba(109, 92, 231, 0.62) 62%, rgba(48, 38, 92, 0.9) 100%);
+  box-shadow: 0 0 calc(26 * var(--u)) rgba(139, 124, 246, 0.6);
+}
+.ai__meta {
+  /* 兜底：标题/副标题列保底 260u 宽，不够则让月相胶囊换行（见 ai__hd） */
+  flex: 1 1 calc(260 * var(--u));
+  min-width: calc(260 * var(--u));
+  display: flex;
+  flex-direction: column;
+  gap: calc(4 * var(--u));
+}
+.ai__t {
+  font-size: calc(28 * var(--u));
+  font-weight: 700;
+  letter-spacing: calc(1 * var(--u));
+  color: var(--a-white);
+  /* 标题永不折行：窄屏下宁可副标题换行，也不要把「AI 今日星象」压成单字竖排 */
+  white-space: nowrap;
+}
+.ai__s {
+  font-size: calc(20 * var(--u));
+  color: var(--a-sub);
+  line-height: 1.5;
+}
+.ai__moon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: calc(6 * var(--u));
+  padding: calc(6 * var(--u)) calc(14 * var(--u));
+  border-radius: calc(999 * var(--u));
+  background: var(--a-glass);
+  border: calc(1 * var(--u)) solid var(--a-border);
+}
+.ai__moonico {
+  font-size: calc(22 * var(--u));
+}
+.ai__moontx {
+  font-size: calc(20 * var(--u));
+  color: rgba(216, 182, 106, 0.9);
+}
+
+.ai__quote {
+  position: relative;
+  padding: calc(18 * var(--u)) calc(20 * var(--u));
+  border-radius: calc(20 * var(--u));
+  background: rgba(255, 255, 255, 0.05);
+  border-left: calc(4 * var(--u)) solid var(--a-gold);
+  font-size: calc(26 * var(--u));
+  line-height: 1.66;
+  letter-spacing: calc(0.4 * var(--u));
+  color: rgba(233, 236, 255, 0.94);
+}
+
+.ai__scores {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: calc(12 * var(--u));
+  margin-top: calc(18 * var(--u));
+}
+.ai__score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(6 * var(--u));
+  padding: calc(16 * var(--u)) 0;
+  border-radius: calc(18 * var(--u));
+  background: rgba(255, 255, 255, 0.05);
+  border: calc(1 * var(--u)) solid rgba(255, 255, 255, 0.07);
+}
+.ai__scoreico {
+  font-size: calc(24 * var(--u));
+}
+.ai__scorev {
+  font-size: calc(30 * var(--u));
+  font-weight: 800;
+  color: var(--a-white);
+}
+.ai__scorel {
+  font-size: calc(20 * var(--u));
+  color: var(--a-sub);
+}
+
+.ai__cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(10 * var(--u));
+  margin-top: calc(20 * var(--u));
+  padding: calc(22 * var(--u)) 0;
+  border-radius: calc(999 * var(--u));
+  background: linear-gradient(135deg, var(--a-primary) 0%, var(--a-secondary) 100%);
+  box-shadow: 0 calc(10 * var(--u)) calc(28 * var(--u)) rgba(109, 92, 231, 0.5);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+.ai__cta--hover {
+  transform: scale(0.975);
+  box-shadow: 0 calc(5 * var(--u)) calc(16 * var(--u)) rgba(109, 92, 231, 0.62);
+}
+.ai__ctatx {
+  font-size: calc(28 * var(--u));
+  font-weight: 700;
+  letter-spacing: calc(2 * var(--u));
+  color: var(--a-white);
+}
+.ai__ctaarrow {
+  font-size: calc(28 * var(--u));
+  color: var(--a-white);
+}
+
+/* ============================ 八、AstroFeatures ============================ */
+.feats {
+  position: relative;
+  z-index: 1;
+  margin-top: calc(20 * var(--u));
+  padding: calc(22 * var(--u)) calc(20 * var(--u)) calc(18 * var(--u));
+  border-radius: calc(30 * var(--u));
+  background: linear-gradient(165deg, rgba(48, 38, 92, 0.42) 0%, rgba(13, 11, 38, 0.7) 100%);
+  border: calc(1 * var(--u)) solid var(--a-border);
+  box-shadow: 0 calc(14 * var(--u)) calc(40 * var(--u)) rgba(0, 0, 0, 0.44);
+}
+
+/* ---- 区块标题 ---- */
+.feats__hd {
+  display: flex;
+  align-items: baseline;
+  gap: calc(12 * var(--u));
+  padding: 0 calc(4 * var(--u)) calc(20 * var(--u));
+}
+.feats__t {
+  font-size: calc(28 * var(--u));
+  font-weight: 700;
+  letter-spacing: calc(2 * var(--u));
+  color: var(--a-white);
+}
+.feats__s {
+  font-size: calc(20 * var(--u));
+  color: var(--a-sub);
+}
+
+/* ---- 分组标题（分组依据见 index.ts 顶部注释） ---- */
+.fgroup {
+  margin-bottom: calc(10 * var(--u));
+}
+.fgroup__hd {
+  display: flex;
+  align-items: center;
+  gap: calc(10 * var(--u));
+  padding: calc(8 * var(--u)) calc(4 * var(--u)) calc(16 * var(--u));
+}
+.fgroup__bar {
+  flex-shrink: 0;
+  width: calc(6 * var(--u));
+  height: calc(24 * var(--u));
+  border-radius: calc(999 * var(--u));
+  background: linear-gradient(180deg, var(--a-secondary), var(--a-gold));
+}
+.fgroup__t {
+  font-size: calc(24 * var(--u));
+  font-weight: 700;
+  letter-spacing: calc(2 * var(--u));
+  color: rgba(233, 236, 255, 0.94);
+}
+.fgroup__hint {
+  flex: 1;
+  min-width: 0;
+  font-size: calc(19 * var(--u));
+  color: rgba(159, 163, 196, 0.7);
+}
+
+/* ---- 统一网格：手机 2 列；平板 / PC 宽窗 4 列（见文末「响应式」节）
+   【为什么列数不用 auto-fill 自动算】
+   auto-fill 只看「卡片最小宽度」够不够放，不看「一行放几个才整齐」。8 个模块在
+   1400px 宽窗上会被它塞成 5 列（5+3），末行缺两个位置 —— 反而更失衡。既然分组
+   已定（每组 4 个），列数就该由版式决定：手机 2 列（两行铺满）、宽窗 4 列（一行
+   铺满），两种都是零缺口。故这里写死列数，交给 `.is-wide` 类切换。
+   注：改列数的同时必须让 --u 一起变（原理见 --u 定义处），否则卡片内部尺寸会
+   与新的卡宽错配。 ---- */
+.fgrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: calc(18 * var(--u));
+}
+
+/* ---- 统一卡片规格：八个模块完全一致 ---- */
+.fcard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  /* min-height 保证等高：描述长短不一时，同一行也不会高低不齐 */
+  min-height: calc(236 * var(--u));
+  padding: calc(26 * var(--u)) calc(18 * var(--u)) calc(24 * var(--u));
+  border-radius: calc(24 * var(--u));
+  background: var(--a-glass);
+  border: calc(1 * var(--u)) solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+  opacity: 0;
+  /* hover / touch：translateY(-4px) scale(1.02) + glow（需求八） */
+  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 240ms ease, border-color 240ms ease;
+}
+.feats.is-on .fcard {
+  animation: featIn 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes featIn {
+  0%   { opacity: 0; transform: translateY(calc(26 * var(--u))) scale(0.97); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.fcard--hover {
+  transform: translateY(calc(-8 * var(--u))) scale(1.02);
+  border-color: rgba(139, 124, 246, 0.5);
+  box-shadow: 0 calc(18 * var(--u)) calc(44 * var(--u)) rgba(109, 92, 231, 0.45), 0 0 calc(30 * var(--u)) rgba(139, 124, 246, 0.32);
+}
+
+/* 3D 图标：层叠渐变 + 内高光 + 透视倾斜 + 斜向光带 */
+.fcard__ico {
+  position: relative;
+  flex-shrink: 0;
+  width: calc(100 * var(--u));
+  height: calc(100 * var(--u));
+  border-radius: calc(26 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: calc(16 * var(--u));
+  transform: perspective(calc(420 * var(--u))) rotateX(9deg) rotateY(-7deg);
+  box-shadow: 0 calc(10 * var(--u)) calc(22 * var(--u)) rgba(0, 0, 0, 0.45), inset 0 calc(2 * var(--u)) 0 rgba(255, 255, 255, 0.28), inset 0 calc(-6 * var(--u)) calc(14 * var(--u)) rgba(0, 0, 0, 0.28);
+}
+.fcard__glyph {
+  font-size: calc(48 * var(--u));
+  line-height: 1;
+  filter: drop-shadow(0 calc(4 * var(--u)) calc(8 * var(--u)) rgba(0, 0, 0, 0.45));
+}
+.fcard__shine {
+  position: absolute;
+  left: -30%;
+  top: -60%;
+  width: 70%;
+  height: 220%;
+  background: linear-gradient(100deg, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0) 72%);
+  transform: rotate(18deg);
+  pointer-events: none;
+}
+
+/* 能量色（每张卡一套 3D 图标配色，需求八「能量颜色」） */
+.ico-violet { background: linear-gradient(150deg, #8B7CF6 0%, #4B3BB0 100%); }
+.ico-gold   { background: linear-gradient(150deg, #E8CB86 0%, #A8802F 100%); }
+.ico-rose   { background: linear-gradient(150deg, #F09BC0 0%, #A63D6B 100%); }
+.ico-blue   { background: linear-gradient(150deg, #7FB0F5 0%, #2E5AA8 100%); }
+.ico-purple { background: linear-gradient(150deg, #B18CF0 0%, #5B2FA8 100%); }
+.ico-green  { background: linear-gradient(150deg, #8FD9B0 0%, #2F7A54 100%); }
+
+/* ---- 卡片文字：图标 → 标题 → 描述，顺序全局统一 ---- */
+.fcard__name {
+  font-size: calc(27 * var(--u));
+  font-weight: 700;
+  letter-spacing: calc(1 * var(--u));
+  line-height: 1.3;
+  color: var(--a-white);
+}
+.fcard__desc {
+  /* 描述最多两行并省略：保证同行卡片高度与视觉重量一致，不出现「一高一矮」 */
+  display: -webkit-box;
+  margin-top: calc(8 * var(--u));
+  font-size: calc(20 * var(--u));
+  line-height: 1.45;
+  color: var(--a-sub);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.fcard__badge {
+  position: absolute;
+  top: calc(12 * var(--u));
+  right: calc(12 * var(--u));
+  padding: calc(2 * var(--u)) calc(12 * var(--u));
+  border-radius: calc(999 * var(--u));
+  font-size: calc(18 * var(--u));
+  font-weight: 700;
+  letter-spacing: calc(1 * var(--u));
+  color: #1A1440;
+  background: linear-gradient(135deg, var(--a-secondary), var(--a-gold));
+  box-shadow: 0 calc(4 * var(--u)) calc(12 * var(--u)) rgba(216, 182, 106, 0.4);
+}
+
+/* ============================ 立即测算 CTA ============================ */
+.cta {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: calc(18 * var(--u));
+  margin-top: calc(20 * var(--u));
+  padding: calc(24 * var(--u)) calc(22 * var(--u));
+  border-radius: calc(30 * var(--u));
+  overflow: hidden;
+  background: linear-gradient(120deg, rgba(109, 92, 231, 0.42) 0%, rgba(48, 38, 92, 0.6) 55%, rgba(216, 182, 106, 0.22) 100%);
+  border: calc(1 * var(--u)) solid rgba(139, 124, 246, 0.36);
+  box-shadow: 0 calc(14 * var(--u)) calc(40 * var(--u)) rgba(0, 0, 0, 0.46), inset 0 calc(1 * var(--u)) 0 rgba(255, 255, 255, 0.08);
+  opacity: 0;
+  transform: translateY(calc(24 * var(--u)));
+  transition: opacity 600ms cubic-bezier(0.22, 1, 0.36, 1), transform 600ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 240ms ease;
+}
+.cta.is-on {
+  opacity: 1;
+  transform: none;
+}
+.cta--hover {
+  transform: translateY(calc(-4 * var(--u))) scale(1.01);
+  box-shadow: 0 calc(20 * var(--u)) calc(50 * var(--u)) rgba(109, 92, 231, 0.5);
+}
+.cta__orb {
+  flex-shrink: 0;
+  width: calc(84 * var(--u));
+  height: calc(84 * var(--u));
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 30%, rgba(247, 247, 255, 0.6) 0%, rgba(139, 124, 246, 0.7) 46%, rgba(48, 38, 92, 0.95) 100%);
+  box-shadow: 0 0 calc(26 * var(--u)) rgba(139, 124, 246, 0.7);
+  animation: orbFloat 6.4s ease-in-out infinite;
+}
+@keyframes orbFloat {
+  0%   { transform: translateY(0) scale(1); }
+  50%  { transform: translateY(calc(-8 * var(--u))) scale(1.04); }
+  100% { transform: translateY(0) scale(1); }
+}
+.cta__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: calc(6 * var(--u));
+}
+.cta__t {
+  font-size: calc(28 * var(--u));
+  font-weight: 700;
+  letter-spacing: calc(1 * var(--u));
+  color: var(--a-white);
+  white-space: nowrap;
+}
+.cta__s {
+  font-size: calc(20 * var(--u));
+  color: var(--a-sub);
+  line-height: 1.5;
+}
+.cta__btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: calc(6 * var(--u));
+  /* 「立即测算」必须整体一行：允许按钮内部换行会把它拆成两行竖排 */
+  white-space: nowrap;
+  padding: calc(16 * var(--u)) calc(26 * var(--u));
+  border-radius: calc(999 * var(--u));
+  background: linear-gradient(135deg, rgba(247, 247, 255, 0.95) 0%, rgba(216, 182, 106, 0.9) 100%);
+  box-shadow: 0 calc(8 * var(--u)) calc(22 * var(--u)) rgba(216, 182, 106, 0.4);
+  font-size: calc(24 * var(--u));
+  font-weight: 700;
+  color: #1A1440;
+}
+.cta__arrow {
+  font-size: calc(24 * var(--u));
+}
+
+/* ============================ 最近足迹 ============================ */
+.recent {
+  position: relative;
+  z-index: 1;
+  margin-top: calc(20 * var(--u));
+  padding: calc(24 * var(--u)) calc(22 * var(--u));
+  border-radius: calc(30 * var(--u));
+  background: rgba(255, 255, 255, 0.05);
+  border: calc(1 * var(--u)) solid var(--a-border);
+  opacity: 0;
+  transform: translateY(calc(24 * var(--u)));
+  transition: opacity 600ms cubic-bezier(0.22, 1, 0.36, 1), transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.recent.is-on {
+  opacity: 1;
+  transform: none;
+}
+.recent__hd {
+  margin-bottom: calc(16 * var(--u));
+}
+.recent__t {
+  font-size: calc(26 * var(--u));
+  font-weight: 700;
+  letter-spacing: calc(1 * var(--u));
+  color: var(--a-white);
+}
+.recent__list {
+  display: flex;
+  flex-direction: column;
+  gap: calc(12 * var(--u));
+}
+.recent__row {
+  display: flex;
+  align-items: center;
+  gap: calc(16 * var(--u));
+  padding: calc(18 * var(--u)) calc(18 * var(--u));
+  border-radius: calc(20 * var(--u));
+  background: rgba(255, 255, 255, 0.04);
+  border: calc(1 * var(--u)) solid rgba(255, 255, 255, 0.06);
+  transition: transform 200ms ease, background 200ms ease;
+}
+.recent__row--hover {
+  background: rgba(255, 255, 255, 0.09);
+  transform: scale(0.99);
+}
+.recent__ico {
+  flex-shrink: 0;
+  width: calc(56 * var(--u));
+  height: calc(56 * var(--u));
+  border-radius: calc(16 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(28 * var(--u));
+  background: rgba(255, 255, 255, 0.08);
+}
+.recent__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: calc(4 * var(--u));
+}
+.recent__name {
+  font-size: calc(25 * var(--u));
+  color: rgba(233, 236, 255, 0.94);
+}
+.recent__time {
+  font-size: calc(20 * var(--u));
+  color: var(--a-sub);
+}
+
+.astro-foot {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  margin-top: calc(30 * var(--u));
+  font-size: calc(20 * var(--u));
+  letter-spacing: calc(1 * var(--u));
+  color: rgba(159, 163, 196, 0.45);
+}
+
+/* ============================ BottomNavigation ============================ */
+.bnav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  padding: calc(14 * var(--u)) calc(12 * var(--u)) calc(30 * var(--u));
+  background: linear-gradient(180deg, rgba(8, 10, 28, 0.72) 0%, rgba(8, 10, 28, 0.97) 62%);
+  backdrop-filter: blur(calc(20 * var(--u)));
+  -webkit-backdrop-filter: blur(calc(20 * var(--u)));
+  border-top: calc(1 * var(--u)) solid rgba(255, 255, 255, 0.08);
+}
+.bnav__i {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(6 * var(--u));
+  padding: calc(8 * var(--u)) 0;
+  border-radius: calc(18 * var(--u));
+  transition: transform 200ms ease;
+}
+.bnav__i--hover {
+  transform: scale(0.94);
+}
+.bnav__ic {
+  font-size: calc(34 * var(--u));
+  line-height: 1;
+  opacity: 0.62;
+  transition: opacity 200ms ease;
+}
+.bnav__tx {
+  font-size: calc(19 * var(--u));
+  letter-spacing: calc(1 * var(--u));
+  color: rgba(159, 163, 196, 0.8);
+}
+.bnav__i.is-on .bnav__ic {
+  opacity: 1;
+  filter: drop-shadow(0 0 calc(14 * var(--u)) rgba(139, 124, 246, 0.9));
+}
+.bnav__i.is-on .bnav__tx {
+  color: var(--a-white);
+  font-weight: 700;
+}
+
+/* ============================ AstrologyDetail 弹层 ============================ */
+.mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 99;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(60 * var(--u));
+  background: rgba(4, 6, 18, 0.76);
+  backdrop-filter: blur(calc(10 * var(--u)));
+  -webkit-backdrop-filter: blur(calc(10 * var(--u)));
+}
+.detail {
+  position: relative;
+  width: 100%;
+  max-width: calc(600 * var(--u));
+  padding: calc(44 * var(--u)) calc(34 * var(--u)) calc(30 * var(--u));
+  border-radius: calc(32 * var(--u));
+  overflow: hidden;
+  text-align: center;
+  background: linear-gradient(165deg, rgba(48, 38, 92, 0.98) 0%, rgba(13, 11, 38, 0.99) 100%);
+  border: calc(1 * var(--u)) solid rgba(139, 124, 246, 0.34);
+  box-shadow: 0 calc(24 * var(--u)) calc(64 * var(--u)) rgba(0, 0, 0, 0.66);
+  animation: detailIn 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes detailIn {
+  0%   { opacity: 0; transform: translateY(calc(30 * var(--u))) scale(0.94); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.detail__halo {
+  position: absolute;
+  left: 50%;
+  top: calc(-120 * var(--u));
+  width: calc(420 * var(--u));
+  height: calc(420 * var(--u));
+  margin-left: calc(-210 * var(--u));
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(216, 182, 106, 0.26) 0%, rgba(139, 124, 246, 0.12) 44%, rgba(139, 124, 246, 0) 70%);
+  pointer-events: none;
+}
+.detail__name {
+  position: relative;
+  font-size: calc(42 * var(--u));
+  font-weight: 800;
+  letter-spacing: calc(4 * var(--u));
+  color: var(--a-white);
+  text-shadow: 0 0 calc(30 * var(--u)) rgba(216, 182, 106, 0.6);
+}
+.detail__energy {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: calc(8 * var(--u));
+  margin: calc(26 * var(--u)) 0 calc(18 * var(--u));
+}
+.detail__elabel {
+  font-size: calc(24 * var(--u));
+  color: var(--a-sub);
+  margin-right: calc(6 * var(--u));
+}
+.detail__eval {
+  font-size: calc(66 * var(--u));
+  font-weight: 800;
+  line-height: 1;
+  color: var(--a-gold);
+  text-shadow: 0 0 calc(26 * var(--u)) rgba(216, 182, 106, 0.7);
+}
+.detail__eunit {
+  font-size: calc(24 * var(--u));
+  color: var(--a-sub);
+}
+.detail__bar {
+  height: calc(10 * var(--u));
+  border-radius: calc(999 * var(--u));
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  margin-bottom: calc(22 * var(--u));
+}
+.detail__bin {
+  height: 100%;
+  border-radius: calc(999 * var(--u));
+  background: linear-gradient(90deg, var(--a-primary), var(--a-gold));
+  box-shadow: 0 0 calc(14 * var(--u)) rgba(216, 182, 106, 0.7);
+  transition: width 620ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.detail__hint {
+  font-size: calc(23 * var(--u));
+  line-height: 1.6;
+  color: rgba(233, 236, 255, 0.8);
+  margin-bottom: calc(28 * var(--u));
+}
+.detail__acts {
+  display: flex;
+  gap: calc(16 * var(--u));
+}
+.detail__btn {
+  flex: 1;
+  padding: calc(22 * var(--u)) 0;
+  border-radius: calc(999 * var(--u));
+  text-align: center;
+  font-size: calc(26 * var(--u));
+  font-weight: 700;
+  letter-spacing: calc(1 * var(--u));
+  color: var(--a-white);
+  background: linear-gradient(135deg, var(--a-primary) 0%, var(--a-secondary) 100%);
+  box-shadow: 0 calc(10 * var(--u)) calc(26 * var(--u)) rgba(109, 92, 231, 0.48);
+}
+.detail__btn--ghost {
+  background: transparent;
+  border: calc(1 * var(--u)) solid rgba(255, 255, 255, 0.22);
+  box-shadow: none;
+  color: rgba(233, 236, 255, 0.86);
+}
+
+/* ============================ 减弱动态效果（需求十） ============================
+ * 小程序不支持 @media (prefers-reduced-motion)，故由 ts 探测系统设置后挂 `.is-reduced`。
+ * 策略：关掉背景大动画与循环动画，入场动画改为「直接到末态」。
+ */
+.astro-home.is-reduced .cbg__nebula--1,
+.astro-home.is-reduced .cbg__nebula--2,
+.astro-home.is-reduced .cbg__dust,
+.astro-home.is-reduced .cbg__glow,
+.astro-home.is-reduced .ring::after,
+.astro-home.is-reduced .ring__glow,
+.astro-home.is-reduced .cta__orb {
+  animation: none;
+}
+.astro-home.is-reduced .hero__canvas,
+.astro-home.is-reduced .hero__text,
+.astro-home.is-reduced .hero__note,
+.astro-home.is-reduced .hero__hint,
+.astro-home.is-reduced .zodiac,
+.astro-home.is-reduced .energy,
+.astro-home.is-reduced .ai,
+.astro-home.is-reduced .fcard,
+.astro-home.is-reduced .cta,
+.astro-home.is-reduced .recent {
+  transition: none;
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+
+/* ============================ 响应式：平板 / PC 宽窗 ============================
+ * 【为什么不用 @media (min-width: 740px)】
+ *   小程序 WXSS 里 @media 的 px 判定口径与浏览器不同（工具按设备像素、真机可能
+ *   按物理像素），375pt 宽的手机会被判成 ≥740px 恒命中宽窗样式，导致 --u 被缩到
+ *   0.62px、模块变 4 列，flex 子项压到极窄 → 标题被挤成单字竖排（真机已复现）。
+ *   结论：小程序里**不要用 px 媒体查询做版式分支**。
+ *   改由 ts 用 wx.getWindowInfo().windowWidth 判定（阈值 600，远高于任何手机逻辑
+ *   像素宽），挂 .is-wide 类；见 index.ts 的 applyLayout()。
+ * ============================================================================ */
+.astro-home.is-wide {
+  /* 尺寸参考系由「视口比例」切换为「固定桌面尺度」。
+     注：applyLayout() 会同时在根节点内联同样的 0.62px（内联优先级更高），
+     这里只作 JS 未注入时的兜底。 */
+  --u: 0.62px;
+}
+
+/* 每组 4 个模块 → 一行一组，整整齐齐 */
+.is-wide .fgrid {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* 内容列定宽居中（只设左右 margin，保留各块原有的 margin-top） */
+.is-wide .hero,
+.is-wide .zodiac,
+.is-wide .energy,
+.is-wide .ai,
+.is-wide .feats,
+.is-wide .cta,
+.is-wide .recent,
+.is-wide .astro-foot {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 宽窗可用鼠标：hover 反馈做成常驻（小程序 hover-class 只在按住时生效） */
+.is-wide .fcard:hover {
+  transform: translateY(calc(-8 * var(--u))) scale(1.02);
+  border-color: rgba(139, 124, 246, 0.5);
+  box-shadow: 0 calc(18 * var(--u)) calc(44 * var(--u)) rgba(109, 92, 231, 0.45), 0 0 calc(30 * var(--u)) rgba(139, 124, 246, 0.32);
+}
+
+/* 超宽窗：只把内容列放宽一点，避免两侧留白过大 */
+.astro-home.is-wide-xl {
+  max-width: 1040px;
+}
+.is-wide-xl .hero,
+.is-wide-xl .zodiac,
+.is-wide-xl .energy,
+.is-wide-xl .ai,
+.is-wide-xl .feats,
+.is-wide-xl .cta,
+.is-wide-xl .recent,
+.is-wide-xl .astro-foot {
+  max-width: 1040px;
+}

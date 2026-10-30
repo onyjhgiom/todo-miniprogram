@@ -1,0 +1,9 @@
+{
+  "name": "civilAI",
+  "version": "1.0.0",
+  "description": "仕途衡鉴（体制内模块）AI 能力：赛道测评 / 备考计划 / 面试点评 / 简历优化",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

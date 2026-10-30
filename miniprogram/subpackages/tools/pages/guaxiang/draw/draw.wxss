@@ -1,0 +1,78 @@
+/* pages/guaxiang/draw/draw.wxss */
+/* 复用 guaxiang/index.wxss 的视觉语言（.gua/.sec/.blk/.card/.acts 等），仅补充编辑器专属样式 */
+@import "../index.wxss";
+
+.sec__hint {
+  display: block;
+  font-size: 24rpx;
+  color: #9aa0a6;
+  margin: 8rpx 0 18rpx;
+  line-height: 1.6;
+}
+
+.draw-board {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1rpx solid rgba(212, 175, 110, 0.25);
+  border-radius: 16rpx;
+  padding: 14rpx 14rpx;
+}
+
+.draw-row {
+  display: flex;
+  align-items: center;
+  padding: 10rpx 0;
+}
+
+.draw-row__idx {
+  width: 40rpx;
+  text-align: center;
+  color: #d4af6e;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.draw-bars {
+  flex: 1;
+  justify-content: center;
+}
+
+.draw-row__move {
+  width: 56rpx;
+  height: 56rpx;
+  margin-left: 14rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1rpx solid rgba(212, 175, 110, 0.35);
+  border-radius: 50%;
+  color: #9aa0a6;
+  font-size: 24rpx;
+}
+
+.draw-row__move.is-on {
+  background: rgba(212, 175, 110, 0.18);
+  color: #d4af6e;
+  border-color: #d4af6e;
+  font-weight: 600;
+}
+
+.draw-acts {
+  display: flex;
+  gap: 14rpx;
+  margin-top: 18rpx;
+}
+
+.draw-act {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx 0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1rpx solid rgba(212, 175, 110, 0.22);
+  border-radius: 12rpx;
+  color: #e8e2d4;
+  font-size: 24rpx;
+}
+
+.draw-act.is-dim {
+  opacity: 0.45;
+}

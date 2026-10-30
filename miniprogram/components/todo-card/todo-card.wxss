@@ -1,0 +1,421 @@
+/* components/todo-card/todo-card.wxss
+ * Phase 2：玻璃卡片 —— 磨砂底 + 内高光描边 + 优先级色晕 + 主题 token 化
+ * 工艺 token 化：描边宽度 / 圆角 / 阴影由 --home-card-* 提供（默认 = 侘寂原值），
+ * 主页「风格」维度覆盖变量即可换形态，组件不感知风格。
+ */
+
+.todo {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 20rpx;
+  padding: 26rpx 24rpx 26rpx 30rpx;
+  margin-bottom: 20rpx;
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-width: var(--home-card-edge);
+  border-style: solid;
+  border-color: var(--glass-border);
+  border-radius: var(--home-card-r);
+  box-shadow: var(--home-card-shadow);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  overflow: hidden;
+  animation: todo-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes todo-in {
+  from {
+    opacity: 0;
+    transform: translateY(18rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.todo--high {
+  box-shadow:
+    0 1rpx 0 rgba(255, 255, 255, 0.4) inset,
+    0 8rpx 24rpx rgba(181, 113, 76, 0.09);
+}
+.todo--medium {
+  box-shadow:
+    0 1rpx 0 rgba(255, 255, 255, 0.4) inset,
+    0 8rpx 24rpx rgba(192, 154, 94, 0.08);
+}
+
+.todo--done {
+  opacity: 0.66;
+  background: var(--glass-bg-soft);
+}
+
+/* 优先级色条 */
+.todo__bar {
+  position: absolute;
+  left: 0;
+  top: 26rpx;
+  bottom: 26rpx;
+  width: 6rpx;
+  border-radius: 0 6rpx 6rpx 0;
+}
+.todo--high .todo__bar { background: linear-gradient(180deg, #D08A6A, #B5714C); }
+.todo--medium .todo__bar { background: linear-gradient(180deg, #E3B999, #C09A5E); }
+
+/* 勾选 */
+.todo__check {
+  flex-shrink: 0;
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  border: 3rpx solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 4rpx;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--glass-bg-strong);
+}
+.todo__check--checked {
+  background: #6E8E6E;
+  border-color: transparent;
+  box-shadow: 0 4rpx 12rpx rgba(110, 142, 110, 0.3);
+  transform: scale(1.04);
+}
+.todo__check--hover {
+  transform: scale(0.92);
+  background: var(--color-bg-soft);
+}
+.todo__check--hover.todo__check--checked {
+  background: #6E8E6E;
+}
+.todo__check-icon {
+  color: #ffffff;
+  font-size: 26rpx;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* 主体 */
+.todo__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+  border-radius: 12rpx;
+  transition: background 0.15s ease;
+}
+.todo__body--hover {
+  background: var(--color-primary-soft);
+}
+
+.todo__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+}
+.todo__row--head {
+  margin-bottom: 2rpx;
+}
+
+.todo__content {
+  flex: 1;
+  font-family: var(--font-serif, serif);
+  font-size: 31rpx;
+  color: var(--color-text);
+  word-break: break-all;
+  line-height: 1.5;
+  font-weight: 600;
+  letter-spacing: 0.5rpx;
+}
+.todo__content--done {
+  color: var(--color-text-mute);
+  text-decoration: line-through;
+  text-decoration-color: var(--color-text-mute);
+  font-weight: 400;
+}
+
+/* 优先级小圆点 */
+.todo__priority-dot {
+  flex-shrink: 0;
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  margin-top: 14rpx;
+}
+.todo__priority-dot--rose { background: #B5714C; box-shadow: 0 0 0 4rpx rgba(181, 113, 76, 0.12); }
+.todo__priority-dot--amber { background: #C09A5E; box-shadow: 0 0 0 4rpx rgba(192, 154, 94, 0.12); }
+.todo__priority-dot--emerald { background: #6E8E6E; box-shadow: 0 0 0 4rpx rgba(110, 142, 110, 0.12); }
+.todo__priority-dot--slate { background: #94a3b8; box-shadow: 0 0 0 4rpx rgba(148, 163, 184, 0.12); }
+
+/* 元信息行 */
+.todo__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 4rpx;
+}
+
+/* 倒计时 pill */
+.todo__countdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+  letter-spacing: 0.2rpx;
+}
+.todo__countdown-icon {
+  font-size: 18rpx;
+  line-height: 1;
+}
+.todo__countdown--overdue {
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  color: #b91c1c;
+}
+.todo__countdown--today {
+  background: linear-gradient(135deg, #ffedd5, #fed7aa);
+  color: #c2410c;
+}
+.todo__countdown--tomorrow {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #b45309;
+}
+.todo__countdown--week {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  color: #1d4ed8;
+}
+.todo__countdown--later {
+  background: var(--color-bg-soft);
+  color: var(--color-text-soft);
+}
+
+/* 地点 chip */
+.todo__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  background: var(--color-bg-soft);
+  color: var(--color-text-soft);
+  max-width: 320rpx;
+}
+.todo__chip-glyph {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+.todo__chip-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 260rpx;
+}
+
+/* 人物头像栈 */
+.todo__people {
+  display: inline-flex;
+  align-items: center;
+}
+.todo__avatar {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #ffffff;
+  font-size: 20rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx solid var(--glass-bg-strong);
+  margin-left: -8rpx;
+}
+.todo__avatar:first-child {
+  margin-left: 0;
+}
+.todo__avatar--rose { background: linear-gradient(135deg, #D08A6A, #B5714C); }
+.todo__avatar--amber { background: linear-gradient(135deg, #E3B999, #C09A5E); }
+.todo__avatar--emerald { background: linear-gradient(135deg, #8FAE8F, #6E8E6E); }
+.todo__avatar--blue { background: linear-gradient(135deg, #60a5fa, #3b82f6); }
+.todo__avatar--violet { background: linear-gradient(135deg, #C09A5E, #A98743); }
+.todo__avatar--overflow {
+  background: var(--color-bg-soft);
+  color: var(--color-text-soft);
+  font-size: 18rpx;
+}
+
+/* 标签 */
+.todo__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-top: 4rpx;
+}
+.todo__tag {
+  font-size: 20rpx;
+  font-weight: 500;
+  padding: 3rpx 10rpx;
+  border-radius: 6rpx;
+  letter-spacing: 0.2rpx;
+}
+.todo__tag--rose { background: rgba(181, 113, 76, 0.12); color: #96573A; }
+.todo__tag--amber { background: rgba(245, 158, 11, 0.14); color: #b45309; }
+.todo__tag--emerald { background: rgba(110, 142, 110, 0.16); color: #4A6A4A; }
+.todo__tag--blue { background: rgba(59, 130, 246, 0.14); color: #1d4ed8; }
+.todo__tag--violet { background: rgba(192, 154, 94, 0.16); color: #8C6E30; }
+.todo__tag--slate { background: rgba(100, 116, 139, 0.14); color: #334155; }
+
+/* 操作 */
+.todo__actions {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 2rpx;
+  flex-shrink: 0;
+}
+.todo__icon {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12rpx;
+  color: var(--color-text-mute);
+  transition: all 0.18s ease;
+}
+.todo__icon-glyph {
+  font-size: 32rpx;
+  font-weight: 300;
+  line-height: 1;
+}
+.todo__icon--hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+}
+
+/* 图片附件缩略图 */
+.todo__photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 6rpx;
+}
+.todo__photo {
+  width: 132rpx;
+  height: 132rpx;
+  border-radius: 12rpx;
+  background: var(--color-bg-soft);
+  border: 1rpx solid var(--glass-border);
+  object-fit: cover;
+}
+
+/* ============================================================
+ * 剧场版追加（追加在末尾 → 同名同权靠后的生效）
+ * 只加「光、影、材质的层次」与「交互动势」，不动任何结构类名，
+ * 因此不需要改 wxml，也不会影响既有功能。
+ * 注意：优先级变体（--high/--medium）在此一并重新声明，
+ * 否则会被上面 .todo 的新阴影覆盖掉。
+ * ============================================================ */
+
+.todo {
+  /* 冠光 + 双段投影 + 细描边：从「贴纸」变成「有厚度的实体」 */
+  box-shadow:
+    var(--crown-light, inset 0 2rpx 0 rgba(255, 255, 255, .8)),
+    var(--elev-2, 0 8rpx 24rpx rgba(74, 58, 42, .08)),
+    var(--edge-line, 0 0 0 1rpx rgba(228, 222, 210, .9));
+  transition:
+    transform 260ms cubic-bezier(.16, .84, .28, 1),
+    box-shadow 260ms cubic-bezier(.16, .84, .28, 1),
+    opacity 260ms ease;
+}
+/* 顶部一道极净的斜向高光，模拟顶光打在纸面上的反光 */
+.todo::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  height: 150rpx;
+  background: linear-gradient(168deg, rgba(255, 255, 255, .42) 0%, rgba(255, 255, 255, 0) 62%);
+  pointer-events: none;
+}
+
+.todo--high {
+  box-shadow:
+    var(--crown-light, inset 0 2rpx 0 rgba(255, 255, 255, .8)),
+    var(--elev-2, 0 8rpx 24rpx rgba(74, 58, 42, .08)),
+    0 0 0 1rpx rgba(181, 113, 76, .3);
+}
+.todo--medium {
+  box-shadow:
+    var(--crown-light, inset 0 2rpx 0 rgba(255, 255, 255, .8)),
+    var(--elev-2, 0 8rpx 24rpx rgba(74, 58, 42, .08)),
+    0 0 0 1rpx rgba(192, 154, 94, .28);
+}
+
+/* 已完成：整体退到背景层，但不失质感 */
+.todo--done {
+  opacity: .58;
+  transform: scale(.994);
+}
+.todo--done::before { opacity: .4; }
+
+/* 优先级色条：加一点外溢的光，让重点自己「亮」起来 */
+.todo__bar {
+  top: 22rpx;
+  bottom: 22rpx;
+  box-shadow: 0 0 14rpx rgba(181, 113, 76, .55);
+}
+.todo--medium .todo__bar {
+  box-shadow: 0 0 14rpx rgba(192, 154, 94, .45);
+}
+
+/* 勾选环：未选中时更沉静，选中时更有分量 */
+.todo__check {
+  transition: transform 320ms cubic-bezier(.34, 1.56, .64, 1), background 220ms, border-color 220ms;
+}
+.todo__check--hover { transform: scale(1.12); }
+.todo__check--checked {
+  box-shadow: 0 6rpx 16rpx var(--color-primary-shadow), inset 0 1rpx 0 rgba(255, 255, 255, .4);
+}
+
+/* 内容区：轻微位移，保持整体精密的排版节奏 */
+.todo__body { min-width: 0; }
+
+/* 视频缩略图：封面铺满 + 居中播放角标；无封面时用深色占位底 */
+.todo__photo--video {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(160deg, #2A2118 0%, #14100C 100%);
+}
+.todo__photo-poster {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+.todo__photo-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44rpx;
+  height: 44rpx;
+  margin: -22rpx 0 0 -22rpx;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  border: 2rpx solid rgba(255, 255, 255, 0.72);
+  color: #ffffff;
+  font-size: 20rpx;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 3rpx;
+  box-sizing: border-box;
+}

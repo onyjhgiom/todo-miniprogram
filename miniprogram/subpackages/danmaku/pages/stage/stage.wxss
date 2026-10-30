@@ -1,0 +1,114 @@
+/* 全屏弹幕播放页 · 竖屏 / 横屏自适应 */
+.stage {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #000;
+}
+
+/* 画布铺满整屏（含状态栏/刘海区域），弹幕轨道边界由组件按安全区自动收缩 */
+.stage-render {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* 点击层：横屏呼出控件用；透明且不拦截浮层按钮 */
+.tap-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+}
+
+/* 浮层控件：绝对定位，显隐不占用布局 → 呼出/收起时画布尺寸不变，弹幕零重排 */
+.chrome {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 3;
+  box-sizing: content-box;
+  transition: opacity 0.18s ease;
+}
+.chrome-on {
+  opacity: 1;
+}
+.chrome-off {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 0 16px;
+}
+.nav-close {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 50%;
+}
+.nav-title {
+  flex: 1;
+  text-align: center;
+  font-size: 15px;
+  color: #fff;
+  font-weight: 600;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+.nav-dir {
+  font-size: 12px;
+  font-weight: 400;
+  opacity: 0.7;
+}
+.nav-share {
+  width: 48px;
+  display: flex;
+  justify-content: flex-end;
+}
+.share-btn {
+  margin: 0;
+  padding: 0 6px;
+  font-size: 12px;
+  line-height: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  border-radius: 14px;
+}
+.share-btn::after {
+  border: none;
+}
+
+/* 方向切换提示 */
+.hint {
+  position: absolute;
+  left: 50%;
+  bottom: 32px;
+  transform: translateX(-50%);
+  z-index: 4;
+  max-width: 80%;
+  padding: 6px 14px;
+  font-size: 12px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 14px;
+  white-space: nowrap;
+  pointer-events: none;
+}

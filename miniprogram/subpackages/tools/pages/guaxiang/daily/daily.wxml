@@ -1,0 +1,166 @@
+<!--pages/guaxiang/daily/daily.wxml-->
+<view class="page themed gx" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <fx-stage mode="ink" rays="{{true}}" dust="{{true}}" topglow="{{true}}" level="7" />
+
+  <!-- ===== 头部 ===== -->
+  <view class="head">
+    <view class="head__bar" style="background:{{heroGradient}}">
+      <view class="gx-seal" aria-hidden="true">日</view>
+      <view class="head__decor">
+        <text class="head__line"></text>
+        <text class="head__dot"></text>
+        <text class="head__line"></text>
+      </view>
+      <text class="head__title">每日一卦 · 卦历</text>
+      <text class="head__sub">{{dateLabel}} · 一卦一省，日新其德</text>
+    </view>
+  </view>
+
+  <scroll-view class="body" scroll-y enhanced show-scrollbar="{{false}}">
+
+    <!-- ===== 今日卦象 ===== -->
+    <block wx:if="{{reading}}">
+      <view class="card result">
+
+        <view class="res__head">
+          <view class="res__name-wrap">
+            <text class="res__name">{{reading.ben.fullName}}</text>
+          </view>
+          <text class="res__num">第 {{reading.ben.num}} 卦</text>
+        </view>
+
+        <view class="gua-section">
+          <text class="gua-section__title">今日卦象</text>
+          <view class="gua">
+            <view class="gua__row" wx:for="{{benLines}}" wx:key="index">
+              <view class="gua__bars">
+                <block wx:if="{{item.type === 'yang'}}">
+                  <view class="gua__bar gua__bar--yang"></view>
+                </block>
+                <block wx:else>
+                  <view class="gua__bar gua__bar--yin"></view>
+                  <view class="gua__bar gua__bar--gap"></view>
+                  <view class="gua__bar gua__bar--yin"></view>
+                </block>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view class="blk blk--cite">
+          <view class="blk__header">
+            <text class="blk__tag">卦辞</text>
+            <text class="blk__tag-sub">古籍原文</text>
+          </view>
+          <text class="blk__cite">{{reading.benCi}}</text>
+        </view>
+
+        <view class="blk blk--cite">
+          <view class="blk__header">
+            <text class="blk__tag">象传</text>
+            <text class="blk__tag-sub">古籍原文</text>
+          </view>
+          <text class="blk__cite">{{reading.benXiang}}</text>
+        </view>
+
+        <view class="blk">
+          <view class="blk__header">
+            <text class="blk__tag">卦意今解</text>
+          </view>
+          <text class="blk__text">{{reading.benPhilosophy}}</text>
+        </view>
+
+        <!-- 今日变卦 -->
+        <view class="blk" wx:if="{{bianName}}">
+          <view class="blk__header">
+            <text class="blk__tag">今日变卦 · {{bianName}}</text>
+          </view>
+          <view class="gua gua--sm">
+            <view class="gua__row" wx:for="{{bianLines}}" wx:key="index">
+              <view class="gua__bars">
+                <block wx:if="{{item.type === 'yang'}}">
+                  <view class="gua__bar gua__bar--yang"></view>
+                </block>
+                <block wx:else>
+                  <view class="gua__bar gua__bar--yin"></view>
+                  <view class="gua__bar gua__bar--gap"></view>
+                  <view class="gua__bar gua__bar--yin"></view>
+                </block>
+              </view>
+            </view>
+          </view>
+          <text class="blk__text">{{bianPhilosophy}}</text>
+        </view>
+
+        <view class="blk blk--mood">
+          <view class="blk__header">
+            <text class="blk__tag blk__tag--mood">今日可留意</text>
+          </view>
+          <text class="blk__text">{{keywordsLine}}</text>
+        </view>
+
+        <view class="blk blk--guide">
+          <view class="blk__header">
+            <text class="blk__tag blk__tag--primary">人生疏导</text>
+          </view>
+          <text class="blk__text">{{reading.guide}}</text>
+        </view>
+
+        <view class="blk">
+          <view class="blk__header">
+            <text class="blk__tag">可行之法</text>
+          </view>
+          <text class="blk__text">{{reading.advice}}</text>
+        </view>
+
+        <view class="res__tip-wrap">
+          <text class="res__tip">{{disclaimerShort}}</text>
+        </view>
+
+        <view class="acts">
+          <view class="act act--primary" hover-class="press" hover-stay-time="60" bindtap="onCopy">
+            <text class="act__icon">📋</text>
+            <text class="act__text">复制解读</text>
+          </view>
+          <view class="act" hover-class="press" hover-stay-time="60" bindtap="onGoDraw">
+            <text class="act__icon">🖌️</text>
+            <text class="act__text">去涂爻</text>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <!-- ===== 卦历打卡 ===== -->
+    <view class="sec">
+      <view class="sec__header">
+        <text class="sec__title">卦历打卡</text>
+        <text class="sec__badge">连续 {{streak}} 天 · 累计 {{total}} 天</text>
+      </view>
+      <view class="checkin {{checked ? 'is-done' : ''}}" hover-class="press" hover-stay-time="80" bindtap="onCheckin">
+        <text class="checkin__icon">{{checked ? '✓' : '☯'}}</text>
+        <text class="checkin__text">{{checked ? '今日已打卡' : '今日打卡'}}</text>
+      </view>
+      <text class="sec__note">打卡后今日卦象留存于下方卦历，连日不断便形成你的专属卦历。</text>
+    </view>
+
+    <!-- ===== 近30天卦历 ===== -->
+    <view class="sec">
+      <text class="sec__title">近 30 天卦历</text>
+      <view class="cal">
+        <view class="cal-cell {{item.checked ? 'is-on' : ''}}" wx:for="{{calendar}}" wx:key="key"
+              hover-class="{{item.checked ? 'press' : ''}}" hover-stay-time="60"
+              bindtap="onDayTap" data-num="{{item.num}}">
+          <text class="cal-cell__day">{{item.day}}</text>
+          <text class="cal-cell__name" wx:if="{{item.checked}}">{{item.name}}</text>
+          <text class="cal-cell__dot" wx:else></text>
+        </view>
+      </view>
+      <text class="sec__note">点击有卦象的日期，可回看当日详解。</text>
+    </view>
+
+    <view class="safe-bottom" />
+  </scroll-view>
+
+  <view class="disclaimer">{{disclaimer}}</view>
+</view>

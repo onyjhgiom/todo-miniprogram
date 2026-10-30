@@ -1,0 +1,23 @@
+<!--components/astro-sphere/astro-sphere.wxml-->
+<!-- AstroSphere 3D 星语星球：玻璃星球 + 内部星云 + 十二星座节点 + 三条轨道环 + 星尘 + 能量核心
+     用法：<astro-sphere signs="{{signs}}" active="{{signKey}}" reduced="{{reducedMotion}}"
+                         paused="{{spherePaused}}" height="{{720}}"
+                         bind:node="onTapNode" bind:core="onTapCore" bind:pulse="onSpherePulse" />
+     画布背景透明，直接坐在页面的宇宙渐变背景上
+     尺寸单位：height 属性按「页面缩放单位 --u」计算（--u 由页面注入，手机端 = 1rpx，
+     宽窗端 = 固定 px；自定义属性可穿透样式隔离继承下来）。取不到 --u 时回退 1rpx，
+     保证组件被别处复用时行为与改造前一致。 -->
+<view class="sphere-wrap" style="height:calc({{height}} * var(--u, 1rpx))">
+  <canvas
+    type="2d"
+    id="sphereCv"
+    class="sphere-cv"
+    bindtouchstart="onTouchStart"
+    bindtouchmove="onTouchMove"
+    bindtouchend="onTouchEnd"
+    bindtouchcancel="onTouchEnd"
+  ></canvas>
+
+  <view class="sphere-hint" wx:if="{{hint}}">{{hint}}</view>
+  <slot></slot>
+</view>

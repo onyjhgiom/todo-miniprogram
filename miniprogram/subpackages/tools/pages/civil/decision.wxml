@@ -1,0 +1,169 @@
+<!-- subpackages/tools/pages/civil/decision.wxml -->
+<view class="cx themed" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <!-- ===== 欢迎横幅 ===== -->
+  <view class="cx__hero" style="background:{{heroGradient}}">
+    <view class="cx__hero-brand">
+      <text class="cx__hero-name">{{meta.name}}</text>
+      <text class="cx__hero-tag">战略决策台</text>
+    </view>
+    <view class="cx__hero-welcome" style="font-size:48rpx">智能决策</view>
+    <view class="cx__hero-line"></view>
+    <view class="cx__hero-sub">分层报考组合 · 均衡资源调配</view>
+    <view class="cx__hero-desc">输入你的画像，本地引擎即时生成「冲刺 / 匹配 / 保底」三层组合与精力分配</view>
+  </view>
+
+  <!-- ===== 诚实声明 ===== -->
+  <view class="cx__disclaim">
+    <text class="cx__disclaim-dot">●</text>
+    <text class="cx__disclaim-t">本页为智能决策参考，岗位均为泛化示例岗，一切以官方公告为准</text>
+  </view>
+
+  <!-- ===== 输入表单 ===== -->
+  <view class="cx__card">
+    <view class="cx__card-title">① 你的报考画像</view>
+
+    <view class="cx__field">
+      <text class="cx__label">专业名称</text>
+      <input class="cx__input" placeholder="如：法学 / 电气工程 / 汉语言 / 会计" value="{{major}}"
+        bindinput="onInputMajor" confirm-type="done" />
+    </view>
+
+    <view class="cx__field">
+      <text class="cx__label">学历</text>
+      <view class="cx__chips-row">
+        <view class="cx__opt {{eduIndex === index ? 'cx__opt--on' : ''}}"
+          wx:for="{{educations}}" wx:key="key" wx:for-index="index"
+          data-index="{{index}}" bindtap="onPickEdu">{{item.label}}</view>
+      </view>
+    </view>
+
+    <view class="cx__field cx__field--row">
+      <text class="cx__label">中共党员</text>
+      <view class="cx__toggle {{party ? 'cx__toggle--on' : ''}}" bindtap="onToggleParty">
+        <view class="cx__toggle-knob"></view>
+        <text class="cx__toggle-t">{{party ? '是' : '否'}}</text>
+      </view>
+    </view>
+
+    <view class="cx__field cx__field--row">
+      <text class="cx__label">应届生</text>
+      <view class="cx__toggle {{fresh ? 'cx__toggle--on' : ''}}" bindtap="onToggleFresh">
+        <view class="cx__toggle-knob"></view>
+        <text class="cx__toggle-t">{{fresh ? '是' : '否'}}</text>
+      </view>
+    </view>
+
+    <view class="cx__field">
+      <text class="cx__label">报考偏好</text>
+      <view class="cx__chips-row">
+        <view class="cx__opt {{preferKey === item.key ? 'cx__opt--on' : ''}}"
+          wx:for="{{prefers}}" wx:key="key"
+          data-key="{{item.key}}" bindtap="onPickPrefer">{{item.icon}} {{item.label}}</view>
+      </view>
+    </view>
+
+    <view class="cx__field">
+      <text class="cx__label">每周可投入 <text class="cx__hl">{{hours}}</text> 小时</text>
+      <slider class="cx__slider" min="5" max="60" step="5" value="{{hours}}"
+        activeColor="#7c2d12" backgroundColor="rgba(120,120,120,0.18)" bindchange="onHours" bindchanging="onHours" />
+    </view>
+
+    <view class="cx__gen">
+      <view class="cx__gen-btn" bindtap="onGenerate" hover-class="cx__press" hover-stay-time="50">生成战略决策</view>
+      <view class="cx__gen-reset" wx:if="{{assessed}}" bindtap="onReset" hover-class="cx__press" hover-stay-time="50">重置</view>
+    </view>
+  </view>
+
+  <!-- ===== 结果：赛道适配 ===== -->
+  <block wx:if="{{assessed}}">
+    <view class="cx__sec-title">② 赛道适配评分</view>
+    <view class="cx__card">
+      <view class="cx__assess" wx:for="{{assess}}" wx:key="key">
+        <view class="cx__assess-head">
+          <text class="cx__assess-icon">{{item.icon}}</text>
+          <text class="cx__assess-name">{{item.name}}</text>
+          <text class="cx__assess-level" style="color:{{item.color}}">{{item.level}}</text>
+          <text class="cx__assess-score" style="color:{{item.color}}">{{item.score}}</text>
+        </view>
+        <view class="cx__bar"><view class="cx__bar-fill" style="width:{{item.bar}}%;background:{{item.color}}"></view></view>
+        <text class="cx__assess-reason">{{item.reason}}</text>
+      </view>
+    </view>
+
+    <!-- ===== 结果：分层报考组合 ===== -->
+    <view class="cx__sec-title">③ 分层报考组合</view>
+    <view class="cx__layers">
+      <view class="cx__layer" wx:for="{{portfolio.layers}}" wx:key="key"
+        style="border-color:{{item.color}}">
+        <view class="cx__layer-head">
+          <text class="cx__layer-badge" style="background:{{item.color}}">{{item.label}}</text>
+          <text class="cx__layer-desc">{{item.desc}}</text>
+        </view>
+        <view class="cx__job" wx:for="{{item.jobs}}" wx:for-item="j" wx:key="id"
+          data-id="{{j.id}}" bindtap="onJob" hover-class="cx__press" hover-stay-time="50">
+          <view class="cx__job-head">
+            <text class="cx__job-title">{{j.title}}</text>
+            <text class="cx-tag cx-tag--{{j.tone}}">{{j.hasBian ? '有编' : '无编'}} · {{j.compileShort}}</text>
+          </view>
+          <text class="cx__job-unit">{{j.unit}}</text>
+          <view class="cx__job-meta">
+            <text class="cx__jm" style="color:{{j.color}}">{{j.trackShort}}</text>
+            <text class="cx__jm">难度 {{j.stars}}</text>
+            <text class="cx__jm">{{j.freshText}}</text>
+            <text class="cx__jm">{{j.region}}</text>
+          </view>
+          <text class="cx__job-salary">💰 {{j.salary}}</text>
+          <view class="cx__job-apply" wx:if="{{j.applyUrl}}">
+            <text class="cx__apply-badge">官方报名</text>
+            <text class="cx__apply-name">{{j.applyName}}</text>
+            <text class="cx__apply-host">{{j.applyHost}}</text>
+            <text class="cx__apply-copy" catchtap="onCopyApply" data-url="{{j.applyUrl}}"
+              hover-class="cx__press" hover-stay-time="50">复制链接</text>
+          </view>
+        </view>
+        <view class="cx__layer-empty" wx:if="{{item.jobs.length === 0}}">该档暂无匹配岗位，可调整画像后重试</view>
+      </view>
+    </view>
+
+    <!-- ===== 结果：组合逻辑 ===== -->
+    <view class="cx__card cx__combo">
+      <view class="cx__combo-row" wx:for="{{portfolio.combo}}" wx:key="role">
+        <text class="cx__combo-role" style="background:{{item.role === '主攻' ? '#7c2d12' : item.role === '并行' ? '#166534' : '#1e3a8a'}}">{{item.role}}</text>
+        <text class="cx__combo-t">{{item.text}}</text>
+      </view>
+    </view>
+
+    <!-- ===== 结果：均衡资源调配 ===== -->
+    <view class="cx__sec-title">④ 均衡资源调配</view>
+    <view class="cx__card">
+      <view class="cx__res-note">{{resource.note}}</view>
+      <view class="cx__splits">
+        <view class="cx__split" wx:for="{{resource.splits}}" wx:key="track">
+          <view class="cx__split-head">
+            <text class="cx__split-icon">{{item.icon}}</text>
+            <text class="cx__split-name">{{item.name}}</text>
+            <text class="cx__split-pct" style="color:{{item.color}}">{{item.pct}}% · {{item.hours}}h/周</text>
+          </view>
+          <view class="cx__bar"><view class="cx__bar-fill" style="width:{{item.pct}}%;background:{{item.color}}"></view></view>
+          <text class="cx__split-focus">{{item.focus}}</text>
+        </view>
+      </view>
+
+      <view class="cx__mix">
+        <view class="cx__mix-head">
+          <text class="cx__mix-title">编制结构均衡</text>
+          <text class="cx__mix-t">带编 {{resource.compileMix.bian}}% / 无编 {{resource.compileMix.unbian}}%</text>
+        </view>
+        <view class="cx__bar cx__bar--mix">
+          <view class="cx__bar-fill" style="width:{{resource.compileMix.bian}}%;background:#166534"></view>
+        </view>
+        <text class="cx__mix-tip">带编占比偏低时，优先把保底档换成「全额/差额事业编」「国企正式工」等带编岗位</text>
+      </view>
+    </view>
+  </block>
+
+  <view class="cx__foot">
+    数据为人工整理的参考信息 · 版本 {{meta.version}} · 招录节奏每年变化，一切以官方公告为准
+  </view>
+</view>

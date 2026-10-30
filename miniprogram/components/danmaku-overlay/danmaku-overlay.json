@@ -1,0 +1,6 @@
+{
+  "component": true,
+  "usingComponents": {
+    "danmaku-render": "../danmaku-render/danmaku-render"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "todos",
+  "version": "1.0.0",
+  "description": "待办事项云函数：通过 wxContext.OPENID 实现用户级数据隔离，支持 list/add/update/toggle/delete/clearCompleted/remind 七种 action",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  },
+  "permissions": {
+    "openapi": []
+  }
+}

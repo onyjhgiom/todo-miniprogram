@@ -1,0 +1,159 @@
+<!--components/todo-composer/todo-composer.wxml-->
+<view
+  class="composer-modal {{visible ? 'composer-modal--visible' : ''}}"
+  wx:if="{{visible}}"
+  catchtouchmove="noop"
+>
+  <!-- 遮罩 -->
+  <view class="composer-modal__mask" bindtap="onCancel"></view>
+
+  <!-- 弹层 -->
+  <view class="composer-modal__sheet safe-bottom" catchtap="noop">
+    <view class="composer-modal__handle"></view>
+
+    <view class="composer-modal__header">
+      <view class="composer-modal__title">{{isEdit ? '编辑任务' : '新建任务'}}</view>
+      <view class="composer-modal__close" hover-class="cmp-press" hover-stay-time="60" bindtap="onCancel">×</view>
+    </view>
+
+    <scroll-view class="composer-modal__body" scroll-y enhanced show-scrollbar="{{false}}">
+      <!-- 任务内容 -->
+      <view class="field">
+        <view class="field__label">任务内容</view>
+        <textarea
+          class="field__textarea"
+          placeholder="想做什么？"
+          placeholder-class="field__placeholder"
+          value="{{form.content}}"
+          maxlength="200"
+          auto-height
+          bindinput="onInputContent"
+        ></textarea>
+      </view>
+
+      <!-- 优先级 -->
+      <view class="field">
+        <view class="field__label">优先级</view>
+        <view class="priority-segment">
+          <view
+            wx:for="{{priorityOptions}}"
+            wx:key="value"
+            class="priority-segment__item priority-segment__item--{{item.value}} {{form.priority === item.value ? 'priority-segment__item--active' : ''}}"
+            data-value="{{item.value}}"
+            hover-class="cmp-press"
+            hover-stay-time="60"
+            bindtap="onPickPriority"
+          >{{item.label}}</view>
+        </view>
+      </view>
+
+      <!-- 截止时间（精确到当天的几点几分） -->
+      <view class="field">
+        <view class="field__label">截止时间</view>
+        <picker
+          mode="multiSelector"
+          range="{{dueColumns}}"
+          value="{{dueColumnIdx}}"
+          bindchange="onPickDue"
+          bindcolumnchange="onDueColumnChange"
+          class="field__picker"
+        >
+          <view class="field__picker-inner {{form.dueDateStr ? '' : 'field__placeholder'}}">
+            <text wx:if="{{form.dueDateStr}}">⏰ {{form.dueDateStr}}</text>
+            <text wx:else>选择截止时间（可选）</text>
+          </view>
+        </picker>
+        <view wx:if="{{form.dueDateStr}}" class="field__clear" hover-class="cmp-press" hover-stay-time="60" bindtap="onClearDue">清除</view>
+      </view>
+
+      <!-- 地点 -->
+      <view class="field">
+        <view class="field__label">地点</view>
+        <input
+          class="field__input"
+          placeholder="在哪儿做？例如：星巴克、办公室 3F"
+          placeholder-class="field__placeholder"
+          value="{{form.location}}"
+          maxlength="60"
+          bindinput="onInputLocation"
+        />
+      </view>
+
+      <!-- 人物 chip 输入 -->
+      <view class="field">
+        <view class="field__label">相关人物</view>
+        <view class="chips-input">
+          <view wx:for="{{form.people}}" wx:key="*this" class="chip chip--people">
+            <text class="chip__text">{{item}}</text>
+            <text class="chip__x" data-index="{{index}}" catchtap="onRemovePerson">×</text>
+          </view>
+          <input
+            class="chips-input__field"
+            placeholder="{{form.people.length ? '+ 再添加' : '+ 添加参与人'}}"
+            placeholder-class="field__placeholder"
+            value="{{personDraft}}"
+            maxlength="20"
+            confirm-type="done"
+            bindinput="onInputPersonDraft"
+            bindconfirm="onAddPerson"
+          />
+        </view>
+      </view>
+
+      <!-- 标签 chip 输入 -->
+      <view class="field">
+        <view class="field__label">标签</view>
+        <view class="chips-input">
+          <view wx:for="{{form.tags}}" wx:key="*this" class="chip chip--tag">
+            <text class="chip__text">#{{item}}</text>
+            <text class="chip__x" data-index="{{index}}" catchtap="onRemoveTag">×</text>
+          </view>
+          <input
+            class="chips-input__field"
+            placeholder="{{form.tags.length ? '+ 再添加' : '+ 添加标签（工作 / 学习 / 生活）'}}"
+            placeholder-class="field__placeholder"
+            value="{{tagDraft}}"
+            maxlength="12"
+            confirm-type="done"
+            bindinput="onInputTagDraft"
+            bindconfirm="onAddTag"
+          />
+        </view>
+        <view class="field__hint">标签可用于按主题快速筛选</view>
+      </view>
+
+      <!-- 备注 -->
+      <view class="field">
+        <view class="field__label">备注（可选）</view>
+        <textarea
+          class="field__textarea field__textarea--small"
+          placeholder="补充说明、链接或检查清单…"
+          placeholder-class="field__placeholder"
+          value="{{form.description}}"
+          maxlength="500"
+          auto-height
+          bindinput="onInputDescription"
+        ></textarea>
+      </view>
+
+      <!-- 图片 / 视频附件（可选）；图片最多 9 张，视频最多 3 个 ≤60 秒 -->
+      <view class="field">
+        <view class="field__label">图片 / 视频（可选）</view>
+        <attachment-bar
+          id="attBar"
+          items="{{form.attachments}}"
+          bind:change="onAttachChange"
+          bind:update="onAttachUpdate"
+          bind:remove="onAttachRemove"
+        />
+      </view>
+    </scroll-view>
+
+    <view class="composer-modal__footer">
+      <button class="composer-modal__btn composer-modal__btn--ghost" bindtap="onCancel">取消</button>
+      <button class="composer-modal__btn composer-modal__btn--primary" bindtap="onSubmit">
+        {{isEdit ? '保存' : '添加到清单'}}
+      </button>
+    </view>
+  </view>
+</view>

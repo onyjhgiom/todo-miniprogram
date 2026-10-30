@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "数字速记",
+  "usingComponents": {
+    "game-shell": "/subpackages/games/components/game-shell/index"
+  },
+  "disableScroll": true
+}

@@ -1,0 +1,146 @@
+<!--pages/love/plan/plan.wxml-->
+<view class="ay" style="{{skin.style}}">
+
+  <!-- 未绑定提示 -->
+  <view class="duo-banner" wx:if="{{!bound}}">
+    <text class="duo-banner__ico">🔒</text>
+    <view class="duo-banner__main">
+      <text class="duo-banner__t">当前未绑定，清单仅自己可见</text>
+      <text class="duo-banner__d">绑定后两人共同维护，进度实时同步</text>
+    </view>
+    <view class="duo-banner__btn" bindtap="onGoBind">去绑定</view>
+  </view>
+
+  <view class="duo-tabs">
+    <view class="duo-tab {{tab === 'wish' ? 'is-on' : ''}}" bindtap="onTab" data-t="wish">🌟 共同心愿</view>
+    <view class="duo-tab {{tab === 'task' ? 'is-on' : ''}}" bindtap="onTab" data-t="task">🤝 共同约定</view>
+  </view>
+
+  <!-- ================= 共同心愿 ================= -->
+  <block wx:if="{{tab === 'wish'}}">
+    <view class="ay-card ay-glass ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">🌟 想一起做的事</text></view>
+
+      <view class="ay-field">
+        <text class="ay-field__label">心愿</text>
+        <input class="ay-field__input" value="{{wTitle}}" bindinput="onWTitle"
+               placeholder="如：一起去看海" placeholder-class="ay-field__ph" maxlength="40" />
+      </view>
+      <view class="ay-field">
+        <text class="ay-field__label">备注</text>
+        <input class="ay-field__input" value="{{wNote}}" bindinput="onWNote"
+               placeholder="可不填" placeholder-class="ay-field__ph" maxlength="60" />
+      </view>
+      <view class="ay-field">
+        <text class="ay-field__label">期望日期</text>
+        <picker mode="date" value="{{wTarget}}" bindchange="onWTarget">
+          <view class="ay-field__input">{{wTarget || '不限时间'}}</view>
+        </picker>
+      </view>
+
+      <view class="ay-wrap" style="margin-top:24rpx">
+        <view class="ay-btn ay-btn--block" hover-class="ay-btn--off" bindtap="onAddWish">加入心愿</view>
+      </view>
+    </view>
+
+    <view class="ay-card ay-glass">
+      <view class="duo-sec__hd">
+        <text class="duo-sec__t">心愿清单</text>
+        <text class="duo-sec__x">已完成 {{doneCount}} / {{totalCount}}</text>
+      </view>
+
+      <block wx:if="{{wishes.length}}">
+        <view class="duo-item" wx:for="{{wishes}}" wx:key="id">
+          <view class="duo-item__check {{item.done ? 'is-on' : ''}}"
+                hover-class="ay-btn--off" bindtap="onToggleWish" data-id="{{item.id}}">
+            {{item.done ? '✓' : ''}}
+          </view>
+          <view class="duo-item__main">
+            <text class="duo-item__t {{item.done ? 'is-done' : ''}}">{{item.title}}</text>
+            <text class="duo-item__d" wx:if="{{item.note}}">{{item.note}}</text>
+            <text class="duo-item__d" wx:if="{{item.target}}">期望：{{item.target}}</text>
+            <text class="duo-who {{item.mine ? 'duo-who--mine' : ''}}" style="margin-top:8rpx">{{item.who}} 添加</text>
+          </view>
+          <text class="duo-item__del" bindtap="onDelWish" data-id="{{item.id}}">✕</text>
+        </view>
+      </block>
+
+      <view class="ay-empty" wx:else>
+        <view class="ay-empty__ico">🌟</view>
+        <view class="ay-empty__t">还没有共同心愿</view>
+        <view class="ay-empty__t" style="margin-top:8rpx">写下一个想和 TA 一起完成的事吧</view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ================= 共同约定 ================= -->
+  <block wx:else>
+    <view class="ay-card ay-glass ay-anim">
+      <view class="ay-card__hd"><text class="ay-card__title">🤝 一起完成的约定</text></view>
+
+      <view class="ay-field">
+        <text class="ay-field__label">约定</text>
+        <input class="ay-field__input" value="{{tTitle}}" bindinput="onTTitle"
+               placeholder="如：一起存旅行基金" placeholder-class="ay-field__ph" maxlength="40" />
+      </view>
+      <view class="ay-field">
+        <text class="ay-field__label">备注</text>
+        <input class="ay-field__input" value="{{tNote}}" bindinput="onTNote"
+               placeholder="可不填" placeholder-class="ay-field__ph" maxlength="60" />
+      </view>
+      <view class="ay-field">
+        <text class="ay-field__label">截止日期</text>
+        <picker mode="date" value="{{tDue}}" bindchange="onTDue">
+          <view class="ay-field__input">{{tDue || '不限时间'}}</view>
+        </picker>
+      </view>
+
+      <view class="ay-wrap" style="margin-top:24rpx">
+        <view class="ay-btn ay-btn--block" hover-class="ay-btn--off" bindtap="onAddTask">创建约定</view>
+      </view>
+    </view>
+
+    <view class="ay-card ay-glass">
+      <view class="duo-sec__hd">
+        <text class="duo-sec__t">我们的约定</text>
+        <text class="duo-sec__x">已完成 {{doneCount}} / {{totalCount}}</text>
+      </view>
+
+      <block wx:if="{{tasks.length}}">
+        <view class="duo-item" wx:for="{{tasks}}" wx:key="id">
+          <view class="duo-item__check {{item.done ? 'is-on' : ''}}"
+                hover-class="ay-btn--off" bindtap="onToggleTask" data-id="{{item.id}}">
+            {{item.done ? '✓' : ''}}
+          </view>
+          <view class="duo-item__main">
+            <text class="duo-item__t {{item.done ? 'is-done' : ''}}">{{item.title}}</text>
+            <text class="duo-item__d" wx:if="{{item.note}}">{{item.note}}</text>
+            <text class="duo-item__d" wx:if="{{item.due}}">截止：{{item.due}}</text>
+
+            <view class="duo-item__prog">
+              <view class="ay-bar">
+                <view class="ay-bar__in" style="width:{{item.progress}}%"></view>
+              </view>
+              <slider
+                value="{{item.progress}}"
+                min="0" max="100" step="5"
+                activeColor="#FF7F9C" backgroundColor="#FFECE6" block-size="18"
+                bindchange="onProgress" data-id="{{item.id}}" />
+            </view>
+            <text class="duo-item__pnum">进度 {{item.progress}}%</text>
+            <text class="duo-who {{item.mine ? 'duo-who--mine' : ''}}" style="margin-top:8rpx">{{item.who}} 创建</text>
+          </view>
+          <text class="duo-item__del" bindtap="onDelTask" data-id="{{item.id}}">✕</text>
+        </view>
+      </block>
+
+      <view class="ay-empty" wx:else>
+        <view class="ay-empty__ico">🤝</view>
+        <view class="ay-empty__t">还没有共同约定</view>
+        <view class="ay-empty__t" style="margin-top:8rpx">创建后双方都能拖动进度条，一起推进</view>
+      </view>
+    </view>
+  </block>
+
+  <view class="duo-safe" />
+</view>

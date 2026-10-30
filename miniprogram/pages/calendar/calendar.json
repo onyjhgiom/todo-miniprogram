@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "日历",
+  "navigationBarBackgroundColor": "#15110D",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#15110D",
+  "usingComponents": {
+    "empty-state": "/components/empty-state/empty-state",
+    "fx-stage": "/components/fx-stage/fx-stage"
+  }
+}

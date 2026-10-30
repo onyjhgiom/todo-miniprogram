@@ -1,0 +1,130 @@
+<!-- 根容器绑定皮肤：cs-theme-* 类一变，整页 CSS 变量级联刷新 -->
+<view class="cs-root cs-theme-{{csTheme}}">
+
+  <view class="page">
+
+    <!-- 顶部周次切换 -->
+    <view class="topbar">
+      <view class="nav-btn" bindtap="onPrevWeek" hover-class="btn-hover">‹</view>
+      <picker class="week-picker" mode="selector" range="{{weekOptions}}" value="{{weekIndex}}" bindchange="onWeekPick">
+        <view class="week-text">{{weekOptions[weekIndex]}} ▾</view>
+      </picker>
+      <view class="nav-btn" bindtap="onNextWeek" hover-class="btn-hover">›</view>
+      <view class="today-btn {{showToday ? 'today-btn-off' : ''}}" bindtap="onBackToThisWeek" hover-class="btn-hover">本周</view>
+      <view class="theme-slot">
+        <cs-theme-picker current="{{csTheme}}" bind:change="onCsThemeChange" />
+      </view>
+    </view>
+
+    <!-- 冲突提示 -->
+    <view class="conflict" wx:if="{{conflictTip}}" bindtap="onTapConflict" hover-class="btn-hover">
+      <text class="conflict-dot">!</text>
+      <text class="conflict-text">{{conflictTip}}</text>
+    </view>
+
+    <!-- 课表网格 -->
+    <view class="board" wx:if="{{!empty}}">
+      <view class="row row-head">
+        <view class="slot-col"></view>
+        <view class="cell head-cell {{item.today ? 'head-today' : ''}}" wx:for="{{headers}}" wx:key="name">
+          <view class="head-name">{{item.name}}</view>
+        </view>
+      </view>
+
+      <view class="row" wx:for="{{grid}}" wx:for-item="line" wx:key="start">
+        <view class="slot-col">
+          <!-- 非预设节次（连排课）label 就等于 start，避免重复两行 -->
+          <view class="slot-label" wx:if="{{line.label !== line.start}}">{{line.label}}</view>
+          <view class="slot-time">{{line.start}}</view>
+          <block wx:if="{{line.end && line.end !== line.start}}">
+            <view class="slot-sep"></view>
+            <view class="slot-time slot-end">{{line.end}}</view>
+          </block>
+        </view>
+        <view
+          class="cell"
+          wx:for="{{line.cells}}"
+          wx:for-item="c"
+          wx:key="index">
+          <view
+            wx:if="{{c}}"
+            id="card-{{c.id}}"
+            class="course cs-c{{c.ci}} {{c.conflicted ? 'course-conflict' : ''}} {{c.id === editingId ? 'course-editing' : ''}}"
+            data-id="{{c.id}}"
+            bindtap="onTapCourse"
+            hover-class="course-hover">
+            <view class="course-title">{{c.title}}</view>
+            <view class="course-loc" wx:if="{{c.location}}">{{c.location}}</view>
+            <view class="course-teacher" wx:if="{{c.teacher}}">{{c.teacher}}</view>
+            <view class="course-week">{{c.weekText}}</view>
+            <view class="course-flag" wx:if="{{c.overridden}}">已调整</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空态 -->
+    <view class="empty" wx:if="{{empty}}">
+      <view class="empty-title">本周没有课</view>
+      <view class="empty-sub">上传课程表截图，或手动添加第一门课</view>
+      <view class="empty-btn" bindtap="goImport" hover-class="btn-hover">导入课表</view>
+      <view class="empty-link" bindtap="demoFill">载入示例课表</view>
+    </view>
+
+  </view>
+
+  <view class="fab" bindtap="goEdit" hover-class="fab-hover">课表调整</view>
+
+  <!-- 就地编辑：遮罩。点一下 = 点空白处 = 保存并关闭 -->
+  <view wx:if="{{editingId}}" class="cs-mask" bindtap="onMaskTap" catchtouchmove="onNoop"></view>
+
+  <!--
+    就地编辑面板：fixed 定位在卡片处，不占布局流。
+    格子很窄（7 列，卡片约 88rpx），在原地塞输入框根本点不中，
+    所以面板从卡片位置"长出来"：视觉上就地，布局上不挤动任何格子。
+  -->
+  <view
+    wx:if="{{editingId}}"
+    class="cs-edit"
+    style="top:{{editPos.top}}px;left:{{editPos.left}}px;width:{{editPos.width}}px"
+    catchtap="onNoop"
+    catchtouchmove="onNoop">
+    <view class="cs-edit-title">编辑课程</view>
+
+    <view class="cs-field" wx:for="{{editFields}}" wx:key="key">
+      <view class="cs-field-label">{{item.label}}</view>
+      <input
+        class="cs-input"
+        type="text"
+        value="{{draft[item.key]}}"
+        placeholder="{{item.placeholder}}"
+        placeholder-class="cs-input-ph"
+        maxlength="{{item.max + 10}}"
+        focus="{{editFocus === item.key}}"
+        adjust-position="{{false}}"
+        cursor-spacing="12"
+        data-field="{{item.key}}"
+        bindinput="onEditInput"
+        bindfocus="onEditFocus"
+        bindblur="onEditBlur"
+        bindconfirm="onEditConfirm"
+        bindkeyboardheightchange="onKbHeight" />
+    </view>
+
+    <view class="cs-edit-tip">回车 / 点空白处保存，取消可还原</view>
+
+    <view class="cs-edit-actions">
+      <view class="cs-btn cs-btn-ghost" bindtouchstart="onEditCancelTouch" bindtap="onEditCancel" hover-class="cs-btn-hover">取消</view>
+      <view class="cs-btn cs-btn-ghost" bindtouchstart="onEditMoreTouch" bindtap="onEditMore" hover-class="cs-btn-hover">更多</view>
+      <view class="cs-btn cs-btn-primary" bindtouchstart="onEditSaveTouch" bindtap="onEditSave" hover-class="cs-btn-hover">保存</view>
+    </view>
+  </view>
+
+  <undo-bar
+    text="{{undoText}}"
+    visible="{{undoVisible}}"
+    duration="{{5000}}"
+    bind:undo="onUndo"
+    bind:close="onUndoClose" />
+
+</view>

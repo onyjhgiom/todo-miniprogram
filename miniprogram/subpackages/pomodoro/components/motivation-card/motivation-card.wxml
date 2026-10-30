@@ -1,0 +1,6 @@
+<!--components/motivation-card/motivation-card.wxml-->
+<!-- 今日激励语：需求五要求「轻量」，所以用极淡的底 + 左侧一条短竖线，不抢主视觉。 -->
+<view class="moti">
+  <view class="moti__bar"></view>
+  <text class="moti__tx">{{text}}</text>
+</view>

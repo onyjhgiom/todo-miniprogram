@@ -1,0 +1,24 @@
+<view class="recurrence">
+  <view class="recur-type">
+    <view wx:for="{{types}}" wx:key="key" class="recur-chip {{type === item.key ? 'is-active' : ''}}" bindtap="onTypeChange" data-key="{{item.key}}">
+      {{item.label}}
+    </view>
+  </view>
+  <view wx:if="{{type === 'custom'}}" class="recur-interval">
+    <text>每</text>
+    <input type="number" class="recur-num" value="{{interval}}" bindinput="onIntervalChange" />
+    <text>{{intervalUnit}}</text>
+  </view>
+  <view wx:if="{{type === 'weekly'}}" class="recur-weekdays">
+    <view wx:for="{{weekdays}}" wx:key="value" class="weekday-chip {{selectedWeekdays.includes(item.value) ? 'is-active' : ''}}" bindtap="onWeekdayToggle" data-value="{{item.value}}">
+      {{item.label}}
+    </view>
+  </view>
+  <view wx:if="{{type !== 'none'}}" class="recur-end">
+    <text class="recur-end-label">重复至</text>
+    <picker mode="date" value="{{endDateStr}}" bindchange="onEndDateChange" class="recur-end-picker">
+      <view class="recur-end-value">{{endDateStr || '永不结束'}}</view>
+    </picker>
+    <view wx:if="{{endDateStr}}" class="recur-end-clear" bindtap="onEndDateClear">清除</view>
+  </view>
+</view>

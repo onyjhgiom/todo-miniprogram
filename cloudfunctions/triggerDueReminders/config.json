@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "openapi": []
+  },
+  "timeout": 20,
+  "installDependency": true,
+  "triggers": [
+    {
+      "name": "everyMinute",
+      "type": "timer",
+      "config": "0 * * * * * *"
+    }
+  ]
+}

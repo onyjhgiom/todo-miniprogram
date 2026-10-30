@@ -1,0 +1,20 @@
+<!--components/love-core/love-core.wxml-->
+<!-- LoveCore 3D 爱情水晶球：玻璃穹顶 + 水晶爱心 + 三条倾斜轨道 + 星尘
+     用法：<love-core id="core" level="{{heartLv}}" primary="#8B5CF6" accent="#F5A7D7"
+                      reduced="{{reducedMotion}}" paused="{{corePaused}}" height="{{660}}"
+                      bind:pulse="onCorePulse" />
+     背景透明，直接坐在页面的动态渐变上 -->
+<view class="core-wrap" style="height:{{height}}rpx">
+  <canvas
+    type="2d"
+    id="coreCv"
+    class="core-cv"
+    bindtouchstart="onTouchStart"
+    bindtouchmove="onTouchMove"
+    bindtouchend="onTouchEnd"
+    bindtouchcancel="onTouchEnd"
+  ></canvas>
+
+  <view class="core-hint" wx:if="{{hint}}">{{hint}}</view>
+  <slot></slot>
+</view>

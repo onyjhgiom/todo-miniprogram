@@ -1,0 +1,9 @@
+{
+  "name": "memo",
+  "version": "1.0.0",
+  "description": "语音备忘录云端同步",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

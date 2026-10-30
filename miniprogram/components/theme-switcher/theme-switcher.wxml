@@ -1,0 +1,43 @@
+<view class="ts-grid">
+  <view
+    wx:for="{{themes}}"
+    wx:key="key"
+    class="ts-card {{current === item.key ? 'is-active' : ''}}"
+    bindtap="onSelect"
+    hover-class="ts-card--press"
+    hover-stay-time="80"
+    data-key="{{item.key}}"
+  >
+    <!-- 迷你界面预览屏：状态条 + 标题行 + 迷你卡片 + 胶囊行 -->
+    <view class="ts-screen" style="background: {{item.bg}};">
+      <view class="ts-screen__notch" style="background: {{item.line}};"></view>
+      <view class="ts-screen__title" style="background: {{item.line}};"></view>
+      <view class="ts-screen__panel" style="background: {{item.chip}};"></view>
+      <view class="ts-screen__row">
+        <view class="ts-screen__pill" style="background: {{item.chip}};"></view>
+        <view class="ts-screen__pill ts-screen__pill--soft" style="background: {{item.line}};"></view>
+      </view>
+      <view wx:if="{{current === item.key}}" class="ts-check">✓</view>
+    </view>
+    <!-- 风格信息：名 + 标语 + 配色圆点 -->
+    <view class="ts-meta">
+      <view class="ts-name">{{item.name}}</view>
+      <view class="ts-tag">{{item.tag}}</view>
+      <view class="ts-dots">
+        <view wx:for="{{item.dots}}" wx:for-item="dot" wx:key="*this" class="ts-dot" style="background: {{dot}};"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 自定义颜色主题：色板随用户选择的主题色实时变化 -->
+  <view class="ts-card {{current === 'custom' ? 'is-active' : ''}}" bindtap="onSelect" hover-class="ts-card--press" hover-stay-time="80" data-key="custom">
+    <view class="ts-screen ts-screen--custom" style="background: {{customGradient}};">
+      <text class="ts-custom-glyph">🎨</text>
+      <view wx:if="{{current === 'custom'}}" class="ts-check">✓</view>
+    </view>
+    <view class="ts-meta">
+      <view class="ts-name">自定义</view>
+      <view class="ts-tag">随心配色 · 我的主题</view>
+    </view>
+  </view>
+</view>

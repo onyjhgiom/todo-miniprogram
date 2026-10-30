@@ -1,0 +1,117 @@
+.hv { display: flex; flex-direction: column; align-items: center; }
+.hv__bar { gap: 16rpx; margin-bottom: 20rpx; }
+
+/* 规格切换 chip */
+.chip {
+  min-width: 96rpx; padding: 12rpx 26rpx; border-radius: 999rpx;
+  background: var(--card-2); border: 2rpx solid var(--line);
+  font-size: 26rpx; color: var(--ink-2); font-weight: 600;
+  transition: transform .08s ease, background .15s ease, color .15s ease;
+}
+.chip:active { transform: scale(.95); }
+.chip--active {
+  background: var(--mint); color: #FFFFFF; border-color: var(--mint-deep);
+}
+
+/* 归位进度条 */
+.hv__progressbar {
+  width: 100%; max-width: 620rpx; align-items: center; gap: 16rpx;
+  margin-bottom: 18rpx;
+}
+.hv__track {
+  flex: 1; height: 10rpx; border-radius: 999rpx;
+  background: var(--card-3); border: 2rpx solid var(--line); overflow: hidden;
+}
+.hv__fill {
+  height: 100%; border-radius: 999rpx;
+  background: linear-gradient(90deg, var(--mint), var(--mint-deep));
+  transition: width .25s ease;
+}
+
+.hv__board {
+  width: 100%; max-width: 620rpx; box-sizing: border-box; display: grid; gap: 14rpx;
+  background: var(--card-2); padding: 14rpx; border-radius: var(--r-lg);
+  border: 2rpx solid var(--line);
+  box-shadow: var(--sd-1);
+}
+.hv__cell {
+  aspect-ratio: 1 / 1; min-width: 0; min-height: 0; border-radius: var(--r-md);
+  display: flex; align-items: center; justify-content: center;
+  background: var(--card); box-shadow: var(--sd-1);
+  transition: transform .12s ease, background-color .2s ease, box-shadow .2s ease;
+}
+.hv__cell:active { transform: scale(.96); }
+.hv__cell--blank { background: transparent; box-shadow: none; }
+
+/* 已归位（常亮浅绿，给玩家进度感） */
+.hv__cell--placed {
+  background: var(--mint-2);
+  box-shadow: inset 0 0 0 2rpx rgba(110, 142, 110, .35), var(--sd-1);
+}
+.hv__cell--placed .hv__num { color: var(--mint-deep); }
+
+/* 刚滑入正确位置：金色强调，强化「归位」手感 */
+.hv__cell--done {
+  background: var(--gold-soft);
+  box-shadow: 0 0 0 3rpx var(--gold), var(--sd-1);
+  animation: donePulse .5s ease-out;
+}
+.hv__cell--done .hv__num { color: #9C7F3F; }
+
+/* 滑入微动效：新数字落下时轻微 pop */
+.hv__cell--slide { animation: slidePop .18s ease-out; }
+
+/* 点击无效：抖动提示 */
+.hv__cell--shake { animation: cellShake .22s ease-in-out; }
+
+@keyframes donePulse {
+  0% { box-shadow: 0 0 0 8rpx rgba(192, 154, 94, .55), var(--sd-1); }
+  100% { box-shadow: 0 0 0 3rpx var(--gold), var(--sd-1); }
+}
+@keyframes slidePop {
+  0% { transform: scale(.82); }
+  100% { transform: scale(1); }
+}
+@keyframes cellShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8rpx); }
+  40% { transform: translateX(8rpx); }
+  60% { transform: translateX(-5rpx); }
+  80% { transform: translateX(5rpx); }
+}
+.hv__num { font-size: 44rpx; color: var(--clay); font-weight: 700; }
+
+/* 控制区：撤销 + 方向键 */
+.hv__ctrls {
+  width: 100%; max-width: 620rpx;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-top: 22rpx;
+}
+.hv__undo {
+  display: flex; flex-direction: column; align-items: center; gap: 6rpx;
+  padding: 12rpx 16rpx; border-radius: var(--r-md);
+  color: var(--clay); background: var(--card-2); border: 2rpx solid var(--line);
+  transition: transform .08s ease, opacity .15s ease;
+}
+.hv__undo:active { transform: scale(.95); }
+.hv__undo--disabled { opacity: .42; pointer-events: none; }
+.hv__undoIcon { font-size: 32rpx; line-height: 1; }
+
+.hv__dir { display: flex; flex-direction: column; align-items: center; gap: 16rpx; }
+.hv__dir .row { gap: 16rpx; }
+.hv__d {
+  width: 108rpx; height: 108rpx; border-radius: 50%; background: var(--card);
+  display: flex; align-items: center; justify-content: center;
+  border: 2rpx solid var(--line); box-shadow: var(--sd-1);
+  transition: transform .08s ease, background .12s ease, box-shadow .12s ease;
+}
+.hv__d:active {
+  transform: scale(.93);
+  background: var(--card-2);
+  box-shadow: inset 0 4rpx 12rpx rgba(90, 74, 56, .08);
+}
+.hv__arrow { width: 0; height: 0; border-style: solid; border-color: transparent; }
+.hv__arrow--up { border-width: 0 20rpx 30rpx 20rpx; border-bottom-color: var(--clay); }
+.hv__arrow--down { border-width: 30rpx 20rpx 0 20rpx; border-top-color: var(--clay); }
+.hv__arrow--left { border-width: 20rpx 30rpx 20rpx 0; border-right-color: var(--clay); }
+.hv__arrow--right { border-width: 20rpx 0 20rpx 30rpx; border-left-color: var(--clay); }

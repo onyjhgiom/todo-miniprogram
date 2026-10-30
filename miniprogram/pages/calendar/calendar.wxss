@@ -1,0 +1,310 @@
+/* calendar */
+.cal-page { min-height: 100vh; padding-bottom: 200rpx; position: relative; }
+.cal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 24rpx 32rpx;
+  background: var(--color-card);
+}
+.cal-nav { display: flex; align-items: center; gap: 24rpx; }
+.cal-nav-btn {
+  width: 56rpx; height: 56rpx;
+  border-radius: 50%;
+  background: var(--color-bg-soft);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36rpx; color: var(--color-text);
+}
+.cal-nav-btn:active { background: var(--color-primary-soft); }
+.cal-title { font-size: 32rpx; font-weight: 600; color: var(--color-text); }
+.cal-today {
+  padding: 10rpx 20rpx;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  border-radius: 999rpx;
+  font-size: 22rpx; font-weight: 500;
+}
+.cal-weekdays {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  background: var(--color-card);
+  padding: 16rpx 0;
+  border-top: 1rpx solid var(--color-border);
+  border-bottom: 1rpx solid var(--color-border);
+}
+.cal-weekday {
+  text-align: center;
+  font-size: 22rpx; color: var(--color-text-mute);
+  font-weight: 500;
+}
+.cal-weekday.is-weekend { color: var(--color-danger); opacity: 0.65; }
+.cal-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  background: var(--color-card);
+  padding: 8rpx;
+  gap: 4rpx;
+}
+.cal-cell {
+  aspect-ratio: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2rpx;
+  border-radius: 12rpx;
+  position: relative;
+  transition: all 200ms;
+}
+.cal-cell.is-out .cal-date { color: var(--color-text-mute); opacity: 0.4; }
+.cal-cell.is-out .cal-lunar { opacity: 0.35; }
+.cal-cell.is-today {
+  background: var(--color-primary-soft);
+}
+.cal-cell.is-today .cal-date { color: var(--color-primary); font-weight: 700; }
+.cal-cell.is-selected {
+  background: var(--color-primary);
+}
+.cal-cell.is-selected .cal-date { color: #fff; }
+.cal-cell.is-selected .cal-lunar { color: rgba(255, 255, 255, 0.85); }
+.cal-cell.is-selected .cal-lunar.is-festival { color: #fff; }
+.cal-cell:active { background: var(--color-bg-soft); }
+
+/* 双休日：日期与农历用柔和的暖色区分 */
+.cal-cell.is-weekend .cal-date { color: var(--color-danger); }
+.cal-cell.is-weekend .cal-lunar { color: var(--color-danger); opacity: 0.75; }
+/* 调休上班的周末：降回主文字色，靠「班」角标区分 */
+.cal-cell.is-work .cal-date,
+.cal-cell.is-work .cal-lunar { color: var(--color-text); opacity: 1; }
+/* 法定假日 */
+.cal-cell.is-rest .cal-date { color: var(--color-danger); font-weight: 600; }
+.cal-cell.is-rest .cal-lunar { color: var(--color-danger); }
+
+.cal-date { font-size: 26rpx; color: var(--color-text); line-height: 1.2; }
+/* 农历/节日小字 */
+.cal-lunar {
+  font-size: 18rpx;
+  color: var(--color-text-mute);
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 2rpx;
+}
+.cal-lunar.is-festival { color: var(--color-danger); font-weight: 600; }
+
+/* 角标：休（右上角红色）/ 班（右上角灰色） */
+.cal-badge {
+  position: absolute;
+  top: 2rpx;
+  right: 2rpx;
+  min-width: 26rpx;
+  height: 26rpx;
+  padding: 0 4rpx;
+  border-radius: 6rpx;
+  font-size: 16rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.cal-badge--rest {
+  background: var(--color-danger);
+  color: #ffffff;
+}
+.cal-badge--work {
+  background: var(--color-text-mute);
+  color: #ffffff;
+}
+
+/* 假期首日：放假天数标签 */
+.cal-holiday-days {
+  position: absolute;
+  bottom: 2rpx;
+  right: 2rpx;
+  padding: 0 6rpx;
+  height: 24rpx;
+  border-radius: 6rpx;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 16rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.cal-dot {
+  min-width: 28rpx; height: 28rpx; padding: 0 6rpx;
+  border-radius: 999rpx;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 18rpx; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+}
+.cal-cell.is-selected .cal-dot { background: #fff; color: var(--color-primary); }
+
+/* ============ 本月假期安排 ============ */
+.cal-holidays {
+  margin: 20rpx 24rpx 0;
+  padding: 20rpx 24rpx;
+  background: var(--color-card);
+  border-radius: 16rpx;
+  box-shadow: var(--shadow-sm);
+}
+.cal-holidays-title {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: var(--color-text-soft);
+  margin-bottom: 14rpx;
+}
+.cal-holiday-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 10rpx 0;
+}
+.cal-holiday-name {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: var(--color-danger);
+  flex-shrink: 0;
+}
+.cal-holiday-name.is-workday { color: var(--color-text-soft); }
+.cal-holiday-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex-wrap: wrap;
+}
+.cal-holiday-days-text {
+  font-size: 22rpx;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+.cal-holiday-range {
+  font-size: 22rpx;
+  color: var(--color-text-soft);
+}
+.cal-holiday-estimated {
+  font-size: 18rpx;
+  color: var(--color-text-mute);
+  background: var(--color-bg-soft);
+  border-radius: 6rpx;
+  padding: 2rpx 8rpx;
+}
+.cal-holiday-work-note {
+  font-size: 20rpx;
+  font-weight: 600;
+  color: var(--color-warning);
+}
+
+/* ============ 图例 ============ */
+.cal-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32rpx;
+  margin-top: 16rpx;
+}
+.cal-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  font-size: 20rpx;
+  color: var(--color-text-mute);
+}
+.cal-legend-item .cal-badge { position: static; }
+.cal-legend-weekend {
+  width: 22rpx;
+  height: 22rpx;
+  border-radius: 6rpx;
+  background: var(--color-primary-soft);
+  border: 2rpx solid var(--color-border);
+}
+
+/* ============ 选中日信息 ============ */
+.cal-day-section { padding: 32rpx 24rpx; }
+.cal-day-title {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+.cal-day-date { font-size: 28rpx; color: var(--color-text); font-weight: 600; }
+.cal-day-count { font-size: 22rpx; color: var(--color-text-mute); }
+
+.cal-day-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  background: var(--color-card);
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: var(--shadow-sm);
+}
+.cal-day-lunar {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex-wrap: wrap;
+}
+.cal-day-festival {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: var(--color-danger);
+}
+.cal-day-lunar-text {
+  font-size: 24rpx;
+  color: var(--color-text-soft);
+}
+.cal-day-holiday {
+  font-size: 22rpx;
+  color: var(--color-primary);
+  font-weight: 500;
+}
+.cal-day-badge-note {
+  font-size: 20rpx;
+  font-weight: 600;
+}
+.cal-day-badge-note--rest { color: var(--color-danger); }
+.cal-day-badge-note--work { color: var(--color-text-mute); }
+
+.cal-day-list { display: flex; flex-direction: column; gap: 12rpx; }
+.cal-day-item {
+  display: flex; align-items: center; gap: 16rpx;
+  background: var(--color-card);
+  border-radius: 12rpx;
+  padding: 16rpx 20rpx;
+  box-shadow: var(--shadow-sm);
+  transition: all 200ms;
+}
+.cal-day-item.is-done { opacity: 0.6; }
+.cal-day-item.is-done .cal-day-content { text-decoration: line-through; }
+.cal-day-item:active { transform: scale(0.98); }
+.cal-day-priority {
+  width: 6rpx; height: 36rpx;
+  border-radius: 3rpx;
+  background: var(--color-primary);
+  flex-shrink: 0;
+}
+.cal-day-info { flex: 1; min-width: 0; }
+.cal-day-content { font-size: 26rpx; color: var(--color-text); }
+.cal-day-time { font-size: 22rpx; color: var(--color-text-mute); margin-top: 4rpx; }
+.cal-fab {
+  position: fixed; right: 32rpx; bottom: 160rpx;
+  width: 96rpx; height: 96rpx; border-radius: 50%;
+  background: var(--gradient-hero);
+  box-shadow: var(--shadow-lg);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 56rpx; font-weight: 300;
+  z-index: 90;
+}
+.cal-fab:active { transform: scale(0.92); }
+
+/* 舞台层配合：fx-stage 为 fixed z-index:0，主内容容器显式抬升（弹层/fab 自带更高层级不受影响） */
+.cal-header,
+.cal-weekdays,
+.cal-grid,
+.cal-holidays,
+.cal-legend,
+.cal-day-section {
+  position: relative;
+  z-index: 1;
+}

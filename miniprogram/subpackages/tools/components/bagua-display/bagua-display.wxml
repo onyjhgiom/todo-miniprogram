@@ -1,0 +1,15 @@
+<!--components/tools/bagua-display/bagua-display.wxml-->
+<!-- 八卦圆盘：图片盘面（先天八卦纹样，装饰用） + 缓旋 + 细金光环 + 中心呼吸光 -->
+<view
+  class="bagua {{spinning ? '' : 'bagua--still'}}"
+  style="width:{{size}}rpx;height:{{size}}rpx;--bf-glow:{{glow}};"
+>
+  <!-- 最外层柔光呼吸 -->
+  <view class="bagua__halo"></view>
+  <!-- 盘面：缓旋（真实八卦盘的整体旋转意象，周期很长不抢视线） -->
+  <image class="bagua__img" src="/subpackages/tools/assets/guofeng/bagua-emblem.jpg" mode="aspectFit" />
+  <!-- 细金描边环：反向慢转，与盘面形成层次 -->
+  <view class="bagua__ring"></view>
+  <!-- 中心高光呼吸（盘心阴阳位置） -->
+  <view class="bagua__core"></view>
+</view>

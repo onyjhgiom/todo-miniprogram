@@ -1,0 +1,408 @@
+<!-- pages/recruit/detail.wxml -->
+<view class="dt themed" data-theme="{{theme}}" style="{{themeStyle}}">
+  <view class="dt__hero" style="background:{{heroGradient}}">
+    <text class="dt__hero-title">{{form.company || '新建投递'}}</text>
+    <text class="dt__hero-sub">{{form.position || '填写公司 / 职位信息'}}</text>
+  </view>
+
+  <!-- 智能建议：简历×JD 匹配度 + 下一步 + 关键时间节点 -->
+  <view class="dt__card dt__intel" wx:if="{{insight && match}}">
+    <view class="dt__card-title">
+      智能建议
+      <text class="dt__match-score dt__match-score--{{match.levelKey}}">{{match.score}} 分 · {{match.level}}</text>
+    </view>
+
+    <block wx:if="{{insight.alerts.length}}">
+      <view class="dt__alert dt__alert--{{item.tone}}" wx:for="{{insight.alerts}}" wx:for-index="ai" wx:key="ai">{{item.text}}</view>
+    </block>
+
+    <view class="dt__sub">下一步</view>
+    <view class="dt__next" wx:for="{{insight.actions}}" wx:key="key">
+      <text class="dt__next-icon">{{item.icon}}</text>
+      <view class="dt__next-body">
+        <text class="dt__next-text">{{item.text}}</text>
+        <text class="dt__next-reason">{{item.reason}}</text>
+      </view>
+      <text wx:if="{{item.urgent}}" class="dt__next-urgent">紧急</text>
+    </view>
+
+    <block wx:if="{{match.gaps.length}}">
+      <view class="dt__sub">简历待补强（按 JD 关键词）</view>
+      <view class="dt__gap" wx:for="{{match.gaps}}" wx:key="kw">
+        <text class="dt__gap-kw">{{item.kw}}</text>
+        <text class="dt__gap-advice">{{item.advice}}</text>
+      </view>
+    </block>
+
+    <block wx:if="{{match.missing.length}}">
+      <view class="dt__sub">先补齐这些，匹配度才算得准</view>
+      <view class="dt__miss" wx:for="{{match.missing}}" wx:key="*this">{{item}}</view>
+    </block>
+  </view>
+
+  <!-- 基本信息 -->
+  <view class="dt__card">
+    <view class="dt__field">
+      <text class="dt__label">公司名称</text>
+      <input class="dt__input {{errors.company ? 'dt__input--err' : ''}}" placeholder="如 腾讯 / 字节跳动" value="{{form.company}}" data-field="company" bindinput="onInput" />
+      <text class="dt__err ix-shake" wx:if="{{errors.company}}">{{errors.company}}</text>
+    </view>
+    <view class="dt__field">
+      <text class="dt__label">应聘职位</text>
+      <input class="dt__input" placeholder="如 后端开发 / 产品经理" value="{{form.position}}" data-field="position" bindinput="onInput" confirm-type="next" cursor-spacing="120" adjust-position />
+    </view>
+    <view class="dt__field">
+      <text class="dt__label">当前状态</text>
+      <picker mode="selector" range="{{statusOptions}}" value="{{statusIndex}}" bindchange="onStatus">
+        <view class="dt__picker">{{statusLabel}} ▾</view>
+      </picker>
+    </view>
+    <view class="dt__field">
+      <text class="dt__label">工作地 (base)</text>
+      <input class="dt__input" placeholder="如 深圳 / 上海" value="{{form.base}}" data-field="base" bindinput="onInput" />
+    </view>
+    <view class="dt__field">
+      <text class="dt__label">薪资范围</text>
+      <input class="dt__input" placeholder="如 20-30K·16薪" value="{{form.salary}}" data-field="salary" bindinput="onInput" />
+    </view>
+  </view>
+
+  <!-- 链接自动提取 -->
+  <view class="dt__card">
+    <view class="dt__autofill" bindtap="autoFillFromClipboard">
+      <view class="dt__af-icon">🔗</view>
+      <view class="dt__af-main">
+        <view class="dt__af-t">粘贴岗位链接，自动填好并生成待办</view>
+        <view class="dt__af-s">支持 BOSS直聘 / 前程无忧 / 猎聘 / 实习僧 / 智联 / 拉勾 等；读不到时会自动引导你粘贴岗位文案</view>
+      </view>
+      <view class="dt__af-go">›</view>
+    </view>
+    <view class="dt__af-alt">
+      <text class="dt__af-alt-i" bindtap="askForLink">手动输入链接</text>
+      <text class="dt__af-alt-sep">·</text>
+      <text class="dt__af-alt-i" bindtap="askForText">粘贴文案解析</text>
+    </view>
+  </view>
+
+  <!-- 链接 -->
+  <view class="dt__card">
+    <view class="dt__field">
+      <text class="dt__label">JD 链接</text>
+      <view class="dt__row">
+        <input class="dt__input dt__input--grow" placeholder="粘贴 JD 链接" value="{{form.jdUrl}}" data-field="jdUrl" bindinput="onInput" />
+        <view class="dt__mini" bindtap="copyJd">复制</view>
+      </view>
+    </view>
+    <view class="dt__field">
+      <text class="dt__label">投递入口</text>
+      <view class="dt__row">
+        <input class="dt__input dt__input--grow" placeholder="网申 / 投递页面链接" value="{{form.applyUrl}}" data-field="applyUrl" bindinput="onInput" confirm-type="done" cursor-spacing="120" adjust-position />
+        <view class="dt__mini dt__mini--primary" bindtap="copyApply">打开</view>
+      </view>
+      <text class="dt__hint">秋招最大的痛是「我投的那家入口在哪」——这里一键复制，下次直接打开</text>
+    </view>
+    <view class="dt__field" wx:if="{{form.jdUrl && form.jdUrl.indexOf('#小程序://') === 0}}">
+      <text class="dt__label">小程序岗位链接</text>
+      <view class="dt__row">
+        <input class="dt__input dt__input--grow" placeholder="微信小程序岗位链接" value="{{form.jdUrl}}" data-field="jdUrl" bindinput="onInput" />
+        <view class="dt__mini dt__mini--primary" bindtap="openShortLink">打开</view>
+      </view>
+      <text class="dt__hint">这是微信小程序链接，微信不提供反解接口，无法读出岗位内容；点「打开」可直接回到该岗位页，再用「粘贴文案解析」补全信息</text>
+    </view>
+  </view>
+
+  <!-- 内推 -->
+  <view class="dt__card">
+    <view class="dt__field">
+      <text class="dt__label">是否内推</text>
+      <view class="dt__seg">
+        <view class="dt__seg-i {{form.isReferral ? 'dt__seg-i--on' : ''}}" data-v="1" bindtap="onReferral">内推</view>
+        <view class="dt__seg-i {{!form.isReferral ? 'dt__seg-i--on' : ''}}" data-v="0" bindtap="onReferral">自投</view>
+      </view>
+    </view>
+    <view class="dt__field" wx:if="{{form.isReferral}}">
+      <text class="dt__label">内推人 / 联系方式</text>
+      <input class="dt__input" placeholder="如 张三（微信 xxx）" value="{{form.referrer}}" data-field="referrer" bindinput="onInput" />
+    </view>
+  </view>
+
+  <!-- 截止与提醒（模块二） -->
+  <view class="dt__card">
+    <view class="dt__field">
+      <text class="dt__label">截止 / 笔试时间</text>
+      <picker mode="datetime" value="{{form.dueText === '点击设置截止时间' ? '' : form.dueText}}" bindchange="onDue">
+        <view class="dt__picker">{{form.dueText}} ▾</view>
+      </picker>
+    </view>
+    <view class="dt__field dt__field--row">
+      <view>
+        <text class="dt__label">到期提醒</text>
+        <text class="dt__hint">{{canRemind ? '笔试前一天 + 前 3 小时各提醒一次' : '需先设置截止时间'}}</text>
+      </view>
+      <view class="dt__switch {{remindOn ? 'dt__switch--on' : ''}}" data-v="{{remindOn ? '0' : '1'}}" bindtap="toggleRemind">
+        <view class="dt__switch-dot"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 面试安排（模块五：日历事件与提醒的数据源） -->
+  <view class="dt__card">
+    <view class="dt__card-head">
+      <text class="dt__card-title">📅 面试安排</text>
+      <text class="dt__card-sub">{{ivCount > 0 ? ivCount + ' 场待进行' : '还没登记'}}</text>
+    </view>
+
+    <view class="dt__iv" wx:for="{{interviews}}" wx:key="id">
+      <view class="dt__iv-main" data-id="{{item.id}}" bindtap="openIvEditor">
+        <view class="dt__iv-head">
+          <text class="dt__iv-round dt__iv-round--{{item.modeKey}}">{{item.round}}</text>
+          <text class="dt__iv-mode">{{item.mode}}</text>
+          <text class="dt__iv-cd {{item.done ? 'dt__iv-cd--done' : ''}}">{{item.countdown}}</text>
+        </view>
+        <text class="dt__iv-date">{{item.dateText}}</text>
+        <text class="dt__iv-sub" wx:if="{{item.place}}">📍 {{item.place}}</text>
+        <text class="dt__iv-sub" wx:if="{{item.interviewer}}">👤 {{item.interviewer}}</text>
+        <text class="dt__iv-note" wx:if="{{item.note}}">{{item.note}}</text>
+      </view>
+      <view class="dt__iv-acts">
+        <view class="dt__mini dt__mini--ghost" data-id="{{item.id}}" catchtap="toggleIvDone">{{item.done ? '改回未完成' : '标记已结束'}}</view>
+        <view class="dt__mini dt__mini--ghost" data-id="{{item.id}}" catchtap="logIv">记入时间线</view>
+        <view class="dt__mini dt__mini--danger" data-id="{{item.id}}" catchtap="removeIv">删除</view>
+      </view>
+    </view>
+
+    <text class="dt__hint" wx:if="{{ivNextText}}">下一场：{{ivNextText}} · 自动提前 30 分钟提醒</text>
+    <text class="dt__hint" wx:else>登记面试时间后，会自动出现在日历视图，并提前 30 分钟提醒</text>
+    <view class="dt__btn-soft" bindtap="openIvEditor">＋ 添加面试安排</view>
+  </view>
+
+  <!-- 嵌入式知识库（模块一） -->
+  <view class="dt__card">
+    <view class="dt__kb-tabs">
+      <view class="dt__kb-tab {{kbTab === 'jd' ? 'dt__kb-tab--on' : ''}}" data-tab="jd" bindtap="onKbTab">JD & 关键词</view>
+      <view class="dt__kb-tab {{kbTab === 'company' ? 'dt__kb-tab--on' : ''}}" data-tab="company" bindtap="onKbTab">公司研究</view>
+      <view class="dt__kb-tab {{kbTab === 'questions' ? 'dt__kb-tab--on' : ''}}" data-tab="questions" bindtap="onKbTab">面经准备</view>
+    </view>
+
+    <!-- JD 关键词 -->
+    <block wx:if="{{kbTab === 'jd'}}">
+      <textarea class="dt__area" placeholder="粘贴岗位 JD 全文，点下方按钮自动提取高频关键词" value="{{jdText}}" bindinput="onJdInput"></textarea>
+      <view class="dt__btn-soft" bindtap="extractKeywords">🔑 提取 JD 关键词</view>
+      <view class="dt__kw-wrap" wx:if="{{keywords.length > 0}}">
+        <view class="dt__kw" wx:for="{{keywords}}" wx:key="*this" data-kw="{{item}}" bindtap="removeKeyword">
+          {{item}} <text class="dt__kw-x">×</text>
+        </view>
+      </view>
+      <text class="dt__hint" wx:else>提取后关键词会关联到下方「面经准备」，方便针对性复习</text>
+    </block>
+
+    <!-- 公司研究 -->
+    <block wx:if="{{kbTab === 'company'}}">
+      <textarea class="dt__area" placeholder="记录公司文化、核心产品、最新业务、竞争对手分析……" value="{{companyNotes}}" bindinput="onCompanyNotes"></textarea>
+    </block>
+
+    <!-- 面经准备 -->
+    <block wx:if="{{kbTab === 'questions'}}">
+      <view class="dt__q-head">
+        <text class="dt__q-title">问题与答题要点</text>
+        <view class="dt__q-actions">
+          <view class="dt__mini dt__mini--ghost" bindtap="importFromLib">从资源库导入</view>
+          <view class="dt__mini dt__mini--primary" bindtap="openQEditor">＋ 新增</view>
+        </view>
+      </view>
+
+      <view class="dt__q" wx:for="{{questions}}" wx:key="id" data-id="{{item.id}}" bindtap="openQEditor">
+        <view class="dt__q-check {{item.done ? 'dt__q-check--on' : ''}}" catchtap="toggleQ" data-id="{{item.id}}"></view>
+        <view class="dt__q-body">
+          <text class="dt__q-q">{{item.q}}</text>
+          <text class="dt__q-a" wx:if="{{item.a}}">{{item.a}}</text>
+        </view>
+        <view class="dt__q-del" catchtap="removeQ" data-id="{{item.id}}">×</view>
+      </view>
+
+      <view class="dt__sec" wx:if="{{imported.length > 0}}">从面经库导入</view>
+      <view class="dt__q" wx:for="{{imported}}" wx:key="id" data-id="{{item.id}}" bindtap="openQEditor">
+        <view class="dt__q-check {{item.done ? 'dt__q-check--on' : ''}}" catchtap="toggleQ" data-id="{{item.id}}"></view>
+        <view class="dt__q-body">
+          <text class="dt__q-q">{{item.q}}</text>
+          <text class="dt__q-a" wx:if="{{item.a}}">{{item.a}}</text>
+        </view>
+        <view class="dt__q-del" catchtap="removeQ" data-id="{{item.id}}">×</view>
+      </view>
+
+      <text class="dt__hint" wx:if="{{questions.length === 0 && imported.length === 0}}">还没有准备题目，点「从资源库导入」一键拉取高频面试题</text>
+    </block>
+  </view>
+
+  <!-- 面试准备清单（模块四） -->
+  <view class="dt__card" wx:if="{{checklistVisible || form.status === 'interview' || form.status === 'offer' || form.status === 'rejected'}}">
+    <view class="dt__card-head">
+      <text class="dt__card-title">🎯 面试准备清单</text>
+      <text class="dt__card-sub">{{ckTotal > 0 ? ckDone + '/' + ckTotal : '未载入'}}</text>
+    </view>
+    <view class="dt__ck" wx:for="{{checklist}}" wx:key="id">
+      <view class="dt__q-check {{item.done ? 'dt__q-check--on' : ''}}" catchtap="toggleCk" data-id="{{item.id}}"></view>
+      <text class="dt__ck-text {{item.done ? 'dt__ck-text--done' : ''}}">{{item.text}}</text>
+    </view>
+    <view class="dt__row" wx:if="{{ckTotal > 0}}">
+      <view class="dt__mini dt__mini--ghost" bindtap="resetChecklist">重置为默认清单</view>
+    </view>
+    <view class="dt__btn-soft" wx:if="{{ckTotal === 0}}" bindtap="resetChecklist">载入默认准备清单</view>
+  </view>
+
+  <!-- 评分 / 复盘（模块四） -->
+  <view class="dt__card" wx:if="{{form.status === 'interview' || form.status === 'offer' || form.status === 'rejected'}}">
+    <view class="dt__card-head">
+      <text class="dt__card-title">⭐ 面后评分 / 复盘</text>
+    </view>
+    <view class="dt__stars">
+      <text class="dt__star {{rating >= n ? 'dt__star--on' : ''}}" wx:for="{{[1,2,3,4,5]}}" wx:for-item="n" wx:key="*this" data-r="{{n}}" bindtap="onRate">{{rating >= n ? '★' : '☆'}}</text>
+    </view>
+    <textarea class="dt__area" placeholder="复盘：表现如何、答得好的、下次改进点……" value="{{review}}" bindinput="onReview"></textarea>
+  </view>
+
+  <!-- 进度时间线（状态流转 + 手动记一笔） -->
+  <view class="dt__card">
+    <view class="dt__card-head">
+      <text class="dt__card-title">🕘 进度时间线</text>
+      <text class="dt__card-sub">准备度 {{readyScore}}% · {{readyLevel}}</text>
+    </view>
+
+    <view class="dt__tl">
+      <view class="dt__tl-node {{item.isLatest ? 'dt__tl-node--last' : ''}}" wx:for="{{timeline}}" wx:key="idx">
+        <view class="dt__tl-rail">
+          <view class="dt__tl-dot dt__tl-dot--{{item.status}} {{item.isLatest ? 'is-latest' : ''}}"></view>
+          <view class="dt__tl-line" wx:if="{{!item.isLatest}}"></view>
+        </view>
+        <view class="dt__tl-body">
+          <view class="dt__tl-head">
+            <text class="dt__tl-label">{{item.label}}</text>
+            <text class="dt__tl-ago">{{item.agoText}}</text>
+          </view>
+          <text class="dt__tl-date">{{item.dateText}}</text>
+          <text class="dt__tl-note" wx:if="{{item.note}}">{{item.note}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="dt__btn-soft" bindtap="openNoteEditor">＋ 记一笔进展</view>
+    <block wx:if="{{showNote}}">
+      <textarea class="dt__area" placeholder="如：3.12 14:00 一面 / 线上，部门 leader 面" value="{{noteDraft}}" bindinput="onNoteInput" cursor-spacing="120" adjust-position></textarea>
+      <view class="dt__row">
+        <view class="dt__mini dt__mini--ghost" bindtap="closeNoteEditor">取消</view>
+        <view class="dt__mini dt__mini--primary" bindtap="saveNote">保存</view>
+      </view>
+    </block>
+  </view>
+
+  <!-- 面试提纲生成器：按 JD / 简历 / 公司研究出提纲，可一键导入题库 -->
+  <view class="dt__card" wx:if="{{drill}}">
+    <view class="dt__card-title">
+      面试提纲
+      <text class="dt__tag">共 {{drill.total}} 题 · {{drill.round}}</text>
+    </view>
+
+    <view class="dt__drill-ctrl">
+      <view class="dt__drill-field">
+        <text class="dt__label">轮次</text>
+        <picker mode="selector" range="{{drillRoundOptions}}" value="{{drillRoundIndex}}" bindchange="onDrillRound">
+          <view class="dt__picker">{{drillRound}} ▾</view>
+        </picker>
+      </view>
+      <view class="dt__drill-field">
+        <text class="dt__label">时长</text>
+        <picker mode="selector" range="{{drillMinuteOptions}}" value="{{drillMinuteIndex}}" bindchange="onDrillMinutes">
+          <view class="dt__picker">{{drillMinutes}} 分钟 ▾</view>
+        </picker>
+      </view>
+      <view class="dt__btn-soft dt__btn-soft--sm" bindtap="genDrill">重新生成</view>
+    </view>
+
+    <view class="dt__drill-basis" wx:if="{{drill.basis.length}}">
+      <text class="dt__basis-pill" wx:for="{{drill.basis}}" wx:key="*this">{{item}}</text>
+    </view>
+    <view class="dt__drill-miss" wx:if="{{drill.missing.length}}">
+      <text class="dt__drill-miss-t">生成更准还差：</text>
+      <text class="dt__basis-pill dt__basis-pill--warn" wx:for="{{drill.missing}}" wx:key="*this">{{item}}</text>
+    </view>
+
+    <view class="dt__drill-group" wx:for="{{drill.groups}}" wx:for-item="g" wx:key="kind">
+      <text class="dt__drill-group-t">{{g.title}}</text>
+      <view class="dt__drill-q" wx:for="{{g.items}}" wx:for-item="q" wx:key="id">
+        <text class="dt__drill-qtext">{{q.q}}</text>
+        <text class="dt__drill-qwhy">{{q.why}}</text>
+      </view>
+    </view>
+
+    <view class="dt__btn-soft {{drillImported ? 'dt__btn-soft--done' : ''}}" bindtap="importDrill">{{drillImported ? '已导入题库 ✓' : '一键导入题库'}}</view>
+  </view>
+
+  <!-- 底部操作 -->
+  <view class="dt__footer">
+    <view class="dt__fbtn dt__fbtn--ghost" bindtap="linkTodo">同步到待办</view>
+    <!-- 公司名为空时保存键置灰：与其让用户点了才被告知，不如一开始就点不动 -->
+    <view class="dt__fbtn dt__fbtn--primary {{canSave ? '' : 'dt__fbtn--disabled'}}" bindtap="save">
+      {{saving ? '保存中…' : '保存'}}
+    </view>
+    <view class="dt__fbtn dt__fbtn--danger" bindtap="onDelete">{{isEdit ? '删除' : '取消'}}</view>
+  </view>
+
+  <!-- 问题编辑器弹层 -->
+  <view class="dt__mask" wx:if="{{showQEditor}}" bindtap="closeQEditor">
+    <view class="dt__sheet" catchtap="">
+      <text class="dt__sheet-title">{{qEditId ? '编辑问题' : '新增问题'}}</text>
+      <input class="dt__input dt__sheet-input {{errors.qText ? 'dt__input--err' : ''}}" placeholder="问题（如：如何设计短链服务？）" value="{{qEditText}}" bindinput="onQText" confirm-type="next" cursor-spacing="120" adjust-position />
+      <text class="dt__err ix-shake" wx:if="{{errors.qText}}">{{errors.qText}}</text>
+      <textarea class="dt__area" placeholder="答题要点（可选）" value="{{qEditAns}}" bindinput="onQAns"></textarea>
+      <view class="dt__sheet-btns">
+        <view class="dt__fbtn dt__fbtn--ghost" bindtap="closeQEditor">取消</view>
+        <view class="dt__fbtn dt__fbtn--primary" bindtap="saveQEditor">保存</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 面试安排编辑器弹层 -->
+  <view class="dt__mask" wx:if="{{showIvEditor}}" bindtap="closeIvEditor">
+    <view class="dt__sheet" catchtap="">
+      <text class="dt__sheet-title">{{ivEditId ? '编辑面试安排' : '添加面试安排'}}</text>
+
+      <view class="dt__field dt__field--sheet">
+        <text class="dt__label">轮次</text>
+        <picker mode="selector" range="{{roundOptions}}" value="{{ivRoundIndex}}" bindchange="onIvRound">
+          <view class="dt__picker">{{ivRound}} ▾</view>
+        </picker>
+      </view>
+      <view class="dt__field dt__field--sheet">
+        <text class="dt__label">时间</text>
+        <picker mode="datetime" value="{{ivDateText}}" bindchange="onIvDate">
+          <view class="dt__picker {{errors.ivDate ? 'dt__picker--err' : ''}}">{{ivDateText || '点击选择时间'}} ▾</view>
+        </picker>
+        <text class="dt__err ix-shake" wx:if="{{errors.ivDate}}">{{errors.ivDate}}</text>
+      </view>
+      <view class="dt__field dt__field--sheet">
+        <text class="dt__label">形式</text>
+        <picker mode="selector" range="{{modeOptions}}" value="{{ivModeIndex}}" bindchange="onIvMode">
+          <view class="dt__picker">{{ivMode}} ▾</view>
+        </picker>
+      </view>
+      <view class="dt__field dt__field--sheet">
+        <text class="dt__label">地点 / 会议链接</text>
+        <input class="dt__input" placeholder="如 深圳南山 / 腾讯会议 123-456-789" value="{{ivPlace}}" bindinput="onIvPlace" />
+      </view>
+      <view class="dt__field dt__field--sheet">
+        <text class="dt__label">面试官（可选）</text>
+        <input class="dt__input" placeholder="如 技术 leader / HRBP" value="{{ivInterviewer}}" bindinput="onIvInterviewer" />
+      </view>
+      <view class="dt__field dt__field--sheet">
+        <text class="dt__label">备注（可选）</text>
+        <input class="dt__input" placeholder="如 带作品集 / 提前 15 分钟进会议室" value="{{ivNote}}" bindinput="onIvNote" />
+      </view>
+
+      <text class="dt__hint">保存后会自动按「开始前 30 分钟」排一条提醒，并出现在日历视图里。</text>
+      <view class="dt__sheet-btns">
+        <view class="dt__fbtn dt__fbtn--ghost" bindtap="closeIvEditor">取消</view>
+        <view class="dt__fbtn dt__fbtn--primary" bindtap="saveIvEditor">保存</view>
+      </view>
+    </view>
+  </view>
+</view>

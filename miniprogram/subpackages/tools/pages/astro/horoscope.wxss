@@ -1,0 +1,93 @@
+/* pages/astro/horoscope.wxss */
+@import "../../styles/astro-common.wxss";
+
+.horo-head { display: flex; align-items: center; gap: 18rpx; }
+.horo-head__icon { width: 100rpx; height: 100rpx; border-radius: 50%; flex-shrink: 0; }
+.horo-head__info { flex: 1; min-width: 0; }
+
+.horo-tab {
+  display: flex;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1rpx solid rgba(255, 255, 255, 0.08);
+  border-radius: 16rpx;
+  padding: 6rpx;
+  gap: 6rpx;
+}
+.horo-tab__item {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx 0;
+  font-size: 24rpx;
+  color: rgba(190, 200, 230, 0.7);
+  border-radius: 12rpx;
+  transition: all 200ms ease;
+}
+.horo-tab__item.is-active {
+  background: linear-gradient(135deg, #96573A, #C08468);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 4rpx 12rpx rgba(99, 102, 241, 0.4);
+}
+.horo-tab__item--hover { background: rgba(255, 255, 255, 0.06); }
+
+.horo-canvas {
+  display: block;
+  width: 560rpx;
+  height: 480rpx;
+  margin: 0 auto;
+}
+
+.horo-dim { margin-bottom: 18rpx; }
+.horo-dim:last-child { margin-bottom: 0; }
+
+.luck-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12rpx;
+}
+.luck-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  padding: 14rpx 16rpx;
+  border-radius: 14rpx;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1rpx solid rgba(255, 255, 255, 0.05);
+}
+.luck-cell--full { grid-column: span 2; }
+.luck-dot {
+  width: 22rpx; height: 22rpx;
+  border-radius: 50%;
+  border: 2rpx solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 6rpx rgba(255, 255, 255, 0.2);
+}
+
+.switch-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12rpx;
+}
+.switch-grid__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  padding: 16rpx 4rpx;
+  border-radius: 16rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1rpx solid rgba(255, 255, 255, 0.06);
+  transition: all 200ms ease;
+}
+.switch-grid__item--hover {
+  background: linear-gradient(160deg, rgba(99, 102, 241, 0.32), rgba(168, 85, 247, 0.22));
+  transform: scale(0.97);
+}
+.switch-grid__icon { width: 64rpx; height: 64rpx; border-radius: 50%; }
+.switch-grid__name { font-size: 20rpx; color: rgba(220, 225, 245, 0.85); }
+
+.horo-his {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+.horo-his__icon { width: 48rpx; height: 48rpx; border-radius: 50%; }

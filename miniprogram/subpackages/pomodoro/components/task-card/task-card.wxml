@@ -1,0 +1,29 @@
+<!--components/task-card/task-card.wxml-->
+<!-- 当前任务卡（需求十二）
+     两种状态：已关联 → 任务标题 + 今日目标进度；未关联 → 「今天准备完成什么？」+ 添加按钮 -->
+<view class="task">
+  <view class="task__head">
+    <text class="task__cap">正在专注</text>
+    <view wx:if="{{title}}" class="task__unbind" hover-class="task__unbind--tap" hover-stay-time="60" bindtap="onUnbind">换一项</view>
+  </view>
+
+  <block wx:if="{{title}}">
+    <view class="task__title-wrap" hover-class="task__title-wrap--tap" hover-stay-time="60" bindtap="onPick">
+      <text class="task__title">{{title}}</text>
+    </view>
+    <view class="task__bar">
+      <view class="task__bar-in" style="width:{{target > 0 ? (done / target * 100) : 0}}%"></view>
+    </view>
+    <view class="task__meta">
+      <text class="task__meta-k">今日目标</text>
+      <text class="task__meta-v">{{done}} / {{target}} 项</text>
+    </view>
+  </block>
+
+  <block wx:else>
+    <text class="task__empty">今天准备完成什么？</text>
+    <view class="task__add" hover-class="task__add--tap" hover-stay-time="60" bindtap="onAdd">
+      <text class="task__add-tx">＋ 添加学习任务</text>
+    </view>
+  </block>
+</view>

@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "极简消消乐",
+  "usingComponents": {
+    "game-shell": "/subpackages/games/components/game-shell/index"
+  },
+  "disableScroll": true
+}

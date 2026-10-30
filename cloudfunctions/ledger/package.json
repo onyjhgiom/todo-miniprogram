@@ -1,0 +1,9 @@
+{
+  "name": "ledger",
+  "version": "1.0.0",
+  "description": "记账本云端同步（_openid 隔离，金额以分为单位）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

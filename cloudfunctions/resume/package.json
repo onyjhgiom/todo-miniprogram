@@ -1,0 +1,9 @@
+{
+  "name": "resume",
+  "version": "1.0.0",
+  "description": "把 canvas 渲染的简历页图封装成标准 PDF（零第三方依赖）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

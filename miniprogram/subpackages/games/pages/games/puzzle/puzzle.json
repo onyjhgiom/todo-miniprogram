@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "经典拼图",
+  "usingComponents": {
+    "game-shell": "/subpackages/games/components/game-shell/index"
+  },
+  "disableScroll": true
+}

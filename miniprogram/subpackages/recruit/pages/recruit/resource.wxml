@@ -1,0 +1,208 @@
+<!-- pages/recruit/resource.wxml -->
+<view class="rs themed" data-theme="{{theme}}" style="{{themeStyle}}">
+  <view class="rs__hero" style="background:{{heroGradient}}">
+    <text class="rs__hero-title">📚 秋招资源库</text>
+    <text class="rs__hero-sub">{{appId ? '选择题目导入到当前投递' : '面试题库 · 简历模板 · 面经分享'}}</text>
+  </view>
+
+  <!-- 上下文感知提示：从某条投递「导入」进来时，资料已按该场面试偏序 -->
+  <view class="rs__boost" wx:if="{{boost}}">
+    <text class="rs__boost-ico">🎯</text>
+    <view class="rs__boost-txt">
+      <text class="rs__boost-t">为「{{boost.label}}」优先推荐</text>
+      <text class="rs__boost-s">已按 JD 关键词{{boost.keywords.length ? ' · 简历缺口' : ''}}相关度排序，越靠前越贴合这场面试</text>
+    </view>
+    <text class="rs__boost-x" bindtap="clearBoost">还原</text>
+  </view>
+
+  <!-- 吸顶筛选区：滚动时始终可见 -->
+  <view class="rs__sticky">
+    <view class="rs__search">
+      <text class="rs__search-ico">🔍</text>
+      <input class="rs__search-input" placeholder="搜索题目 / 模板 / 公司" value="{{keyword}}" bindinput="onSearch" />
+      <view class="rs__search-clear" wx:if="{{keyword}}" bindtap="onClearSearch">×</view>
+    </view>
+
+    <scroll-view class="rs__tabs" scroll-x>
+      <view wx:for="{{tabs}}" wx:key="key"
+        class="rs__tab {{type === item.key ? 'rs__tab--on' : ''}}"
+        data-key="{{item.key}}" bindtap="onType">{{item.label}}</view>
+    </scroll-view>
+
+    <!-- 岗位筛选 -->
+    <scroll-view class="rs__tabs rs__tabs--cat" scroll-x>
+      <view wx:for="{{catTabs}}" wx:key="key"
+        class="rs__tab rs__tab--cat {{cat === item.key ? 'rs__tab--on' : ''}}"
+        data-key="{{item.key}}" bindtap="onCat">{{item.label}}</view>
+    </scroll-view>
+
+    <!-- 面试轮次筛选 -->
+    <scroll-view class="rs__tabs rs__tabs--round" scroll-x>
+      <view wx:for="{{roundTabs}}" wx:key="key"
+        class="rs__tab rs__tab--round {{round === item.key ? 'rs__tab--on' : ''}}"
+        data-key="{{item.key}}" bindtap="onRound">{{item.label}}</view>
+    </scroll-view>
+
+    <!-- 分组维度 + 计数 -->
+    <view class="rs__meta">
+      <scroll-view class="rs__gtabs" scroll-x>
+        <view class="rs__gtab rs__gtab--fav {{favOnly ? 'rs__gtab--on' : ''}}" bindtap="toggleFavOnly">⭐ 收藏{{favCount > 0 ? ' ' + favCount : ''}}</view>
+        <view wx:for="{{groupTabs}}" wx:key="key"
+          class="rs__gtab {{groupBy === item.key ? 'rs__gtab--on' : ''}}"
+          data-key="{{item.key}}" bindtap="onGroupBy">{{item.label}}</view>
+      </scroll-view>
+      <text class="rs__count">已显示 {{loaded}} / {{total}}</text>
+    </view>
+  </view>
+
+  <!-- 智能检索 + 自动汇总入口 -->
+  <view class="rs__smart">
+    <view class="rs__smart-btn" bindtap="toggleSummary">
+      <text class="rs__smart-t">🧠 智能汇总（{{summary.total}} 条 · {{summary.topics.length}} 个主题）</text>
+      <text class="rs__smart-a">{{showSummary ? '收起 ▲' : '展开 ▼'}}</text>
+    </view>
+    <scroll-view class="rs__chips" scroll-x wx:if="{{topicChips.length}}">
+      <text class="rs__chip {{selTopic === item.key ? 'rs__chip--on' : ''}}" wx:for="{{topicChips}}" wx:key="key" data-key="{{item.key}}" bindtap="onTopic">{{item.label}} {{item.count}}</text>
+    </scroll-view>
+  </view>
+
+  <!-- 智能汇总面板 -->
+  <view class="rs__sum" wx:if="{{showSummary && summary}}">
+    <view class="rs__sum-scope">当前范围：{{summary.scopeLabel}}</view>
+
+    <view class="rs__sum-sec" wx:if="{{summary.byCompany.length}}">
+      <text class="rs__sum-h">🏢 覆盖公司（Top{{summary.byCompany.length}}）</text>
+      <view class="rs__sum-tags">
+        <text class="rs__sum-tag" wx:for="{{summary.byCompany}}" wx:key="key">{{item.key}} · {{item.count}}</text>
+      </view>
+    </view>
+
+    <view class="rs__sum-sec" wx:if="{{summary.byRound.length}}">
+      <text class="rs__sum-h">🎯 面试轮次分布</text>
+      <view class="rs__sum-tags">
+        <text class="rs__sum-tag" wx:for="{{summary.byRound}}" wx:key="key">{{item.key}} · {{item.count}}</text>
+      </view>
+    </view>
+
+    <view class="rs__sum-sec" wx:if="{{summary.topics.length}}">
+      <text class="rs__sum-h">🔑 高频主题（按层序 + 频次）</text>
+      <view class="rs__sum-topic" wx:for="{{summary.topics}}" wx:key="key">
+        <view class="rs__sum-topic-h">
+          <text class="rs__sum-layer rs__sum-layer--{{item.layerKey}}">{{item.layer}}</text>
+          <text class="rs__sum-tname">{{item.label}}</text>
+          <text class="rs__sum-tcount">{{item.count}} 条</text>
+        </view>
+        <text class="rs__sum-tsample">▸ {{item.sample}}</text>
+      </view>
+    </view>
+
+    <view class="rs__sum-sec" wx:if="{{summary.keyPoints.length}}">
+      <text class="rs__sum-h">📌 核心结论摘录（建议优先读）</text>
+      <view class="rs__sum-kp" wx:for="{{summary.keyPoints}}" wx:key="id">
+        <text class="rs__sum-kp-t">· {{item.title}}</text>
+        <text class="rs__sum-kp-p">{{item.point}}</text>
+      </view>
+    </view>
+
+    <view class="rs__sum-foot">汇总由本地智能层即时生成：分层（方法论→公司→专业→实战）+ 高频主题 + 核心结论 + 推荐阅读顺序</view>
+  </view>
+
+  <view class="rs__list">
+    <!-- 分组视图 -->
+    <block wx:if="{{groupBy !== 'none'}}">
+      <view class="rs__group" wx:for="{{groups}}" wx:key="key">
+        <view class="rs__group-head" data-key="{{item.key}}" bindtap="toggleGroup">
+          <text class="rs__gname">{{item.label}}</text>
+          <text class="rs__gcount">{{item.count}} 条</text>
+          <text class="rs__garrow">{{item.open ? '收起' : '展开'}}</text>
+        </view>
+        <view class="rs__group-body" wx:if="{{item.open}}">
+          <view class="rs__item" wx:for="{{item.items}}" wx:for-item="it" wx:key="_id">
+            <view class="rs__item-head" data-id="{{it._id}}" bindtap="toggleExpand">
+              <text class="rs__item-icon">{{it.icon}}</text>
+              <view class="rs__item-main">
+                <view class="rs__item-titlewrap">
+                  <text class="rs__seg {{s.hit ? 'rs__seg--hit' : ''}}" wx:for="{{it.segs}}" wx:for-item="s" wx:key="index">{{s.t}}</text>
+                </view>
+                <view class="rs__item-meta">
+                  <text class="rs__item-cat">{{it.category}}{{it.company ? ' · ' + it.company : ''}}</text>
+                  <text class="rs__item-round" wx:if="{{it.round && it.round !== '通用'}}">{{it.round}}</text>
+                </view>
+              </view>
+              <text class="rs__item-fav {{it.fav ? 'rs__item-fav--on' : ''}}" data-id="{{it._id}}" catchtap="toggleFav">{{it.fav ? '★' : '☆'}}</text>
+              <text class="rs__item-arrow">{{it.expand ? '收起' : '展开'}}</text>
+            </view>
+            <view class="rs__item-body" wx:if="{{it.expand}}">
+              <text class="rs__item-content" user-select="{{true}}">{{it.content}}</text>
+              <view class="rs__rel" wx:if="{{it.related && it.related.length}}">
+                <text class="rs__rel-h">🔗 相关推荐（同主题）</text>
+                <view class="rs__rel-i" wx:for="{{it.related}}" wx:for-item="r" wx:key="id" data-id="{{r.id}}" catchtap="jumpRelated">{{r.title}}</view>
+              </view>
+              <view class="rs__item-acts">
+                <view class="rs__item-import" wx:if="{{appId}}" data-id="{{it._id}}" catchtap="onImport">＋ 导入到投递</view>
+                <view class="rs__item-pdf" wx:if="{{it.type === 'resume'}}" data-cat="{{it.category}}" catchtap="onMakePdf">生成 PDF 模板</view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <!-- 平铺视图 -->
+    <block wx:else>
+      <view class="rs__item" wx:for="{{flat}}" wx:for-item="it" wx:key="_id">
+        <view class="rs__item-head" data-id="{{it._id}}" bindtap="toggleExpand">
+          <text class="rs__item-icon">{{it.icon}}</text>
+          <view class="rs__item-main">
+            <view class="rs__item-titlewrap">
+              <text class="rs__seg {{s.hit ? 'rs__seg--hit' : ''}}" wx:for="{{it.segs}}" wx:for-item="s" wx:key="index">{{s.t}}</text>
+            </view>
+            <view class="rs__item-meta">
+              <text class="rs__item-cat">{{it.category}}{{it.company ? ' · ' + it.company : ''}}</text>
+              <text class="rs__item-round" wx:if="{{it.round && it.round !== '通用'}}">{{it.round}}</text>
+            </view>
+          </view>
+          <text class="rs__item-fav {{it.fav ? 'rs__item-fav--on' : ''}}" data-id="{{it._id}}" catchtap="toggleFav">{{it.fav ? '★' : '☆'}}</text>
+          <text class="rs__item-arrow">{{it.expand ? '收起' : '展开'}}</text>
+        </view>
+        <view class="rs__item-body" wx:if="{{it.expand}}">
+          <text class="rs__item-content">{{it.content}}</text>
+          <view class="rs__item-acts">
+            <view class="rs__item-import" wx:if="{{appId}}" data-id="{{it._id}}" catchtap="onImport">＋ 导入到投递</view>
+            <view class="rs__item-pdf" wx:if="{{it.type === 'resume'}}" data-cat="{{it.category}}" catchtap="onMakePdf">生成 PDF 模板</view>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <!-- 空态 -->
+    <view class="rs__empty" wx:if="{{total === 0}}">
+      <text class="rs__empty-t">{{favOnly ? '还没有收藏的资料' : '没有匹配的资源'}}</text>
+      <text class="rs__empty-s">{{favOnly ? '点每条右侧的 ☆ 收藏，考前只看收藏过的高频题' : '试试放宽筛选条件，或换个关键词'}}</text>
+      <view class="rs__empty-btn" bindtap="resetAll">{{favOnly ? '看全部资料' : '重置全部筛选'}}</view>
+    </view>
+
+    <!-- 加载更多 -->
+    <view class="rs__more" wx:if="{{hasMore}}" bindtap="loadMore">加载更多（还有 {{total - loaded}} 条）</view>
+    <view class="rs__end" wx:if="{{!hasMore && total > 0}}">— 已全部加载 —</view>
+  </view>
+
+  <!-- 回到顶部 -->
+  <view class="rs__top" wx:if="{{showTop}}" bindtap="backToTop">↑</view>
+
+  <view class="rs__share" bindtap="openShare" wx:if="{{!appId}}">＋ 匿名分享我的面经</view>
+
+  <!-- 分享弹层 -->
+  <view class="rs__mask" wx:if="{{showShare}}" bindtap="closeShare">
+    <view class="rs__sheet" catchtap="">
+      <text class="rs__sheet-title">匿名分享面经</text>
+      <input class="rs__input" placeholder="公司名（如 字节跳动）" value="{{shareCompany}}" bindinput="onShareCompany" />
+      <input class="rs__input" placeholder="一句话标题" value="{{shareTitle}}" bindinput="onShareTitle" />
+      <textarea class="rs__area" placeholder="完整面经：流程 / 题目 / 体验……" value="{{shareContent}}" bindinput="onShareContent"></textarea>
+      <view class="rs__sheet-btns">
+        <view class="rs__fbtn rs__fbtn--ghost" bindtap="closeShare">取消</view>
+        <view class="rs__fbtn rs__fbtn--primary" bindtap="submitShare">提交审核</view>
+      </view>
+    </view>
+  </view>
+</view>

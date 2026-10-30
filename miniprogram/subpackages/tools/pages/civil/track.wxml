@@ -1,0 +1,174 @@
+<!-- subpackages/tools/pages/civil/track.wxml -->
+<view class="ct themed" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <!-- ===== 赛道头 ===== -->
+  <view class="ct__hero" style="background:{{heroGradient}}">
+    <view class="ct__hero-top">
+      <view class="ct__hero-icon" style="background:rgba(255,255,255,0.2)">{{track.icon}}</view>
+      <view class="ct__hero-main">
+        <view class="ct__hero-name">{{track.name}}</view>
+        <view class="ct__hero-tag">{{track.tagline}}</view>
+      </view>
+    </view>
+    <view class="ct__hero-meta">
+      <text class="ct__hero-chip">🏷️ {{track.bian}}</text>
+      <text class="ct__hero-chip">⏱ {{track.when}}</text>
+    </view>
+  </view>
+
+  <view class="ct__card ct__card--desc">
+    <text class="ct__desc">{{track.desc}}</text>
+  </view>
+
+  <!-- ===== 核心亮点 ===== -->
+  <block wx:if="{{highlights.length}}">
+    <view class="ct__sec">核心亮点</view>
+    <view class="ct__card">
+      <view class="ct__li" wx:for="{{highlights}}" wx:key="*this">
+        <text class="ct__bullet">✦</text>
+        <text class="ct__li-t">{{item}}</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== 招录流程 ===== -->
+  <block wx:if="{{process.length}}">
+    <view class="ct__sec">招录流程 · 共 {{process.length}} 步</view>
+    <view class="ct__card">
+      <view class="ct__step" wx:for="{{process}}" wx:key="*this">
+        <view class="ct__step-no">{{index + 1}}</view>
+        <text class="ct__step-t">{{item}}</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== 备考策略（可折叠） ===== -->
+  <block wx:if="{{strategy.length}}">
+    <view class="ct__sec">备考策略与方法</view>
+    <view class="ct__card ct__card--flush">
+      <view class="ct__acc" wx:for="{{strategy}}" wx:key="title" wx:for-index="si">
+        <view class="ct__acc-head" data-i="{{si}}" bindtap="onToggleStrategy"
+          hover-class="ct__press" hover-stay-time="40">
+          <text class="ct__acc-title">{{item.title}}</text>
+          <text class="ct__acc-arrow">{{strategyOpen === si ? '▾' : '▸'}}</text>
+        </view>
+        <view class="ct__acc-body" wx:if="{{strategyOpen === si}}">
+          <view class="ct__li" wx:for="{{item.items}}" wx:for-item="it" wx:key="*this">
+            <text class="ct__bullet">·</text>
+            <text class="ct__li-t">{{it}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== 笔试科目 ===== -->
+  <block wx:if="{{subjects.length}}">
+    <view class="ct__sec">笔试科目与权重</view>
+    <view class="ct__card">
+      <view class="ct__subj" wx:for="{{subjects}}" wx:key="name">
+        <view class="ct__subj-top">
+          <text class="ct__subj-n">{{item.name}}</text>
+          <text class="ct__subj-w">{{item.weight}}</text>
+        </view>
+        <text class="ct__subj-note">{{item.note}}</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== 常见误区 ===== -->
+  <block wx:if="{{pitfalls.length}}">
+    <view class="ct__sec">常见误区 · 避雷</view>
+    <view class="ct__card ct__card--warn">
+      <view class="ct__li" wx:for="{{pitfalls}}" wx:key="*this">
+        <text class="ct__bullet">⚠</text>
+        <text class="ct__li-t">{{item}}</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== 策略中心：工具入口 ===== -->
+  <block wx:if="{{isStrategy}}">
+    <view class="ct__sec">策略工具</view>
+    <view class="ct__entries">
+      <view class="ct__entry" wx:for="{{entries}}" wx:key="key"
+        data-key="{{item.key}}" bindtap="onEntry" hover-class="ct__press" hover-stay-time="50">
+        <view class="ct__entry-icon">{{item.icon}}</view>
+        <view class="ct__entry-main">
+          <view class="ct__entry-title">{{item.title}}</view>
+          <view class="ct__entry-desc">{{item.desc}}</view>
+        </view>
+        <text class="ct__entry-arrow">›</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== 岗位库 ===== -->
+  <block wx:if="{{!isStrategy}}">
+    <view class="ct__sec">岗位库 · 匹配 {{matched}} 条</view>
+
+    <view class="ct__search">
+      <text class="ct__search-icon">🔍</text>
+      <input class="ct__search-input" placeholder="搜岗位 / 单位 / 专业 / 地区"
+        value="{{keyword}}" bindinput="onSearch" confirm-type="search" />
+      <view class="ct__search-clear" wx:if="{{keyword}}" bindtap="onClearSearch">✕</view>
+    </view>
+
+    <scroll-view class="ct__tabs" scroll-x show-scrollbar="{{false}}">
+      <view class="ct__tab {{compileFilter === item.key ? 'ct__tab--on' : ''}}"
+        wx:for="{{tabs}}" wx:key="key" data-key="{{item.key}}" bindtap="onCompileTab">
+        {{item.label}}<text class="ct__tab-n">{{item.count}}</text>
+      </view>
+    </scroll-view>
+
+    <view class="ct__switches">
+      <view class="ct__sw {{bianOnly ? 'ct__sw--on' : ''}}" bindtap="onToggleBian">✓ 只看带编</view>
+      <view class="ct__sw {{freshOnly ? 'ct__sw--on' : ''}}" bindtap="onToggleFresh">✓ 只看应届可报</view>
+      <view class="ct__sw-reset" bindtap="onReset">重置</view>
+    </view>
+
+    <view class="ct__jobs">
+      <view class="ct__job" wx:for="{{jobs}}" wx:key="id"
+        data-id="{{item.id}}" bindtap="onJob" hover-class="ct__press" hover-stay-time="50">
+        <view class="ct__job-head">
+          <text class="ct__job-title">{{item.title}}</text>
+          <text class="cx-tag cx-tag--{{item.tone}}">{{item.hasBian ? '有编' : '无编'}} · {{item.compileShort}}</text>
+        </view>
+        <text class="ct__job-unit">{{item.unit}}</text>
+        <view class="ct__job-tags">
+          <text class="ct__jt">{{item.region}}</text>
+          <text class="ct__jt">{{item.level}}</text>
+          <text class="ct__jt">{{item.education}}</text>
+          <text class="ct__jt ct__jt--hi">{{item.freshText}}</text>
+        </view>
+        <view class="ct__job-foot">
+          <text class="ct__jf">难度 {{item.stars}} {{item.diffLabel}}</text>
+          <text class="ct__jf">报录比 {{item.ratio}}</text>
+        </view>
+        <text class="ct__job-salary">💰 {{item.salary}}</text>
+        <view class="ct__job-apply" wx:if="{{item.applyUrl}}">
+          <text class="ct__apply-badge">官方报名</text>
+          <text class="ct__apply-name">{{item.applyName}}</text>
+          <text class="ct__apply-host">{{item.applyHost}}</text>
+          <text class="ct__apply-copy" catchtap="onCopyApply" data-url="{{item.applyUrl}}"
+            hover-class="ct__press" hover-stay-time="50">复制链接</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="ct__more" wx:if="{{shown < matched}}" bindtap="loadMore"
+      hover-class="ct__press" hover-stay-time="50">
+      加载更多（还有 {{matched - shown}} 条）
+    </view>
+    <view class="ct__empty" wx:if="{{matched === 0}}">
+      <text class="ct__empty-t">没有匹配的岗位</text>
+      <text class="ct__empty-s">试试切换编制类型，或点「重置」清除筛选条件</text>
+    </view>
+  </block>
+
+  <view class="ct__bottom">
+    <view class="ct__copy" bindtap="onCopyStrategy" hover-class="ct__press" hover-stay-time="50">
+      📋 复制完整备考方案
+    </view>
+  </view>
+</view>

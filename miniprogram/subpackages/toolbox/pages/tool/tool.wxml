@@ -1,0 +1,1438 @@
+<!--pages/tool/tool.wxml-->
+<view class="page themed" data-theme="{{theme}}" style="{{themeStyle}}">
+  <!-- 番茄钟自带顶部状态条，且原生导航栏已显示标题，这里不再重复占一行 -->
+  <view wx:if="{{type !== 'pomodoro' && type !== 'countdown'}}" class="title-row">
+    <text class="title">{{title}}</text>
+  </view>
+
+  <!-- ===== 番茄时钟（专业版） ===== -->
+  <block wx:if="{{type === 'pomodoro'}}">
+    <view class="pomo {{pomoZen ? 'is-zen' : ''}}" style="--u: {{uUnit}}">
+      <!-- 顶部：状态条 + 设置入口 -->
+      <view class="pomo__topbar">
+        <view class="pomo__phase">
+          <text class="pomo__phase-dot pomo__phase-dot--{{pomoMode}}"></text>
+          <text class="pomo__phase-text">
+            <block wx:if="{{pomoPhase === 'running'}}">{{pomoMode === 'focus' ? '专注中' : (pomoMode === 'short' ? '短休息中' : '长休息中')}}</block>
+            <block wx:elif="{{pomoPhase === 'paused'}}">已暂停</block>
+            <block wx:elif="{{pomoPhase === 'finished'}}">已完成</block>
+            <block wx:else>准备开始</block>
+          </text>
+        </view>
+        <view class="pomo__top-actions">
+          <view class="pomo__chip" bindtap="onPomoZenToggle" hover-class="pomo__chip--active">🧘 {{pomoZen ? '退出无干扰' : '无干扰'}}</view>
+          <view class="pomo__chip" bindtap="onPomoPanel" data-key="stats" hover-class="pomo__chip--active">📊 统计</view>
+          <view class="pomo__chip" bindtap="onPomoPanel" data-key="settings" hover-class="pomo__chip--active">⚙️ 设置</view>
+        </view>
+      </view>
+
+      <!-- 恢复提示（切后台后） -->
+      <view wx:if="{{pomoResumeHint}}" class="pomo__resume-hint">{{pomoResumeHint}}</view>
+
+      <!-- 环形进度圈（SVG，主题色 + 模式色渐变） -->
+      <view class="pomo__ring-wrap">
+        <view class="pomo__ring pomo__ring--{{pomoMode}}">
+          <view class="pomo__ring-inner">
+            <text class="pomo__time">{{pomoText}}</text>
+            <text class="pomo__mode-label">
+              {{pomoMode === 'focus' ? '专注' : (pomoMode === 'short' ? '短休息' : '长休息')}}
+            </text>
+            <text class="pomo__round">第 {{pomoFocusCount + 1}} / {{pomoSettings.longEvery}} 轮</text>
+          </view>
+        </view>
+        <view class="pomo__progress-arc" style="background: conic-gradient(var(--color-primary) {{pomoPct * 3.6}}deg, var(--color-bg-soft) 0deg);"></view>
+      </view>
+
+      <!-- 模式分段 -->
+      <view class="pomo__modes">
+        <view
+          wx:for="{{pomoSettings.longEvery > 0 ? ['focus','short','long'] : ['focus','short']}}"
+          wx:key="*this"
+          class="pomo__mode {{pomoMode === item ? 'is-active' : ''}} {{pomoPhase !== 'idle' ? 'is-disabled' : ''}}"
+          bindtap="onPomoModeTap"
+          data-mode="{{item}}"
+        >{{item === 'focus' ? '🍅 专注' : (item === 'short' ? '☕ 短休息' : '🛌 长休息')}}</view>
+      </view>
+
+      <!-- 关联待办 -->
+      <view class="pomo__todo">
+        <block wx:if="{{pomoTodoTitle}}">
+          <view class="pomo__todo-card">
+            <text class="pomo__todo-emoji">📌</text>
+            <text class="pomo__todo-title">{{pomoTodoTitle}}</text>
+            <view class="pomo__todo-act" bindtap="onPomoUnbindTodo">解绑</view>
+            <view class="pomo__todo-act pomo__todo-act--primary" bindtap="onPomoMarkTodoDone">标记完成</view>
+          </view>
+        </block>
+        <block wx:else>
+          <view class="pomo__todo-empty" bindtap="onPomoPanel" data-key="bind">+ 关联待办（聚焦到具体任务）</view>
+        </block>
+      </view>
+
+      <!-- 主控制按钮 -->
+      <view class="pomo__controls">
+        <view wx:if="{{pomoPhase === 'idle'}}" class="pomo__btn pomo__btn--primary" bindtap="onPomoStart">开始</view>
+        <view wx:elif="{{pomoPhase === 'running'}}" class="pomo__btn pomo__btn--ghost" bindtap="onPomoPause">暂停</view>
+        <block wx:elif="{{pomoPhase === 'paused'}}">
+          <view class="pomo__btn pomo__btn--ghost" bindtap="onPomoReset">重置</view>
+          <view class="pomo__btn pomo__btn--primary" bindtap="onPomoStart">继续</view>
+        </block>
+        <block wx:elif="{{pomoPhase === 'finished'}}">
+          <view class="pomo__btn pomo__btn--ghost" bindtap="onPomoReset">回到 {{pomoMode === 'focus' ? '专注' : '休息'}}</view>
+          <view class="pomo__btn pomo__btn--primary" bindtap="onPomoNext">下一轮 →</view>
+        </block>
+      </view>
+
+      <!-- 跳过休息 / 放弃（仅在 running/paused 时可见） -->
+      <view wx:if="{{pomoPhase === 'running' || pomoPhase === 'paused'}}" class="pomo__sec">
+        <block wx:if="{{pomoMode !== 'focus'}}">
+          <view class="pomo__sec-btn" bindtap="onPomoSkipRest">跳过休息</view>
+        </block>
+        <view class="pomo__sec-btn {{pomoAbandonConfirm ? 'is-confirm' : ''}}" bindtap="onPomoAbandon">
+          {{pomoAbandonConfirm ? '再点一次确认放弃' : '放弃本轮'}}
+        </view>
+      </view>
+
+      <!-- 当日统计快照 -->
+      <view class="pomo__quick">
+        <view class="pomo__quick-card">
+          <text class="pomo__quick-num">{{pomoStats.todayCount}}</text>
+          <text class="pomo__quick-label">今日完成</text>
+        </view>
+        <view class="pomo__quick-card">
+          <text class="pomo__quick-num">{{pomoStats.todayMinutes}}</text>
+          <text class="pomo__quick-label">今日分钟</text>
+        </view>
+        <view class="pomo__quick-card">
+          <text class="pomo__quick-num">{{pomoStats.streak}}</text>
+          <text class="pomo__quick-label">连续打卡</text>
+        </view>
+        <view class="pomo__quick-card">
+          <text class="pomo__quick-num">{{pomoStats.totalCount}}</text>
+          <text class="pomo__quick-label">累计完成</text>
+        </view>
+      </view>
+
+      <!-- ============ 弹层：设置 ============ -->
+      <view wx:if="{{pomoPanel === 'settings'}}" class="pomo__panel-mask" catchtouchmove="onPomoPanelStop" catchtap="onPomoPanelClose" hover-stay-time="0">
+        <view class="pomo__panel" catchtap="onPomoPanelStop" hover-stay-time="0">
+          <view class="pomo__panel-title">⚙️ 番茄设置</view>
+
+          <view class="pomo__panel-section">
+            <view class="pomo__panel-h">时长设置（分钟）</view>
+            <view class="pomo__dur-row">
+              <text class="pomo__dur-name">🍅 专注</text>
+              <view class="pomo__dur-step" data-key="focusSec" data-delta="-1" catchtap="onPomoDurationStep" hover-stay-time="0">−</view>
+              <text class="pomo__dur-val">{{pomoSettings.focusSec / 60}}</text>
+              <view class="pomo__dur-step" data-key="focusSec" data-delta="1" catchtap="onPomoDurationStep" hover-stay-time="0">+</view>
+            </view>
+            <view class="pomo__dur-row">
+              <text class="pomo__dur-name">☕ 短休息</text>
+              <view class="pomo__dur-step" data-key="shortSec" data-delta="-1" catchtap="onPomoDurationStep" hover-stay-time="0">−</view>
+              <text class="pomo__dur-val">{{pomoSettings.shortSec / 60}}</text>
+              <view class="pomo__dur-step" data-key="shortSec" data-delta="1" catchtap="onPomoDurationStep" hover-stay-time="0">+</view>
+            </view>
+            <view class="pomo__dur-row">
+              <text class="pomo__dur-name">🛌 长休息</text>
+              <view class="pomo__dur-step" data-key="longSec" data-delta="-1" catchtap="onPomoDurationStep" hover-stay-time="0">−</view>
+              <text class="pomo__dur-val">{{pomoSettings.longSec / 60}}</text>
+              <view class="pomo__dur-step" data-key="longSec" data-delta="1" catchtap="onPomoDurationStep" hover-stay-time="0">+</view>
+            </view>
+            <view class="pomo__dur-row">
+              <text class="pomo__dur-name">每 N 轮长休</text>
+              <view class="pomo__dur-step" data-key="longEvery" data-delta="-1" catchtap="onPomoLongEveryStep" hover-stay-time="0">−</view>
+              <text class="pomo__dur-val">{{pomoSettings.longEvery}}</text>
+              <view class="pomo__dur-step" data-key="longEvery" data-delta="1" catchtap="onPomoLongEveryStep" hover-stay-time="0">+</view>
+            </view>
+          </view>
+
+          <view class="pomo__panel-section">
+            <view class="pomo__panel-h">计时模式</view>
+            <view class="pomo__seg">
+              <view class="pomo__seg-item {{pomoSettings.direction === 'down' ? 'is-active' : ''}}" catchtap="onPomoSettingChange" data-key="direction" data-value="down" hover-stay-time="0">倒计时</view>
+              <view class="pomo__seg-item {{pomoSettings.direction === 'up' ? 'is-active' : ''}}" catchtap="onPomoSettingChange" data-key="direction" data-value="up" hover-stay-time="0">正计时</view>
+            </view>
+          </view>
+
+          <view class="pomo__panel-section">
+            <view class="pomo__panel-h">自动行为</view>
+            <view class="pomo__switch-row">
+              <text>完成后自动进入下一轮</text>
+              <switch checked="{{pomoSettings.autoCycle}}" bindchange="onPomoSettingChange" data-key="autoCycle" color="var(--color-primary)" />
+            </view>
+            <view class="pomo__switch-row">
+              <text>休息自动开始</text>
+              <switch checked="{{pomoSettings.autoBreak}}" bindchange="onPomoSettingChange" data-key="autoBreak" color="var(--color-primary)" />
+            </view>
+            <view class="pomo__switch-row">
+              <text>智能休息（按专注时长与今日番茄数自动加长）</text>
+              <switch checked="{{pomoSettings.adaptive}}" bindchange="onPomoSettingChange" data-key="adaptive" color="var(--color-primary)" />
+            </view>
+          </view>
+
+          <view class="pomo__panel-section">
+            <view class="pomo__panel-h">提醒方式</view>
+            <view class="pomo__switch-row">
+              <text>振动提醒</text>
+              <switch checked="{{pomoSettings.vibrate}}" bindchange="onPomoSettingChange" data-key="vibrate" color="var(--color-primary)" />
+            </view>
+            <view class="pomo__switch-row">
+              <text>结束音</text>
+              <switch checked="{{pomoSettings.sound}}" bindchange="onPomoSettingChange" data-key="sound" color="var(--color-primary)" />
+            </view>
+            <view wx:if="{{pomoSettings.sound}}" class="pomo__sub">
+              <view class="pomo__tone-grid">
+                <view
+                  wx:for="{{pomoToneList}}"
+                  wx:key="key"
+                  class="pomo__tone {{pomoSettings.finishTone === item.key ? 'is-active' : ''}}"
+                  catchtap="onPomoPreviewTone"
+                  data-key="{{item.key}}"
+                  hover-stay-time="0"
+                >
+                  <text class="pomo__tone-emoji">{{item.emoji}}</text>
+                  <text class="pomo__tone-label">{{item.label}}</text>
+                </view>
+              </view>
+              <view class="pomo__vol-row">
+                <text>🔉</text>
+                <slider
+                  min="0" max="100" value="{{pomoSettings.toneVolume * 100}}"
+                  activeColor="var(--color-primary)"
+                  block-size="18"
+                  bindchange="onPomoToneVolume"
+                  data-key="toneVolume"
+                />
+                <text>🔊</text>
+              </view>
+            </view>
+            <view class="pomo__switch-row">
+              <text>微信服务通知</text>
+              <switch checked="{{pomoSettings.subscribe}}" bindchange="onPomoSettingChange" data-key="subscribe" color="var(--color-primary)" />
+            </view>
+          </view>
+
+          <view class="pomo__panel-section">
+            <view class="pomo__panel-h">环境音</view>
+            <view class="pomo__ambient-grid">
+              <view
+                wx:for="{{pomoAmbientList}}"
+                wx:key="key"
+                class="pomo__ambient {{pomoSettings.ambient === item.key ? 'is-active' : ''}}"
+                catchtap="onPomoAmbientTap"
+                data-key="{{item.key}}"
+                hover-stay-time="0"
+              >
+                <text class="pomo__ambient-emoji">{{item.emoji}}</text>
+                <text class="pomo__ambient-label">{{item.label}}</text>
+              </view>
+            </view>
+            <view wx:if="{{pomoSettings.ambient !== 'off'}}" class="pomo__vol-row">
+              <text>🔉</text>
+              <slider
+                min="0" max="100" value="{{pomoSettings.ambientVolume * 100}}"
+                activeColor="var(--color-primary)"
+                block-size="18"
+                bindchange="onPomoAmbientVolume"
+              />
+              <text>🔊</text>
+            </view>
+          </view>
+
+          <view class="pomo__panel-section">
+            <view class="pomo__panel-h">数据</view>
+            <view class="pomo__switch-row" catchtap="onPomoClearLogs">
+              <text>🗑️ 清空本地日志缓存</text>
+              <text class="pomo__danger">点击清空</text>
+            </view>
+          </view>
+
+          <view class="pomo__panel-close" catchtap="onPomoPanelClose" hover-stay-time="0">完成</view>
+        </view>
+      </view>
+
+      <!-- ============ 弹层：统计 ============ -->
+      <view wx:if="{{pomoPanel === 'stats'}}" class="pomo__panel-mask" catchtouchmove="onPomoPanelStop" catchtap="onPomoPanelClose" hover-stay-time="0">
+        <view class="pomo__panel" catchtap="onPomoPanelStop" hover-stay-time="0">
+          <view class="pomo__panel-title">📊 专注统计</view>
+
+          <view class="pomo__stat-grid">
+            <view class="pomo__stat-cell">
+              <text class="pomo__stat-num">{{pomoStats.todayCount}}</text>
+              <text class="pomo__stat-label">今日完成</text>
+            </view>
+            <view class="pomo__stat-cell">
+              <text class="pomo__stat-num">{{pomoStats.todayMinutes}}</text>
+              <text class="pomo__stat-label">今日分钟</text>
+            </view>
+            <view class="pomo__stat-cell">
+              <text class="pomo__stat-num">{{pomoStats.weekCount}}</text>
+              <text class="pomo__stat-label">本周完成</text>
+            </view>
+            <view class="pomo__stat-cell">
+              <text class="pomo__stat-num">{{pomoStats.monthCount}}</text>
+              <text class="pomo__stat-label">本月完成</text>
+            </view>
+            <view class="pomo__stat-cell">
+              <text class="pomo__stat-num">{{pomoStats.streak}}</text>
+              <text class="pomo__stat-label">连续天数</text>
+            </view>
+            <view class="pomo__stat-cell">
+              <text class="pomo__stat-num">{{pomoStats.totalCount}}</text>
+              <text class="pomo__stat-label">累计完成</text>
+            </view>
+          </view>
+
+          <!-- ============ 目标设置 ============ -->
+          <view class="pomo__panel-section">
+            <view class="pomo__panel-h">🎯 番茄目标</view>
+
+            <view class="pomo__goal-row">
+              <view class="pomo__goal-info">
+                <text class="pomo__goal-name">今日</text>
+                <text class="pomo__goal-progress">{{pomoStats.todayCount}} / {{pomoGoals.dailyTarget}} 个</text>
+              </view>
+              <view class="pomo__goal-bar">
+                <view class="pomo__goal-bar-fill pomo__goal-bar-fill--{{pomoStats.todayCount >= pomoGoals.dailyTarget ? 'done' : ''}}" style="width: {{pomoStats.todayCount / pomoGoals.dailyTarget * 100 > 100 ? 100 : (pomoStats.todayCount / pomoGoals.dailyTarget * 100)}}%;"></view>
+              </view>
+              <view class="pomo__goal-stepper">
+                <view class="pomo__goal-step" data-key="dailyTarget" data-delta="-1" catchtap="onPomoGoalStep" hover-stay-time="0">−</view>
+                <text class="pomo__goal-val">{{pomoGoals.dailyTarget}}</text>
+                <view class="pomo__goal-step" data-key="dailyTarget" data-delta="1" catchtap="onPomoGoalStep" hover-stay-time="0">+</view>
+              </view>
+            </view>
+
+            <view class="pomo__goal-row">
+              <view class="pomo__goal-info">
+                <text class="pomo__goal-name">本周</text>
+                <text class="pomo__goal-progress">{{pomoStats.weekCount}} / {{pomoGoals.weeklyTarget}} 个</text>
+              </view>
+              <view class="pomo__goal-bar">
+                <view class="pomo__goal-bar-fill pomo__goal-bar-fill--{{pomoStats.weekCount >= pomoGoals.weeklyTarget ? 'done' : ''}}" style="width: {{pomoStats.weekCount / pomoGoals.weeklyTarget * 100 > 100 ? 100 : (pomoStats.weekCount / pomoGoals.weeklyTarget * 100)}}%;"></view>
+              </view>
+              <view class="pomo__goal-stepper">
+                <view class="pomo__goal-step" data-key="weeklyTarget" data-delta="-1" catchtap="onPomoGoalStep" hover-stay-time="0">−</view>
+                <text class="pomo__goal-val">{{pomoGoals.weeklyTarget}}</text>
+                <view class="pomo__goal-step" data-key="weeklyTarget" data-delta="1" catchtap="onPomoGoalStep" hover-stay-time="0">+</view>
+              </view>
+            </view>
+          </view>
+
+          <!-- ============ 24 小时效率曲线 ============ -->
+          <view class="pomo__panel-section">
+            <view class="pomo__panel-h">📈 24 小时效率曲线</view>
+            <view class="pomo__hour-chart">
+              <view class="pomo__hour-axis">
+                <text>0</text><text>6</text><text>12</text><text>18</text><text>24</text>
+              </view>
+              <view class="pomo__hour-bars">
+                <view
+                  wx:for="{{pomoStats.hourHistogram}}"
+                  wx:key="index"
+                  class="pomo__hour-bar pomo__hour-bar--lv{{item > 0 ? (item >= pomoStats.hourPeak * 0.75 ? 4 : (item >= pomoStats.hourPeak * 0.5 ? 3 : (item >= pomoStats.hourPeak * 0.25 ? 2 : 1))) : 0}}"
+                  style="height: {{item / pomoStats.hourPeak * 100 > 100 ? 100 : (item / pomoStats.hourPeak * 100)}}%;"
+                  data-hour="{{index}}"
+                >
+                  <view class="pomo__hour-tip" wx:if="{{item > 0}}">{{item}}</view>
+                </view>
+              </view>
+              <view class="pomo__hour-axis">
+                <text>00</text><text>06</text><text>12</text><text>18</text><text>24</text>
+              </view>
+            </view>
+            <view class="pomo__window-row">
+              <view wx:if="{{pomoStats.bestWindow}}" class="pomo__window-best">
+                <text class="pomo__window-label">🌟 最佳时段</text>
+                <text class="pomo__window-time">{{pomoStats.bestWindow.label}}</text>
+                <text class="pomo__window-meta">{{pomoStats.bestWindow.count}} 个番茄 · {{pomoStats.bestWindow.minutes}} 分钟</text>
+              </view>
+              <view wx:else class="pomo__window-empty">完成更多番茄后告诉你最佳时段</view>
+            </view>
+            <view wx:if="{{pomoStats.efficientWindows.length > 0}}" class="pomo__window-row pomo__window-row--small">
+              <text class="pomo__window-label">⚡ 高效时段</text>
+              <view class="pomo__window-list">
+                <text wx:for="{{pomoStats.efficientWindows}}" wx:key="label" wx:for-item="w" class="pomo__window-chip">{{w.label}} · {{w.count}}</text>
+              </view>
+            </view>
+          </view>
+
+          <!-- ============ 时间轴（最近 14 天） ============ -->
+          <view class="pomo__panel-section">
+            <view class="pomo__panel-h">🗓 最近 14 天时间轴</view>
+            <view class="pomo__timeline">
+              <view
+                wx:for="{{pomoStats.timeline}}"
+                wx:key="dateKey"
+                class="pomo__tl-item {{item.isToday ? 'is-today' : ''}}"
+              >
+                <view class="pomo__tl-bar-wrap">
+                  <view class="pomo__tl-bar" style="height: {{item.count > 0 ? (item.count / 8 * 100 > 100 ? 100 : item.count / 8 * 100) : 0}}%;"></view>
+                </view>
+                <text class="pomo__tl-count">{{item.count}}</text>
+                <text class="pomo__tl-wd">{{item.weekday === 0 ? '日' : (item.weekday === 1 ? '一' : (item.weekday === 2 ? '二' : (item.weekday === 3 ? '三' : (item.weekday === 4 ? '四' : (item.weekday === 5 ? '五' : '六')))))}}</text>
+              </view>
+            </view>
+          </view>
+
+          <view class="pomo__panel-h">12 周热力图</view>
+          <view class="pomo__heat">
+            <view class="pomo__heat-week" wx:for="{{pomoStats.heatmap}}" wx:for-item="week" wx:key="index">
+              <view
+                wx:for="{{week}}"
+                wx:for-item="cell"
+                wx:key="index"
+                class="pomo__heat-cell pomo__heat-cell--lv{{cell}}"
+                wx:if="{{false}}"
+              ></view>
+              <block wx:for="{{week}}" wx:for-item="cell" wx:key="index">
+                <view class="pomo__heat-cell pomo__heat-cell--lv{{cell > 0 ? (cell <= 1 ? 1 : (cell <= 3 ? 2 : (cell <= 6 ? 3 : 4))) : 0}}"></view>
+              </block>
+            </view>
+            <view class="pomo__heat-legend">
+              <text>少</text>
+              <view class="pomo__heat-cell pomo__heat-cell--lv0"></view>
+              <view class="pomo__heat-cell pomo__heat-cell--lv1"></view>
+              <view class="pomo__heat-cell pomo__heat-cell--lv2"></view>
+              <view class="pomo__heat-cell pomo__heat-cell--lv3"></view>
+              <view class="pomo__heat-cell pomo__heat-cell--lv4"></view>
+              <text>多</text>
+            </view>
+          </view>
+
+          <view class="pomo__panel-h">最近 20 条日志</view>
+          <view class="pomo__logs">
+            <view wx:if="{{pomoLogs.length === 0}}" class="pomo__logs-empty">暂无记录</view>
+            <view
+              wx:for="{{pomoLogs}}"
+              wx:key="_id"
+              wx:if="{{index < 20}}"
+              class="pomo__log pomo__log--{{item.status}}"
+            >
+              <text class="pomo__log-date">{{item.dateKey}}</text>
+              <text class="pomo__log-mode">{{item.mode === 'focus' ? '🍅' : (item.mode === 'short' ? '☕' : '🛌')}}</text>
+              <text class="pomo__log-title">{{item.todoTitle || '—'}}</text>
+              <text class="pomo__log-mins">{{item.actualSec / 60}} 分</text>
+              <text class="pomo__log-status">{{item.status === 'completed' ? '✓' : (item.status === 'abandoned' ? '×' : '∅')}}</text>
+            </view>
+          </view>
+
+          <view class="pomo__panel-share">
+            <button class="pomo__share-btn" open-type="share" bindtap="onPomoShareAppMessage">🍅 生成分享卡</button>
+          </view>
+
+          <view class="pomo__panel-close" catchtap="onPomoPanelClose" hover-stay-time="0">关闭</view>
+        </view>
+      </view>
+
+      <!-- ============ 弹层：绑定待办 ============ -->
+      <view wx:if="{{pomoPanel === 'bind'}}" class="pomo__panel-mask" catchtouchmove="onPomoPanelStop" catchtap="onPomoPanelClose" hover-stay-time="0">
+        <view class="pomo__panel" catchtap="onPomoPanelStop" hover-stay-time="0">
+          <view class="pomo__panel-title">📌 关联待办</view>
+          <view wx:if="{{pomoTodos.length === 0}}" class="pomo__panel-empty">暂无未完成任务，先去首页添加吧</view>
+          <view class="pomo__todo-pick">
+            <view
+              wx:for="{{pomoTodos}}"
+              wx:key="_id"
+              class="pomo__todo-pick-item"
+              catchtap="onPomoBindTodo"
+              data-id="{{item._id}}"
+              hover-stay-time="0"
+            >{{item.content}}</view>
+          </view>
+          <view class="pomo__panel-close" catchtap="onPomoPanelClose" hover-stay-time="0">取消</view>
+        </view>
+      </view>
+
+      <!-- ============ 完成弹窗 ============ -->
+      <view wx:if="{{pomoJustCompleted}}" class="pomo__finish-mask" catchtouchmove="onPomoPanelStop" catchtap="onPomoNext" hover-stay-time="0">
+        <view class="pomo__finish" catchtap="onPomoPanelStop" hover-stay-time="0">
+          <view class="pomo__finish-emoji">{{pomoJustCompleted.mode === 'focus' ? '🍅' : (pomoJustCompleted.mode === 'short' ? '☕' : '🛌')}}</view>
+          <view class="pomo__finish-title">{{pomoJustCompleted.mode === 'focus' ? '本轮专注完成！' : (pomoJustCompleted.mode === 'short' ? '短休息结束' : '长休息结束')}}</view>
+          <view class="pomo__finish-meta">专注 {{pomoJustCompleted.minutes}} 分钟</view>
+          <view class="pomo__finish-next">即将进入：{{pomoJustCompleted.nextMode === 'focus' ? '🍅 专注' : (pomoJustCompleted.nextMode === 'short' ? '☕ 短休息' : '🛌 长休息')}} · {{pomoJustCompleted.nextMin}} 分钟</view>
+          <view wx:if="{{pomoJustCompleted.adaptive}}" class="pomo__finish-meta">🧠 智能休息已把本轮加长到 {{pomoJustCompleted.nextMin}} 分钟</view>
+          <view class="pomo__finish-actions">
+            <view class="pomo__btn pomo__btn--ghost" catchtap="onPomoReset" hover-stay-time="0">停留</view>
+            <view class="pomo__btn pomo__btn--primary" catchtap="onPomoNext" hover-stay-time="0">下一轮 →</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== 倒数日（事件列表：倒数/正数 · 分类 · 置顶 · 归档） ===== -->
+<!-- ===== 倒数日 · 人生重要时刻记录册（手账风：照片头图 + 置顶横幅 + 胶带分类 + 三列照片卡） ===== -->
+  <block wx:elif="{{type === 'countdown'}}">
+    <view class="cd3 cd3--{{cdPageStyle}}">
+
+      <!-- ===== 整幅照片头图（标题已烤进图内）+ 右上角风格切换 ===== -->
+      <view class="cd3__top">
+        <image
+          wx:if="{{cdPageStyle === 'a'}}"
+          class="cd3__top-img"
+          src="/subpackages/toolbox/assets/countdown/cd-head.jpg"
+          mode="widthFix"
+        />
+        <image
+          wx:else
+          class="cd3__top-img"
+          src="/subpackages/toolbox/assets/countdown/cd-headb.jpg"
+          mode="widthFix"
+        />
+        <view class="cd3__switch">
+          <view
+            wx:for="{{cdPageStyleChips}}"
+            wx:key="key"
+            class="cd3__switch-b {{cdPageStyle === item.key ? 'is-on' : ''}}"
+            data-key="{{item.key}}"
+            catchtap="onCdPageStyleTap"
+          >{{item.name}}</view>
+        </view>
+      </view>
+
+      <!-- ===== 手账标签 Tab + 新建 ===== -->
+      <view class="cd3__bar">
+        <scroll-view scroll-x class="cd3__tabs" enhanced show-scrollbar="{{false}}">
+          <view class="cd3__tabs-in">
+            <view
+              wx:for="{{cdFilters}}"
+              wx:key="key"
+              class="cd3__tab {{cdFilter === item.key ? 'is-active' : ''}}"
+              data-key="{{item.key}}"
+              bindtap="onCdFilterTap"
+            >
+              <text class="cd3__tab-ico cd3__tab-ico--{{item.key}}"></text>
+              <text class="cd3__tab-t">{{item.label}}</text>
+            </view>
+          </view>
+        </scroll-view>
+        <view class="cd3__add" catchtap="onCdAdd">
+          <text class="cd3__add-plus">＋</text>
+          <text class="cd3__add-t">新建</text>
+        </view>
+      </view>
+
+      <!-- ===== 置顶横幅（宽幅照片 + 右侧毛玻璃卡）===== -->
+      <view class="cd3__banner" bindtap="onCdBannerTap">
+        <image
+          wx:if="{{cdPageStyle === 'a'}}"
+          class="cd3__banner-img"
+          src="/subpackages/toolbox/assets/countdown/cd-banner.jpg"
+          mode="widthFix"
+        />
+        <image
+          wx:else
+          class="cd3__banner-img"
+          src="/subpackages/toolbox/assets/countdown/cd-bannerb.jpg"
+          mode="widthFix"
+        />
+        <block wx:if="{{cdHero}}">
+          <view class="cd3__glass">
+            <text class="cd3__glass-pill">{{cdHero.isToday ? '就是' : (cdHero.isFuture ? '距离' : '已经')}}</text>
+            <text class="cd3__glass-name">{{cdHero.title}}</text>
+            <view class="cd3__glass-big">
+              <text class="cd3__glass-num">{{cdHero.isToday ? '今天' : cdHero.bigNum}}</text>
+              <text wx:if="{{!cdHero.isToday}}" class="cd3__glass-unit">天</text>
+            </view>
+            <text class="cd3__glass-when">{{cdHero.dotDate}} {{cdHero.weekdayText}}</text>
+          </view>
+        </block>
+        <view wx:else class="cd3__banner-none">
+          <text class="cd3__banner-none-t">还没有倒数日</text>
+          <text class="cd3__banner-none-s">点「新建」添加一个吧</text>
+        </view>
+      </view>
+
+      <!-- ===== 我的倒数日（章节标题，副文案随风格切换）===== -->
+      <view class="cd3__sec">
+        <view class="cd3__sec-l">
+          <text class="cd3__sec-flower">✿</text>
+          <text class="cd3__sec-t">{{cdPageStyle === 'a' ? '我的倒数日' : '热门分类'}}</text>
+        </view>
+        <text class="cd3__sec-s">{{cdPageStyle === 'a' ? '愿所有的等待，都有意义 ♡' : '每一个重要的日子，都值得记录 ♥'}}</text>
+      </view>
+
+      <!-- ===== 分类：A 风=5 列胶带网格（不带"全部"）；B 风=横向圆角滚动条（带"全部"） ===== -->
+      <view wx:if="{{cdPageStyle === 'a'}}" class="cd3__cats">
+        <view
+          wx:for="{{cdGroups}}"
+          wx:key="key"
+          class="cd3__cat cd3__cat--{{item.key}} {{cdGroupFilter === item.key ? 'is-active' : ''}}"
+          style="background:{{item.soft}}"
+          data-key="{{item.key}}"
+          bindtap="onCdGroupTap"
+        >
+          <view class="cd3__cat-tape"></view>
+          <text class="cd3__cat-ico">{{item.icon}}</text>
+          <text class="cd3__cat-name">{{item.label}}</text>
+          <text class="cd3__cat-n">{{item.count}} 个</text>
+        </view>
+      </view>
+      <scroll-view wx:else scroll-x class="cd3__catsx" enhanced show-scrollbar="{{false}}">
+        <view class="cd3__catsx-in">
+          <view
+            class="cd3__catx cd3__catx--all {{(!cdGroupFilter || cdGroupFilter === 'all') ? 'is-on' : ''}}"
+            bindtap="onCdGroupFilterAll"
+          >
+            <text class="cd3__catx-nm">✧ 全部</text>
+            <text class="cd3__catx-ct">{{cdList.length}} 个</text>
+          </view>
+          <view
+            wx:for="{{cdGroups}}"
+            wx:key="key"
+            class="cd3__catx cd3__catx--{{item.key}} {{cdGroupFilter === item.key ? 'is-on' : ''}}"
+            style="background:{{item.soft}}"
+            data-key="{{item.key}}"
+            bindtap="onCdGroupTap"
+          >
+            <text class="cd3__catx-nm">{{item.icon}} {{item.label}}</text>
+            <text class="cd3__catx-ct">共 {{item.count}} 个</text>
+          </view>
+        </view>
+      </scroll-view>
+
+      <!-- ===== 三列照片卡 ===== -->
+      <view wx:if="{{cdCards.length}}" class="cd3__grid">
+        <view
+          wx:for="{{cdCards}}"
+          wx:key="id"
+          class="cd3__ev {{item.isToday ? 'is-today' : ''}} {{item.done ? 'is-arch' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="onCdCardTap"
+        >
+          <view class="cd3__ev-photo">
+            <image wx:if="{{item.photo}}" class="cd3__ev-img" src="{{item.photo}}" mode="aspectFill" />
+            <view wx:else class="cd3__ev-img cd3__ev-img--ph" style="background:{{item.photoFallback}}">
+              <text class="cd3__ev-emoji">{{item.emotionIcon}}</text>
+            </view>
+            <text wx:if="{{cdPageStyle === 'a'}}" class="cd3__ev-tag cd3__ev-tag--{{item.tagTone}}">{{item.tagText}}</text>
+            <text wx:else class="cd3__ev-tag2 {{item.isFuture ? '' : 'is-up'}}">{{item.isFuture ? '倒数日' : '正数日'}}</text>
+          </view>
+          <view class="cd3__ev-trow">
+            <text class="cd3__ev-title">{{item.title}}</text>
+            <view
+              wx:if="{{cdPageStyle === 'a'}}"
+              class="cd3__ev-mark {{item.fav ? 'is-on' : ''}}"
+              data-id="{{item.id}}"
+              catchtap="onCdFavTap"
+            >♡</view>
+          </view>
+          <text wx:if="{{item.note}}" class="cd3__ev-desc">{{item.note}}</text>
+          <view wx:if="{{cdPageStyle === 'b'}}" class="cd3__ev-when">
+            <text class="cd3__ev-when-pre">{{item.stampPre}}</text>
+            <text wx:if="{{!item.isToday}}" class="cd3__ev-when-num">{{item.bigNum}}</text>
+            <text wx:else class="cd3__ev-when-num">今天</text>
+            <text wx:if="{{!item.isToday}}" class="cd3__ev-when-unit">天</text>
+          </view>
+          <view class="cd3__ev-bottom">
+            <text class="cd3__ev-date">▤ {{item.dotDate}}</text>
+            <text class="cd3__ev-wd">{{item.weekdayText}}</text>
+            <view wx:if="{{cdPageStyle === 'a'}}" class="cd3__stamp cd3__stamp--{{item.stampTone}}">
+              <text class="cd3__stamp-pre">{{item.stampPre}}</text>
+              <text class="cd3__stamp-num">{{item.isToday ? '今天' : item.bigNum}}</text>
+              <text wx:if="{{!item.isToday}}" class="cd3__stamp-unit">天</text>
+            </view>
+            <view
+              wx:else
+              class="cd3__ev-mark2 {{item.fav ? 'is-on' : ''}}"
+              data-id="{{item.id}}"
+              catchtap="onCdFavTap"
+            >♡</view>
+          </view>
+        </view>
+      </view>
+
+      <!-- ===== 空态 ===== -->
+      <view wx:else class="cd3__empty">
+        <view class="cd3__empty-art">
+          <view class="cd3__empty-ring"></view>
+          <text class="cd3__empty-flower">🌷</text>
+          <view class="cd3__empty-leaf cd3__empty-leaf--l"></view>
+          <view class="cd3__empty-leaf cd3__empty-leaf--r"></view>
+        </view>
+        <view class="cd3__empty-text">{{cdEmptyText}}</view>
+        <view class="cd3__empty-sub">{{cdEmptySub}}</view>
+        <view class="cd3__empty-btn" catchtap="onCdEmptyAction">{{cdEmptyAction}}</view>
+      </view>
+
+      <!-- ===== 归档区 ===== -->
+      <view wx:if="{{cdArchived.length && cdFilter !== 'archive'}}" class="cd3__arch">
+        <view class="cd3__arch-hd">
+          <text class="cd3__arch-t">📦 已归档</text>
+          <text class="cd3__arch-n">{{cdArchived.length}} 个</text>
+        </view>
+        <view class="cd3__arch-list">
+          <view
+            wx:for="{{cdArchived}}"
+            wx:key="id"
+            class="cd3__arch-item"
+            data-id="{{item.id}}"
+            bindtap="onCdCardTap"
+          >
+            <image wx:if="{{item.photo}}" class="cd3__arch-img" src="{{item.photo}}" mode="aspectFill" />
+            <view wx:else class="cd3__arch-img cd3__arch-img--ph" style="background:{{item.photoFallback}}"></view>
+            <view class="cd3__arch-main">
+              <text class="cd3__arch-name">{{item.title}}</text>
+              <text class="cd3__arch-date">{{item.dayPhrase}} · {{item.dotDate}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- ===== 底部：A 风=文案图；B 风=小猫 + 手写文字 ===== -->
+      <view wx:if="{{cdPageStyle === 'a'}}" class="cd3__foot">
+        <image class="cd3__foot-img" src="/subpackages/toolbox/assets/countdown/cd-note.jpg" mode="widthFix" />
+      </view>
+      <view wx:else class="cd3__foot cd3__foot--b">
+        <image class="cd3__foot-cat" src="/subpackages/toolbox/assets/countdown/cd-cat.jpg" mode="widthFix" />
+        <view class="cd3__foot-tx">
+          <text class="cd3__foot-tl">把重要的日子</text>
+          <text class="cd3__foot-tl">都变成值得期待的回忆</text>
+        </view>
+      </view>
+      <view wx:if="{{cdEditorFor !== null}}" class="cd3__mask" bindtap="onCdEditorClose">
+        <view class="cd3__sheet" catchtap="onCdSheetStop">
+          <view class="cd3__sheet-head">
+            <text class="cd3__sheet-title">{{cdEditorTitle}}</text>
+            <text class="cd3__sheet-close" catchtap="onCdEditorClose">✕</text>
+          </view>
+
+          <view class="cd3__field">
+            <text class="cd3__label">事件标题</text>
+            <input class="cd3__input {{cdFocusField === 'title' ? 'cd3__input--focus' : ''}}" value="{{cdFormTitle}}" bindinput="onCdFormTitle" bindfocus="onCdFocus" bindblur="onCdBlur" data-field="title" maxlength="30" placeholder="如：出发去京都旅行" placeholder-class="cd3__ph" />
+          </view>
+
+          <!-- 这份心情 -->
+          <view class="cd3__field">
+            <text class="cd3__label">这份心情</text>
+            <view class="cd3__emos">
+              <view
+                wx:for="{{cdEmotions}}"
+                wx:key="key"
+                class="cd3__emo {{cdFormEmotion === item.key ? 'is-active' : ''}}"
+                style="background:{{cdFormEmotion === item.key ? item.bg : '#FFFDFB'}};color:{{cdFormEmotion === item.key ? item.color : '#9d8d8d'}}"
+                data-key="{{item.key}}"
+                catchtap="onCdFormEmotion"
+              ><text class="cd3__emo-i">{{item.icon}}</text><text class="cd3__emo-t">{{item.label}}</text></view>
+            </view>
+          </view>
+
+          <!-- 配图 -->
+          <view class="cd3__field">
+            <text class="cd3__label">配图</text>
+            <view class="cd3__photo">
+              <image wx:if="{{cdFormPhoto}}" class="cd3__photo-img" src="{{cdFormPhoto}}" mode="aspectFill" />
+              <view wx:else class="cd3__photo-ph">
+                <text class="cd3__photo-ph-i">☁</text>
+                <text class="cd3__photo-ph-t">还没有照片</text>
+              </view>
+              <view wx:if="{{cdFormPhoto}}" class="cd3__photo-x" catchtap="onCdClearPhoto">✕</view>
+            </view>
+            <view class="cd3__pool">
+              <view
+                wx:for="{{cdPhotoPool}}"
+                wx:key="key"
+                class="cd3__pool-i {{cdFormPhoto === item.src ? 'is-active' : ''}}"
+                data-src="{{item.src}}"
+                catchtap="onCdPickPhoto"
+              >
+                <image class="cd3__pool-img" src="{{item.src}}" mode="aspectFill" />
+                <text class="cd3__pool-t">{{item.label}}</text>
+              </view>
+            </view>
+            <view class="cd3__photo-btns">
+              <view class="cd3__photo-btn" catchtap="onCdChoosePhoto">＋ 从相册选一张</view>
+            </view>
+          </view>
+
+          <view class="cd3__field-row">
+            <view class="cd3__field">
+              <text class="cd3__label">日期</text>
+              <picker mode="date" value="{{cdFormDate}}" bindchange="onCdFormDate">
+                <view class="cd3__input cd3__input--pick">📅 {{cdFormDate || '选择日期'}}</view>
+              </picker>
+            </view>
+            <view class="cd3__field">
+              <text class="cd3__label">时间</text>
+              <picker mode="time" value="{{cdFormTime}}" bindchange="onCdFormTime">
+                <view class="cd3__input cd3__input--pick">🕘 {{cdFormTime}}</view>
+              </picker>
+            </view>
+          </view>
+
+          <view class="cd3__field">
+            <text class="cd3__label">类型</text>
+            <view class="cd3__seg">
+              <view class="cd3__seg-item {{cdFormType === 'countdown' ? 'is-active' : ''}}" data-type="countdown" bindtap="onCdFormTypeTap">⏳ 倒数日</view>
+              <view class="cd3__seg-item {{cdFormType === 'countup' ? 'is-active' : ''}}" data-type="countup" bindtap="onCdFormTypeTap">📅 正数日</view>
+            </view>
+          </view>
+
+          <view class="cd3__field">
+            <text class="cd3__label">分类</text>
+            <view class="cd3__cats">
+              <view
+                wx:for="{{cdCategories}}"
+                wx:key="*this"
+                class="cd3__cat {{cdFormCategory === item ? 'is-active' : ''}}"
+                data-cat="{{item}}"
+                bindtap="onCdFormCategory"
+              >{{item}}</view>
+            </view>
+          </view>
+
+          <view class="cd3__field">
+            <text class="cd3__label">添加一句话</text>
+            <textarea class="cd3__textarea {{cdFocusField === 'note' ? 'cd3__textarea--focus' : ''}}" value="{{cdFormNote}}" bindinput="onCdFormNote" bindfocus="onCdFocus" bindblur="onCdBlur" data-field="note" maxlength="100" placeholder="希望今年能和喜欢的人一起去看看春天" placeholder-class="cd3__ph" auto-height cursor-spacing="120" />
+          </view>
+
+          <view class="cd3__sheet-acts">
+            <view class="cd3__btn-ghost" catchtap="onCdEditorClose">取消</view>
+            <view class="cd3__btn-primary" catchtap="onCdSave">♡ 已记下这一天</view>
+          </view>
+        </view>
+      </view>
+
+    </view>
+  </block>
+
+  <!-- ===== 时间进度（三环指标 · 24h 时间轴 · 高端数据艺术） ===== -->
+  <block wx:elif="{{type === 'time'}}">
+    <view class="td3 td3--{{clockStyle}} td3--bg-{{clockBg}}">
+      <!-- 背景氛围装饰层：与表盘工艺相互独立，可自由组合，切换实时联动 -->
+      <view class="td3__deco">
+        <view class="td3__blob td3__blob--a"></view>
+        <view class="td3__blob td3__blob--b"></view>
+        <view class="td3__fx"></view>
+      </view>
+
+      <view class="td3__head">
+        <text class="td3__title">时间余额</text>
+        <text class="td3__date">{{nowLabel}} · 今天是 {{yearDay}} / {{yearTotalDays}} 天</text>
+      </view>
+
+      <!-- 主视觉：今天 / 本月 / 今年 三环形指标 -->
+      <view class="td3__stats">
+        <view class="td3__stat">
+          <view class="td3__sheen"></view>
+          <text class="td3__stat-label">☀️ 今天</text>
+          <view class="td3__ring td3__ring--day" style="background: conic-gradient(var(--color-accent) {{dayPassedPct * 3.6}}deg, var(--td3-track) 0deg);">
+            <view class="td3__ring-in">
+              <text class="td3__ring-num">{{dayPassedPct}}</text>
+              <text class="td3__ring-unit">%</text>
+            </view>
+          </view>
+          <text class="td3__stat-cap">{{dayCap}}</text>
+        </view>
+
+        <view class="td3__stat">
+          <view class="td3__sheen"></view>
+          <text class="td3__stat-label">🌗 本月</text>
+          <view class="td3__ring td3__ring--month" style="background: conic-gradient(var(--color-primary) {{monthPassedPct * 3.6}}deg, var(--td3-track) 0deg);">
+            <view class="td3__ring-in">
+              <text class="td3__ring-num">{{monthPassedPct}}</text>
+              <text class="td3__ring-unit">%</text>
+            </view>
+          </view>
+          <text class="td3__stat-cap">{{monthCap}}</text>
+        </view>
+
+        <view class="td3__stat">
+          <view class="td3__sheen"></view>
+          <text class="td3__stat-label">🗓️ 今年</text>
+          <view class="td3__ring td3__ring--year" style="background: conic-gradient(var(--color-primary-deep) {{yearPassedPct * 3.6}}deg, var(--td3-track) 0deg);">
+            <view class="td3__ring-in">
+              <text class="td3__ring-num">{{yearPassedPct}}</text>
+              <text class="td3__ring-unit">%</text>
+            </view>
+          </view>
+          <text class="td3__stat-cap">{{yearCap}}</text>
+        </view>
+      </view>
+
+      <!-- 24 小时今日时间轴：天空渐变轨道 + 发光时刻标记 + 金属倒计时 -->
+      <view class="td3__day">
+        <view class="td3__sheen"></view>
+        <view class="td3__day-head">
+          <text class="td3__day-title">今日时间轴</text>
+          <view class="td3__now-chip">🕐 现在 {{nowLabel}}</view>
+        </view>
+        <view class="td3__track">
+          <view class="td3__track-fill" style="width: {{nowPct}}%;"></view>
+          <view class="td3__marker" style="left: {{nowPct}}%;">
+            <view class="td3__marker-knob"></view>
+          </view>
+        </view>
+        <view class="td3__scale">
+          <text>0点</text>
+          <text>6点</text>
+          <text>12点</text>
+          <text>18点</text>
+          <text>24点</text>
+        </view>
+        <view class="td3__count">
+          <view class="td3__count-cell">
+            <text class="td3__count-num">{{dayRemainH}}</text>
+            <text class="td3__count-unit">时</text>
+          </view>
+          <text class="td3__count-sep">:</text>
+          <view class="td3__count-cell">
+            <text class="td3__count-num">{{dayRemainM}}</text>
+            <text class="td3__count-unit">分</text>
+          </view>
+          <text class="td3__count-sep">:</text>
+          <view class="td3__count-cell">
+            <text class="td3__count-num">{{dayRemainS}}</text>
+            <text class="td3__count-unit">秒</text>
+          </view>
+        </view>
+        <text class="td3__day-cap">距明日 00:00 · 今日已过 {{dayPassedPct}}%</text>
+      </view>
+
+      <!-- 外观风格：表盘工艺 + 背景氛围 两个独立维度，即时生效并自动保存 -->
+      <view class="gl3__theme">
+        <view class="gl3__theme-head">
+          <text class="gl3__theme-title">⌚ 表盘风格</text>
+          <text class="gl3__theme-sub">数字金属工艺 · 自动保存</text>
+        </view>
+        <view class="gl3__theme-row">
+          <view
+            wx:for="{{clockStyleChips}}"
+            wx:key="key"
+            class="gl3__theme-chip {{clockStyle === item.key ? 'is-active' : ''}}"
+            data-key="{{item.key}}"
+            hover-class="tap-press"
+            hover-stay-time="60"
+            bindtap="onClockStyleTap"
+          >
+            <view class="gl3__theme-dot" style="background: {{item.dot}};"></view>
+            <text class="gl3__theme-name">{{item.name}}</text>
+          </view>
+        </view>
+
+        <view class="gl3__dim-label">背景氛围</view>
+        <view class="gl3__theme-row">
+          <view
+            wx:for="{{clockBgChips}}"
+            wx:key="key"
+            class="gl3__theme-chip {{clockBg === item.key ? 'is-active' : ''}}"
+            data-key="{{item.key}}"
+            hover-class="tap-press"
+            hover-stay-time="60"
+            bindtap="onClockBgTap"
+          >
+            <view class="gl3__theme-dot" style="background: {{item.dot}};"></view>
+            <text class="gl3__theme-name">{{item.name}}</text>
+          </view>
+        </view>
+      </view>
+
+      <text class="td3__hint">每一天都是限量版，珍惜当下的每一刻 ⏳</text>
+    </view>
+  </block>
+
+  <!-- ===== 人生进度（电影级 3D 电池） ===== -->
+  <block wx:elif="{{type === 'life'}}">
+    <!-- 整页皮肤容器：只改变页面环境氛围，电池恒定绿色流体 -->
+    <view class="life-skin life-skin--{{lifeSkin}}">
+      <!-- 环境装饰层：不同皮肤分别呈现 光斑 / 星空 / 网格 / 群山 / 金晕 等 -->
+      <view class="life-skin__deco">
+        <view class="life-skin__blob-a"></view>
+        <view class="life-skin__blob-b"></view>
+        <view class="life-skin__fx"></view>
+      </view>
+
+      <view class="life-skin__body life3">
+        <view class="life3__head">
+          <text class="life3__lifespan">中国现阶段人均寿命 {{lifeLifespanMonths}} 个月（75岁）</text>
+          <text class="life3__months">{{lifeMonthText}}</text>
+        </view>
+
+        <!-- ===== 生日豪华专区：仅生日当天显示（礼花彩带 + 三种风格祝福动效） ===== -->
+        <block wx:if="{{isBirthday}}">
+          <view class="bday">
+            <view class="bday__deco">
+              <view class="bday__confetti bday__confetti--1"></view>
+              <view class="bday__confetti bday__confetti--2"></view>
+              <view class="bday__confetti bday__confetti--3"></view>
+              <view class="bday__confetti bday__confetti--4"></view>
+              <view class="bday__confetti bday__confetti--5"></view>
+              <view class="bday__confetti bday__confetti--6"></view>
+              <view class="bday__confetti bday__confetti--7"></view>
+              <view class="bday__confetti bday__confetti--8"></view>
+              <view class="bday__spark bday__spark--1"></view>
+              <view class="bday__spark bday__spark--2"></view>
+              <view class="bday__spark bday__spark--3"></view>
+              <view class="bday__spark bday__spark--4"></view>
+            </view>
+
+            <!-- 主标题：渐变流光 + 两侧气球摆动 -->
+            <view class="bday__top">
+              <view class="bday__balloon bday__balloon--1">🎈</view>
+              <view class="bday__cap">
+                <text class="bday__cap-en">HAPPY BIRTHDAY</text>
+                <text class="bday__cap-cn">🎉 生日快乐 🎉</text>
+              </view>
+              <view class="bday__balloon bday__balloon--2">🎈</view>
+            </view>
+
+            <!-- 走心寄语 · 打字机逐字 + 闪烁光标 -->
+            <view class="bday__card bday__card--heart">
+              <view class="bday__tag">💌 走心寄语</view>
+              <view class="bday__type-row">
+                <text class="bday__type-text">{{bdayType}}</text>
+                <view class="bday__caret" wx:if="{{bdayType.length < bdayHeartFull.length}}"></view>
+              </view>
+            </view>
+
+            <!-- 俏皮文案 · 弹跳入场 -->
+            <view class="bday__card bday__card--fun">
+              <view class="bday__tag">😄 俏皮文案</view>
+              <text class="bday__fun-text">{{bdayFun}}</text>
+            </view>
+
+            <!-- 正式祝福 · 渐变流光文字 -->
+            <view class="bday__card bday__card--formal">
+              <view class="bday__tag">🎩 正式祝福</view>
+              <text class="bday__formal-text">{{bdayFormal}}</text>
+            </view>
+
+            <view class="bday__wish">🎂 愿此刻的快乐，延续到未来的每一天 🎂</view>
+          </view>
+        </block>
+
+        <view class="life3__actions">
+          <picker mode="date" value="{{birthDate}}" bindchange="onBirthChange" class="life3__act-holder">
+            <view class="life3__act-btn">🎂 换一个日期</view>
+          </picker>
+          <view class="life3__act-btn" hover-class="tap-press" hover-stay-time="60" bindtap="onClearLife">清除记录</view>
+        </view>
+
+        <view class="life3__stage">
+
+          <!-- 电池：恒定绿色流体（液面波浪起伏，皮肤不影响其颜色） -->
+          <view class="bat3">
+            <view class="bat3__bloom"></view>
+            <view class="bat3__cap"></view>
+            <view class="bat3__shell">
+              <view class="bat3__cavity">
+                <view class="bat3__fill" style="height: {{lifePct}}%;">
+                  <view class="bat3__fill-surface"></view>
+                  <view class="bat3__wave bat3__wave--1"></view>
+                  <view class="bat3__wave bat3__wave--2"></view>
+                  <view class="bat3__fill-shine"></view>
+                </view>
+                <view class="bat3__tick bat3__tick--25"></view>
+                <view class="bat3__tick bat3__tick--50"></view>
+                <view class="bat3__tick bat3__tick--75"></view>
+              </view>
+              <view class="bat3__glass"></view>
+              <text class="bat3__pct">{{lifePct}}%</text>
+            </view>
+            <view class="bat3__reflect"></view>
+          </view>
+        </view>
+
+        <text class="life3__quote">“{{lifeQuote}}”</text>
+
+        <!-- 整页风格：6 套观感完全不同的页面氛围（电池保持绿色流体，不随皮肤变化） -->
+        <view class="gl3__theme life3__panel">
+          <view class="gl3__theme-head">
+            <text class="gl3__theme-title">🎨 整页风格</text>
+            <text class="gl3__theme-sub">整页氛围一键切换 · 电池恒定绿 · 自动保存</text>
+          </view>
+          <view class="gl3__theme-row">
+            <view
+              wx:for="{{lifeSkinChips}}"
+              wx:key="key"
+              class="gl3__theme-chip {{lifeSkin === item.key ? 'is-active' : ''}}"
+              data-key="{{item.key}}"
+              hover-class="tap-press"
+              hover-stay-time="60"
+              bindtap="onLifeSkinTap"
+            >
+              <view class="gl3__theme-dot" style="background: {{item.dot}};"></view>
+              <text class="gl3__theme-name">{{item.name}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+  <block wx:elif="{{type === 'lifegrid'}}">
+    <view class="gl3">
+      <!-- 主视觉：年度时间进度 / 人生已过进度 双环形指标 -->
+      <view class="gl3__stats">
+        <view class="gl3__stat">
+          <view class="gl3__sheen"></view>
+          <text class="gl3__stat-label">📅 年度时间进度</text>
+          <view class="gl3__ring" style="background: conic-gradient(var(--color-primary) {{lgYearPct * 3.6}}deg, var(--gl3-track) 0deg);">
+            <view class="gl3__ring-in">
+              <text class="gl3__ring-num">{{lgYearPct}}</text>
+              <text class="gl3__ring-unit">%</text>
+            </view>
+          </view>
+          <text class="gl3__stat-cap">已过 {{lgYearPassedDays}} 天 / 剩余 {{lgYearRemainDays}} 天</text>
+        </view>
+
+        <view class="gl3__stat">
+          <view class="gl3__sheen"></view>
+          <text class="gl3__stat-label">🎂 人生已过进度</text>
+          <view class="gl3__ring gl3__ring--life" style="background: conic-gradient(var(--color-accent) {{lgLifePct * 3.6}}deg, var(--gl3-track) 0deg);">
+            <view class="gl3__ring-in">
+              <text class="gl3__ring-num">{{lgLifePct}}</text>
+              <text class="gl3__ring-unit">%</text>
+            </view>
+          </view>
+          <text class="gl3__stat-cap">已过 {{lifegridPassed}} 格 / 共 {{lgTotalCells}} 格</text>
+        </view>
+      </view>
+
+      <!-- 参数：出生日期 + 预期寿命（切换后立即刷新） -->
+      <view class="gl3__ctrl">
+        <picker mode="date" value="{{birthDate}}" bindchange="onBirthChange" class="gl3__ctrl-item">
+          <view class="gl3__ctrl-btn">🎂 {{birthDate || '1995-01-01'}}</view>
+        </picker>
+        <picker mode="selector" range="{{lgLifespanOptions}}" value="{{lgLifespanIndex}}" bindchange="onLifespanChange" class="gl3__ctrl-item">
+          <view class="gl3__ctrl-btn">⏳ 预期 {{lgLifespanYears}} 岁</view>
+        </picker>
+      </view>
+
+      <view class="gl3__frame">
+        <view class="gl3__scene">
+          <view class="gl3__grid">
+            <view
+              wx:for="{{lifegridCells}}"
+              wx:key="index"
+              class="gl3__cell {{item.p ? 'is-lit' : ''}} {{item.now ? 'is-now' : ''}}"
+            ></view>
+          </view>
+          <view class="gl3__grid-gloss"></view>
+        </view>
+      </view>
+
+      <view class="gl3__legend">
+        <view class="gl3__legend-item"><view class="gl3__dot gl3__dot--lit"></view><text>已度过</text></view>
+        <view class="gl3__legend-item"><view class="gl3__dot gl3__dot--now"></view><text>本月</text></view>
+        <view class="gl3__legend-item"><view class="gl3__dot gl3__dot--empty"></view><text>未来</text></view>
+      </view>
+
+      <text class="gl3__hint">每个格子代表你人生的 1 个月（按 {{lgLifespanYears}} 岁 · {{lgTotalCells}} 个月估算）</text>
+
+      <!-- 主题选择：全局联动 + 持久化，下次进入自动恢复 -->
+      <view class="gl3__theme">
+        <view class="gl3__theme-head">
+          <text class="gl3__theme-title">🎨 主题风格</text>
+          <text class="gl3__theme-sub">全部页面联动 · 自动保存</text>
+        </view>
+        <view class="gl3__theme-row">
+          <view
+            wx:for="{{themeChips}}"
+            wx:key="key"
+            class="gl3__theme-chip {{theme === item.key ? 'is-active' : ''}}"
+            data-key="{{item.key}}"
+            bindtap="onGridThemeTap"
+          >
+            <view class="gl3__theme-dot" style="background: {{item.dot}};"></view>
+            <text class="gl3__theme-name">{{item.name}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== 翻页时钟（3D 翻页 · 明媚版式） ===== -->
+  <block wx:elif="{{type === 'flipclock'}}">
+    <view class="clock clock--{{fcPalette}} clock--font-{{fcFont}} clock--bg-{{fcBg}}">
+      <!-- 氛围背景：柔和渐变光斑 -->
+      <view class="clock__deco">
+        <view class="clock__blob clock__blob--sky"></view>
+        <view class="clock__blob clock__blob--peach"></view>
+        <view class="clock__blob clock__blob--mint"></view>
+      </view>
+
+      <view class="clock__inner">
+        <!-- 问候区 -->
+        <view class="clock__greet">
+          <text class="clock__greet-emoji">{{clockIcon}}</text>
+          <text class="clock__greet-text">{{clockGreet}}</text>
+          <view class="clock__noon">{{clockNoon}}</view>
+        </view>
+
+        <!-- 时 : 分 : 秒 翻页卡 -->
+        <view class="clock__digits">
+          <view class="clock__unit">
+            <view class="clock__pair">
+              <flip-digit class="clock__cell" style="--fd-font: 88rpx; --fd-face-top: var(--fc-face-top); --fd-face-bottom: var(--fc-face-bottom); --fd-border: var(--fc-face-line); --fd-ink: var(--fc-face-ink); --fd-shade-rgb: var(--fc-face-shade); --fd-family: var(--fc-font-family)" value="{{clockDigits[0]}}" />
+              <flip-digit class="clock__cell" style="--fd-font: 88rpx; --fd-face-top: var(--fc-face-top); --fd-face-bottom: var(--fc-face-bottom); --fd-border: var(--fc-face-line); --fd-ink: var(--fc-face-ink); --fd-shade-rgb: var(--fc-face-shade); --fd-family: var(--fc-font-family)" value="{{clockDigits[1]}}" />
+            </view>
+            <text class="clock__unit-label">时</text>
+          </view>
+
+          <view class="clock__colon">
+            <view class="clock__colon-dot"></view>
+            <view class="clock__colon-dot"></view>
+          </view>
+
+          <view class="clock__unit">
+            <view class="clock__pair">
+              <flip-digit class="clock__cell" style="--fd-font: 88rpx; --fd-face-top: var(--fc-face-top); --fd-face-bottom: var(--fc-face-bottom); --fd-border: var(--fc-face-line); --fd-ink: var(--fc-face-ink); --fd-shade-rgb: var(--fc-face-shade); --fd-family: var(--fc-font-family)" value="{{clockDigits[2]}}" />
+              <flip-digit class="clock__cell" style="--fd-font: 88rpx; --fd-face-top: var(--fc-face-top); --fd-face-bottom: var(--fc-face-bottom); --fd-border: var(--fc-face-line); --fd-ink: var(--fc-face-ink); --fd-shade-rgb: var(--fc-face-shade); --fd-family: var(--fc-font-family)" value="{{clockDigits[3]}}" />
+            </view>
+            <text class="clock__unit-label">分</text>
+          </view>
+
+          <view class="clock__colon">
+            <view class="clock__colon-dot"></view>
+            <view class="clock__colon-dot"></view>
+          </view>
+
+          <view class="clock__unit">
+            <view class="clock__pair">
+              <flip-digit class="clock__cell" style="--fd-font: 88rpx; --fd-face-top: var(--fc-face-top); --fd-face-bottom: var(--fc-face-bottom); --fd-border: var(--fc-face-line); --fd-ink: var(--fc-face-ink); --fd-shade-rgb: var(--fc-face-shade); --fd-family: var(--fc-font-family)" value="{{clockDigits[4]}}" />
+              <flip-digit class="clock__cell" style="--fd-font: 88rpx; --fd-face-top: var(--fc-face-top); --fd-face-bottom: var(--fc-face-bottom); --fd-border: var(--fc-face-line); --fd-ink: var(--fc-face-ink); --fd-shade-rgb: var(--fc-face-shade); --fd-family: var(--fc-font-family)" value="{{clockDigits[5]}}" />
+            </view>
+            <text class="clock__unit-label">秒</text>
+          </view>
+        </view>
+
+        <!-- 日期胶囊 -->
+        <view class="clock__date-card">
+          <text class="clock__date">{{clockDate}}</text>
+        </view>
+
+        <!-- 今日流转进度 -->
+        <view class="clock__progress">
+          <view class="clock__progress-track">
+            <view class="clock__progress-fill" style="width: {{clockDayPct}}%"></view>
+          </view>
+          <text class="clock__progress-text">今日已流转 {{clockDayPct}}%</text>
+        </view>
+
+        <!-- 模块化风格：配色 / 数字字体 / 背景氛围 独立配置，即时生效并自动保存 -->
+        <view class="gl3__theme clock__panel">
+          <view class="gl3__theme-head">
+            <text class="gl3__theme-title">🎨 模块化风格</text>
+            <text class="gl3__theme-sub">配色 · 字体 · 氛围 独立配置 · 自动保存</text>
+          </view>
+
+          <view class="gl3__dim-label">配色</view>
+          <view class="gl3__theme-row">
+            <view
+              wx:for="{{fcPaletteChips}}"
+              wx:key="key"
+              class="gl3__theme-chip {{fcPalette === item.key ? 'is-active' : ''}}"
+              data-key="{{item.key}}"
+              hover-class="tap-press"
+              hover-stay-time="60"
+              bindtap="onFcPaletteTap"
+            >
+              <view class="gl3__theme-dot" style="background: {{item.dot}};"></view>
+              <text class="gl3__theme-name">{{item.name}}</text>
+            </view>
+          </view>
+
+          <view class="gl3__dim-label">数字字体</view>
+          <view class="gl3__theme-row">
+            <view
+              wx:for="{{fcFontChips}}"
+              wx:key="key"
+              class="gl3__theme-chip {{fcFont === item.key ? 'is-active' : ''}}"
+              data-key="{{item.key}}"
+              hover-class="tap-press"
+              hover-stay-time="60"
+              bindtap="onFcFontTap"
+            >
+              <view class="gl3__theme-dot" style="background: {{item.dot}};"></view>
+              <text class="gl3__theme-name">{{item.name}}</text>
+            </view>
+          </view>
+
+          <view class="gl3__dim-label">背景氛围</view>
+          <view class="gl3__theme-row">
+            <view
+              wx:for="{{fcBgChips}}"
+              wx:key="key"
+              class="gl3__theme-chip {{fcBg === item.key ? 'is-active' : ''}}"
+              data-key="{{item.key}}"
+              hover-class="tap-press"
+              hover-stay-time="60"
+              bindtap="onFcBgTap"
+            >
+              <view class="gl3__theme-dot" style="background: {{item.dot}};"></view>
+              <text class="gl3__theme-name">{{item.name}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== 节假日信息中心 ===== -->
+  <block wx:elif="{{type === 'favorites'}}">
+    <view class="fav2">
+      <!-- 顶部氛围横幅 -->
+      <view class="fav2__banner">
+        <text class="fav2__slogan">把期待的日子，变成生活的动力</text>
+        <text class="fav2__slogan-en">every day worth waiting for</text>
+      </view>
+
+      <!-- Hero：下一个节假日（第一视觉层） -->
+      <view class="fav2__hero" wx:if="{{favHero}}" bindtap="onFavHeroDetail" hover-class="fav2__hero--press">
+        <view class="fav2__hero-thumb" style="background: {{favHero.grad}}">{{favHero.emoji}}</view>
+        <view class="fav2__hero-info">
+          <view class="fav2__hero-label">✈️ 距离下一个节假日</view>
+          <view class="fav2__hero-count">
+            <text class="fav2__hero-num">{{favHero.daysLeft}}</text>
+            <text class="fav2__hero-unit">天</text>
+          </view>
+          <view class="fav2__hero-name">{{favHero.name}} · {{favHero.monthDayText}}</view>
+        </view>
+        <view class="fav2__hero-cta">查看详情 ›</view>
+      </view>
+
+      <!-- 列表标题 + 年份切换 -->
+      <view class="fav2__sec">
+        <text class="fav2__sec-title">🎉 节假日列表</text>
+        <picker
+          mode="selector"
+          range="{{favYears}}"
+          value="{{favYearIndex}}"
+          bindchange="onFavYearChange"
+        >
+          <view class="fav2__year">📅 {{favYear}}年 ›</view>
+        </picker>
+      </view>
+
+      <!-- 分类筛选（横向滚动，不换行） -->
+      <scroll-view class="fav2__filters" scroll-x enhanced show-scrollbar="{{false}}">
+        <view class="fav2__filters-row">
+          <view
+            wx:for="{{favFilters}}"
+            wx:key="key"
+            class="fav2__chip {{favFilter === item.key ? 'is-active' : ''}}"
+            data-key="{{item.key}}"
+            bindtap="onFavFilterTap"
+            hover-class="fav2__chip--press"
+          >{{item.label}}</view>
+        </view>
+      </scroll-view>
+
+      <!-- 节日列表 -->
+      <view class="fav2__list" wx:if="{{favList.length}}">
+        <view
+          wx:for="{{favList}}"
+          wx:key="id"
+          class="fav2__item {{item.daysLeft < 0 ? 'is-past' : ''}} {{item.daysLeft > 0 && item.daysLeft <= 7 ? 'is-soon' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="onFavItemTap"
+          hover-class="fav2__item--press"
+        >
+          <view class="fav2__thumb" style="background: {{item.grad}}">{{item.emoji}}</view>
+          <view class="fav2__main">
+            <view class="fav2__name-row">
+              <text class="fav2__name">{{item.name}}</text>
+              <text class="fav2__tag" wx:if="{{item.isHot}}">热门</text>
+              <text class="fav2__tag fav2__tag--legal" wx:if="{{item.kind === 'legal'}}">法定</text>
+              <text class="fav2__tag fav2__tag--trad" wx:if="{{item.kind === 'traditional'}}">传统</text>
+            </view>
+            <text class="fav2__date">{{item.monthDayText}} · {{item.weekdayText}}</text>
+          </view>
+          <view class="fav2__count">
+            <block wx:if="{{item.daysLeft < 0}}">
+              <text class="fav2__count-past">已结束</text>
+            </block>
+            <block wx:elif="{{item.daysLeft === 0}}">
+              <text class="fav2__count-today">今天</text>
+            </block>
+            <block wx:else>
+              <text class="fav2__count-num">{{item.daysLeft}}</text>
+              <text class="fav2__count-unit">天后</text>
+            </block>
+          </view>
+          <view class="fav2__star {{item.faved ? 'is-on' : ''}}" catchtap="onFavStarTap" data-id="{{item.id}}">
+            {{item.faved ? '★' : '☆'}}
+          </view>
+          <text class="fav2__bell" wx:if="{{item.reminded}}">🔔</text>
+        </view>
+      </view>
+
+      <!-- 已结束节日折叠条 -->
+      <view
+        class="fav2__past"
+        wx:if="{{favPastCount > 0}}"
+        bindtap="onFavTogglePast"
+        hover-class="fav2__past--press"
+      >{{favShowPast ? '收起已结束节日' : '展开 ' + favPastCount + ' 个已结束节日'}}</view>
+
+      <!-- 空态 -->
+      <view class="fav2__empty" wx:if="{{!favList.length}}">
+        <text class="fav2__empty-emoji">🗓️</text>
+        <text class="fav2__empty-text">该分类下 {{favYear}} 年暂无节日</text>
+        <text class="fav2__empty-sub">换个分类或年份看看</text>
+      </view>
+
+      <!-- 节日详情弹层 -->
+      <view class="fav2__mask" wx:if="{{favDetail}}" bindtap="onFavDetailClose">
+        <view class="fav2__sheet" catchtap="noop">
+          <view class="fav2__sheet-head">
+            <view class="fav2__sheet-thumb" style="background: {{favDetail.grad}}">{{favDetail.emoji}}</view>
+            <view class="fav2__sheet-title-box">
+              <text class="fav2__sheet-name">{{favDetail.name}}</text>
+              <text class="fav2__sheet-sub">{{favDetail.monthDayText}} · {{favDetail.weekdayText}}</text>
+            </view>
+            <view class="fav2__sheet-close" bindtap="onFavDetailClose">✕</view>
+          </view>
+
+          <view class="fav2__sheet-count">
+            <block wx:if="{{favDetail.daysLeft < 0}}">
+              <text class="fav2__sheet-num fav2__sheet-num--muted">已结束</text>
+              <text class="fav2__sheet-unit">过去了 {{favDetail.daysLeft * -1}} 天</text>
+            </block>
+            <block wx:elif="{{favDetail.daysLeft === 0}}">
+              <text class="fav2__sheet-num">今天</text>
+              <text class="fav2__sheet-unit">就是 {{favDetail.name}}</text>
+            </block>
+            <block wx:else>
+              <text class="fav2__sheet-num">{{favDetail.daysLeft}}</text>
+              <text class="fav2__sheet-unit">天后 · 距离 {{favDetail.name}}</text>
+            </block>
+          </view>
+
+          <view class="fav2__sheet-rows">
+            <view class="fav2__sheet-row">
+              <text class="fav2__row-k">节日类型</text>
+              <text class="fav2__row-v">{{favDetail.kind === 'legal' ? '法定节假日' : (favDetail.kind === 'traditional' ? '传统节日' : (favDetail.kind === 'memorial' ? '纪念日' : (favDetail.kind === 'ethnic' ? '民族节日' : '网络/西方')))}}</text>
+            </view>
+            <view class="fav2__sheet-row" wx:if="{{favDetail.lunarText}}">
+              <text class="fav2__row-k">农历</text>
+              <text class="fav2__row-v">{{favDetail.lunarText}}</text>
+            </view>
+            <view class="fav2__sheet-row" wx:if="{{favDetail.isHot}}">
+              <text class="fav2__row-k">热度</text>
+              <text class="fav2__row-v">热门节日</text>
+            </view>
+            <view class="fav2__sheet-row" wx:if="{{favDetailPast}}">
+              <text class="fav2__row-k">提醒</text>
+              <text class="fav2__row-v">已结束的节日不再提醒</text>
+            </view>
+          </view>
+
+          <view class="fav2__sheet-acts">
+            <view
+              class="fav2__act {{favDetailFaved ? 'is-on' : ''}}"
+              bindtap="onFavToggleFav"
+              hover-class="fav2__act--press"
+            >{{favDetailFaved ? '★ 已收藏' : '☆ 收藏'}}</view>
+            <view
+              class="fav2__act fav2__act--primary {{favDetailPast ? 'is-disabled' : ''}}"
+              bindtap="onFavRemindTap"
+              hover-class="fav2__act--press"
+            >🔔 设置提醒</view>
+          </view>
+          <text class="fav2__sheet-remind" wx:if="{{favDetailRemind}}">{{favDetailRemind}}</text>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

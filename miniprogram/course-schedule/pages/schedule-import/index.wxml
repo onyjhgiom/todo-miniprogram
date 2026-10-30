@@ -1,0 +1,140 @@
+<view class="cs-root cs-theme-{{csTheme}}">
+
+  <view class="page" wx:if="{{ready}}">
+
+    <!-- 概览 -->
+    <view class="summary">
+      <view class="summary-head">
+        <view class="summary-head-main">
+          <view class="summary-title">{{tableTitle}}</view>
+          <view class="summary-sub">
+            共识别 {{totalCount}} 门课
+            <text wx:if="{{semesterHint}}"> · {{semesterHint}}</text>
+          </view>
+        </view>
+        <cs-theme-picker current="{{csTheme}}" bind:change="onCsThemeChange" />
+      </view>
+      <view class="summary-actions">
+        <view class="link" bindtap="onToggleAll">{{checkedCount === totalCount ? '取消全选' : '全选'}}</view>
+        <view class="link {{showLowOnly ? 'link-on' : ''}}" bindtap="onToggleLowOnly">
+          只看待确认（{{lowCount}}）
+        </view>
+      </view>
+    </view>
+
+    <!-- 风险提示 -->
+    <view class="warnings" wx:if="{{warnings.length}}">
+      <view class="warning-item" wx:for="{{warnings}}" wx:key="*this">· {{item}}</view>
+    </view>
+
+    <!-- 课程卡片 -->
+    <view class="card {{item.low ? 'card-low' : ''}}" wx:for="{{viewList}}" wx:key="_idx">
+      <view class="card-head" data-idx="{{item._idx}}" bindtap="onToggle">
+        <view class="check {{item.checked ? 'check-on' : ''}}">
+          <view class="check-dot" wx:if="{{item.checked}}"></view>
+        </view>
+        <input
+          class="title-input"
+          value="{{item.title}}"
+          data-idx="{{item._idx}}"
+          data-field="title"
+          bindblur="onFieldBlur"
+          placeholder="课程名"
+          placeholder-class="input-ph"
+          maxlength="15"
+          catchtap="__noop" />
+        <view class="badge" wx:if="{{item.low}}">待确认</view>
+      </view>
+
+      <view class="card-body" wx:if="{{item.checked}}">
+        <view class="row">
+          <picker
+            class="picker"
+            mode="selector"
+            range="{{weekdayOptions}}"
+            value="{{item.weekdayIndex}}"
+            data-idx="{{item._idx}}"
+            bindchange="onWeekdayChange">
+            <view class="picker-text">{{weekdayOptions[item.weekdayIndex]}} ▾</view>
+          </picker>
+
+          <picker
+            class="picker picker-flex"
+            mode="selector"
+            range="{{slotOptions}}"
+            value="{{item.slotIndex}}"
+            data-idx="{{item._idx}}"
+            bindchange="onSlotChange">
+            <view class="picker-text">{{slotOptions[item.slotIndex]}} ▾</view>
+          </picker>
+        </view>
+
+        <view class="row">
+          <picker
+            class="picker"
+            mode="selector"
+            range="{{ruleModeOptions}}"
+            value="{{item.ruleModeIndex}}"
+            data-idx="{{item._idx}}"
+            bindchange="onRuleModeChange">
+            <view class="picker-text">{{ruleModeOptions[item.ruleModeIndex]}} ▾</view>
+          </picker>
+
+          <block wx:if="{{item.ruleModeIndex === 3}}">
+            <picker
+              class="picker"
+              mode="selector"
+              range="{{weekOptions}}"
+              value="{{item.ruleStartIndex}}"
+              data-idx="{{item._idx}}"
+              bindchange="onRuleStartChange">
+              <view class="picker-text">{{weekOptions[item.ruleStartIndex]}} ▾</view>
+            </picker>
+            <text class="picker-sep">至</text>
+            <picker
+              class="picker"
+              mode="selector"
+              range="{{weekOptions}}"
+              value="{{item.ruleEndIndex}}"
+              data-idx="{{item._idx}}"
+              bindchange="onRuleEndChange">
+              <view class="picker-text">{{weekOptions[item.ruleEndIndex]}} ▾</view>
+            </picker>
+          </block>
+        </view>
+
+        <view class="row">
+          <input
+            class="field-input"
+            value="{{item.location}}"
+            data-idx="{{item._idx}}"
+            data-field="location"
+            bindblur="onFieldBlur"
+            placeholder="地点"
+            placeholder-class="input-ph"
+            maxlength="20" />
+          <input
+            class="field-input"
+            value="{{item.teacher}}"
+            data-idx="{{item._idx}}"
+            data-field="teacher"
+            bindblur="onFieldBlur"
+            placeholder="教师"
+            placeholder-class="input-ph"
+            maxlength="10" />
+        </view>
+
+        <view class="note" wx:if="{{item.note}}">{{item.note}}</view>
+      </view>
+    </view>
+
+    <view class="footer-space"></view>
+  </view>
+
+  <!-- 底部操作条 -->
+  <view class="footer" wx:if="{{ready}}">
+    <view class="btn btn-ghost" bindtap="onCancel" hover-class="btn-hover">放弃</view>
+    <view class="btn btn-primary" bindtap="onConfirm" hover-class="btn-hover">确认导入 {{checkedCount}} 门</view>
+  </view>
+
+</view>

@@ -1,0 +1,268 @@
+<!--pages/guaxiang/index.wxml-->
+<view class="page themed gx" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <!-- 电影级舞台层：启用「墨韵」模式 —— 缓慢旋转的水墨光轮，
+       像宣纸上一圈未干的水痕，为整页定下东方玄学的基调 -->
+  <fx-stage mode="ink" rays="{{true}}" dust="{{true}}" topglow="{{true}}" level="7" />
+
+  <!-- ===== 头部：绢帛卷首 ===== -->
+  <view class="head">
+    <view class="head__bar" style="background:{{heroGradient}}">
+      <!-- 朱砂印：传统印章语汇，作为这一屏的身份标记 -->
+      <view class="gx-seal" aria-hidden="true">卦</view>
+      <view class="head__decor">
+        <text class="head__line"></text>
+        <text class="head__dot"></text>
+        <text class="head__line"></text>
+      </view>
+      <text class="head__title">起卦 · 人生疏导</text>
+      <text class="head__sub">《周易》传统哲学文化科普 · 仅供娱乐参考</text>
+    </view>
+  </view>
+
+  <scroll-view class="body" scroll-y enhanced show-scrollbar="{{false}}">
+
+    <!-- ===== 起卦方式 ===== -->
+    <block wx:if="{{!readonly}}">
+      <view class="sec">
+        <view class="sec__header">
+          <text class="sec__title">选择起卦方式</text>
+          <text class="sec__badge">{{activeMethodLabel}}</text>
+        </view>
+        <view class="methods">
+          <view
+            class="method {{activeMethod === item.key ? 'is-on' : ''}}"
+            wx:for="{{methods}}" wx:key="key"
+            hover-class="press" hover-stay-time="80"
+            bindtap="onMethod" data-key="{{item.key}}"
+          >
+            <view class="method__icon-wrap">
+              <text class="method__icon">{{item.icon}}</text>
+            </view>
+            <text class="method__label">{{item.label}}</text>
+            <text class="method__desc">{{item.desc}}</text>
+            <view class="method__check" wx:if="{{activeMethod === item.key}}">
+              <text class="method__check-icon">✓</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 数字输入（仅数字起卦时显示） -->
+      <view class="sec sec--slide-in" wx:if="{{activeMethod === 'number'}}">
+        <text class="sec__title">心中所想的两个数</text>
+        <view class="numrow">
+          <view class="numinput-wrap">
+            <input class="numinput" type="number" placeholder="上卦数 (1-8)" value="{{numA}}" bindinput="onNumA" maxlength="1" />
+          </view>
+          <text class="numrow__plus">+</text>
+          <view class="numinput-wrap">
+            <input class="numinput" type="number" placeholder="下卦数 (1-8)" value="{{numB}}" bindinput="onNumB" maxlength="1" />
+          </view>
+        </view>
+        <text class="sec__hint">各输入 1-8 的数字，对应八卦序位</text>
+      </view>
+    </block>
+
+    <!-- ===== 心境 ===== -->
+    <view class="sec">
+      <text class="sec__title">此刻的心境 <text class="sec__optional">（可不选）</text></text>
+      <view class="chips">
+        <view
+          class="chip {{activeMood === item.key ? 'is-on' : ''}}"
+          wx:for="{{moods}}" wx:key="key"
+          hover-class="chip-press" hover-stay-time="80"
+          bindtap="onMood" data-key="{{item.key}}"
+        >
+          <text class="chip__icon">{{item.icon}}</text>
+          <text class="chip__label">{{item.label}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- ===== 起卦按钮 ===== -->
+    <view class="cast-wrap" wx:if="{{!readonly}}">
+      <view class="cast" hover-class="cast--active" hover-stay-time="100" bindtap="onCast">
+        <text class="cast__text">起 一 卦</text>
+        <view class="cast__glow"></view>
+      </view>
+    </view>
+
+    <!-- ===== 结果 ===== -->
+    <block wx:if="{{hasResult && reading}}">
+      <view class="card result">
+
+        <!-- 八卦侧栏：竖向排布的卦符，作为宣纸卷轴的暗纹 -->
+        <view class="gx-trigrams" aria-hidden="true">
+          <text class="gx-trigrams__i">☰</text>
+          <text class="gx-trigrams__i">☱</text>
+          <text class="gx-trigrams__i">☲</text>
+          <text class="gx-trigrams__i">☳</text>
+          <text class="gx-trigrams__i">☴</text>
+          <text class="gx-trigrams__i">☵</text>
+          <text class="gx-trigrams__i">☶</text>
+          <text class="gx-trigrams__i">☷</text>
+        </view>
+
+        <!-- 卦名 + 序号 -->
+        <view class="res__head">
+          <view class="res__name-wrap">
+            <text class="res__name">{{reading.ben.fullName}}</text>
+          </view>
+          <text class="res__num">第 {{reading.ben.num}} 卦</text>
+        </view>
+
+        <!-- 本卦卦画 -->
+        <view class="gua-section">
+          <text class="gua-section__title">本卦</text>
+          <view class="gua">
+            <view class="gua__row" wx:for="{{reading.benLines}}" wx:key="index">
+              <text class="gua__idx" wx:if="{{item.moving}}">{{6 - index}}</text>
+              <text class="gua__idx gua__idx--empty" wx:else>{{6 - index}}</text>
+              <view class="gua__bars">
+                <block wx:if="{{item.type === 'yang'}}">
+                  <view class="gua__bar gua__bar--yang {{item.moving ? 'is-moving' : ''}}"></view>
+                </block>
+                <block wx:else>
+                  <view class="gua__bar gua__bar--yin {{item.moving ? 'is-moving' : ''}}"></view>
+                  <view class="gua__bar gua__bar--gap"></view>
+                  <view class="gua__bar gua__bar--yin {{item.moving ? 'is-moving' : ''}}"></view>
+                </block>
+              </view>
+              <text class="gua__mark" wx:if="{{item.moving}}">动</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 卦辞 -->
+        <view class="blk blk--cite">
+          <view class="blk__header">
+            <text class="blk__tag">卦辞</text>
+            <text class="blk__tag-sub">古籍原文</text>
+          </view>
+          <text class="blk__cite">{{reading.benCi}}</text>
+        </view>
+
+        <!-- 象传 -->
+        <view class="blk blk--cite">
+          <view class="blk__header">
+            <text class="blk__tag">象传</text>
+            <text class="blk__tag-sub">古籍原文</text>
+          </view>
+          <text class="blk__cite">{{reading.benXiang}}</text>
+        </view>
+
+        <!-- 卦意今解 -->
+        <view class="blk">
+          <view class="blk__header">
+            <text class="blk__tag">卦意今解</text>
+          </view>
+          <text class="blk__text">{{reading.benPhilosophy}}</text>
+        </view>
+
+        <!-- 动爻 -->
+        <view class="blk blk--moving" wx:if="{{reading.movingTips.length}}">
+          <view class="blk__header">
+            <text class="blk__tag blk__tag--warn">动爻</text>
+          </view>
+          <view class="moving-list">
+            <view class="moving-item" wx:for="{{reading.movingTips}}" wx:key="name">
+              <text class="moving-item__name">{{item.name}}</text>
+              <text class="moving-item__hint">{{item.hint}}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 变卦 -->
+        <view class="blk" wx:if="{{reading.bian}}">
+          <view class="blk__header">
+            <text class="blk__tag">变卦 · {{reading.bian.fullName}}</text>
+          </view>
+          <view class="gua gua--sm">
+            <view class="gua__row" wx:for="{{reading.bianLines}}" wx:key="index">
+              <view class="gua__bars">
+                <block wx:if="{{item.type === 'yang'}}">
+                  <view class="gua__bar gua__bar--yang"></view>
+                </block>
+                <block wx:else>
+                  <view class="gua__bar gua__bar--yin"></view>
+                  <view class="gua__bar gua__bar--gap"></view>
+                  <view class="gua__bar gua__bar--yin"></view>
+                </block>
+              </view>
+            </view>
+          </view>
+          <text class="blk__text">{{reading.bianPhilosophy}}</text>
+        </view>
+
+        <!-- 心境疏导 -->
+        <view class="blk blk--mood" wx:if="{{reading.mood}}">
+          <view class="blk__header">
+            <text class="blk__tag blk__tag--mood">心境 · {{reading.mood.label}}</text>
+          </view>
+          <text class="blk__text blk__text--opener">{{reading.moodOpener}}</text>
+          <text class="blk__text">{{reading.moodTip}}</text>
+        </view>
+
+        <!-- 人生疏导 -->
+        <view class="blk blk--guide">
+          <view class="blk__header">
+            <text class="blk__tag blk__tag--primary">人生疏导</text>
+          </view>
+          <text class="blk__text">{{reading.guide}}</text>
+        </view>
+
+        <!-- 可行之法 -->
+        <view class="blk">
+          <view class="blk__header">
+            <text class="blk__tag">可行之法</text>
+          </view>
+          <text class="blk__text">{{reading.advice}}</text>
+        </view>
+
+        <!-- 关键词 -->
+        <view class="kw-row" wx:if="{{reading.keywords.length}}">
+          <text class="kw" wx:for="{{reading.keywords}}" wx:key="*this">{{item}}</text>
+        </view>
+
+        <!-- 免责提示 -->
+        <view class="res__tip-wrap">
+          <text class="res__tip">{{disclaimerShort}}</text>
+        </view>
+
+        <!-- 操作按钮 -->
+        <view class="acts">
+          <view class="act act--primary" hover-class="press" hover-stay-time="60" bindtap="onCopy">
+            <text class="act__icon">📋</text>
+            <text class="act__text">复制解读</text>
+          </view>
+          <view class="act" wx:if="{{!readonly}}" hover-class="press" hover-stay-time="60" bindtap="onAgain">
+            <text class="act__icon">🔄</text>
+            <text class="act__text">再起一卦</text>
+          </view>
+          <view class="act" hover-class="press" hover-stay-time="60" bindtap="onGoLibrary">
+            <text class="act__icon">📖</text>
+            <text class="act__text">六十四卦</text>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <!-- ===== 近期起卦 ===== -->
+    <view class="sec" wx:if="{{history.length}}">
+      <text class="sec__title">近期起卦</text>
+      <view class="chips">
+        <view class="chip chip--history" wx:for="{{history}}" wx:key="num" hover-class="press" bindtap="onHistory" data-num="{{item.num}}">
+          <text class="chip__label">{{item.name}}</text>
+          <text class="chip__sub">第{{item.num}}卦</text>
+        </view>
+      </view>
+      <text class="sec__note">点击可查看该卦详解</text>
+    </view>
+
+    <view class="safe-bottom" />
+  </scroll-view>
+
+  <!-- 底部永久免责 -->
+  <view class="disclaimer">{{disclaimer}}</view>
+</view>

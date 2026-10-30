@@ -1,0 +1,952 @@
+/* pages/todo-panel/todo-panel.wxss */
+/* 待办清单（对齐参考稿 待办清单.html）
+ *
+ * 设计要点：
+ *  - 浅灰蓝底 + 白色圆角卡 + 细描边分隔线，全部走 theme 注入的 CSS 变量，
+ *    所以换肤 / 明暗切换时本页自动跟随，不写第二套样式；
+ *  - 卡片圆角 30u~44u、阴影统一 var(--shadow-md)，与工具中心其他页同一套卡片语言；
+ *  - 尺寸：calc(N * var(--u))，--u 由 JS 按窗口宽下发（窄窗 1rpx）。
+ *    不写裸 px，也不用 @media —— 尺度单一来源，避免多档屏各写一套。
+ *  - 小程序不支持 * 通配与 :nth-of-type，故逐个列类名。
+ *
+ *  ⚠️ .ts-card 自带 padding:24rpx + overflow:hidden（tool-shell 通用卡片）。
+ *     本页卡片各有自己的内边距，且进度环刻度要溢出到卡片边距之外、
+ *     任务行展开后要露出工具栏，所以必须覆盖 padding/overflow；
+ *     而 tool-shell 的 .tshell-ps-glass .ts-card 权重是 (0,2,0)，
+ *     单类 .tl-card 同权重会因 @import 顺序而失效，
+ *     故用 .tl.tl-card.tl-card（0,3,0）稳赢。 */
+@import "../../styles/tool-shell.wxss";
+
+.tl {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  box-sizing: border-box;
+  /* 底部留出悬浮按钮的高度，避免最后一条任务被盖住 */
+  padding: calc(30 * var(--u, 1rpx)) calc(30 * var(--u, 1rpx)) calc(180 * var(--u, 1rpx));
+
+  /* ---- 卡片质感变量：跟随「页面质感」切换，让整页卡片统一改变 ----
+   * 不写死 background/shadow，而是继承 tool-shell 的 .ts-card 表现；
+   * 这里只提供"非卡片元素"（圆形按钮等）复用同一套质感。 */
+  --tl-card-radius: calc(44 * var(--u, 1rpx));
+  --tl-card-shadow: var(--shadow-md);
+  --tl-card-bg: var(--color-card);
+}
+/* 柔雾磨砂：卡片半透明 + 真模糊；圆形按钮也一起变 */
+.tl.tshell-ps-frost {
+  --tl-card-bg: rgba(255, 255, 255, 0.42);
+  --tl-card-radius: calc(30 * var(--u, 1rpx));
+  --tl-card-shadow: 0 calc(12 * var(--u, 1rpx)) calc(36 * var(--u, 1rpx)) rgba(60, 48, 36, 0.1);
+}
+/* 半透明必须配 backdrop-filter 才是"磨砂"；没有它就只是"变淡"，
+   与玻璃的差别只剩透明度，一眼分辨不出。 */
+.tl.tshell-ps-frost .tl-card,
+.tl.tshell-ps-frost.tl-card {
+  backdrop-filter: blur(calc(24 * var(--u, 1rpx))) saturate(160%);
+  -webkit-backdrop-filter: blur(calc(24 * var(--u, 1rpx))) saturate(160%);
+  /* 半透明卡片压在花纹背景上边缘会发虚，补一道亮描边把轮廓"切"出来 */
+  border: calc(2 * var(--u, 1rpx)) solid rgba(255, 255, 255, 0.75);
+}
+/* 丝绒浮雕：几乎不用外投影、圆角更小，靠内光影表现"压印" */
+.tl.tshell-ps-relief {
+  --tl-card-bg: rgba(255, 255, 255, 0.94);
+  --tl-card-radius: calc(22 * var(--u, 1rpx));
+  --tl-card-shadow:
+    inset 0 calc(4 * var(--u, 1rpx)) 0 rgba(255, 255, 255, 0.95),
+    inset 0 calc(-5 * var(--u, 1rpx)) calc(10 * var(--u, 1rpx)) rgba(90, 74, 56, 0.14);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+/* 浮雕的锐利描边是它最强的识别特征（玻璃是浅边、磨砂是亮边、浮雕是深边） */
+.tl.tshell-ps-relief .tl-card,
+.tl.tshell-ps-relief.tl-card {
+  border: calc(2 * var(--u, 1rpx)) solid rgba(120, 100, 80, 0.28);
+}
+
+.tl.tl-card.tl-card {
+  position: relative;
+  padding: 0;
+  overflow: visible;
+  /* 卡面背景跟随质感切换（磨砂=半透明、浮雕=近白、玻璃=纯白）。
+     权重必须压过 tool-shell 的 .tshell-ps-glass .ts-card（0,2,0），
+     否则会用到它的纯白背景，磨砂就失效了。 */
+  background: var(--tl-card-bg);
+}
+
+/* ============ 问候头 ============ */
+.tl__top {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: calc(20 * var(--u, 1rpx));
+  margin-bottom: calc(28 * var(--u, 1rpx));
+}
+.tl__hello {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+.tl__date {
+  font-size: calc(25 * var(--u, 1rpx));
+  color: var(--color-text-mute);
+  letter-spacing: calc(2 * var(--u, 1rpx));
+}
+.tl__greet {
+  margin-top: calc(6 * var(--u, 1rpx));
+  font-size: calc(48 * var(--u, 1rpx));
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--color-text);
+}
+.tl__paint {
+  flex-shrink: 0;
+  width: calc(88 * var(--u, 1rpx));
+  height: calc(88 * var(--u, 1rpx));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 圆形按钮复用卡片质感，切换质感时一起变，保持整页统一 */
+  background: var(--tl-card-bg);
+  box-shadow: var(--tl-card-shadow);
+}
+.tl__paint--tap {
+  opacity: 0.75;
+}
+.tl__paint-g {
+  font-size: calc(40 * var(--u, 1rpx));
+}
+
+/* ============ 外观面板 ============ */
+.tl-sheet-card {
+  border-radius: var(--tl-card-radius);
+  padding: calc(26 * var(--u, 1rpx)) calc(28 * var(--u, 1rpx)) calc(30 * var(--u, 1rpx));
+  margin-bottom: calc(24 * var(--u, 1rpx));
+  box-shadow: var(--tl-card-shadow);
+}
+.tl-sheet-card__hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: calc(20 * var(--u, 1rpx));
+}
+.tl-sheet-card__t {
+  font-size: calc(30 * var(--u, 1rpx));
+  font-weight: 700;
+  color: var(--color-text);
+}
+.tl-sheet-card__x {
+  font-size: calc(28 * var(--u, 1rpx));
+  color: var(--color-text-mute);
+  padding: calc(8 * var(--u, 1rpx));
+}
+.tl-sheet-card__l {
+  display: block;
+  font-size: calc(22 * var(--u, 1rpx));
+  color: var(--color-text-mute);
+  margin-bottom: calc(12 * var(--u, 1rpx));
+}
+.tl-sheet-card__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(14 * var(--u, 1rpx));
+  margin-bottom: calc(20 * var(--u, 1rpx));
+}
+.tl-chip {
+  display: flex;
+  align-items: center;
+  gap: calc(8 * var(--u, 1rpx));
+  min-height: calc(58 * var(--u, 1rpx));
+  padding: 0 calc(22 * var(--u, 1rpx));
+  border-radius: calc(29 * var(--u, 1rpx));
+  background: var(--color-bg-soft);
+  font-size: var(--u-fs-xs);
+  color: var(--color-text-soft);
+}
+.tl-chip.is-on {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-weight: 700;
+}
+.tl-chip__dot {
+  width: calc(16 * var(--u, 1rpx));
+  height: calc(16 * var(--u, 1rpx));
+  border-radius: 50%;
+}
+
+/* ============ Hero 汇总卡 ============ */
+.tl-hero {
+  border-radius: var(--tl-card-radius);
+  padding: calc(32 * var(--u, 1rpx)) calc(32 * var(--u, 1rpx)) calc(28 * var(--u, 1rpx));
+  box-shadow: var(--tl-card-shadow);
+  margin-bottom: calc(24 * var(--u, 1rpx));
+}
+.tl-hero__top {
+  display: flex;
+  align-items: center;
+  gap: calc(30 * var(--u, 1rpx));
+}
+
+/* 进度环：Canvas 画描边圆，中心数字用原生 WXML（字体渲染比 canvas 更清晰） */
+.tl-ring {
+  position: relative;
+  flex-shrink: 0;
+  width: calc(176 * var(--u, 1rpx));
+  height: calc(176 * var(--u, 1rpx));
+}
+.tl-ring__cv {
+  display: block;
+}
+.tl-ring__tx {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.tl-ring__n {
+  font-size: calc(46 * var(--u, 1rpx));
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-text);
+}
+.tl-ring__s {
+  font-size: calc(24 * var(--u, 1rpx));
+}
+.tl-ring__l {
+  margin-top: calc(4 * var(--u, 1rpx));
+  font-size: calc(19 * var(--u, 1rpx));
+  color: var(--color-text-mute);
+}
+
+.tl-hero__tx {
+  flex: 1;
+  min-width: 0;
+}
+.tl-eye {
+  font-size: calc(23 * var(--u, 1rpx));
+  color: var(--color-text-mute);
+  letter-spacing: calc(3 * var(--u, 1rpx));
+}
+.tl-big {
+  display: flex;
+  align-items: baseline;
+  gap: calc(8 * var(--u, 1rpx));
+  margin-top: calc(6 * var(--u, 1rpx));
+}
+.tl-big__a {
+  font-size: calc(58 * var(--u, 1rpx));
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--color-primary);
+}
+.tl-big__b {
+  font-size: calc(32 * var(--u, 1rpx));
+  font-weight: 700;
+  color: var(--color-text-mute);
+}
+.tl-big__em {
+  font-size: calc(24 * var(--u, 1rpx));
+  font-weight: 500;
+  color: var(--color-text-mute);
+}
+.tl-hint {
+  display: block;
+  margin-top: calc(8 * var(--u, 1rpx));
+  font-size: calc(23 * var(--u, 1rpx));
+  color: var(--color-text-mute);
+  line-height: 1.4;
+}
+
+/* 四项数据：上下细线分隔，列间竖线用伪元素 */
+.tl-stats {
+  display: flex;
+  margin-top: calc(26 * var(--u, 1rpx));
+  padding: calc(22 * var(--u, 1rpx)) 0;
+  border-top: calc(1 * var(--u, 1rpx)) solid var(--color-border);
+  border-bottom: calc(1 * var(--u, 1rpx)) solid var(--color-border);
+}
+.tl-stats__c {
+  flex: 1;
+  position: relative;
+  text-align: center;
+  min-width: 0;
+}
+.tl-stats__c + .tl-stats__c::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 18%;
+  bottom: 18%;
+  width: calc(1 * var(--u, 1rpx));
+  background: var(--color-border);
+}
+.tl-stats__n {
+  display: block;
+  font-size: calc(40 * var(--u, 1rpx));
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--color-text);
+}
+.tl-stats__n--pend {
+  color: var(--color-primary);
+}
+.tl-stats__n--done {
+  color: var(--color-success);
+}
+.tl-stats__n--late {
+  color: var(--color-danger);
+}
+.tl-stats__l {
+  display: block;
+  margin-top: calc(4 * var(--u, 1rpx));
+  font-size: calc(21 * var(--u, 1rpx));
+  color: var(--color-text-mute);
+}
+
+/* 近 7 天柱状 */
+.tl-week__hd {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-top: calc(24 * var(--u, 1rpx));
+}
+.tl-week__total {
+  font-size: calc(21 * var(--u, 1rpx));
+  color: var(--color-text-mute);
+}
+.tl-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: calc(14 * var(--u, 1rpx));
+  height: calc(120 * var(--u, 1rpx));
+  margin-top: calc(14 * var(--u, 1rpx));
+}
+.tl-bar {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+}
+/* 柱子：给固定 min-height 之外还有 pct 下限，保证 0 值时也留一截可见柱。
+   底色比 --color-primary-soft 再深一档 —— 参考稿的 accent-soft 在浅灰蓝底上
+   几乎看不见，这里用主色 26% 透明度混合，柱子才有存在感又不抢数据。 */
+.tl-bar__col {
+  width: 100%;
+  max-width: calc(56 * var(--u, 1rpx));
+  min-height: calc(10 * var(--u, 1rpx));
+  border-radius: calc(14 * var(--u, 1rpx));
+  background: var(--color-bar, rgba(92, 114, 232, 0.22));
+  transition: height 500ms cubic-bezier(0.3, 0.8, 0.3, 1);
+}
+.tl-bar.is-on .tl-bar__col {
+  background: var(--color-primary);
+}
+.tl-bar__l {
+  margin-top: calc(10 * var(--u, 1rpx));
+  font-size: calc(19 * var(--u, 1rpx));
+  color: var(--color-text-mute);
+  line-height: 1;
+  white-space: nowrap;
+}
+.tl-bar.is-on .tl-bar__l {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+/* ============ 下一件事 ============ */
+.tl-focus {
+  display: flex;
+  align-items: center;
+  gap: calc(22 * var(--u, 1rpx));
+  background: var(--color-primary-soft);
+  border-radius: calc(32 * var(--u, 1rpx));
+  padding: calc(24 * var(--u, 1rpx)) calc(26 * var(--u, 1rpx));
+  margin-bottom: calc(24 * var(--u, 1rpx));
+  min-height: calc(104 * var(--u, 1rpx));
+}
+.tl-focus__check {
+  flex-shrink: 0;
+  width: calc(54 * var(--u, 1rpx));
+  height: calc(54 * var(--u, 1rpx));
+  border-radius: 50%;
+  border: calc(3 * var(--u, 1rpx)) solid var(--color-ring, #c9ccdc);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+.tl-focus__check--tap {
+  opacity: 0.7;
+  transform: scale(0.9);
+}
+.tl-focus__tick {
+  font-size: calc(28 * var(--u, 1rpx));
+  line-height: 1;
+  color: transparent;
+  font-weight: 700;
+}
+/* 勾号本身透明，只在按下瞬间闪一下主色 —— 提示「点它可以完成」 */
+.tl-focus__check:active .tl-focus__tick {
+  color: var(--color-primary);
+}
+.tl-focus__tx {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.tl-focus__tag {
+  font-size: calc(20 * var(--u, 1rpx));
+  color: var(--color-primary);
+  font-weight: 700;
+  letter-spacing: calc(3 * var(--u, 1rpx));
+}
+.tl-focus__t {
+  margin-top: calc(4 * var(--u, 1rpx));
+  font-size: calc(28 * var(--u, 1rpx));
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tl-focus__when {
+  flex-shrink: 0;
+  font-size: calc(24 * var(--u, 1rpx));
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* ============ 四维页签（滑动指示器） ============ */
+.tl-tabs {
+  position: relative;
+  display: flex;
+  padding: calc(8 * var(--u, 1rpx));
+  background: var(--tl-card-bg);
+  border-radius: calc(36 * var(--u, 1rpx));
+  box-shadow: var(--tl-card-shadow);
+  margin-bottom: calc(26 * var(--u, 1rpx));
+}
+/* 指示器：--i 由 JS 下发当前页签序号，位移交给 GPU，不触发重排 */
+.tl-tabs__ind {
+  position: absolute;
+  top: calc(8 * var(--u, 1rpx));
+  bottom: calc(8 * var(--u, 1rpx));
+  left: calc(8 * var(--u, 1rpx));
+  width: calc((100% - 16 * var(--u, 1rpx)) / 4);
+  border-radius: calc(28 * var(--u, 1rpx));
+  background: var(--color-primary-soft);
+  border: calc(3 * var(--u, 1rpx)) solid var(--color-primary);
+  box-sizing: border-box;
+  transform: translateX(calc(var(--i, 0) * 100%));
+  transition: transform 320ms cubic-bezier(0.3, 0.8, 0.3, 1);
+}
+.tl-tab {
+  position: relative;
+  flex: 1;
+  /* min-width:0 必不可少：不写的话 flex 子项按内容固有宽度撑开，
+     图标 + 文字会把四页签顶出容器，右侧「全部」被裁掉。 */
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(6 * var(--u, 1rpx));
+  padding: calc(20 * var(--u, 1rpx)) calc(4 * var(--u, 1rpx)) calc(16 * var(--u, 1rpx));
+  min-height: calc(120 * var(--u, 1rpx));
+  box-sizing: border-box;
+}
+.tl-tab--tap {
+  opacity: 0.7;
+}
+.tl-tab__l {
+  font-size: calc(23 * var(--u, 1rpx));
+  color: var(--color-text-mute);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tl-tab.is-on .tl-tab__l {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+.tl-tab__badge {
+  position: absolute;
+  top: calc(6 * var(--u, 1rpx));
+  right: calc(6 * var(--u, 1rpx));
+  min-width: calc(32 * var(--u, 1rpx));
+  height: calc(32 * var(--u, 1rpx));
+  padding: 0 calc(8 * var(--u, 1rpx));
+  border-radius: calc(16 * var(--u, 1rpx));
+  background: var(--color-primary);
+  color: #fff;
+  font-size: calc(19 * var(--u, 1rpx));
+  font-weight: 800;
+  line-height: calc(32 * var(--u, 1rpx));
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* ============ 区块标题 ============ */
+.tl-sec {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: calc(16 * var(--u, 1rpx));
+  padding: 0 calc(8 * var(--u, 1rpx));
+  margin-bottom: calc(16 * var(--u, 1rpx));
+}
+.tl-sec__t {
+  flex: 1;
+  min-width: 0;
+  font-size: calc(25 * var(--u, 1rpx));
+  font-weight: 500;
+  color: var(--color-text-mute);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tl-sec__c {
+  flex-shrink: 0;
+  font-size: calc(22 * var(--u, 1rpx));
+  color: var(--color-text-mute);
+}
+
+/* ============ 分组与任务行 ============ */
+.tl-group {
+  margin-bottom: calc(20 * var(--u, 1rpx));
+}
+.tl-glabel {
+  display: flex;
+  align-items: center;
+  gap: calc(8 * var(--u, 1rpx));
+  padding: 0 calc(8 * var(--u, 1rpx));
+  margin-bottom: calc(14 * var(--u, 1rpx));
+  font-size: calc(23 * var(--u, 1rpx));
+  font-weight: 700;
+  letter-spacing: calc(3 * var(--u, 1rpx));
+  color: var(--color-text-mute);
+}
+.tl-glabel.is-late {
+  color: var(--color-danger);
+}
+.tl-list {
+  display: flex;
+  flex-direction: column;
+  gap: calc(14 * var(--u, 1rpx));
+}
+.tl-task {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: var(--tl-card-radius);
+  /* 左侧内边距要容得下逾期红条（inset shadow 画在 border-box 内侧，
+     留 14u 才不会和圆角起始处贴在一起；同时给圆形勾选留呼吸位） */
+  padding: calc(12 * var(--u, 1rpx)) calc(12 * var(--u, 1rpx)) calc(12 * var(--u, 1rpx)) calc(14 * var(--u, 1rpx));
+  box-shadow: var(--tl-card-shadow);
+}
+/* 逾期：左侧一道红条（内嵌阴影，不额外占元素） */
+.tl-task.is-late {
+  box-shadow: inset calc(6 * var(--u, 1rpx)) 0 0 var(--color-danger), var(--shadow-md);
+}
+.tl-task.is-done {
+  opacity: 0.62;
+}
+.tl-task__check {
+  flex-shrink: 0;
+  width: calc(78 * var(--u, 1rpx));
+  height: calc(78 * var(--u, 1rpx));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tl-task__check::before {
+  content: '';
+  width: calc(44 * var(--u, 1rpx));
+  height: calc(44 * var(--u, 1rpx));
+  border-radius: 50%;
+  border: calc(3 * var(--u, 1rpx)) solid var(--color-ring, #c9ccdc);
+  box-sizing: border-box;
+  transition: background 200ms ease, border-color 200ms ease, transform 200ms ease;
+}
+.tl-task__check.is-done::before {
+  background: var(--color-success);
+  border-color: var(--color-success);
+}
+.tl-task__check--tap {
+  opacity: 0.7;
+}
+/* 勾号绝对定位叠在::before 圆心上：圆形是伪元素，文字没法做它的子元素 */
+.tl-task__tick {
+  position: absolute;
+  margin-left: calc(-26 * var(--u, 1rpx));
+  font-size: calc(26 * var(--u, 1rpx));
+  font-weight: 700;
+  line-height: 1;
+  color: transparent;
+}
+.tl-task__check.is-done .tl-task__tick {
+  color: #fff;
+}
+.tl-task__bd {
+  flex: 1;
+  min-width: 0;
+  padding: calc(12 * var(--u, 1rpx)) 0;
+}
+.tl-task__title {
+  display: block;
+  font-size: calc(28 * var(--u, 1rpx));
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--color-text);
+  overflow-wrap: break-word;
+}
+.tl-task.is-done .tl-task__title {
+  color: var(--color-text-mute);
+  text-decoration: line-through;
+}
+.tl-task__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(8 * var(--u, 1rpx)) calc(18 * var(--u, 1rpx));
+  margin-top: calc(6 * var(--u, 1rpx));
+}
+.tl-task__cat {
+  display: flex;
+  align-items: center;
+  gap: calc(8 * var(--u, 1rpx));
+}
+.tl-task__cdot {
+  width: calc(14 * var(--u, 1rpx));
+  height: calc(14 * var(--u, 1rpx));
+  border-radius: 50%;
+}
+.tl-task__cat-l,
+.tl-task__due {
+  font-size: calc(22 * var(--u, 1rpx));
+  color: var(--color-text-mute);
+}
+.tl-task__due.is-late {
+  color: var(--color-danger);
+  font-weight: 700;
+}
+.tl-task__pri {
+  font-size: calc(20 * var(--u, 1rpx));
+  font-weight: 700;
+  color: var(--color-warning);
+  background: var(--color-warning-soft, #fbf0e3);
+  border-radius: calc(8 * var(--u, 1rpx));
+  padding: calc(2 * var(--u, 1rpx)) calc(10 * var(--u, 1rpx));
+}
+.tl-task__scope {
+  font-size: calc(20 * var(--u, 1rpx));
+  font-weight: 700;
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+  border-radius: calc(8 * var(--u, 1rpx));
+  padding: calc(2 * var(--u, 1rpx)) calc(10 * var(--u, 1rpx));
+}
+.tl-task__more {
+  flex-shrink: 0;
+  width: calc(64 * var(--u, 1rpx));
+  height: calc(78 * var(--u, 1rpx));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tl-task__more--tap {
+  opacity: 0.6;
+}
+.tl-task__more-g {
+  font-size: calc(40 * var(--u, 1rpx));
+  color: var(--color-text-mute);
+  line-height: 1;
+  transition: transform 200ms ease;
+}
+.tl-task__more-g.is-open {
+  transform: rotate(90deg);
+}
+/* 展开的工具栏：换行到下一行，不挤压标题 */
+.tl-tools {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(14 * var(--u, 1rpx));
+  padding: calc(10 * var(--u, 1rpx)) calc(16 * var(--u, 1rpx)) calc(14 * var(--u, 1rpx)) calc(86 * var(--u, 1rpx));
+}
+.tl-tools__b {
+  min-height: calc(66 * var(--u, 1rpx));
+  padding: 0 calc(26 * var(--u, 1rpx));
+  border-radius: calc(20 * var(--u, 1rpx));
+  background: var(--color-bg-soft);
+  color: var(--color-text);
+  font-size: calc(24 * var(--u, 1rpx));
+  display: flex;
+  align-items: center;
+}
+.tl-tools__b--tap {
+  opacity: 0.7;
+}
+.tl-tools__b--del {
+  color: var(--color-danger);
+  background: var(--color-danger-soft, #fbebed);
+}
+
+/* ============ 空态 ============ */
+.tl-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: calc(72 * var(--u, 1rpx)) 0 calc(48 * var(--u, 1rpx));
+}
+.tl-empty__emo {
+  font-size: calc(110 * var(--u, 1rpx));
+  line-height: 1;
+  margin-bottom: calc(16 * var(--u, 1rpx));
+}
+.tl-empty__t {
+  font-size: calc(30 * var(--u, 1rpx));
+  color: var(--color-text);
+}
+.tl-empty__d {
+  margin-top: calc(8 * var(--u, 1rpx));
+  font-size: calc(23 * var(--u, 1rpx));
+  color: var(--color-text-mute);
+}
+
+/* ============ 悬浮新建 ============ */
+.tl-fab {
+  position: fixed;
+  left: 50%;
+  bottom: calc(40 * var(--u, 1rpx) + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: calc(12 * var(--u, 1rpx));
+  height: calc(96 * var(--u, 1rpx));
+  padding: 0 calc(44 * var(--u, 1rpx)) 0 calc(36 * var(--u, 1rpx));
+  border-radius: calc(48 * var(--u, 1rpx));
+  background: var(--color-primary);
+  color: #fff;
+  font-size: calc(28 * var(--u, 1rpx));
+  font-weight: 700;
+  box-shadow: 0 calc(18 * var(--u, 1rpx)) calc(44 * var(--u, 1rpx)) var(--color-primary-shadow);
+  white-space: nowrap;
+}
+.tl-fab--tap {
+  transform: translateX(-50%) scale(0.96);
+}
+.tl-fab__ico {
+  font-size: calc(34 * var(--u, 1rpx));
+  line-height: 1;
+}
+
+/* ============ 新建弹层 ============ */
+.tl-mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 100;
+  background: var(--color-overlay);
+  display: flex;
+  align-items: flex-end;
+}
+.tl-sheet {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--color-bg-elevated);
+  border-radius: calc(48 * var(--u, 1rpx)) calc(48 * var(--u, 1rpx)) 0 0;
+  padding: calc(18 * var(--u, 1rpx)) calc(36 * var(--u, 1rpx)) calc(40 * var(--u, 1rpx) + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 calc(-20 * var(--u, 1rpx)) calc(70 * var(--u, 1rpx)) rgba(15, 23, 42, 0.2);
+}
+.tl-sheet__grab {
+  width: calc(80 * var(--u, 1rpx));
+  height: calc(8 * var(--u, 1rpx));
+  border-radius: calc(4 * var(--u, 1rpx));
+  background: var(--color-border);
+  margin: 0 auto calc(22 * var(--u, 1rpx));
+}
+.tl-sheet__in {
+  width: 100%;
+  box-sizing: border-box;
+  font-size: calc(32 * var(--u, 1rpx));
+  line-height: 1.5;
+  color: var(--color-text);
+  background: transparent;
+  border: none;
+  border-bottom: calc(3 * var(--u, 1rpx)) solid var(--color-border);
+  padding: calc(14 * var(--u, 1rpx)) 0 calc(18 * var(--u, 1rpx));
+}
+.tl-sheet__ph {
+  color: var(--color-text-mute);
+}
+.tl-sheet__row {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(20 * var(--u, 1rpx));
+  margin-top: calc(24 * var(--u, 1rpx));
+}
+.tl-sheet__lb {
+  flex-shrink: 0;
+  width: calc(80 * var(--u, 1rpx));
+  font-size: calc(23 * var(--u, 1rpx));
+  color: var(--color-text-mute);
+  line-height: calc(60 * var(--u, 1rpx));
+}
+.tl-sheet__opts {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(12 * var(--u, 1rpx));
+}
+.tl-opt,
+.tl-chip2 {
+  min-height: calc(60 * var(--u, 1rpx));
+  padding: 0 calc(24 * var(--u, 1rpx));
+  border-radius: calc(30 * var(--u, 1rpx));
+  background: var(--color-bg-soft);
+  color: var(--color-text-soft);
+  font-size: calc(23 * var(--u, 1rpx));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tl-opt.is-sel,
+.tl-chip2.is-sel {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-weight: 700;
+}
+.tl-sheet__time {
+  flex-shrink: 0;
+  min-height: calc(60 * var(--u, 1rpx));
+  padding: 0 calc(26 * var(--u, 1rpx));
+  border-radius: calc(30 * var(--u, 1rpx));
+  background: var(--color-bg-soft);
+  display: flex;
+  align-items: center;
+}
+.tl-sheet__time-t {
+  font-size: calc(23 * var(--u, 1rpx));
+  color: var(--color-text-soft);
+}
+.tl-sheet__submit {
+  margin-top: calc(32 * var(--u, 1rpx));
+  height: calc(92 * var(--u, 1rpx));
+  border-radius: calc(46 * var(--u, 1rpx));
+  background: var(--color-primary);
+  color: #fff;
+  font-size: calc(29 * var(--u, 1rpx));
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tl-sheet__submit--tap {
+  opacity: 0.85;
+}
+
+/* ============ 底部 Toast（带撤销） ============ */
+.tl-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(170 * var(--u, 1rpx) + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: calc(24 * var(--u, 1rpx));
+  max-width: calc(100% - 56 * var(--u, 1rpx));
+  padding: calc(20 * var(--u, 1rpx)) calc(28 * var(--u, 1rpx));
+  border-radius: calc(26 * var(--u, 1rpx));
+  background: var(--color-text);
+  color: var(--color-bg);
+  font-size: var(--u-fs-sm);
+  box-sizing: border-box;
+}
+.tl-toast__t {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tl-toast__b {
+  flex-shrink: 0;
+  color: var(--color-primary);
+  font-weight: 700;
+  padding: calc(6 * var(--u, 1rpx)) 0;
+}
+
+/* 弹性待办：逾期不打扰，弱化视觉（不去红、不催促） */
+.tl-task.is-elastic {
+  border-left: calc(6 * var(--u, 1rpx)) solid rgba(16, 185, 129, 0.5);
+}
+.tl-task__due.is-elastic {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+  padding: 2rpx 10rpx;
+  border-radius: 999rpx;
+  font-size: 20rpx;
+}
+
+/* 今日聚焦（最多 3 件事） */
+.tl-focus3 {
+  margin: calc(20 * var(--u, 1rpx)) calc(24 * var(--u, 1rpx)) 0;
+  padding: calc(20 * var(--u, 1rpx)) calc(24 * var(--u, 1rpx)) calc(8 * var(--u, 1rpx));
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(59, 130, 246, 0.1));
+  border: 1rpx solid rgba(16, 185, 129, 0.25);
+  border-radius: calc(24 * var(--u, 1rpx));
+}
+.tl-focus3__hd {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: calc(12 * var(--u, 1rpx));
+}
+.tl-focus3__t { font-size: calc(26 * var(--u, 1rpx)); font-weight: 700; color: var(--color-text); }
+.tl-focus3__c { font-size: calc(22 * var(--u, 1rpx)); color: #10b981; font-weight: 600; }
+.tl-focus3__row {
+  display: flex; align-items: center; gap: calc(16 * var(--u, 1rpx));
+  padding: calc(14 * var(--u, 1rpx)) 0;
+  border-top: 1rpx solid rgba(0, 0, 0, 0.05);
+}
+.tl-focus3__check {
+  width: calc(44 * var(--u, 1rpx)); height: calc(44 * var(--u, 1rpx)); flex-shrink: 0;
+  border-radius: 50%; border: 2rpx solid var(--color-border);
+  display: flex; align-items: center; justify-content: center;
+}
+.tl-focus3__tick { font-size: calc(24 * var(--u, 1rpx)); color: transparent; }
+.tl-focus3__check--tap { background: rgba(0, 0, 0, 0.05); }
+.tl-focus3__content {
+  flex: 1; font-size: calc(28 * var(--u, 1rpx)); color: var(--color-text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.tl-focus3__x {
+  flex-shrink: 0; width: calc(44 * var(--u, 1rpx)); text-align: center;
+  font-size: calc(34 * var(--u, 1rpx)); color: var(--color-text-mute);
+}
+.tl-focus3__x--tap { color: var(--color-danger); }
+
+/* 低负反馈提示 */
+.tl-soft {
+  display: flex; align-items: center; gap: calc(12 * var(--u, 1rpx));
+  margin: calc(20 * var(--u, 1rpx)) calc(24 * var(--u, 1rpx)) 0;
+  padding: calc(18 * var(--u, 1rpx)) calc(22 * var(--u, 1rpx));
+  background: rgba(100, 116, 139, 0.1);
+  border-radius: calc(18 * var(--u, 1rpx));
+}
+.tl-soft__emo { font-size: calc(30 * var(--u, 1rpx)); }
+.tl-soft__t { flex: 1; font-size: calc(23 * var(--u, 1rpx)); color: var(--color-text-mute); line-height: 1.45; }
+.tl-soft__x { font-size: calc(30 * var(--u, 1rpx)); color: var(--color-text-mute); flex-shrink: 0; }

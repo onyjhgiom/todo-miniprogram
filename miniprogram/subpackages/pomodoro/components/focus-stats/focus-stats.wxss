@@ -1,0 +1,78 @@
+/* components/focus-stats/focus-stats.wxss
+ * 注意：单元之间用 1rpx 竖线分隔而不是留大 gap —— 需求二十三要求
+ * 「避免当前页面大量硬边框」，这里的竖线是极淡的内部分隔，不是卡片描边。
+ * 四格等宽：minmax(0, 1fr) 四列天然等宽，不会有「前三项挤、最后一项空」的失衡。
+ * minmax(0,…) 而不是 1fr：1fr 的最小尺寸是 auto，真机放大字体时
+ * 单元格会被内容顶宽、把整张卡撑破；minmax(0,…) 允许格子真正收缩。
+ *
+ * 【左右内边距必须与其它卡一致（现 24u，原 28u）】
+ * 这里原来写的是 8u，导致本卡文字左边缘停在距屏 36u，而其它三张停在 56u，
+ * 纵向扫下来四张卡的文字对不齐 —— 统一后全页卡片文字左边线重合。
+ *
+ * 【所有文字 nowrap】数字 + 单位 + 标签都必须单行。真机上系统「字体大小」会把
+ * <text> 放大，放大后字宽超过格宽会从词中间断行（曾出现「分/钟」「今日完/成」）。
+ * 配合下面略降的字号，放大后仍能保持一行、不会挤乱整张卡。
+ *
+ * 【2026-10-06 收紧】内边距 26/28u → 18/24u、圆角 32u → 24u、数字 40u → 31u。 */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  box-sizing: border-box;
+  padding: calc(13 * var(--u, 1rpx)) calc(20 * var(--u, 1rpx));
+  border-radius: calc(24 * var(--u, 1rpx));
+  background: rgba(255, 255, 255, 0.82);
+  border: calc(1 * var(--u, 1rpx)) solid rgba(120, 140, 170, 0.08);
+  box-shadow: 0 calc(8 * var(--u, 1rpx)) calc(28 * var(--u, 1rpx)) rgba(60, 80, 120, 0.06);
+}
+.stats__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(3 * var(--u, 1rpx));
+  box-sizing: border-box;
+  min-width: 0;
+  position: relative;
+}
+/* 分隔线：只在 2/3 项右侧，末项不加，避免右边框贴边显得不对称 */
+.stats__cell + .stats__cell::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: calc(10 * var(--u, 1rpx));
+  bottom: calc(10 * var(--u, 1rpx));
+  width: calc(1 * var(--u, 1rpx));
+  background: rgba(120, 140, 170, 0.1);
+}
+
+.stats__ico {
+  font-size: calc(19 * var(--u, 1rpx));
+  line-height: 1;
+  white-space: nowrap;
+}
+/* 数字与单位同行：用 flex + baseline 对齐，unit 不换行、不被压缩，
+   否则会出现「0 分 / 钟」这种从词中间断开的情况。 */
+.stats__numrow {
+  display: flex;
+  align-items: baseline;
+  gap: calc(2 * var(--u, 1rpx));
+  max-width: 100%;
+  white-space: nowrap;
+}
+.stats__num {
+  font-size: calc(29 * var(--u, 1rpx));
+  font-weight: 700;
+  line-height: 1.1;
+  color: #5F76BE;
+  white-space: nowrap;
+}
+.stats__unit {
+  font-size: calc(16 * var(--u, 1rpx));
+  color: #7C8AA2;
+  white-space: nowrap;
+}
+.stats__label {
+  font-size: calc(18 * var(--u, 1rpx));
+  line-height: 1.2;
+  color: #7C8AA2;
+  white-space: nowrap;
+}

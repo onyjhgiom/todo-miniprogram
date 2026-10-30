@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "数独闯关",
+  "usingComponents": {
+    "game-shell": "/subpackages/games/components/game-shell/index"
+  },
+  "disableScroll": true
+}

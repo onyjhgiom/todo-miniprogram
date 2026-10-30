@@ -1,0 +1,966 @@
+/* ============================================================
+ * 爱遇小栈 · 共享样式层（love-common.wxss）
+ *
+ * 全部颜色走 CSS 变量 --ay-*，变量由页面根节点内联注入（见 love-skin.ts）。
+ * 每个变量都带兜底值：万一皮肤变量没注入，界面依然是完整的粉调，不会白屏。
+ * 换肤只改根节点的 style，这里一行都不用动。
+ * ============================================================ */
+
+/* ---------- 基础容器 ---------- */
+/* z-index:0 让根节点成为层叠上下文：星尘层(::before) 垫在卡片后面、页面背景之上 */
+.ay {
+  position: relative;
+  z-index: 0;
+  min-height: 100vh;
+  padding-bottom: 180rpx;
+  background: var(--ay-sky, linear-gradient(180deg, var(--ay-bg, #FFF6F3) 0%, var(--ay-bg2, #FFECE7) 100%));
+  color: var(--ay-text, #4A3238);
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+/* 星尘 / 光斑装饰层：只有提供 --ay-bokeh 的皮肤（如星梦夜曲）会显形，其他皮肤为 none */
+.ay::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: -1;
+  background: var(--ay-bokeh, none);
+  animation: ay-twinkle 7s ease-in-out infinite alternate;
+}
+@keyframes ay-twinkle {
+  from { opacity: 0.75; }
+  to { opacity: 1; }
+}
+
+.ay-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 36rpx 32rpx 40rpx;
+  background: var(--ay-hero, linear-gradient(135deg, #FF9FB2, #FFB199));
+  color: #fff;
+  border-bottom-left-radius: 36rpx;
+  border-bottom-right-radius: 36rpx;
+  box-shadow: 0 10rpx 34rpx var(--ay-shadow, rgba(255, 127, 156, 0.16));
+}
+/* 右上角一团柔光，玻璃感 Bloom */
+.ay-hero::after {
+  content: '';
+  position: absolute;
+  right: -90rpx;
+  top: -130rpx;
+  width: 340rpx;
+  height: 340rpx;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.38) 0%, rgba(255, 255, 255, 0) 70%);
+  pointer-events: none;
+}
+.ay-hero__title {
+  font-size: 42rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+}
+.ay-hero__sub {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  opacity: 0.92;
+}
+.ay-hero__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ay-hero__badge {
+  padding: 8rpx 20rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.24);
+  font-size: 24rpx;
+}
+.ay-hero__stats {
+  display: flex;
+  margin-top: 24rpx;
+  gap: 12rpx;
+}
+.ay-hero__stat {
+  flex: 1;
+  padding: 14rpx 8rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.18);
+  text-align: center;
+}
+.ay-hero__stat-n {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 700;
+}
+.ay-hero__stat-l {
+  display: block;
+  margin-top: 2rpx;
+  font-size: 21rpx;
+  opacity: 0.9;
+}
+
+/* ---------- 卡片 ---------- */
+/* 玻璃拟态：实底皮肤照旧，玻璃皮肤（半透明卡色）会透出后面的星空，
+   backdrop-filter 在不支持的环境里被安全忽略，只留半透明卡面 */
+.ay-card {
+  margin: 22rpx 24rpx 0;
+  padding: 28rpx 26rpx;
+  border-radius: 28rpx;
+  background: var(--ay-card, #fff);
+  border: 1rpx solid var(--ay-cardline, rgba(255, 255, 255, 0));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8rpx 26rpx var(--ay-shadow, rgba(255, 127, 156, 0.14));
+}
+.ay-card--soft {
+  background: var(--ay-card-soft, #FFF1EC);
+  box-shadow: none;
+}
+.ay-card--flat {
+  box-shadow: none;
+  border: 2rpx solid var(--ay-line, #F8E3DC);
+}
+.ay-card__hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18rpx;
+}
+.ay-card__title {
+  font-size: 30rpx;
+  font-weight: 700;
+}
+.ay-card__more {
+  font-size: 24rpx;
+  color: var(--ay-primary, #FF7F9C);
+}
+
+/* ---------- 文字 ---------- */
+.ay-t {
+  font-size: 28rpx;
+  color: var(--ay-text, #4A3238);
+}
+.ay-sub {
+  font-size: 24rpx;
+  color: var(--ay-sub, #8A6E74);
+}
+.ay-faint {
+  font-size: 22rpx;
+  color: var(--ay-faint, #B79AA1);
+}
+.ay-strong {
+  font-weight: 700;
+  color: var(--ay-primary, #FF7F9C);
+}
+
+/* ---------- Tab ---------- */
+.ay-tabs {
+  display: flex;
+  gap: 12rpx;
+  padding: 20rpx 24rpx 4rpx;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.ay-tab {
+  flex: none;
+  padding: 12rpx 26rpx;
+  border-radius: 999rpx;
+  background: var(--ay-card, #fff);
+  color: var(--ay-sub, #8A6E74);
+  font-size: 26rpx;
+  transition: transform 160ms ease, background 200ms ease, color 200ms ease;
+}
+.ay-tab--on {
+  background: var(--ay-primary, #FF7F9C);
+  color: #fff;
+  font-weight: 700;
+}
+.ay-tab:active {
+  transform: scale(0.94);
+}
+
+/* ---------- 按钮 ---------- */
+.ay-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18rpx 34rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, var(--ay-primary, #FF7F9C) 0%, var(--ay-primary-2, #FFB199) 100%);
+  color: #fff;
+  font-size: 28rpx;
+  font-weight: 600;
+  box-shadow: 0 6rpx 18rpx var(--ay-shadow, rgba(255, 127, 156, 0.16));
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+.ay-btn:active {
+  transform: scale(0.95);
+  opacity: 0.88;
+}
+.ay-btn--ghost {
+  background: var(--ay-card-soft, #FFF1EC);
+  color: var(--ay-primary, #FF7F9C);
+  box-shadow: none;
+}
+.ay-btn--line {
+  background: transparent;
+  color: var(--ay-primary, #FF7F9C);
+  border: 2rpx solid var(--ay-primary, #FF7F9C);
+}
+.ay-btn--block {
+  display: flex;
+  width: 100%;
+}
+.ay-btn--sm {
+  padding: 10rpx 22rpx;
+  font-size: 24rpx;
+}
+/* 小号居中胶囊：用于弹层关闭 / 卡片内次要操作，不抢视觉 */
+.ay-btn--pill {
+  display: flex;
+  width: fit-content;
+  margin: 14rpx auto 0;
+  padding: 12rpx 48rpx;
+  font-size: 25rpx;
+  font-weight: 500;
+  background: var(--ay-card-soft, #FFF1EC);
+  color: var(--ay-primary, #FF7F9C);
+  box-shadow: none;
+}
+.ay-btn--off {
+  opacity: 0.45;
+}
+
+/* ---------- 标签 ---------- */
+.ay-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
+  background: var(--ay-chip, #FFECE6);
+  color: var(--ay-sub, #8A6E74);
+  font-size: 23rpx;
+  margin: 0 12rpx 12rpx 0;
+}
+.ay-chip--on {
+  background: var(--ay-primary, #FF7F9C);
+  color: #fff;
+  font-weight: 600;
+}
+.ay-chip--accent {
+  background: var(--ay-accent, #FFC77D);
+  color: #fff;
+}
+.ay-chips {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: -4rpx;
+}
+
+/* ---------- 列表行 ---------- */
+.ay-row {
+  display: flex;
+  align-items: flex-start;
+  padding: 18rpx 0;
+  border-bottom: 2rpx solid var(--ay-line, #F8E3DC);
+}
+.ay-row:last-child {
+  border-bottom: none;
+}
+.ay-row__ico {
+  flex: none;
+  width: 48rpx;
+  font-size: 32rpx;
+  text-align: center;
+}
+.ay-row__main {
+  flex: 1;
+  min-width: 0;
+}
+.ay-row__t {
+  font-size: 27rpx;
+  font-weight: 600;
+}
+.ay-row__d {
+  margin-top: 4rpx;
+  font-size: 24rpx;
+  color: var(--ay-sub, #8A6E74);
+  word-break: break-all;
+}
+.ay-row__extra {
+  flex: none;
+  margin-left: 16rpx;
+  font-size: 24rpx;
+  color: var(--ay-faint, #B79AA1);
+}
+
+/* ---------- 步骤 ---------- */
+.ay-step {
+  padding: 18rpx 0;
+  border-bottom: 2rpx dashed var(--ay-line, #F8E3DC);
+}
+.ay-step:last-child {
+  border-bottom: none;
+}
+.ay-step__hd {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  font-size: 27rpx;
+  font-weight: 700;
+}
+.ay-step__n {
+  flex: none;
+  width: 40rpx;
+  height: 40rpx;
+  line-height: 40rpx;
+  border-radius: 50%;
+  background: var(--ay-primary, #FF7F9C);
+  color: #fff;
+  font-size: 22rpx;
+  text-align: center;
+}
+.ay-step__li {
+  margin-top: 8rpx;
+  padding-left: 52rpx;
+  font-size: 25rpx;
+  color: var(--ay-sub, #8A6E74);
+}
+.ay-step__li::before {
+  content: '· ';
+  color: var(--ay-primary, #FF7F9C);
+}
+
+/* ---------- 入口宫格 ---------- */
+.ay-entries {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 8rpx 12rpx 0;
+}
+.ay-entry {
+  width: 50%;
+  padding: 12rpx;
+  box-sizing: border-box;
+}
+.ay-entry__in {
+  padding: 26rpx 22rpx;
+  border-radius: 26rpx;
+  background: var(--ay-card, #fff);
+  border: 1rpx solid var(--ay-cardline, rgba(255, 255, 255, 0));
+  box-shadow: 0 8rpx 24rpx var(--ay-shadow, rgba(255, 127, 156, 0.12));
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+.ay-entry__in:active {
+  transform: scale(0.97);
+}
+.ay-entry__ico {
+  font-size: 44rpx;
+}
+.ay-entry__name {
+  margin-top: 10rpx;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+.ay-entry__desc {
+  margin-top: 4rpx;
+  font-size: 22rpx;
+  color: var(--ay-sub, #8A6E74);
+  line-height: 1.5;
+}
+
+/* ---------- 空状态 ---------- */
+.ay-empty {
+  padding: 70rpx 40rpx;
+  text-align: center;
+}
+.ay-empty__ico {
+  font-size: 70rpx;
+  opacity: 0.6;
+}
+.ay-empty__t {
+  margin-top: 16rpx;
+  font-size: 27rpx;
+  color: var(--ay-sub, #8A6E74);
+}
+.ay-empty__btn {
+  margin: 24rpx auto 0;
+  width: 300rpx;
+}
+
+/* ---------- 进度条 ---------- */
+.ay-bar {
+  height: 16rpx;
+  border-radius: 999rpx;
+  background: var(--ay-chip, #FFECE6);
+  overflow: hidden;
+}
+.ay-bar__in {
+  height: 100%;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, var(--ay-primary, #FF7F9C), var(--ay-primary-2, #FFB199));
+  transition: width 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---------- 表单 ---------- */
+.ay-field {
+  display: flex;
+  align-items: center;
+  padding: 18rpx 0;
+  border-bottom: 2rpx solid var(--ay-line, #F8E3DC);
+}
+.ay-field__label {
+  flex: none;
+  width: 190rpx;
+  font-size: 26rpx;
+  color: var(--ay-sub, #8A6E74);
+}
+.ay-field__input {
+  flex: 1;
+  font-size: 27rpx;
+  color: var(--ay-text, #4A3238);
+}
+.ay-field__ph {
+  color: var(--ay-faint, #B79AA1);
+}
+.ay-field__hl {
+  box-shadow: 0 0 0 4rpx rgba(255, 127, 156, 0.28);
+  border-radius: 14rpx;
+  padding: 6rpx 12rpx;
+  animation: ay-hl 1.4s ease-in-out 2;
+}
+@keyframes ay-hl {
+  0%, 100% { box-shadow: 0 0 0 4rpx rgba(255, 127, 156, 0.28); }
+  50% { box-shadow: 0 0 0 8rpx rgba(255, 127, 156, 0.45); }
+}
+
+/* ---------- 爱心（等级皮肤 · 真 3D 立体 · 三档视觉层级） ----------
+ * 配色变量（由 heartVisual 注入）：
+ *   --ht-c0 高光 / --ht-c1 主色 / --ht-c2 过渡 / --ht-c3 暗部 / --ht-c4 深影
+ *   --ht-glow 主光晕 / --ht-glow-2 次光晕 / --ht-ring 边缘描光 / --ht-beat 心跳周期 / --ht-tilt 倾斜周期
+ * 视觉层级：t1 简洁（Lv1-3）· t2 精致（Lv4-7）· t3 华丽（Lv8-10）
+ * 性能：全部动画只动 transform / opacity，无 filter 动画；节点数按档位收敛。
+ */
+.ay-heart {
+  position: relative;
+  width: 320rpx;
+  height: 300rpx;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* 立体底层：更暗、下移的同源形状，制造厚度/挤出感（t1 保留最薄的一层） */
+.ay-heart::before {
+  content: '';
+  position: absolute;
+  width: 120rpx;
+  height: 120rpx;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border-radius: 20rpx;
+  background: linear-gradient(135deg, var(--ht-c3, #d8547a), var(--ht-c4, #a83b5c));
+  filter: blur(1rpx);
+  opacity: 0.85;
+}
+/* 核心辉光核：藏在爱心后方的一层近场光溢（t2/t3 逐级加强） */
+.ay-heart::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 180rpx;
+  height: 180rpx;
+  margin: -90rpx 0 0 -90rpx;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--ht-glow-2, rgba(255, 200, 220, 0.5)) 0%, transparent 68%);
+  opacity: 0;
+  z-index: 1;
+  transition: opacity 400ms ease;
+}
+.ay-heart__halo {
+  position: absolute;
+  width: 240rpx;
+  height: 240rpx;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, var(--ht-glow, rgba(255, 140, 170, 0.35)) 0%, transparent 62%),
+    radial-gradient(circle at 62% 38%, var(--ht-glow-2, rgba(255, 210, 230, 0.3)) 0%, transparent 52%);
+  animation: ay-halo 3.2s ease-in-out infinite;
+}
+/* 光晕流动环：斜向的一圈柔 Emma（依附 halo 旋转，不额外增加大面积绘制） */
+.ay-heart__halo::before {
+  content: '';
+  position: absolute;
+  inset: 6rpx;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    var(--ht-ring, rgba(255, 220, 235, 0.5)) 22%,
+    transparent 44%,
+    var(--ht-glow-2, rgba(255, 210, 230, 0.42)) 70%,
+    transparent 100%
+  );
+  opacity: 0;
+}
+.ay-heart__shape {
+  position: relative;
+  width: 150rpx;
+  height: 135rpx;
+  z-index: 2;
+  /* 接地软阴影，强化悬浮立体感（颜色随暗部走，避免脏色） */
+  filter: drop-shadow(0 12rpx 16rpx var(--ht-drop, rgba(150, 40, 80, 0.28)));
+  animation: ay-beat var(--ht-beat, 2000ms) ease-in-out infinite;
+}
+/* 两个瓣：多层渐变（高光 → 主色 → 过渡 → 暗部 → 深影）+ 内阴影塑形 + 边缘描光 */
+.ay-heart__shape::before,
+.ay-heart__shape::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 75rpx;
+  height: 120rpx;
+  border-radius: 75rpx 75rpx 0 0;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 40%),
+    radial-gradient(circle at 72% 82%, var(--ht-c0, rgba(255, 255, 255, 0.6)) 0%, rgba(255, 255, 255, 0) 55%),
+    linear-gradient(150deg, var(--ht-c1, #FFB3C6) 0%, var(--ht-c2, #FFD9E0) 42%, var(--ht-c3, #d8547a) 78%, var(--ht-c4, #a83b5c) 100%);
+  box-shadow:
+    inset -6rpx -10rpx 18rpx rgba(150, 30, 70, 0.4),
+    inset 5rpx 7rpx 12rpx rgba(255, 255, 255, 0.55),
+    inset 0 -2rpx 0 var(--ht-ring, rgba(255, 255, 255, 0.35));
+}
+.ay-heart__shape::before {
+  left: 75rpx;
+  transform: rotate(-45deg);
+  transform-origin: 0 100%;
+}
+.ay-heart__shape::after {
+  left: 0;
+  transform: rotate(45deg);
+  transform-origin: 100% 100%;
+}
+.ay-heart__orb {
+  position: absolute;
+  font-size: 26rpx;
+  transform: translate(-50%, -50%);
+  animation: ay-float 3s ease-in-out infinite;
+}
+/* 顶面镜面高光：一小片随呼吸轻移的白斑，营造通透玻璃质感 */
+.ay-heart__shine {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 74rpx;
+  height: 52rpx;
+  margin: -84rpx 0 0 -40rpx;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.28) 46%, rgba(255, 255, 255, 0) 72%);
+  filter: blur(1rpx);
+  z-index: 3;
+  pointer-events: none;
+  animation: ay-shine-breathe var(--ht-beat, 2000ms) ease-in-out infinite;
+}
+/* 星光粒子：等级越高越密（点位由 heartVisual 以黄金角均匀分布） */
+.ay-heart__spark {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, var(--ht-glow-2, rgba(255, 220, 235, 0.7)) 45%, transparent 72%);
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  pointer-events: none;
+  animation: ay-spark-tw 2.6s ease-in-out infinite;
+}
+/* 高光扫过：斜向亮带掠过表面，用作出现/升级反馈（仅全屏展示态启用） */
+.ay-heart__sweep {
+  position: absolute;
+  left: -18%;
+  top: -30%;
+  width: 42rpx;
+  height: 190%;
+  transform: rotate(22deg) translateX(-160rpx);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.16) 40%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0.16) 60%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  filter: blur(2rpx);
+  opacity: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+/* 华丽档专属：外层流动光环 */
+.ay-heart__ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 232rpx;
+  height: 232rpx;
+  margin: -116rpx 0 0 -116rpx;
+  border-radius: 50%;
+  border: 2rpx solid var(--ht-ring, rgba(255, 220, 235, 0.6));
+  border-top-color: rgba(255, 255, 255, 0.9);
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+  opacity: 0.55;
+  z-index: 0;
+  pointer-events: none;
+  animation: ay-ring-spin 14s linear infinite;
+}
+.ay-heart__lv {
+  position: absolute;
+  bottom: 6rpx;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 24rpx;
+  font-weight: 700;
+  color: var(--ay-primary, #FF7F9C);
+}
+
+/* ---------- 档位差异：t1 简洁 / t2 精致 / t3 华丽 ---------- */
+/* t1：单层柔和光晕，几乎不做额外装饰，干净耐看 */
+.ay-heart--t1 .ay-heart__halo {
+  width: 208rpx;
+  height: 208rpx;
+  opacity: 0.85;
+}
+.ay-heart--t1 .ay-heart__shine {
+  opacity: 0.5;
+}
+/* t2：补核心辉光核 + 缓慢倾斜自转 + 边缘描光增强 */
+.ay-heart--t2 {
+  animation: ay-heart-tilt var(--ht-tilt, 16s) ease-in-out infinite alternate;
+}
+.ay-heart--t2::after {
+  opacity: 0.55;
+  animation: ay-core-breathe 3.4s ease-in-out infinite;
+}
+.ay-heart--t2 .ay-heart__halo::before {
+  opacity: 0.45;
+  animation: ay-halo-flow 12s linear infinite;
+}
+.ay-heart--t2 .ay-heart__shine {
+  opacity: 0.72;
+}
+/* t3：大面积多层辉光 + 流动光环 + 更透的高光 + 更密的粒子 */
+.ay-heart--t3 {
+  animation: ay-heart-tilt var(--ht-tilt, 11s) ease-in-out infinite alternate;
+}
+.ay-heart--t3::after {
+  opacity: 0.85;
+  animation: ay-core-breathe 2.6s ease-in-out infinite;
+}
+.ay-heart--t3 .ay-heart__halo {
+  width: 268rpx;
+  height: 268rpx;
+  animation: ay-halo var(--ht-beat, 2000ms) ease-in-out infinite;
+}
+.ay-heart--t3 .ay-heart__halo::before {
+  opacity: 0.72;
+  animation: ay-halo-flow 7s linear infinite;
+}
+.ay-heart--t3 .ay-heart__shine {
+  opacity: 0.9;
+}
+
+/* ---------- 全屏展示态（预览/大图）：启用扫光与粒子迸发反馈 ---------- */
+.ay-heart--full .ay-heart__sweep {
+  animation: ay-sweep 5.2s ease-in-out 900ms infinite;
+}
+.ay-heart--full.ay-heart--pop .ay-heart__shape {
+  animation:
+    ay-heart-in 900ms cubic-bezier(0.22, 1.4, 0.4, 1) 1,
+    ay-beat var(--ht-beat, 2000ms) ease-in-out 900ms infinite;
+}
+.ay-heart--full.ay-heart--pop .ay-heart__spark {
+  animation: ay-spark-burst 1100ms cubic-bezier(0.2, 1.2, 0.4, 1) 1 both;
+}
+
+@keyframes ay-beat {
+  0%, 100% { transform: scale(1); }
+  14% { transform: scale(1.14); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.09); }
+  60% { transform: scale(1); }
+}
+@keyframes ay-halo {
+  0%, 100% { opacity: 0.45; transform: scale(0.9); }
+  50% { opacity: 0.85; transform: scale(1.12); }
+}
+@keyframes ay-float {
+  0%, 100% { transform: translate(-50%, -50%) translateY(0); opacity: 0.75; }
+  50% { transform: translate(-50%, -50%) translateY(-14rpx); opacity: 1; }
+}
+
+/* ---------- 入场 / 通用动画 ---------- */
+@keyframes ay-up {
+  from { opacity: 0; transform: translateY(20rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ay-anim {
+  animation: ay-up 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes ay-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-10rpx); }
+  40% { transform: translateX(10rpx); }
+  60% { transform: translateX(-6rpx); }
+  80% { transform: translateX(6rpx); }
+}
+.ay-shake {
+  animation: ay-shake 400ms ease;
+}
+
+/* ---------- 爱心特效动画（全部 transform/opacity，GPU 友好） ---------- */
+/* 缓慢倾斜：给爱心一点「浮在光里」的姿态（t2/t3） */
+@keyframes ay-heart-tilt {
+  0%   { transform: rotate(-4deg) translateY(0); }
+  100% { transform: rotate(4deg) translateY(-6rpx); }
+}
+/* 核心辉光核收缩呼吸 */
+@keyframes ay-core-breathe {
+  0%, 100% { opacity: 0.4; transform: scale(0.9); }
+  50%      { opacity: 0.85; transform: scale(1.08); }
+}
+/* 光晕流动：conic 环缓慢旋转 */
+@keyframes ay-halo-flow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+/* 顶面高光随心跳轻移 */
+@keyframes ay-shine-breathe {
+  0%, 100% { opacity: 0.45; transform: scale(0.96) translate(0, 0); }
+  30%      { opacity: 0.9; transform: scale(1.06) translate(3rpx, -2rpx); }
+  60%      { opacity: 0.6; transform: scale(1) translate(1rpx, 2rpx); }
+}
+/* 星光粒子闪烁 */
+@keyframes ay-spark-tw {
+  0%, 100% { opacity: 0.25; transform: translate(-50%, -50%) scale(0.7); }
+  50%      { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+}
+/* 华丽档外环自转 */
+@keyframes ay-ring-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+/* 高光扫过：出现 / 升级反馈，亮带掠过表面后隐去 */
+@keyframes ay-sweep {
+  0%   { opacity: 0; transform: rotate(22deg) translateX(-170rpx); }
+  12%  { opacity: 1; }
+  42%  { opacity: 1; transform: rotate(22deg) translateX(190rpx); }
+  60%, 100% { opacity: 0; transform: rotate(22deg) translateX(190rpx); }
+}
+/* 出现 / 升级弹入：带过冲的缩放，配合扫光形成「迸发」观感 */
+@keyframes ay-heart-in {
+  0%   { opacity: 0; transform: scale(0.55); }
+  55%  { opacity: 1; transform: scale(1.16); }
+  75%  { transform: scale(0.94); }
+  100% { transform: scale(1); }
+}
+/* 粒子迸发：弹入瞬间从中心炸开再回落 */
+@keyframes ay-spark-burst {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
+  45%  { opacity: 1; transform: translate(-50%, -50%) scale(1.5); }
+  100% { opacity: 0.9; transform: translate(-50%, -50%) scale(1); }
+}
+
+/* ---------- 色卡 ---------- */
+.ay-palette {
+  display: flex;
+  gap: 12rpx;
+  margin-top: 12rpx;
+}
+.ay-palette__i {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 16rpx;
+  box-shadow: inset 0 0 0 2rpx rgba(255, 255, 255, 0.6);
+}
+
+/* ---------- 长文本输入 ---------- */
+.ay-story {
+  width: 100%;
+  min-height: 180rpx;
+  padding: 18rpx 20rpx;
+  box-sizing: border-box;
+  border-radius: 18rpx;
+  background: var(--ay-card-soft, #FFF1EC);
+  font-size: 26rpx;
+  line-height: 1.7;
+  color: var(--ay-text, #4A3238);
+}
+
+/* ---------- 分隔 ---------- */
+.ay-hr {
+  height: 2rpx;
+  margin: 18rpx 0;
+  background: var(--ay-line, #F8E3DC);
+}
+.ay-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+.ay-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+.ay-mt {
+  margin-top: 18rpx;
+}
+.ay-mb {
+  margin-bottom: 18rpx;
+}
+.ay-center {
+  text-align: center;
+}
+
+/* ---------- 卡片副标题 ---------- */
+.ay-card__sub {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  font-weight: 400;
+  color: var(--ay-faint, #B79C9C);
+}
+
+/* ---------- 超小号按钮（卡片内次要操作） ---------- */
+.ay-btn--xs {
+  padding: 8rpx 22rpx;
+  font-size: 22rpx;
+  font-weight: 500;
+}
+
+/* ---------- 想要准备的事 ---------- */
+.ay-prep-add {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+.ay-prep-input {
+  flex: 1;
+  min-width: 0;
+  height: 64rpx;
+  padding: 0 22rpx;
+  border-radius: 18rpx;
+  background: var(--ay-card-soft, #FFF1EC);
+  color: var(--ay-text, #4A3238);
+  font-size: 26rpx;
+}
+.ay-prep-due {
+  flex: none;
+  height: 64rpx;
+  padding: 0 22rpx;
+  display: flex;
+  align-items: center;
+  border-radius: 18rpx;
+  background: var(--ay-card-soft, #FFF1EC);
+  color: var(--ay-faint, #B79C9C);
+  font-size: 24rpx;
+  white-space: nowrap;
+}
+.ay-prep-due.is-set {
+  color: var(--ay-primary, #FF7F9C);
+}
+.ay-prep-list {
+  margin-top: 18rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+}
+.ay-prep-item {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 16rpx 18rpx;
+  border-radius: 20rpx;
+  background: var(--ay-card-soft, #FFF1EC);
+}
+.ay-prep-check {
+  flex: none;
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  border: 2rpx solid var(--ay-primary, #FF7F9C);
+  color: #fff;
+  font-size: 24rpx;
+  line-height: 36rpx;
+  text-align: center;
+}
+.ay-prep-check.on {
+  background: var(--ay-primary, #FF7F9C);
+}
+.ay-prep-main {
+  flex: 1;
+  min-width: 0;
+}
+.ay-prep-content {
+  font-size: 27rpx;
+  color: var(--ay-text, #4A3238);
+  word-break: break-all;
+}
+.ay-prep-content.done {
+  text-decoration: line-through;
+  color: var(--ay-faint, #B79C9C);
+}
+.ay-prep-meta {
+  margin-top: 4rpx;
+  font-size: 22rpx;
+  color: var(--ay-faint, #B79C9C);
+}
+.ay-prep-act {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+.ay-prep-synced {
+  font-size: 22rpx;
+  color: var(--ay-primary-2, #8D7BFF);
+  white-space: nowrap;
+}
+.ay-prep-undo {
+  font-size: 22rpx;
+  color: var(--ay-faint, #B79C9C);
+  text-decoration: underline;
+}
+.ay-prep-del {
+  font-size: 26rpx;
+  color: var(--ay-faint, #B79C9C);
+  padding: 0 4rpx;
+}
+
+/* ---------- 无障碍：减弱动态 ---------- */
+/* 系统开启「减弱动态效果」时，停掉所有装饰性动画，只保留静态视觉 */
+@media (prefers-reduced-motion: reduce) {
+  .ay-anim,
+  .ay::before,
+  .ay-heart__shape,
+  .ay-heart__halo,
+  .ay-heart__halo::before,
+  .ay-heart__orb,
+  .ay-heart__shine,
+  .ay-heart__spark,
+  .ay-heart__sweep,
+  .ay-heart__ring,
+  .ay-heart::after,
+  .ay-heart--t2,
+  .ay-heart--t3 {
+    animation: none !important;
+  }
+  /* 静态态保留完整立体观感：该亮的高光、该满的辉光都留在原位 */
+  .ay-heart__shine { opacity: 0.7 !important; }
+  .ay-heart::after { opacity: 0.6 !important; }
+  .ay-heart__halo::before { opacity: 0.4 !important; }
+  .ay-heart__sweep { opacity: 0 !important; }
+}

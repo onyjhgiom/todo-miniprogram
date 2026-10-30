@@ -1,0 +1,86 @@
+/* pages/guaxiang/daily/daily.wxss */
+/* 复用 guaxiang/index.wxss 的视觉语言（.gua/.sec/.blk/.card/.acts 等），仅补充打卡专属样式 */
+@import "../index.wxss";
+
+/* ==================== 卦历打卡：落印式打卡按钮 ==================== */
+.checkin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14rpx;
+  padding: 30rpx 0;
+  border-radius: 20rpx;
+  background: linear-gradient(140deg, var(--gx-cinnabar-2), var(--gx-cinnabar) 62%, #8E1F1C);
+  box-shadow:
+    0 14rpx 32rpx rgba(176, 42, 38, .3),
+    inset 0 0 0 3rpx rgba(255, 255, 255, .34),
+    inset 0 3rpx 0 rgba(255, 255, 255, .3);
+  color: #FFF6EF;
+  letter-spacing: 4rpx;
+  transition: transform 220ms cubic-bezier(.34, 1.56, .64, 1), box-shadow 220ms ease;
+}
+.checkin__icon {
+  font-size: 34rpx;
+  line-height: 1;
+}
+.checkin__text {
+  font-size: 30rpx;
+  font-weight: 600;
+}
+.checkin.is-done {
+  background: rgba(176, 138, 79, .12);
+  color: var(--gx-gold, #B08B4F);
+  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, .85), 0 0 0 2rpx rgba(176, 138, 79, .4);
+  font-weight: 500;
+  letter-spacing: 2rpx;
+}
+
+/* ==================== 近 30 天卦历：朱砂点阵 ==================== */
+.cal {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 14rpx;
+  margin-top: 6rpx;
+}
+.cal-cell {
+  position: relative;
+  height: 96rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+  border-radius: 14rpx;
+  background: rgba(255, 253, 246, .82);
+  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, .85), 0 0 0 1rpx rgba(36, 31, 26, .07);
+  overflow: hidden;
+  transition: box-shadow 200ms ease, transform 200ms ease;
+}
+.cal-cell__day {
+  font-size: 24rpx;
+  color: var(--gx-ink-2, #574D40);
+  font-weight: 500;
+}
+.cal-cell__name {
+  max-width: 100%;
+  padding: 0 6rpx;
+  font-size: 20rpx;
+  color: var(--gx-cinnabar, #B02A26);
+  font-weight: 600;
+  letter-spacing: 1rpx;
+  text-align: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.cal-cell__dot {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  background: var(--gx-ink-3, #8B7F6C);
+  opacity: .35;
+}
+.cal-cell.is-on {
+  background: linear-gradient(165deg, var(--gx-cinnabar-soft), rgba(255, 253, 246, .9));
+  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, .9), 0 0 0 2rpx rgba(176, 42, 38, .35);
+}

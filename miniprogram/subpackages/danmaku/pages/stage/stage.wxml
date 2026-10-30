@@ -1,0 +1,34 @@
+<!-- 全屏弹幕播放页（投屏 / 聚会场景）· 支持竖屏与横屏全屏 -->
+<view class="stage">
+  <!-- 画布铺满整屏（含状态栏区域）；安全区避让由组件折算成弹幕轨道边界 -->
+  <danmaku-render
+    wx:if="{{config}}"
+    id="render"
+    class="stage-render"
+    config="{{config}}"
+    playing="{{true}}"
+    drawBackground="{{true}}"
+    loop="{{true}}"
+    quality="auto"
+    reserve-top="{{reserveTop}}"
+  ></danmaku-render>
+
+  <!-- 点击层：横屏下呼出/收起浮层控件（不改变画布尺寸 → 弹幕不重排） -->
+  <view class="tap-layer" bindtap="onToggleChrome"></view>
+
+  <!-- 浮层控件：竖屏常显；横屏自动隐藏、点击呼出。浮层不参与文档流，显隐不影响画布 -->
+  <view
+    class="chrome {{navVisible ? 'chrome-on' : 'chrome-off'}}"
+    style="padding-top:{{safeTop}}px;padding-left:{{safeLeft}}px;padding-right:{{safeRight}}px;"
+  >
+    <view class="nav" style="height:{{navH}}px;">
+      <view class="nav-close" bindtap="onClose">✕</view>
+      <view class="nav-title">弹幕墙<text class="nav-dir"> · {{orientation === 'landscape' ? '横屏' : '竖屏'}}</text></view>
+      <view class="nav-share">
+        <button class="share-btn" open-type="share" data-role="share">分享</button>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{hint}}" class="hint">{{hint}}</view>
+</view>

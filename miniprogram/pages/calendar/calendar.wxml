@@ -1,0 +1,99 @@
+<view class="cal-page themed" data-theme="{{theme}}" style="{{themeStyle}};{{bgStyle}}">
+  <!-- 电影级舞台背景：随主题切换场景图/场景动画（src 为空时走 CSS 场景） -->
+  <fx-stage mode="{{fxMode}}" src="{{fxSrc}}" full="{{fxFull}}" rays="{{true}}" dust="{{false}}" topglow="{{true}}" level="{{fxLevel}}" />
+  <view class="cal-header">
+    <view class="cal-nav">
+      <view class="cal-nav-btn" hover-class="tap-press" hover-stay-time="60" bindtap="onPrevMonth">‹</view>
+      <view class="cal-title">{{year}} 年 {{month}} 月</view>
+      <view class="cal-nav-btn" hover-class="tap-press" hover-stay-time="60" bindtap="onNextMonth">›</view>
+    </view>
+    <view class="cal-today" hover-class="tap-press" hover-stay-time="60" bindtap="onToday">回到今天</view>
+  </view>
+
+  <view class="cal-weekdays">
+    <view wx:for="{{weekdays}}" wx:key="*this" class="cal-weekday {{index === 0 || index === 6 ? 'is-weekend' : ''}}">{{item}}</view>
+  </view>
+
+  <view class="cal-grid">
+    <view
+      wx:for="{{cells}}"
+      wx:key="ymd"
+      class="cal-cell {{!item.inMonth ? 'is-out' : ''}} {{item.isToday ? 'is-today' : ''}} {{item.ymd === selectedYMD ? 'is-selected' : ''}} {{item.isWeekend ? 'is-weekend' : ''}} {{item.isWork ? 'is-work' : ''}} {{item.isRest ? 'is-rest' : ''}}"
+      bindtap="onSelectDay"
+      hover-class="tap-press"
+      hover-stay-time="60"
+      data-ymd="{{item.ymd}}"
+    >
+      <view class="cal-date">{{item.date}}</view>
+      <view class="cal-lunar {{item.isFestival ? 'is-festival' : ''}}">{{item.lunarText}}</view>
+      <!-- 角标：休（法定假日）/ 班（调休上班） -->
+      <view wx:if="{{item.badge === '休'}}" class="cal-badge cal-badge--rest">休</view>
+      <view wx:elif="{{item.badge === '班'}}" class="cal-badge cal-badge--work">班</view>
+      <!-- 假期首日：显示放假天数 -->
+      <view wx:if="{{item.isHolidayStart && item.holidayDays}}" class="cal-holiday-days">{{item.holidayDays}}天</view>
+      <view wx:if="{{countByDate[item.ymd] > 0}}" class="cal-dot">
+        <text>{{countByDate[item.ymd]}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 本月节假日 / 调休概览：放假天数 + 调休排班 -->
+  <view class="cal-holidays" wx:if="{{monthHolidays.length > 0}}">
+    <view class="cal-holidays-title">本月假期安排</view>
+    <view wx:for="{{monthHolidays}}" wx:key="name" class="cal-holiday-row">
+      <view class="cal-holiday-name {{item.days === 0 ? 'is-workday' : ''}}">{{item.days === 0 ? '⏰ 调休上班' : '🎉 ' + item.name}}</view>
+      <view class="cal-holiday-info">
+        <block wx:if="{{item.days > 0}}">
+          <text class="cal-holiday-days-text">放假 {{item.days}} 天</text>
+          <text class="cal-holiday-range">{{item.rangeText}}</text>
+          <text wx:if="{{!item.official}}" class="cal-holiday-estimated">预估</text>
+        </block>
+        <block wx:else>
+          <text class="cal-holiday-range">{{item.rangeText}}</text>
+          <text class="cal-holiday-work-note">需上班</text>
+        </block>
+      </view>
+    </view>
+  </view>
+
+  <!-- 图例 -->
+  <view class="cal-legend">
+    <view class="cal-legend-item"><view class="cal-badge cal-badge--rest">休</view><text>法定假日</text></view>
+    <view class="cal-legend-item"><view class="cal-badge cal-badge--work">班</view><text>调休上班</text></view>
+    <view class="cal-legend-item"><view class="cal-legend-weekend"></view><text>双休日</text></view>
+  </view>
+
+  <view class="cal-day-section">
+    <view class="cal-day-title">
+      <text class="cal-day-date">{{selectedDayLabel}}</text>
+      <text class="cal-day-count">{{dayItems.length}} 项</text>
+    </view>
+
+    <!-- 选中日：农历 + 节假日信息 -->
+    <view class="cal-day-meta" wx:if="{{selectedMeta.lunarFull || selectedMeta.holidayDesc || selectedMeta.badge}}">
+      <view class="cal-day-lunar">
+        <text wx:if="{{selectedMeta.festival}}" class="cal-day-festival">{{selectedMeta.festival}}</text>
+        <text class="cal-day-lunar-text">{{selectedMeta.lunarFull}}</text>
+      </view>
+      <view wx:if="{{selectedMeta.holidayDesc}}" class="cal-day-holiday">
+        {{selectedMeta.holidayDesc}}<text wx:if="{{!selectedMeta.holidayOfficial}}" class="cal-holiday-estimated">（预估）</text>
+      </view>
+      <view wx:if="{{selectedMeta.badgeText}}" class="cal-day-badge-note {{selectedMeta.badge === '班' ? 'cal-day-badge-note--work' : 'cal-day-badge-note--rest'}}">{{selectedMeta.badgeText}}</view>
+    </view>
+
+    <view wx:if="{{dayItems.length === 0}}" class="cal-day-empty">
+      <empty-state icon="🌤️" title="这天没有任务" subtitle="点击右下角 + 添加" />
+    </view>
+    <view wx:else class="cal-day-list">
+      <view wx:for="{{dayItems}}" wx:key="_id" class="cal-day-item {{item.completed ? 'is-done' : ''}}" hover-class="tap-press" hover-stay-time="60" bindtap="onOpenTodo" data-id="{{item._id}}">
+        <view class="cal-day-priority" style="background: {{item.priorityColor}}"></view>
+        <view class="cal-day-info">
+          <view class="cal-day-content">{{item.content}}</view>
+          <view wx:if="{{item.time}}" class="cal-day-time">⏰ {{item.time}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="cal-fab" hover-class="tap-press" hover-stay-time="60" bindtap="onAdd">+</view>
+</view>

@@ -1,0 +1,159 @@
+/* 课表皮肤切换器 —— 全部颜色走 --cs-* 变量，随皮肤实时变化 */
+
+.cs-tp-entry {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 999rpx;
+  background: var(--cs-bg-soft, rgba(0, 0, 0, 0.06));
+  border: 2rpx solid var(--cs-border, rgba(0, 0, 0, 0.08));
+  box-sizing: border-box;
+}
+
+.cs-tp-entry-icon { font-size: 32rpx; line-height: 1; }
+
+.cs-tp-entry-text {
+  margin-left: 8rpx;
+  font-size: 26rpx;
+  color: var(--cs-text-soft, #6b7280);
+}
+
+.cs-tp-entry-hover { opacity: 0.6; }
+
+/* ===== 弹层 ===== */
+.cs-tp-mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 300;
+  display: flex;
+  align-items: flex-end;
+  background: var(--cs-overlay, rgba(0, 0, 0, 0.45));
+}
+
+.cs-tp-sheet {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 32rpx 28rpx calc(28rpx + env(safe-area-inset-bottom));
+  background: var(--cs-card, #ffffff);
+  border-radius: 32rpx 32rpx 0 0;
+  box-shadow: var(--cs-shadow, 0 -8rpx 32rpx rgba(0, 0, 0, 0.12));
+}
+
+.cs-tp-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.cs-tp-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: var(--cs-text, #1a1d21);
+}
+
+.cs-tp-sub {
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  color: var(--cs-text-mute, #9aa1ab);
+}
+
+.cs-tp-close {
+  width: 56rpx;
+  height: 56rpx;
+  line-height: 56rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: var(--cs-text-soft, #6b7280);
+  background: var(--cs-bg-soft, #f2f3f5);
+  border-radius: 999rpx;
+}
+
+/* ===== 皮肤宫格 ===== */
+.cs-tp-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 26rpx;
+}
+
+.cs-tp-opt {
+  position: relative;
+  width: calc(50% - 11rpx);
+  margin: 0 22rpx 22rpx 0;
+  padding: 16rpx;
+  box-sizing: border-box;
+  background: var(--cs-bg-soft, #f5f6f8);
+  border: 3rpx solid transparent;
+  border-radius: 22rpx;
+}
+
+.cs-tp-opt:nth-child(2n) { margin-right: 0; }
+
+.cs-tp-opt.is-on {
+  border-color: var(--cs-primary, #3b6df6);
+  box-shadow: 0 0 0 4rpx var(--cs-primary-soft, rgba(59, 109, 246, 0.14));
+}
+
+.cs-tp-opt-hover { opacity: 0.78; }
+
+.cs-tp-swatch {
+  position: relative;
+  height: 76rpx;
+  border-radius: 14rpx;
+  overflow: hidden;
+}
+
+.cs-tp-dot {
+  position: absolute;
+  left: 12rpx;
+  bottom: 12rpx;
+  width: 22rpx;
+  height: 22rpx;
+  border-radius: 50%;
+  border: 3rpx solid rgba(255, 255, 255, 0.85);
+  box-sizing: border-box;
+}
+
+.cs-tp-tag {
+  position: absolute;
+  right: 10rpx;
+  top: 10rpx;
+  padding: 0 10rpx;
+  height: 30rpx;
+  line-height: 30rpx;
+  font-size: 18rpx;
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.32);
+  border-radius: 6rpx;
+}
+
+.cs-tp-name {
+  margin-top: 12rpx;
+  font-size: 27rpx;
+  font-weight: 600;
+  color: var(--cs-text, #1a1d21);
+}
+
+.cs-tp-desc {
+  margin-top: 4rpx;
+  font-size: 21rpx;
+  color: var(--cs-text-mute, #9aa1ab);
+}
+
+.cs-tp-check {
+  position: absolute;
+  right: 14rpx;
+  bottom: 14rpx;
+  width: 36rpx;
+  height: 36rpx;
+  line-height: 36rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: var(--cs-on-primary, #ffffff);
+  background: var(--cs-primary, #3b6df6);
+  border-radius: 50%;
+}

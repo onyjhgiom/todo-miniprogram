@@ -1,0 +1,280 @@
+/* miniprogram/styles/astro-common.wxss
+ * 星语星球共享样式（各页面 wxss 通过 @import 引入）
+ * 设计语言：深色深空星空 + CSS3D 悬浮卡片 + 多层柔和 AO 软阴影
+ * 与人生格子、倒数日、个人信息页统一卡片材质（透明玻璃 + 内高光 + 柔阴影）
+ */
+
+.astro-page {
+  min-height: 100vh;
+  padding: 16rpx 24rpx 220rpx;
+  background: var(--astro-bg, #0a0f24);
+  color: #e6ecff;
+  position: relative;
+}
+
+/* ---- 环境光（顶部冷光 + 底部暖晕，固定全页底） ---- */
+.astro-page::before {
+  content: '';
+  position: fixed;
+  left: 0; right: 0; top: 0;
+  height: 50vh;
+  background: radial-gradient(70% 60% at 50% 0%, rgba(181, 113, 76, 0.18) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+.astro-page::after {
+  content: '';
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: 40vh;
+  background: radial-gradient(70% 60% at 50% 100%, rgba(244, 114, 182, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ---- 顶部/底部呼吸占位（已启用原生导航栏，无需再为胶囊留高度） ---- */
+.astro-statusbar {
+  height: 12rpx;
+}
+
+/* ---- 头部 banner 占位 ---- */
+.astro-banner {
+  position: relative;
+  border-radius: 32rpx;
+  overflow: hidden;
+  padding: 24rpx;
+  margin-bottom: 18rpx;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1rpx solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.35), inset 0 1rpx 0 rgba(255, 255, 255, 0.05);
+  z-index: 1;
+}
+
+/* ---- CSS3D 悬浮卡片（与项目其它页统一：transform+多层 box-shadow） ---- */
+.astro-card {
+  position: relative;
+  border-radius: 26rpx;
+  padding: 24rpx;
+  margin-bottom: 18rpx;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20rpx) saturate(140%);
+  -webkit-backdrop-filter: blur(20rpx) saturate(140%);
+  border: 1rpx solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 1rpx 0 rgba(255, 255, 255, 0.05) inset,
+    0 12rpx 32rpx rgba(0, 0, 0, 0.35),
+    0 4rpx 12rpx rgba(181, 113, 76, 0.12);
+  transform: translateZ(0);
+  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 240ms ease;
+  z-index: 1;
+}
+.astro-card--hover {
+  transform: translateY(4rpx) scale(0.985);
+  box-shadow:
+    0 1rpx 0 rgba(255, 255, 255, 0.05) inset,
+    0 6rpx 18rpx rgba(0, 0, 0, 0.45),
+    0 2rpx 6rpx rgba(181, 113, 76, 0.18);
+}
+
+/* ---- 大卡片（深底叙事卡） ---- */
+.astro-card--major {
+  background: linear-gradient(165deg, rgba(36, 42, 80, 0.92) 0%, rgba(20, 22, 50, 0.92) 100%);
+}
+
+/* ---- 网格双列悬浮卡（八大入口） ---- */
+.astro-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-bottom: 22rpx;
+  z-index: 1;
+}
+.astro-grid__item {
+  flex: 0 0 calc(50% - 8rpx);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24rpx 12rpx 18rpx;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(18rpx) saturate(140%);
+  -webkit-backdrop-filter: blur(18rpx) saturate(140%);
+  border-radius: 24rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 1rpx 0 rgba(255, 255, 255, 0.05) inset,
+    0 10rpx 24rpx rgba(0, 0, 0, 0.35);
+  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 240ms ease;
+}
+.astro-grid__item--hover {
+  transform: translateY(4rpx) scale(0.97);
+  box-shadow:
+    0 1rpx 0 rgba(255, 255, 255, 0.05) inset,
+    0 4rpx 12rpx rgba(0, 0, 0, 0.45);
+}
+.astro-grid__icon {
+  width: 96rpx; height: 96rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 56rpx;
+  margin-bottom: 14rpx;
+}
+.astro-grid__name {
+  font-size: 26rpx;
+  font-weight: 600;
+  letter-spacing: 1rpx;
+  color: #f1f5ff;
+}
+.astro-grid__desc {
+  font-size: 20rpx;
+  color: rgba(190, 200, 230, 0.7);
+  margin-top: 6rpx;
+  text-align: center;
+}
+
+/* ---- 标签/角标 ---- */
+.astro-tag {
+  display: inline-block;
+  font-size: 20rpx;
+  letter-spacing: 1rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.08);
+  color: #cdd5ff;
+  border: 1rpx solid rgba(255, 255, 255, 0.12);
+}
+
+/* ---- 文本工具 ---- */
+.astro-title {
+  font-size: 38rpx;
+  font-weight: 700;
+  color: #f8faff;
+  letter-spacing: 0.6rpx;
+}
+.astro-subtitle {
+  font-size: 24rpx;
+  color: rgba(200, 210, 240, 0.7);
+  letter-spacing: 0.4rpx;
+}
+.astro-body {
+  font-size: 26rpx;
+  color: rgba(230, 235, 255, 0.92);
+  line-height: 1.7;
+  letter-spacing: 0.3rpx;
+}
+.astro-muted {
+  font-size: 22rpx;
+  color: rgba(190, 200, 230, 0.6);
+}
+
+/* ---- 弹层遮罩（半透磨砂） ---- */
+.astro-modal-mask {
+  position: fixed;
+  left: 0; right: 0; top: 0; bottom: 0;
+  background: rgba(8, 12, 30, 0.72);
+  backdrop-filter: blur(8rpx);
+  -webkit-backdrop-filter: blur(8rpx);
+  z-index: 999;
+  display: flex; align-items: center; justify-content: center;
+  padding: 40rpx;
+}
+.astro-modal {
+  width: 100%;
+  max-width: 660rpx;
+  max-height: 78vh;
+  border-radius: 28rpx;
+  padding: 28rpx;
+  background: linear-gradient(165deg, rgba(36, 42, 80, 0.98) 0%, rgba(20, 22, 50, 0.98) 100%);
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.55);
+  overflow-y: auto;
+}
+
+/* ---- 输入（深空字段） ---- */
+/* ⚠️ .astro-input 是原生 <input>：box-sizing: border-box + 竖向 padding 会把它自带的
+ * 默认高度（约 1.4rem）吃光，占位文字被裁半截（2026-09-19 实测，padding 40rpx > 原生高）。
+ * 故 input 显式定高、竖向 padding 归零；textarea 是多行、需要行内留白，保持原写法。 */
+.astro-input,
+.astro-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 18rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+  color: #f1f5ff;
+  font-size: 26rpx;
+  letter-spacing: 0.3rpx;
+  line-height: 1.55;
+}
+.astro-input {
+  height: 84rpx;
+  padding: 0 22rpx;
+}
+.astro-textarea {
+  min-height: 180rpx;
+  padding: 20rpx 22rpx;
+}
+.astro-input--placeholder { color: rgba(190, 200, 230, 0.45); }
+
+/* ---- 按钮（深空主按钮） ---- */
+.astro-btn {
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  padding: 18rpx 38rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, #96573A 0%, #C08468 100%);
+  color: #fff;
+  font-size: 26rpx;
+  font-weight: 600;
+  letter-spacing: 1rpx;
+  box-shadow: 0 8rpx 20rpx rgba(181, 113, 76, 0.35);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+.astro-btn--hover {
+  transform: scale(0.97);
+  box-shadow: 0 4rpx 12rpx rgba(181, 113, 76, 0.45);
+}
+.astro-btn--ghost {
+  background: transparent;
+  border: 1rpx solid rgba(255, 255, 255, 0.18);
+  box-shadow: none;
+  color: rgba(220, 225, 245, 0.85);
+}
+
+/* ---- 行项 ---- */
+.astro-row {
+  display: flex; align-items: center; gap: 16rpx;
+  padding: 22rpx 24rpx;
+  border-radius: 18rpx;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1rpx solid rgba(255, 255, 255, 0.06);
+  transition: transform 200ms ease, background 200ms ease;
+}
+.astro-row--hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: scale(0.99);
+}
+
+/* ---- 列表分隔/空态 ---- */
+.astro-empty {
+  text-align: center;
+  padding: 80rpx 40rpx;
+  color: rgba(190, 200, 230, 0.55);
+  font-size: 26rpx;
+}
+/* 列表触底加载提示（分页渲染页脚） */
+.astro-load-more {
+  text-align: center;
+  padding: 24rpx 0 8rpx;
+  color: rgba(165, 180, 252, 0.5);
+  font-size: 22rpx;
+}
+.astro-load-more--end {
+  color: rgba(190, 200, 230, 0.35);
+}
+.astro-divider {
+  height: 1rpx;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 14rpx 0;
+}

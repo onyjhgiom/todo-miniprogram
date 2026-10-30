@@ -1,0 +1,85 @@
+/* pages/love/moment/moment.wxss */
+@import "../../styles/love-common.wxss";
+@import "../../styles/love-duo.wxss";
+
+.duo-post-text {
+  width: 100%;
+  min-height: 150rpx;
+  margin-top: 20rpx;
+  padding: 20rpx 24rpx;
+  border-radius: 20rpx;
+  background: var(--ay-chip, #FFECE6);
+  font-size: 28rpx;
+  line-height: 1.7;
+  color: var(--ay-text, #4A3238);
+  box-sizing: border-box;
+}
+
+/* 发布区的配图九宫格 */
+.duo-photos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12rpx;
+  margin-top: 18rpx;
+}
+.duo-photos__cell {
+  position: relative;
+  height: 180rpx;
+}
+.duo-photos__img {
+  width: 100%;
+  height: 100%;
+  border-radius: 14rpx;
+}
+.duo-photos__x {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 40rpx;
+  height: 40rpx;
+  line-height: 40rpx;
+  text-align: center;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .55);
+  color: #fff;
+  font-size: 22rpx;
+}
+.duo-photos__add {
+  height: 180rpx;
+  border-radius: 14rpx;
+  border: 3rpx dashed var(--ay-line, #F8E3DC);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ay-sub, #8A6E74);
+  font-size: 46rpx;
+}
+
+/* 评论输入条 */
+.duo-cmt__compose {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  margin-top: 16rpx;
+}
+.duo-cmt__input {
+  flex: 1;
+  height: 68rpx;
+  padding: 0 22rpx;
+  border-radius: 999rpx;
+  background: var(--ay-card, #fff);
+  font-size: 26rpx;
+  color: var(--ay-text, #4A3238);
+}
+.duo-cmt__send {
+  flex: none;
+  padding: 14rpx 26rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, var(--ay-primary, #FF7F9C), var(--ay-primary-2, #FFB199));
+  color: #fff;
+  font-size: 25rpx;
+}
+.duo-cmt__none {
+  font-size: 23rpx;
+  color: var(--ay-faint, #B79AA1);
+}

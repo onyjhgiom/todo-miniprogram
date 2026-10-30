@@ -1,0 +1,13 @@
+<!--components/focus-stats/focus-stats.wxml-->
+<!-- 四项学习数据（需求十七）：数字 24px/700/#657DBF，标签 12px/#8995A8。
+     用「图标 + 数字 + 单位 + 标签」四级信息层次，数字是唯一的高对比元素。 -->
+<view class="stats">
+  <view class="stats__cell" wx:for="{{items}}" wx:key="label">
+    <text class="stats__ico">{{item.icon}}</text>
+    <view class="stats__numrow">
+      <text class="stats__num">{{item.value}}</text>
+      <text class="stats__unit" wx:if="{{item.unit}}">{{item.unit}}</text>
+    </view>
+    <text class="stats__label">{{item.label}}</text>
+  </view>
+</view>

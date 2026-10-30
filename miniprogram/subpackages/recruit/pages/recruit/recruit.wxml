@@ -1,0 +1,282 @@
+<!-- pages/recruit/recruit.wxml · 秋招助手首页（深蓝 AI 工作台） -->
+<view class="rc themed" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <!-- ===== AI Hero 助手卡 ===== -->
+  <view class="rc__hero" style="background:{{heroGradient}}">
+    <view class="rc__hero-top">
+      <view class="rc__brand">
+        <text class="rc__brand-title">秋招助手</text>
+        <text class="rc__brand-sub">让每一次投递，都更有方向</text>
+      </view>
+      <view class="rc__ai-status"><text class="rc__ai-dot"></text>AI 在线</view>
+    </view>
+
+    <view class="rc__hero-main">
+      <view class="rc__hero-copy">
+        <text class="rc__hero-hi">你的专属秋招助手</text>
+        <text class="rc__hero-desc">正在根据你的求职目标，为你规划下一步</text>
+
+        <view class="rc__hero-stats">
+          <view class="rc__hstat"><text class="rc__hstat-n">{{stats.applied}}</text><text class="rc__hstat-l">网申</text></view>
+          <view class="rc__hstat"><text class="rc__hstat-n">{{stats.written}}</text><text class="rc__hstat-l">笔试</text></view>
+          <view class="rc__hstat"><text class="rc__hstat-n">{{stats.interview}}</text><text class="rc__hstat-l">面试</text></view>
+          <view class="rc__hstat rc__hstat--ok"><text class="rc__hstat-n">{{stats.offer}}</text><text class="rc__hstat-l">Offer</text></view>
+        </view>
+
+        <view class="rc__advice" wx:if="{{!advice.fresh}}">
+          <view class="rc__advice-tag">本周建议</view>
+          <text class="rc__advice-text">{{adviceText}}</text>
+        </view>
+        <view class="rc__advice rc__advice--fresh" wx:else>
+          <view class="rc__advice-tag">开始规划</view>
+          <text class="rc__advice-text">{{advice.headline}} · {{advice.points[0]}}</text>
+        </view>
+
+        <view class="rc__hero-cta" bindtap="jumpAnalysis" hover-class="rc__hero-cta--press" hover-stay-time="60">
+          <text>智能分析</text><text class="rc__hero-cta-arrow">→</text>
+        </view>
+      </view>
+
+      <!-- CSS 机器人头像（玻璃材质 + 呼吸光） -->
+      <view class="rc__bot">
+        <view class="rc__bot-ring"></view>
+        <view class="rc__bot-core">
+          <view class="rc__bot-eye rc__bot-eye--l"></view>
+          <view class="rc__bot-eye rc__bot-eye--r"></view>
+          <view class="rc__bot-pulse"></view>
+        </view>
+        <view class="rc__bot-glow"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 快捷能力宫格 ===== -->
+  <view class="rc__quick">
+    <view class="rc__quick-item" wx:for="{{quickActions}}" wx:key="key"
+      data-key="{{item.key}}" bindtap="onQuickAction" hover-class="rc__quick-item--press" hover-stay-time="60">
+      <view class="rc__quick-ico" style="background:{{item.bg}}">{{item.icon}}</view>
+      <text class="rc__quick-name">{{item.name}}</text>
+      <text class="rc__quick-desc">{{item.desc}}</text>
+    </view>
+  </view>
+
+  <!-- ===== 开发指令 / AI Copilot ===== -->
+  <view class="rc__copilot">
+    <view class="rc__cp-bar">
+      <view class="rc__cp-dots"><text class="rc__cp-dot rc__cp-dot--r"></text><text class="rc__cp-dot rc__cp-dot--y"></text><text class="rc__cp-dot rc__cp-dot--g"></text></view>
+      <text class="rc__cp-file">career-copilot.ts</text>
+      <view class="rc__cp-eg" bindtap="onCopilotEg">使用示例</view>
+    </view>
+    <view class="rc__cp-head">
+      <text class="rc__cp-title">开发指令</text>
+      <text class="rc__cp-sub">AI 驱动 · 根据你的目标生成求职策略</text>
+    </view>
+
+    <scroll-view class="rc__cp-templates" scroll-x enable-flex>
+      <view class="rc__cp-tpl" wx:for="{{promptTemplates}}" wx:key="id"
+        data-id="{{item.id}}" bindtap="onTemplateTap" hover-class="rc__cp-tpl--press" hover-stay-time="60">
+        <text class="rc__cp-tpl-cmd">{{item.title}}</text>
+        <text class="rc__cp-tpl-desc">{{item.desc}}</text>
+      </view>
+    </scroll-view>
+
+    <view class="rc__cp-chips">
+      <view class="rc__cp-chip" wx:for="{{commands}}" wx:key="key"
+        data-key="{{item.key}}" bindtap="onQuickCmd">{{item.label}}</view>
+    </view>
+
+    <view class="rc__cp-input">
+      <input class="rc__cp-field" placeholder="告诉 AI 你想做什么……" placeholder-class="rc__cp-ph"
+        value="{{copilotInput}}" bindinput="onCopilotInput" confirm-type="done" />
+      <view class="rc__cp-run" bindtap="onCopilotRun" hover-class="rc__cp-run--press" hover-stay-time="60">生成方案 →</view>
+    </view>
+    <text class="rc__cp-hint" wx:if="{{copilotHint}}">{{copilotHint}}</text>
+  </view>
+
+  <!-- ===== 今日下一步 ===== -->
+  <view class="rc__brief" wx:if="{{brief && brief.items.length}}">
+    <view class="rc__brief-head">
+      <text class="rc__brief-title">📌 今日推荐任务</text>
+      <text class="rc__brief-sub">{{brief.headline}}</text>
+    </view>
+    <view class="rc__brief-item" wx:for="{{brief.items}}" wx:key="key"
+      data-kind="{{item.go.kind}}" data-target="{{item.go.target}}" bindtap="onBriefTap" hover-class="rc__brief-item--press" hover-stay-time="60">
+      <text class="rc__brief-icon">{{item.icon}}</text>
+      <view class="rc__brief-body">
+        <text class="rc__brief-text">{{item.text}}</text>
+        <text class="rc__brief-reason">{{item.reason}}</text>
+      </view>
+      <text wx:if="{{item.urgent}}" class="rc__brief-urgent">紧急</text>
+      <text class="rc__brief-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- ===== 秋招黄金期 Banner ===== -->
+  <view class="rc__golden" bindtap="jumpGolden" hover-class="rc__golden--press" hover-stay-time="60">
+    <view class="rc__golden-glow"></view>
+    <view class="rc__golden-main">
+      <text class="rc__golden-title">🚀 秋招黄金期</text>
+      <text class="rc__golden-sub">卡准各家公司开放节奏，别错过投递窗口</text>
+    </view>
+    <view class="rc__golden-go">时间线 ›</view>
+  </view>
+
+  <!-- ===== 面试议程：未来 7 天 ===== -->
+  <view class="rc__agenda" wx:if="{{agendaCount > 0}}">
+    <view class="rc__agenda-head">
+      <text class="rc__agenda-title">🎯 面试议程</text>
+      <text class="rc__agenda-sub">{{interviewToday > 0 ? '今天 ' + interviewToday + ' 场 · ' : ''}}未来 7 天 {{agendaCount}} 场</text>
+    </view>
+    <view class="rc__agenda-item" wx:for="{{agenda}}" wx:key="key" data-id="{{item.appId}}" bindtap="onAgendaTap" hover-class="rc__agenda-item--press" hover-stay-time="60">
+      <view class="rc__agenda-when">
+        <text class="rc__agenda-day">{{item.dayKey}}</text>
+        <text class="rc__agenda-time">{{item.timeText}}</text>
+      </view>
+      <view class="rc__agenda-main">
+        <text class="rc__agenda-co">{{item.company}}{{item.position ? ' · ' + item.position : ''}}</text>
+        <text class="rc__agenda-meta">{{item.round}} · {{item.mode}}{{item.place ? ' · ' + item.place : ''}}</text>
+      </view>
+      <text class="rc__agenda-cd">{{item.countdown}}</text>
+    </view>
+  </view>
+
+  <!-- ===== 招聘平台快捷入口 ===== -->
+  <view class="rc__platforms">
+    <view class="rc__plats-title">🔗 招聘平台快捷入口</view>
+    <view class="rc__plats">
+      <view class="rc__plat" wx:for="{{platforms}}" wx:key="key"
+        style="background:{{item.color}}14;border-color:{{item.color}}55;"
+        data-key="{{item.key}}" bindtap="openPlatform" hover-class="rc__plat--press" hover-stay-time="60">
+        <view class="rc__plat-name" style="color:{{item.color}}">{{item.name}}</view>
+        <view class="rc__plat-desc">{{item.desc}}</view>
+        <view class="rc__plat-go" style="color:{{item.color}}">跳转 ›</view>
+      </view>
+    </view>
+    <view class="rc__import rc__import--link {{parsing ? 'ix-disabled' : ''}}" bindtap="addByLink">
+      🔗 粘贴岗位链接自动建卡（BOSS / 前程无忧 / 猎聘 / 实习僧 / 智联 等）
+    </view>
+    <view class="rc__import {{parsing ? 'ix-disabled' : ''}}" bindtap="importFromClipboard">
+      📋 {{parsing ? '正在识别剪贴板内容…' : '从剪贴板导入岗位（在招聘 App 里复制 JD 文案后点此，自动提取关键词）'}}
+    </view>
+  </view>
+
+  <!-- ===== 仕途衡鉴：体制内上岸通 ===== -->
+  <view class="rc__civil" bindtap="jumpCivil" hover-class="rc__civil--press" hover-stay-time="60">
+    <view class="rc__civil-glow"></view>
+    <view class="rc__civil-head">
+      <view class="rc__civil-icon">🏛️</view>
+      <view class="rc__civil-headmain">
+        <view class="rc__civil-name">仕途衡鉴</view>
+        <view class="rc__civil-tag">体制内上岸通 · 考公 · 考编 · 央国企 · 稳岗全覆盖</view>
+      </view>
+      <view class="rc__civil-enter">进入 ›</view>
+    </view>
+    <view class="rc__civil-tracks">
+      <view class="rc__civil-track"><text class="rc__civil-t-icon">🏛️</text>国考</view>
+      <view class="rc__civil-track"><text class="rc__civil-t-icon">🗳️</text>省考</view>
+      <view class="rc__civil-track"><text class="rc__civil-t-icon">🏥</text>事业编</view>
+      <view class="rc__civil-track"><text class="rc__civil-t-icon">🏭</text>央国企</view>
+      <view class="rc__civil-track"><text class="rc__civil-t-icon">🎯</text>通用策略</view>
+    </view>
+    <view class="rc__civil-foot">
+      <text class="rc__civil-hl">所有岗位强制标注【有无编制】</text>
+      <text class="rc__civil-more">岗位库 · 招录流程 · 备考策略 · 全年时间轴 · AI 上岸规划</text>
+    </view>
+  </view>
+
+  <!-- ===== 我关注的岗位 ===== -->
+  <view class="rc__follow" wx:if="{{followCount > 0}}" bindtap="jumpFollowed" hover-class="rc__follow--press" hover-stay-time="60">
+    <text class="rc__follow-t">⭐ 我关注的岗位</text>
+    <text class="rc__follow-n">{{followCount}} 个，看开放与截止 ›</text>
+  </view>
+
+  <!-- ===== Deadline 雷达 ===== -->
+  <view class="rc__radar" wx:if="{{radarCount > 0}}">
+    <view class="rc__radar-head">
+      <text class="rc__radar-title">📡 Deadline 雷达</text>
+      <text class="rc__radar-sub">最近 7 天 {{radarCount}} 个截止</text>
+    </view>
+    <view class="rc__radar-item" wx:for="{{radar}}" wx:key="_id" data-id="{{item._id}}" bindtap="onOpen" hover-class="rc__radar-item--press" hover-stay-time="60">
+      <view class="rc__radar-dot rc__radar-dot--{{item.dueKey}}"></view>
+      <view class="rc__radar-main">
+        <text class="rc__radar-co">{{item.company}}</text>
+        <text class="rc__radar-pos">{{item.position}}</text>
+      </view>
+      <text class="rc__radar-due rc__radar-due--{{item.dueKey}}">{{item.dueText}}</text>
+    </view>
+  </view>
+
+  <!-- ===== 投递后回来：一键回填 ===== -->
+  <view class="rc__back" wx:if="{{backHint}}">
+    <view class="rc__back-main" bindtap="useBackHint">
+      <text class="rc__back-t">刚从「{{backHintName}}」回来？</text>
+      <text class="rc__back-s">粘贴岗位链接，自动提取公司/岗位/城市/薪资并生成待办 ›</text>
+    </view>
+    <view class="rc__back-x" catchtap="dismissBackHint">✕</view>
+  </view>
+
+  <!-- ===== 搜索 + 排序 ===== -->
+  <view class="rc__search">
+    <view class="rc__search-box">
+      <text class="rc__search-icon">🔍</text>
+      <input class="rc__search-input" placeholder="搜公司 / 职位 / 城市" placeholder-class="rc__search-ph" value="{{keyword}}" bindinput="onSearch" confirm-type="search" />
+      <view class="rc__search-clear" wx:if="{{keyword}}" bindtap="onClearSearch">✕</view>
+    </view>
+    <view class="rc__sorts">
+      <view class="rc__sort {{sort === item.key ? 'rc__sort--on' : ''}}" wx:for="{{sorts}}" wx:key="key"
+        data-key="{{item.key}}" bindtap="onSort">{{item.label}}</view>
+    </view>
+  </view>
+
+  <!-- ===== 状态筛选 ===== -->
+  <scroll-view class="rc__filters" scroll-x>
+    <view wx:for="{{filters}}" wx:key="key"
+      class="rc__filter {{filter === item.key ? 'rc__filter--on' : ''}}"
+      data-key="{{item.key}}" bindtap="onFilter">{{item.label}}</view>
+  </scroll-view>
+
+  <!-- ===== 投递列表 ===== -->
+  <view class="rc__list" wx:if="{{apps.length > 0}}">
+    <view class="rc__card" wx:for="{{apps}}" wx:key="_id" data-id="{{item._id}}" bindtap="onOpen" hover-class="rc__card--press" hover-stay-time="60">
+      <view class="rc__card-head">
+        <view class="rc__card-co">
+          <text class="rc__card-co-name">{{item.company}}</text>
+          <text class="rc__card-co-pos" wx:if="{{item.position}}">{{item.position}}</text>
+        </view>
+        <view class="rc__badge rc__badge--{{item.status}}">{{item.statusLabel}}</view>
+      </view>
+
+      <view class="rc__card-meta">
+        <text class="rc__meta rc__meta--{{item.dueKey}}" wx:if="{{item.dueDate}}">⏰ {{item.dueText}}</text>
+        <text class="rc__meta" wx:if="{{item.isReferral}}">🤝 内推</text>
+        <text class="rc__meta" wx:if="{{item.jdCount > 0}}">🔑 {{item.jdCount}} 关键词</text>
+        <text class="rc__meta" wx:if="{{item.qTotal > 0}}">❓ {{item.qDone}}/{{item.qTotal}} 题</text>
+        <text class="rc__meta" wx:if="{{item.ckTotal > 0}}">✅ {{item.ckDone}}/{{item.ckTotal}} 清单</text>
+      </view>
+
+      <view class="rc__ready">
+        <view class="rc__ready-bg">
+          <view class="rc__ready-fill rc__ready-fill--{{item.readyLevelKey}}" style="width:{{item.readyScore}}%"></view>
+        </view>
+        <text class="rc__ready-txt rc__ready-txt--{{item.readyLevelKey}}">准备度 {{item.readyScore}}%</text>
+      </view>
+      <text class="rc__last">🕘 {{item.lastText}}</text>
+
+      <view class="rc__card-actions">
+        <view class="rc__act" catchtap="onStatus" data-id="{{item._id}}">切换状态</view>
+        <view class="rc__act" catchtap="onLinkTodo" data-id="{{item._id}}">同步待办</view>
+        <view class="rc__act rc__act--danger" catchtap="onDelete" data-id="{{item._id}}">删除</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="rc__empty" wx:if="{{apps.length === 0}}">
+    <text class="rc__empty-emoji">💼</text>
+    <text class="rc__empty-tip">{{keyword ? '没有匹配的投递' : '还没有投递记录'}}</text>
+    <text class="rc__empty-sub">{{keyword ? '换个关键词，或清空搜索看全部' : '点右下角 + 添加你的第一个秋招目标'}}</text>
+    <view class="rc__empty-btn" wx:if="{{keyword}}" bindtap="onClearSearch">清空搜索看全部</view>
+    <view class="rc__empty-btn" wx:else bindtap="onAdd">＋ 新建投递</view>
+  </view>
+
+  <view class="rc__fab" bindtap="onAdd">＋</view>
+</view>

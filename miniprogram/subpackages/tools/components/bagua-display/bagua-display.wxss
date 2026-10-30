@@ -1,0 +1,95 @@
+/* components/tools/bagua-display/bagua-display.wxss
+ * 八卦圆盘视觉。动效只用 transform/opacity（GPU 友好），
+ * 周期 16s~80s，避免快速旋转；reduced 时全部静止。
+ */
+.bagua {
+  position: relative;
+  display: block;
+}
+
+/* 盘面：整体极缓旋转（八卦盘自转的意象） */
+.bagua__img {
+  position: absolute;
+  top: 4%;
+  left: 4%;
+  width: 92%;
+  height: 92%;
+  border-radius: 50%;
+  animation: bf-spin 80s linear infinite;
+  will-change: transform;
+}
+
+/* 最外柔光：呼吸 + 微弱放大 */
+.bagua__halo {
+  position: absolute;
+  top: -9%;
+  left: -9%;
+  width: 118%;
+  height: 118%;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--bf-glow, rgba(230, 210, 165, 0.5)) 0%, transparent 62%);
+  opacity: 0.5;
+  filter: blur(4rpx);
+  animation: bf-breathe 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* 细金描边环：虚线金圈，反向慢转 */
+.bagua__ring {
+  position: absolute;
+  top: 1%;
+  left: 1%;
+  width: 98%;
+  height: 98%;
+  border-radius: 50%;
+  border: 1rpx solid rgba(200, 166, 106, 0.55);
+  /* 外圈高光：conic 一段亮弧，旋转时有「光在环上走」的感觉 */
+  background: conic-gradient(
+    from 0deg,
+    rgba(230, 210, 165, 0) 0deg,
+    rgba(230, 210, 165, 0.55) 40deg,
+    rgba(230, 210, 165, 0) 90deg,
+    rgba(230, 210, 165, 0) 360deg
+  );
+  -webkit-mask: radial-gradient(circle, transparent 0 96%, #000 97%);
+  mask: radial-gradient(circle, transparent 0 96%, #000 97%);
+  animation: bf-spin-rev 48s linear infinite;
+  pointer-events: none;
+}
+
+/* 中心呼吸光：叠在阴阳位置，模拟「能量流动」 */
+.bagua__core {
+  position: absolute;
+  top: 32%;
+  left: 32%;
+  width: 36%;
+  height: 36%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 246, 222, 0.34) 0%, rgba(230, 210, 165, 0.12) 46%, transparent 70%);
+  animation: bf-breathe 4.5s ease-in-out -1.2s infinite;
+  pointer-events: none;
+}
+
+@keyframes bf-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes bf-spin-rev {
+  from { transform: rotate(360deg); }
+  to   { transform: rotate(0deg); }
+}
+@keyframes bf-breathe {
+  0%, 100% { opacity: 0.45; transform: scale(1); }
+  50%      { opacity: 0.9;  transform: scale(1.045); }
+}
+
+/* 无障碍：关闭全部动效，保留静态盘面 */
+.bagua--still .bagua__img,
+.bagua--still .bagua__ring {
+  animation: none;
+}
+.bagua--still .bagua__halo,
+.bagua--still .bagua__core {
+  animation: none;
+  opacity: 0.55;
+}

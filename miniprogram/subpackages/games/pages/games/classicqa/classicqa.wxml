@@ -1,0 +1,14 @@
+<game-shell title="{{title}}" timeText="{{timeText}}" statText="{{statText}}" paused="{{paused}}"
+  bind:back="onBack" bind:reset="onReset" bind:hint="onHint" bind:home="onHome" bind:pause="onPause">
+  <view class="cq">
+    <view class="row cq__src"><view class="chip chip--mint">{{src}}</view></view>
+    <view class="card cq__q grain">
+      <text class="t-lg serif">{{q}}</text>
+    </view>
+    <view class="cq__opts">
+      <view wx:for="{{options}}" wx:key="index" class="card cq__opt card--press" data-i="{{index}}" bindtap="onPick">
+        <text class="t-md">{{item}}</text>
+      </view>
+    </view>
+  </view>
+</game-shell>

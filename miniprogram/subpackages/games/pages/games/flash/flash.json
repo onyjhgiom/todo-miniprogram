@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "瞬间记忆",
+  "usingComponents": {
+    "game-shell": "/subpackages/games/components/game-shell/index"
+  },
+  "disableScroll": true
+}

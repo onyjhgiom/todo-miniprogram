@@ -1,0 +1,390 @@
+<!--pages/memo/memo.wxml-->
+<!-- 语音备忘录 · AI 智能语音工作台：文件夹 / 语音速记（本地录音 + 云端转写）/ 清单 / 标签搜索 / 加密 / 版本回溯 -->
+<view class="page themed" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <!-- ===== Hero 区 ===== -->
+  <view class="mm__hero">
+    <view class="mm__hero-text">
+      <text class="mm__title">语音备忘录</text>
+      <view class="mm__hero-line"></view>
+      <text class="mm__sub">用语音记录灵感，</text>
+      <text class="mm__sub">让重要的事不再遗忘</text>
+    </view>
+    <view class="mm__acts">
+      <view class="mm__act" bindtap="onImport">
+        <text class="mm__act-ico">⬆️</text>
+        <text class="mm__act-txt">导入</text>
+      </view>
+      <view class="mm__act" bindtap="onFolderNew">
+        <text class="mm__act-ico">📁</text>
+        <text class="mm__act-txt">文件夹</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 搜索 ===== -->
+  <view class="mm__search">
+    <text class="mm__search-icon">🔍</text>
+    <input class="mm__search-input" placeholder="搜索标题 / 内容 / 标签 / 转写文本" placeholder-class="mm__ph"
+      value="{{keyword}}" bindinput="onSearchInput" confirm-type="search" />
+    <text wx:if="{{keyword || activeTag}}" class="mm__search-clear" bindtap="onSearchClear">✕</text>
+    <view class="mm__filter-btn {{filterOpen ? 'mm__filter-btn--on' : ''}}" catchtap="onFilterToggle">≡ 筛选</view>
+  </view>
+
+  <!-- 标签筛选（点「筛选」展开） -->
+  <scroll-view wx:if="{{filterOpen && tags.length}}" class="mm__tags" scroll-x enable-flex>
+    <view class="mm__tag {{activeTag === item.name ? 'mm__tag--on' : ''}}"
+      wx:for="{{tags}}" wx:key="name" data-tag="{{item.name}}" bindtap="onTagTap"># {{item.name}}</view>
+  </scroll-view>
+  <view wx:if="{{filterOpen}}" class="mm__filter-row">
+    <view class="mm__tag {{showArchived ? 'mm__tag--on' : ''}}" bindtap="onToggleArchived">🗄️ {{showArchived ? '正在查看归档' : '查看归档'}}</view>
+    <view class="mm__tag" bindtap="onExport">📤 导出 CSV</view>
+    <view wx:if="{{activeTag}}" class="mm__tag" bindtap="onSearchClear">清除筛选 ✕</view>
+  </view>
+
+  <!-- ===== 分类（根文件夹） ===== -->
+  <view class="mm__cats-head">
+    <text class="mm__cats-title">{{currentCatName}}</text>
+    <view class="mm__cats-new" bindtap="onFolderNew">📂 文件夹</view>
+  </view>
+  <scroll-view class="mm__cats" scroll-x enable-flex>
+    <view wx:for="{{categories}}" wx:key="id"
+      class="mm__cat {{currentFolderId === item.id ? 'mm__cat--on' : ''}} mm__cat--{{item.key}}"
+      data-id="{{item.id}}" bindtap="onCategoryTap">
+      <text class="mm__cat-ico">{{item.emoji}}</text>
+      <text class="mm__cat-name">{{item.name}}</text>
+      <text class="mm__cat-count" wx:if="{{item.count}}">{{item.count}}</text>
+    </view>
+  </scroll-view>
+
+  <!-- 面包屑（进入子文件夹后显示） -->
+  <view class="mm__crumb" wx:if="{{currentFolderId}}">
+    <view class="mm__crumb-item {{index === breadcrumb.length - 1 ? 'mm__crumb--cur' : ''}}"
+      wx:for="{{breadcrumb}}" wx:key="id" data-id="{{item.id}}" bindtap="onBreadcrumbTap">
+      {{item.name}}<text wx:if="{{index < breadcrumb.length - 1}}" class="mm__crumb-sep">/</text>
+    </view>
+  </view>
+
+  <!-- 子文件夹 -->
+  <view class="mm__folders" wx:if="{{subFolders.length}}">
+    <view class="mm__folder" wx:for="{{subFolders}}" wx:key="id" style="border-color:{{item.color}}22;background:{{item.color}}12"
+      data-id="{{item.id}}" bindtap="onFolderTap" bindlongpress="onFolderLongPress">
+      <text class="mm__folder-dot" style="background:{{item.color}}"></text>
+      <text class="mm__folder-name">{{item.name}}</text>
+      <text class="mm__folder-count">{{item.count}}</text>
+    </view>
+  </view>
+
+  <!-- ===== 数据统计面板 ===== -->
+  <view class="mm__stat">
+    <view class="mm__stat-item">
+      <view class="mm__stat-ico mm__stat-ico--doc">📄</view>
+      <text class="mm__stat-num">{{stat.total}}</text>
+      <text class="mm__stat-label">全部</text>
+      <text class="mm__stat-delta {{statDelta.total.cls}}">{{statDelta.total.text}}</text>
+    </view>
+    <view class="mm__stat-item">
+      <view class="mm__stat-ico mm__stat-ico--mic">🎙️</view>
+      <text class="mm__stat-num">{{stat.audio}}</text>
+      <text class="mm__stat-label">语音</text>
+      <text class="mm__stat-delta {{statDelta.audio.cls}}">{{statDelta.audio.text}}</text>
+    </view>
+    <view class="mm__stat-item">
+      <view class="mm__stat-ico mm__stat-ico--lock">🔒</view>
+      <text class="mm__stat-num">{{stat.locked}}</text>
+      <text class="mm__stat-label">已加密</text>
+      <text class="mm__stat-delta {{statDelta.locked.cls}}">{{statDelta.locked.text}}</text>
+    </view>
+    <view class="mm__stat-item">
+      <view class="mm__stat-ico mm__stat-ico--arch">🗄️</view>
+      <text class="mm__stat-num">{{stat.archived}}</text>
+      <text class="mm__stat-label">归档</text>
+      <text class="mm__stat-delta {{statDelta.archived.cls}}">{{statDelta.archived.text}}</text>
+    </view>
+  </view>
+
+  <!-- ===== 备忘列表 ===== -->
+  <view class="mm__list">
+    <!-- 空状态 -->
+    <view class="mm__empty" wx:if="{{!memoItems.length}}">
+      <view class="mm__empty-visual">
+        <view class="mm__empty-ring mm__empty-ring--1"></view>
+        <view class="mm__empty-ring mm__empty-ring--2"></view>
+        <text class="mm__empty-mic">🎙️</text>
+      </view>
+      <text class="mm__empty-title">{{showArchived ? '暂无归档备忘' : '把灵感留住，把重要的事记下来'}}</text>
+      <text class="mm__empty-sub">{{activeTag ? '换个标签试试' : '支持语音转文字 · 智能摘要 · 待办提取 · 标签归类 · 加密备忘'}}</text>
+      <view class="mm__empty-btns" wx:if="{{!showArchived}}">
+        <view class="mm__empty-btn mm__empty-btn--main" bindtap="onQuickVoice">🎙 开始录音</view>
+        <view class="mm__empty-btn" bindtap="onNewMemo">＋ 快速新建</view>
+      </view>
+    </view>
+
+    <view class="mm__card {{item.locked ? 'mm__card--locked' : ''}}" wx:for="{{memoItems}}" wx:key="id"
+      data-id="{{item.id}}" bindtap="onMemoTap" bindlongpress="onMemoLongPress">
+      <view class="mm__card-head">
+        <view class="mm__card-thumb" style="background:{{item.thumbBg}}">{{item.icon}}</view>
+        <view class="mm__card-headmain">
+          <view class="mm__card-titlerow">
+            <text wx:if="{{item.pinned}}" class="mm__pin">📌</text>
+            <text class="mm__card-title-text">{{item.title}}</text>
+            <text wx:if="{{item.catName}}" class="mm__card-cat" style="color:{{item.catColor}};background:{{item.catBg}}">{{item.catName}}</text>
+          </view>
+          <text class="mm__card-time">{{item.timeText}} · {{item.typeText}}</text>
+        </view>
+        <view class="mm__card-more" catchtap="onMemoLongPress" data-id="{{item.id}}">⋯</view>
+      </view>
+      <view class="mm__card-summary">{{item.summary}}</view>
+      <view class="mm__card-meta" wx:if="{{item.tagText || item.durationText || item.audioCount || item.imgCount}}">
+        <text wx:if="{{item.durationText}}" class="mm__chip mm__chip--audio">🔊 {{item.durationText}}</text>
+        <text wx:if="{{item.audioCount}}" class="mm__chip">🎙 {{item.audioCount}}</text>
+        <text wx:if="{{item.imgCount}}" class="mm__chip">🖼 {{item.imgCount}}</text>
+        <text wx:if="{{item.tagText}}" class="mm__chip mm__chip--tag">{{item.tagText}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== AI 能力快捷入口 ===== -->
+  <view class="mm__tools">
+    <view class="mm__tool" bindtap="onQuickVoice">
+      <view class="mm__tool-ico mm__tool-ico--1">🎙️</view>
+      <text class="mm__tool-name">语音记录</text>
+      <text class="mm__tool-sub">快速录音</text>
+    </view>
+    <view class="mm__tool" bindtap="onNewMemo">
+      <view class="mm__tool-ico mm__tool-ico--2">📝</view>
+      <text class="mm__tool-name">新建备忘</text>
+      <text class="mm__tool-sub">记录文字</text>
+    </view>
+    <view class="mm__tool" bindtap="onNewTodo">
+      <view class="mm__tool-ico mm__tool-ico--3">✅</view>
+      <text class="mm__tool-name">待办事项</text>
+      <text class="mm__tool-sub">规划任务</text>
+    </view>
+    <view class="mm__tool" bindtap="onNewLocked">
+      <view class="mm__tool-ico mm__tool-ico--4">🔒</view>
+      <text class="mm__tool-name">加密备忘</text>
+      <text class="mm__tool-sub">隐私保护</text>
+    </view>
+  </view>
+
+  <!-- ===== 今日效率 ===== -->
+  <view class="mm__eff" wx:if="{{stat.total}}">
+    <view class="mm__eff-head">
+      <text class="mm__eff-title">📊 今日效率</text>
+      <text class="mm__eff-pct">效率提升 {{efficiency.percent}}%</text>
+    </view>
+    <view class="mm__eff-bar">
+      <view class="mm__eff-bar-in" style="width:{{efficiency.percent}}%"></view>
+    </view>
+    <text class="mm__eff-sub">今日已记录 {{efficiency.todayCount}} 条{{efficiency.todayVoice ? '（含语音 ' + efficiency.todayVoice + ' 条）' : ''}} · 已完成 {{efficiency.doneCount}} 项待办</text>
+  </view>
+
+  <!-- 录音 FAB -->
+  <view class="mm__fab" bindtap="onQuickVoice">🎙</view>
+
+  <!-- ============ 编辑器弹层 ============ -->
+  <view class="mask" wx:if="{{editorOpen}}" bindtap="onEditorClose">
+    <view class="sheet sheet--tall" catchtap="onSheetStop">
+
+      <!-- 解锁视图 -->
+      <block wx:if="{{unlockNeeded}}">
+        <view class="sheet__head">
+          <text class="sheet__close" catchtap="onEditorClose">✕</text>
+          <text class="sheet__title">🔒 已加密</text>
+          <text class="sheet__save"></text>
+        </view>
+        <view class="sheet__body mm__unlock">
+          <text class="mm__unlock-icon">🔐</text>
+          <text class="mm__unlock-tip">该备忘已加密，输入密码查看</text>
+          <input class="mm__unlock-input" password placeholder="输入密码" value="{{unlockPwd}}"
+            placeholder-class="mm__ph" bindinput="onUnlockInput" confirm-type="done" bindconfirm="onUnlockSubmit" />
+          <view class="mm__unlock-btn" bindtap="onUnlockSubmit">解 锁</view>
+        </view>
+      </block>
+
+      <!-- 编辑视图 -->
+      <block wx:else>
+        <view class="sheet__head">
+          <text class="sheet__close" catchtap="onEditorClose">✕</text>
+          <text class="sheet__title">{{isEdit ? '编辑备忘' : '新建备忘'}}</text>
+          <text class="sheet__save" catchtap="onSave">保存</text>
+        </view>
+
+        <scroll-view class="sheet__body" scroll-y>
+          <!-- 标题 -->
+          <view class="mm__row">
+            <input class="mm__input-title" placeholder="标题" placeholder-class="mm__ph"
+              value="{{draft.title}}" bindinput="onTitleInput" maxlength="60" />
+          </view>
+
+          <!-- 正文 / 清单 -->
+          <block wx:if="{{!draft.isChecklist}}">
+            <textarea class="mm__content" placeholder="记录想法，或点下方麦克风语音输入…" placeholder-class="mm__ph"
+              value="{{draft.content}}" bindinput="onContentInput" maxlength="5000" auto-height />
+          </block>
+          <block wx:else>
+            <view class="mm__checklist">
+              <view class="mm__check" wx:for="{{draftChecklist}}" wx:key="id">
+                <view class="mm__check-box {{item.done ? 'mm__check-box--on' : ''}}"
+                  data-index="{{index}}" catchtap="onCheckToggle">
+                  <text wx:if="{{item.done}}">✓</text>
+                </view>
+                <input class="mm__check-input {{item.done ? 'mm__check-input--done' : ''}}"
+                  placeholder="清单项" placeholder-class="mm__ph" value="{{item.text}}"
+                  data-index="{{index}}" bindinput="onCheckInput" />
+                <text class="mm__check-del" data-index="{{index}}" catchtap="onCheckRemove">✕</text>
+              </view>
+              <view class="mm__check-add" catchtap="onCheckAdd">＋ 添加清单项</view>
+            </view>
+          </block>
+
+          <!-- 语音速记区 -->
+          <view class="mm__voice">
+            <view class="mm__voice-head">
+              <text class="mm__voice-title">{{voiceReady ? '语音速记 · 自动转写' : '录音速记 · 仅录音'}}</text>
+              <text wx:if="{{recording}}" class="mm__voice-sec">{{recordSeconds}}s</text>
+            </view>
+
+            <!-- 波形 -->
+            <view class="mm__wave" wx:if="{{recording}}">
+              <view class="mm__wave-bar" wx:for="{{[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]}}"
+                wx:key="*this" style="height:{{item % 2 === 0 ? volume : (100 - volume) * 0.6 + 8}}rpx"></view>
+            </view>
+            <view class="mm__partial" wx:if="{{partialText}}">{{partialText}}</view>
+
+            <view class="mm__voice-btn {{recording ? 'mm__voice-btn--rec' : ''}} {{recognizing ? 'mm__voice-btn--busy' : ''}}" catchtap="onRecordToggle">
+              <text>{{recognizing ? '…' : (recording ? '■ 结束' : '🎤')}}</text>
+            </view>
+            <text class="mm__voice-tip">{{recognizing ? '正在识别语音…' : (recording ? '正在聆听，说完点「结束」' : (voiceReady ? '点击开始，说完自动转成文字' : '点击开始录音，云端转写未就绪'))}}</text>
+            <text wx:if="{{!voiceReady}}" class="mm__voice-note">转写需部署 asr 云函数并配置腾讯云密钥</text>
+          </view>
+
+          <!-- 语音片段列表 -->
+          <view class="mm__clips" wx:if="{{draft.audioList.length}}">
+            <view class="mm__clip" wx:for="{{draft.audioList}}" wx:key="id">
+              <view class="mm__clip-play {{playingClipId === item.id ? 'mm__clip-play--on' : ''}}"
+                data-index="{{index}}" catchtap="onClipTap">
+                <text>{{playingClipId === item.id ? '⏸' : '▶'}}</text>
+              </view>
+              <view class="mm__clip-main" data-index="{{index}}" catchtap="onClipText">
+                <text class="mm__clip-text" wx:if="{{item.text}}">{{item.text}}</text>
+                <text class="mm__clip-text mm__clip-text--mute" wx:else>
+                  {{item.status === 'pending' ? '⏳ 待转写' : item.status === 'failed' ? '⚠️ 转写失败' : '♪ 原声片段'}}
+                </text>
+                <text class="mm__clip-dur">{{item.duration}}″</text>
+              </view>
+              <text class="mm__clip-del" data-index="{{index}}" catchtap="onClipRemove">✕</text>
+            </view>
+          </view>
+
+          <!-- 图片 -->
+          <view class="mm__images" wx:if="{{draft.imageList.length}}">
+            <view class="mm__img" wx:for="{{draft.imageList}}" wx:key="*this"
+              data-index="{{index}}" bindtap="onImagePreview">
+              <image src="{{item}}" mode="aspectFill" class="mm__img-pic" />
+              <text class="mm__img-del" data-index="{{index}}" catchtap="onImageRemove">✕</text>
+            </view>
+          </view>
+          <view class="mm__img-add" catchtap="onAddImage">🖼️ 添加图片</view>
+
+          <!-- 属性区 -->
+          <view class="mm__props">
+            <view class="mm__prop">
+              <text class="mm__prop-label">颜色</text>
+              <view class="mm__colors">
+                <view class="mm__color {{draft.color === item ? 'mm__color--on' : ''}}"
+                  wx:for="{{colorList}}" wx:key="*this" style="background:{{item}}"
+                  data-color="{{item}}" catchtap="onColorTap"></view>
+              </view>
+            </view>
+
+            <view class="mm__prop">
+              <text class="mm__prop-label">文件夹</text>
+              <picker mode="selector" range="{{folderNames}}" value="{{folderIndex}}" bindchange="onFolderChange">
+                <view class="mm__picker">{{folderNames[folderIndex] || '根目录'}} ▾</view>
+              </picker>
+            </view>
+
+            <view class="mm__prop">
+              <text class="mm__prop-label">清单模式</text>
+              <switch checked="{{draft.isChecklist}}" color="#f59e0b" bindchange="onChecklistToggle" />
+            </view>
+
+            <view class="mm__prop">
+              <text class="mm__prop-label">置顶</text>
+              <switch checked="{{draft.isPinned}}" color="#f59e0b" bindchange="onPinToggle" />
+            </view>
+
+            <view class="mm__prop">
+              <text class="mm__prop-label">加密</text>
+              <switch checked="{{draft.isLocked}}" color="#ef4444" bindchange="onLockToggle" />
+            </view>
+          </view>
+
+          <!-- 标签 -->
+          <view class="mm__prop">
+            <text class="mm__prop-label">标签</text>
+            <view class="mm__tagrow">
+              <view class="mm__tag mm__tag--edit" wx:for="{{draft.tags}}" wx:key="*this"
+                data-index="{{index}}" bindtap="onTagRemove"># {{item}} ✕</view>
+              <input class="mm__tag-input" placeholder="加标签" placeholder-class="mm__ph"
+                value="{{tagInput}}" bindinput="onTagInput" bindconfirm="onTagAdd" confirm-type="done" />
+              <view class="mm__tag-add" catchtap="onTagAdd">添加</view>
+            </view>
+          </view>
+
+          <!-- 版本回溯 -->
+          <view class="mm__versions" wx:if="{{isEdit}}">
+            <view class="mm__ver-head" bindtap="onVersionsToggle">
+              <text>🕘 历史版本（{{draft.versions.length}}）</text>
+              <text>{{versionsOpen ? '收起 ▴' : '展开 ▾'}}</text>
+            </view>
+            <view class="mm__ver-list" wx:if="{{versionsOpen}}">
+              <view class="mm__ver-empty" wx:if="{{!versions.length}}">暂无历史版本（内容修改后自动存档）</view>
+              <view class="mm__ver" wx:for="{{versions}}" wx:key="id">
+                <view class="mm__ver-main">
+                  <text class="mm__ver-title">{{item.title || '（无标题）'}}</text>
+                  <text class="mm__ver-time">{{item.timeText}}</text>
+                </view>
+                <view class="mm__ver-restore" data-id="{{item.id}}" catchtap="onVersionRestore">恢复</view>
+              </view>
+            </view>
+          </view>
+
+          <!-- 底部操作 -->
+          <view class="mm__foot">
+            <view class="mm__foot-btn" bindtap="onArchiveToggle">{{draft.isArchived ? '↩️ 取消归档' : '🗄️ 归档'}}</view>
+            <view class="mm__foot-btn mm__foot-btn--danger" bindtap="onDelete">🗑 删除</view>
+          </view>
+        </scroll-view>
+      </block>
+    </view>
+  </view>
+
+  <!-- ============ 新建文件夹弹层 ============ -->
+  <view class="mask" wx:if="{{folderSheetOpen}}" bindtap="onFolderSheetClose">
+    <view class="sheet" catchtap="onSheetStop">
+      <view class="sheet__head">
+        <text class="sheet__close" catchtap="onFolderSheetClose">✕</text>
+        <text class="sheet__title">新建文件夹</text>
+        <text class="sheet__save" catchtap="onFolderSave">创建</text>
+      </view>
+      <view class="sheet__body">
+        <view class="mm__row">
+          <text class="mm__prop-label">名称</text>
+          <input class="mm__input-folder" placeholder="文件夹名称" placeholder-class="mm__ph"
+            value="{{folderDraftName}}" bindinput="onFolderNameInput" maxlength="20" />
+        </view>
+        <view class="mm__row">
+          <text class="mm__prop-label">位置</text>
+          <picker mode="selector" range="{{parentNames}}" value="{{parentIndex}}" bindchange="onParentChange">
+            <view class="mm__picker">{{parentNames[parentIndex] || '根目录'}} ▾</view>
+          </picker>
+        </view>
+        <view class="sheet__hint">文件夹支持无限层级嵌套；长按文件夹可重命名或删除</view>
+      </view>
+    </view>
+  </view>
+
+</view>

@@ -1,0 +1,271 @@
+/**
+ * course-schedule/styles/themes.wxss
+ * 课程表专属皮肤系统（6 套）
+ *
+ * 设计原则：
+ *  1. 变量前缀 `--cs-*`，与主项目全局主题（`--color-*` / `--glass-*`）完全隔离，
+ *     课程表的张扬配色不会污染工具中心、待办等其他页面。
+ *  2. 页面根节点绑定 `class="cs-root cs-theme-{{csTheme}}"`，
+ *     变量通过 `.cs-root.cs-theme-X` 生效并向下级联（自定义组件同样继承）。
+ *     ⚠️ 刻意用「类选择器」而非 `[data-cs-theme='X']` 属性选择器：小程序编译器会报
+ *        "Some selectors are not allowed in component wxss, including tag name
+ *        selectors, ID selectors, and attribute selectors"，且属性选择器在部分
+ *        渲染模式下不一定生效。类选择器是官方认可写法。
+ *  3. 浅色壳 3 套（dawn / candy / retro）、深色壳 3 套（midnight / cyber / moss），
+ *     三套深色壳均覆盖全部 token，避免浅色 token 泄漏成"白玻璃块"。
+ *  4. 每套皮肤的圆角（--cs-radius）与字体（--cs-font）也各不相同，
+ *     圆润/锐利/等宽的气质差异让 6 套皮肤彼此一眼可辨。
+ *
+ * 默认皮肤 = dawn（晨光笔记），直接写在 .cs-root 上作为兜底，
+ * 因此 csTheme 为空或为 'dawn' 时都能正常渲染（此时根节点只有 `cs-root` 一个类）。
+ */
+
+/* ========== 基础布局 + 默认皮肤：dawn 晨光笔记 ========== */
+.cs-root {
+  --cs-bg: #F2F6FC;
+  --cs-bg-soft: #E8EFF9;
+  --cs-card: #FFFFFF;
+  --cs-card-line: #E4EBF5;
+  --cs-text: #17202F;
+  --cs-text-soft: #434F66;
+  --cs-text-mute: #69768C;
+  --cs-border: #E1E8F3;
+
+  --cs-primary: #3B6DF6;
+  --cs-primary-deep: #2554D4;
+  --cs-primary-soft: rgba(59, 109, 246, 0.10);
+  --cs-on-primary: #FFFFFF;
+  --cs-hero: linear-gradient(135deg, #3B6DF6 0%, #7A9BFF 100%);
+  --cs-shadow: 0 8rpx 24rpx rgba(37, 84, 212, 0.12);
+
+  --cs-overlay: rgba(16, 26, 48, 0.45);
+  --cs-warn-bg: #FFF6E0;
+  --cs-warn-text: #8A5C0A;
+  --cs-danger: #E5484D;
+  --cs-danger-bg: #FFEDEF;
+  --cs-danger-text: #B42318;
+  --cs-ok: #17A673;
+  --cs-chip-bg: #FFFFFF;
+  --cs-input-bg: #F2F5FA;
+
+  --cs-radius: 20rpx;
+  --cs-font: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+
+  --cs-c1-bg: #E9F0FF; --cs-c1-line: #3B6DF6;
+  --cs-c2-bg: #E4F6EE; --cs-c2-line: #17A673;
+  --cs-c3-bg: #FFF1E4; --cs-c3-line: #E08139;
+  --cs-c4-bg: #F2EBFF; --cs-c4-line: #7C5CF6;
+  --cs-c5-bg: #FFEAF2; --cs-c5-line: #E5487C;
+  --cs-c6-bg: #E4F5FA; --cs-c6-line: #0E93B5;
+
+  box-sizing: border-box;
+  min-height: 100vh;
+  background: var(--cs-bg);
+  color: var(--cs-text);
+  font-family: var(--cs-font);
+}
+
+/* ========== 2. midnight 深空夜航（深）========== */
+.cs-root.cs-theme-midnight {
+  --cs-bg: #0A0F1E;
+  --cs-bg-soft: #111A2E;
+  --cs-card: #161F36;
+  --cs-card-line: #232E4A;
+  --cs-text: #E8EDFA;
+  --cs-text-soft: #A8B4D0;
+  --cs-text-mute: #808FAE;
+  --cs-border: #232E4A;
+
+  --cs-primary: #7C9CFF;
+  --cs-primary-deep: #5A7BEE;
+  --cs-primary-soft: rgba(124, 156, 255, 0.16);
+  --cs-on-primary: #08101F;
+  --cs-hero: linear-gradient(135deg, #1B2A4E 0%, #4A6BC4 100%);
+  --cs-shadow: 0 8rpx 28rpx rgba(0, 0, 0, 0.50);
+
+  --cs-overlay: rgba(0, 0, 0, 0.66);
+  --cs-warn-bg: #322814;
+  --cs-warn-text: #EBCB7C;
+  --cs-danger: #FF6B70;
+  --cs-danger-bg: #33161A;
+  --cs-danger-text: #FFA3A7;
+  --cs-ok: #4FD1A5;
+  --cs-chip-bg: #1B2440;
+  --cs-input-bg: #111A2E;
+
+  --cs-radius: 20rpx;
+  --cs-font: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+
+  --cs-c1-bg: #1C2A4A; --cs-c1-line: #7C9CFF;
+  --cs-c2-bg: #16322A; --cs-c2-line: #4FD1A5;
+  --cs-c3-bg: #3A2A18; --cs-c3-line: #E0A15C;
+  --cs-c4-bg: #272040; --cs-c4-line: #A98BFF;
+  --cs-c5-bg: #3A1E2E; --cs-c5-line: #F07CA8;
+  --cs-c6-bg: #10303A; --cs-c6-line: #4FC3DC;
+}
+
+/* ========== 3. candy 糖果马卡龙（浅）========== */
+.cs-root.cs-theme-candy {
+  --cs-bg: #FFF3F8;
+  --cs-bg-soft: #FCE6F1;
+  --cs-card: #FFFFFF;
+  --cs-card-line: #F8DFEB;
+  --cs-text: #3A2A35;
+  --cs-text-soft: #664557;
+  --cs-text-mute: #8B6579;
+  --cs-border: #F7DAE7;
+
+  --cs-primary: #E8548F;
+  --cs-primary-deep: #CC3B78;
+  --cs-primary-soft: rgba(232, 84, 143, 0.12);
+  --cs-on-primary: #FFFFFF;
+  --cs-hero: linear-gradient(135deg, #E8548F 0%, #B887FF 100%);
+  --cs-shadow: 0 8rpx 26rpx rgba(240, 98, 159, 0.16);
+
+  --cs-overlay: rgba(60, 30, 48, 0.42);
+  --cs-warn-bg: #FFF4D9;
+  --cs-warn-text: #8A5E08;
+  --cs-danger: #E5484D;
+  --cs-danger-bg: #FFEDEF;
+  --cs-danger-text: #B42318;
+  --cs-ok: #35A96F;
+  --cs-chip-bg: #FFFFFF;
+  --cs-input-bg: #FDF0F6;
+
+  --cs-radius: 28rpx;
+  --cs-font: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+
+  --cs-c1-bg: #FFE4F0; --cs-c1-line: #E8548F;
+  --cs-c2-bg: #E7F7EC; --cs-c2-line: #3FA86A;
+  --cs-c3-bg: #FFF0DC; --cs-c3-line: #E09A32;
+  --cs-c4-bg: #F0E6FF; --cs-c4-line: #9B6BEF;
+  --cs-c5-bg: #FFE6E2; --cs-c5-line: #E8685C;
+  --cs-c6-bg: #E2F4FA; --cs-c6-line: #3CA6C4;
+}
+
+/* ========== 4. cyber 赛博霓虹（深）========== */
+.cs-root.cs-theme-cyber {
+  --cs-bg: #05060B;
+  --cs-bg-soft: #0C101D;
+  --cs-card: #151A2E;
+  --cs-card-line: #1E2740;
+  --cs-text: #E6FBFF;
+  --cs-text-soft: #93B8C4;
+  --cs-text-mute: #74929E;
+  --cs-border: #1E2740;
+
+  --cs-primary: #00E5C0;
+  --cs-primary-deep: #00BFA0;
+  --cs-primary-soft: rgba(0, 229, 192, 0.14);
+  --cs-on-primary: #04140F;
+  --cs-hero: linear-gradient(135deg, #00E5C0 0%, #FF3D81 100%);
+  --cs-shadow: 0 0 28rpx rgba(0, 229, 192, 0.16);
+
+  --cs-overlay: rgba(0, 0, 0, 0.72);
+  --cs-warn-bg: #2B2910;
+  --cs-warn-text: #E6DE72;
+  --cs-danger: #FF3D81;
+  --cs-danger-bg: #2E1020;
+  --cs-danger-text: #FF9DBE;
+  --cs-ok: #00E5C0;
+  --cs-chip-bg: #151A2E;
+  --cs-input-bg: #0C101D;
+
+  --cs-radius: 8rpx;
+  --cs-font: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+
+  --cs-c1-bg: #0E2A2E; --cs-c1-line: #00E5C0;
+  --cs-c2-bg: #1A1630; --cs-c2-line: #B48CFF;
+  --cs-c3-bg: #2E1A28; --cs-c3-line: #FF3D81;
+  --cs-c4-bg: #26260A; --cs-c4-line: #D6E02A;
+  --cs-c5-bg: #0E1F33; --cs-c5-line: #3DA5FF;
+  --cs-c6-bg: #2E1F10; --cs-c6-line: #FF9A3D;
+}
+
+/* ========== 5. retro 复古胶片（浅）========== */
+.cs-root.cs-theme-retro {
+  --cs-bg: #F2E7D3;
+  --cs-bg-soft: #E9DAC0;
+  --cs-card: #FBF5E7;
+  --cs-card-line: #E3D2B6;
+  --cs-text: #2A2118;
+  --cs-text-soft: #574634;
+  --cs-text-mute: #7A6547;
+  --cs-border: #DFCDB0;
+
+  --cs-primary: #B4472F;
+  --cs-primary-deep: #8F3520;
+  --cs-primary-soft: rgba(180, 71, 47, 0.12);
+  --cs-on-primary: #FFFFFF;
+  --cs-hero: linear-gradient(135deg, #8F3520 0%, #C25A3C 100%);
+  --cs-shadow: 0 6rpx 20rpx rgba(90, 68, 40, 0.16);
+
+  --cs-overlay: rgba(51, 41, 31, 0.50);
+  --cs-warn-bg: #FBEBCB;
+  --cs-warn-text: #83600D;
+  --cs-danger: #A93226;
+  --cs-danger-bg: #F7E0DB;
+  --cs-danger-text: #8C2A1D;
+  --cs-ok: #4A7C4E;
+  --cs-chip-bg: #FBF5E7;
+  --cs-input-bg: #F0E4CE;
+
+  --cs-radius: 12rpx;
+  --cs-font: Georgia, 'Songti SC', 'SimSun', 'PingFang SC', serif;
+
+  --cs-c1-bg: #F3E2CC; --cs-c1-line: #B4472F;
+  --cs-c2-bg: #E4EBD9; --cs-c2-line: #4A7C4E;
+  --cs-c3-bg: #F5E7C8; --cs-c3-line: #B98A2B;
+  --cs-c4-bg: #E8E0EF; --cs-c4-line: #6E5A8C;
+  --cs-c5-bg: #F2DED8; --cs-c5-line: #A93226;
+  --cs-c6-bg: #DDE8E8; --cs-c6-line: #3E7276;
+}
+
+/* ========== 6. moss 森林苔原（深）========== */
+.cs-root.cs-theme-moss {
+  --cs-bg: #0C1510;
+  --cs-bg-soft: #131F18;
+  --cs-card: #182620;
+  --cs-card-line: #22332A;
+  --cs-text: #E6F2E8;
+  --cs-text-soft: #A3BFAA;
+  --cs-text-mute: #7E9886;
+  --cs-border: #22332A;
+
+  --cs-primary: #6FBF8B;
+  --cs-primary-deep: #4FA06E;
+  --cs-primary-soft: rgba(111, 191, 139, 0.15);
+  --cs-on-primary: #07140D;
+  --cs-hero: linear-gradient(135deg, #2E6B4A 0%, #6FBF8B 100%);
+  --cs-shadow: 0 8rpx 26rpx rgba(0, 0, 0, 0.45);
+
+  --cs-overlay: rgba(0, 0, 0, 0.65);
+  --cs-warn-bg: #2C2914;
+  --cs-warn-text: #DDD07A;
+  --cs-danger: #E8695F;
+  --cs-danger-bg: #301917;
+  --cs-danger-text: #FFA79F;
+  --cs-ok: #6FBF8B;
+  --cs-chip-bg: #182620;
+  --cs-input-bg: #131F18;
+
+  --cs-radius: 18rpx;
+  --cs-font: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+
+  --cs-c1-bg: #1B3327; --cs-c1-line: #6FBF8B;
+  --cs-c2-bg: #262A1C; --cs-c2-line: #B5C46A;
+  --cs-c3-bg: #10303A; --cs-c3-line: #4FC3DC;
+  --cs-c4-bg: #291F33; --cs-c4-line: #A88CD8;
+  --cs-c5-bg: #33261E; --cs-c5-line: #D89B6A;
+  --cs-c6-bg: #301C26; --cs-c6-line: #D87C9A;
+}
+
+/* ========== 课程卡配色轮转（按课程名 hash 取 0~5）==========
+ * 6 组色板让同一屏的多门课彼此可辨，不再是一片同色。
+ */
+.cs-c0 { background: var(--cs-c1-bg); border-left-color: var(--cs-c1-line); }
+.cs-c1 { background: var(--cs-c2-bg); border-left-color: var(--cs-c2-line); }
+.cs-c2 { background: var(--cs-c3-bg); border-left-color: var(--cs-c3-line); }
+.cs-c3 { background: var(--cs-c4-bg); border-left-color: var(--cs-c4-line); }
+.cs-c4 { background: var(--cs-c5-bg); border-left-color: var(--cs-c5-line); }
+.cs-c5 { background: var(--cs-c6-bg); border-left-color: var(--cs-c6-line); }

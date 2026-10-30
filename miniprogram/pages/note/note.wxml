@@ -1,0 +1,347 @@
+<!--pages/note/note.wxml-->
+<!-- 便签 · 手账风格：奶油白纸张 + 手绘装饰 + 分类筛选 -->
+<view class="note-page themed" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <!-- ===== 装饰层（不参与点击） ===== -->
+  <view class="deco" aria-hidden="true">
+    <text class="deco__item deco__item--tl">✿</text>
+    <text class="deco__item deco__item--tr">❀</text>
+    <text class="deco__wave">〰〰〰</text>
+    <!-- 右上：花瓶与小猫（呼应参考图） -->
+    <view class="deco-vase">
+      <view class="deco-vase__flower">✿</view>
+      <view class="deco-vase__cup"></view>
+    </view>
+    <view class="deco-cat">
+      <view class="deco-cat__ear deco-cat__ear--l"></view>
+      <view class="deco-cat__ear deco-cat__ear--r"></view>
+      <view class="deco-cat__face">
+        <text class="deco-cat__eye"></text>
+        <text class="deco-cat__eye"></text>
+        <view class="deco-cat__mouth"></view>
+      </view>
+      <view class="deco-cat__paw"></view>
+    </view>
+    <!-- 左下：Good Things Ahead 便利贴 + 书堆 -->
+    <view class="deco-sticky">
+      <text class="deco-sticky__l1">Good</text>
+      <text class="deco-sticky__l2">Things</text>
+      <text class="deco-sticky__l3">Ahead</text>
+      <text class="deco-sticky__heart">♡</text>
+    </view>
+    <view class="deco-books">
+      <view class="deco-books__b deco-books__b1"></view>
+      <view class="deco-books__b deco-books__b2"></view>
+      <view class="deco-books__b deco-books__b3"></view>
+    </view>
+    <text class="deco__item deco__item--bl">♡</text>
+    <text class="deco__item deco__item--br">✦</text>
+  </view>
+
+  <!-- ===== 顶部标题区 ===== -->
+  <view class="note-header">
+    <view class="note-header-left">
+      <view class="note-notebook">
+        <view class="note-notebook__rings"></view>
+        <view class="note-notebook__face">
+          <text class="note-notebook__eye"></text>
+          <text class="note-notebook__eye"></text>
+          <text class="note-notebook__mouth"></text>
+        </view>
+      </view>
+      <view class="note-header-text">
+        <view class="note-header-title">便签<text class="note-header-heart">♡</text></view>
+        <view class="note-header-sub">把生活的美好 记下来～</view>
+      </view>
+    </view>
+    <view class="note-header-right">
+      <view class="note-icon-btn" hover-stay-time="0" catchtap="onMenu">☰</view>
+      <view class="note-icon-btn" hover-stay-time="0" catchtap="onSettings">⚙</view>
+    </view>
+  </view>
+
+  <!-- ===== 搜索（手账纸张） ===== -->
+  <view class="note-search">
+    <text class="note-search-icon">🔍</text>
+    <input
+      class="note-search-input"
+      placeholder="搜索便签..."
+      placeholder-class="note-search-ph"
+      value="{{keyword}}"
+      bindinput="onSearch"
+      confirm-type="search"
+    />
+    <text wx:if="{{keyword}}" class="note-search-clear" hover-stay-time="0" catchtap="onClearSearch">✕</text>
+    <view class="note-search-filter {{showColorFilter ? 'is-on' : ''}}" hover-stay-time="0" catchtap="onToggleColorFilter">🎨</view>
+  </view>
+
+  <!-- ===== 分类筛选（横向滚动 · 彩色圆点药丸） ===== -->
+  <scroll-view class="note-cats" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="note-cats-inner">
+      <view
+        class="note-cat {{activeCategory === 'all' ? 'is-active' : ''}}"
+        hover-stay-time="0"
+        catchtap="onCategoryFilter"
+        data-key="all"
+      >
+        <text class="note-cat__icon">♡</text>
+        <text class="note-cat__label">全部</text>
+        <text class="note-cat__count">{{totalCount}}</text>
+      </view>
+      <view
+        wx:for="{{categories}}"
+        wx:key="key"
+        class="note-cat"
+        hover-stay-time="0"
+        catchtap="onCategoryFilter"
+        data-key="{{item.key}}"
+        style="{{activeCategory === item.key ? 'background:' + item.bg + ';color:' + item.ink + ';' : ''}}"
+      >
+        <view class="note-cat__dot" style="background:{{item.bg}};"></view>
+        <text class="note-cat__label">{{item.label}}</text>
+        <text class="note-cat__count">{{item.count}}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- ===== 颜色筛选（折叠，保留原有能力） ===== -->
+  <scroll-view wx:if="{{showColorFilter}}" class="note-filter" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="note-filter-inner">
+      <view
+        wx:for="{{colorFilters}}"
+        wx:key="key"
+        class="note-filter-chip {{activeColor === item.key ? 'is-active' : ''}}"
+        data-key="{{item.key}}"
+        hover-stay-time="0"
+        catchtap="onColorFilter"
+      >
+        <view class="note-filter-dot" style="background:{{item.bg}}"></view>
+        <text>{{item.label}}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- ===== 手账纸张区（左侧螺旋装订） ===== -->
+  <view class="note-paper">
+    <view class="note-paper__rings" aria-hidden="true">
+      <view wx:for="{{[1,2,3,4]}}" wx:key="*this" class="note-paper__ring"></view>
+    </view>
+    <view class="note-paper__body">
+      <!-- 章节标题 -->
+      <view wx:if="{{displayNotes.length > 0}}" class="note-sec-row">
+        <text class="note-sec-title-main">我的小记录 ♡</text>
+        <text class="note-sec-count">{{displayNotes.length}} 张便签</text>
+      </view>
+
+      <!-- 便签墙（双列 · 胶带 · 图钉） -->
+      <view wx:if="{{displayNotes.length > 0}}" class="note-wall">
+        <view
+          wx:for="{{displayNotes}}"
+          wx:key="_id"
+          class="note-card note-card--{{item.seq % 4}} {{item.pinned ? 'is-pinned' : ''}}"
+          data-id="{{item._id}}"
+          hover-stay-time="0"
+          bindtap="onEdit"
+          bindlongpress="onLongPress"
+        >
+          <!-- 顶部胶带（四色循环） -->
+          <view class="note-card-tape" style="background:{{item.tapeColor}}"></view>
+          <!-- 右上图钉 -->
+          <text class="note-card-pinmark" style="color:{{item.catInk}}">{{item.pinIcon}}</text>
+          <!-- 分类标签 -->
+          <text class="note-card-cat" style="background:{{item.catInk}}1A;color:{{item.catInk}};">{{item.catLabel}}</text>
+          <!-- 标题（首行内容） -->
+          <view class="note-card-title">{{item.titleText}}</view>
+          <!-- 正文 -->
+          <view class="note-card-content">{{item.content}}</view>
+          <!-- 底部日期 -->
+          <view class="note-card-foot">
+            <text class="note-card-date">{{item.dateText}} · {{item.catLabel}}</text>
+            <text wx:if="{{item.figureEmoji}}" class="note-card-figure">{{item.figureEmoji}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 空状态（手账插画 + 主按钮） -->
+      <view wx:if="{{displayNotes.length === 0}}" class="note-empty">
+        <view class="note-empty-art">
+          <text class="note-empty-star">✦</text>
+          <text class="note-empty-heart">♡</text>
+          <!-- 小熊（趴在本子顶上） -->
+          <view class="note-empty-bear">
+            <view class="note-empty-bear__ear note-empty-bear__ear--l"></view>
+            <view class="note-empty-bear__ear note-empty-bear__ear--r"></view>
+            <view class="note-empty-bear__head">
+              <view class="note-empty-bear__eyes"><text></text><text></text></view>
+              <view class="note-empty-bear__muzzle"></view>
+            </view>
+          </view>
+          <!-- 本子（笑脸 + 爱心 + 横线） -->
+          <view class="note-empty-book">
+            <view class="note-empty-book__spiral">
+              <view wx:for="{{[1,2,3,4]}}" wx:key="*this" class="note-empty-book__coil"></view>
+            </view>
+            <view class="note-empty-book__smile">
+              <text></text><text></text>
+            </view>
+            <view class="note-empty-book__mouth"></view>
+            <text class="note-empty-book__heart">♡</text>
+            <view class="note-empty-book__lines">
+              <view></view><view></view>
+            </view>
+          </view>
+          <!-- 笔筒 + 粉色钢笔 -->
+          <view class="note-empty-cup">
+            <view class="note-empty-cup__pen note-empty-cup__pen--1"></view>
+            <view class="note-empty-cup__pen note-empty-cup__pen--2"></view>
+            <view class="note-empty-cup__pen note-empty-cup__pen--3"></view>
+            <view class="note-empty-cup__body"></view>
+          </view>
+          <view class="note-empty-fountain">
+            <view class="note-empty-fountain__nip"></view>
+            <view class="note-empty-fountain__barrel"></view>
+          </view>
+          <text class="note-empty-tulip">🌷</text>
+        </view>
+        <view class="note-empty-title">{{totalCount === 0 ? '还没有便签～' : '没有匹配的便签'}}</view>
+        <view class="note-empty-desc">
+          <text>{{totalCount === 0 ? '点击下方按钮，记录下你的灵感与生活吧！' : '换个关键词或分类试试'}}</text>
+        </view>
+        <view class="note-empty-btn" hover-stay-time="0" catchtap="onFAB">
+          <view class="note-empty-btn__ring"></view>
+          <text>＋ 添加便签</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 悬浮贴纸按钮 ===== -->
+  <view class="note-fab-wrap">
+    <text class="note-fab-spark note-fab-spark--1">✦</text>
+    <text class="note-fab-spark note-fab-spark--2">✦</text>
+    <view class="note-fab" hover-stay-time="0" catchtap="onFAB">
+      <view class="note-fab__ring"></view>
+      <text class="note-fab__plus">＋</text>
+    </view>
+  </view>
+
+  <!-- ============ 弹窗：编辑 / 外观设置 ============ -->
+  <view wx:if="{{modalOpen}}" class="note-modal-mask" catchtap="onModalClose">
+    <view class="note-modal" catchtap="onModalStop">
+      <view class="note-modal-title">
+        {{modalMode === 'defaults' ? '便签外观设置' : (editingId ? '编辑便签' : '新建便签')}}
+      </view>
+      <view class="note-modal-close" hover-stay-time="0" catchtap="onModalClose">✕</view>
+
+      <!-- 内容输入（仅编辑模式） -->
+      <block wx:if="{{modalMode === 'editor'}}">
+        <input
+          class="note-title-input"
+          placeholder="给这张便签起个名字…"
+          placeholder-class="note-textarea-ph"
+          value="{{draft.title}}"
+          maxlength="20"
+          bindinput="onDraftTitle"
+        />
+        <textarea
+          class="note-textarea"
+          placeholder="写点什么..."
+          placeholder-class="note-textarea-ph"
+          value="{{draft.content}}"
+          maxlength="500"
+          auto-height
+          bindinput="onDraftInput"
+        />
+        <view class="note-count">{{draftCount}}/500</view>
+      </block>
+
+      <!-- 实时预览 -->
+      <view wx:if="{{modalMode === 'defaults'}}" class="note-settings-hint">新便签将默认使用此外观</view>
+      <view class="note-preview" style="{{previewStyle}}">
+        <view class="note-preview-figure" wx:if="{{previewFigure}}">{{previewFigure}}</view>
+        <view class="note-preview-content" style="color:{{previewInk}}">{{previewText}}</view>
+      </view>
+
+      <!-- 分类 -->
+      <view class="note-sec-title">分类</view>
+      <view class="note-cat-row">
+        <view
+          wx:for="{{categoryOptions}}"
+          wx:key="key"
+          class="note-cat-pick {{draft.category === item.key ? 'is-active' : ''}}"
+          style="{{draft.category === item.key ? 'background:' + item.bg + ';color:' + item.ink + ';' : ''}}"
+          data-key="{{item.key}}"
+          hover-stay-time="0"
+          catchtap="onCategoryPick"
+        >
+          <text class="note-cat-pick__icon">{{item.icon}}</text>
+          <text>{{item.label}}</text>
+        </view>
+      </view>
+
+      <!-- 颜色 -->
+      <view class="note-sec-title">颜色</view>
+      <view class="note-swatch-grid">
+        <view
+          wx:for="{{palette}}"
+          wx:key="key"
+          class="note-swatch {{draft.colorKey === item.key ? 'is-active' : ''}}"
+          style="background:{{item.bg}}"
+          data-key="{{item.key}}"
+          hover-stay-time="0"
+          catchtap="onColorPick"
+        >
+          <view wx:if="{{draft.colorKey === item.key}}" class="note-swatch-check">✓</view>
+        </view>
+      </view>
+
+      <!-- 背景样式 -->
+      <view class="note-sec-title">背景样式</view>
+      <view class="note-chip-row">
+        <view
+          wx:for="{{patterns}}"
+          wx:key="key"
+          class="note-chip {{draft.patternKey === item.key ? 'is-active' : ''}}"
+          data-key="{{item.key}}"
+          hover-stay-time="0"
+          catchtap="onPatternPick"
+        >
+          <text class="note-chip-emoji">{{item.emoji}}</text>
+          <text class="note-chip-label">{{item.label}}</text>
+        </view>
+      </view>
+
+      <!-- 可爱图样 -->
+      <view class="note-sec-title">可爱图样</view>
+      <view class="note-chip-row note-chip-row-fig">
+        <view
+          wx:for="{{figures}}"
+          wx:key="key"
+          class="note-chip note-chip-fig {{draft.figureKey === item.key ? 'is-active' : ''}}"
+          data-key="{{item.key}}"
+          hover-stay-time="0"
+          catchtap="onFigurePick"
+        >
+          <text class="note-chip-fig-emoji">{{item.emoji}}</text>
+          <text class="note-chip-label">{{item.label}}</text>
+        </view>
+      </view>
+
+      <!-- 置顶（仅编辑模式） -->
+      <block wx:if="{{modalMode === 'editor'}}">
+        <view class="note-switch-row">
+          <text>置顶显示</text>
+          <switch checked="{{draft.pinned}}" color="#F3A6B4" bindchange="onPinToggle" />
+        </view>
+      </block>
+
+      <!-- 操作按钮 -->
+      <view class="note-modal-actions">
+        <view class="note-btn note-btn-cancel" hover-stay-time="0" catchtap="onModalClose">取消</view>
+        <view class="note-btn note-btn-save" hover-stay-time="0" catchtap="onModalSave">
+          {{modalMode === 'defaults' ? '保存默认' : '保存'}}
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

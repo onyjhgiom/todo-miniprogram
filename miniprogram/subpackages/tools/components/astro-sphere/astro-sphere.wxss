@@ -1,0 +1,29 @@
+/* components/astro-sphere/astro-sphere.wxss
+ * 画布容器：背景透明，坐在页面宇宙渐变之上；尺寸由 height 属性决定。
+ * 单位说明：内部尺寸统一走 calc(N * var(--u, 1rpx))，与页面同一套缩放参考系
+ *   （--u 为自定义属性，可穿透组件样式隔离继承进来；取不到时回退 1rpx）。
+ * 注意：自定义组件默认样式隔离，故这里只写组件内部结构，页面级配色走 CSS 变量继承。
+ */
+.sphere-wrap {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+.sphere-cv {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  /* 让触摸事件走 bindtouch* 而不是被页面滚动抢走 */
+  touch-action: none;
+}
+.sphere-hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(8 * var(--u, 1rpx));
+  text-align: center;
+  font-size: calc(22 * var(--u, 1rpx));
+  letter-spacing: 1rpx;
+  color: rgba(159, 163, 196, 0.72);
+  pointer-events: none;
+}

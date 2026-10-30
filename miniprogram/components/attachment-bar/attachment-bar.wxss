@@ -1,0 +1,144 @@
+/* attachment-bar */
+.attachment-bar { padding: 8rpx 0; }
+.attach-title { font-size: 24rpx; color: var(--color-text-soft); font-weight: 500; margin-bottom: 16rpx; }
+.attach-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180rpx, 1fr));
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+}
+.attach-img-wrap { position: relative; aspect-ratio: 1; border-radius: 12rpx; overflow: hidden; }
+.attach-img { width: 100%; height: 100%; }
+.attach-img-del {
+  position: absolute; top: 6rpx; right: 6rpx;
+  width: 36rpx; height: 36rpx;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28rpx; font-weight: 700;
+}
+.attach-add {
+  aspect-ratio: 1;
+  border: 2rpx dashed var(--color-border);
+  border-radius: 12rpx;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 56rpx; color: var(--color-text-mute);
+  transition: all 200ms;
+}
+.attach-add:active { background: var(--color-bg-soft); color: var(--color-primary); border-color: var(--color-primary); }
+
+.attach-add-row {
+  border: 2rpx dashed var(--color-border);
+  border-radius: 12rpx;
+  padding: 20rpx;
+  text-align: center;
+  color: var(--color-text-mute);
+  font-size: 24rpx;
+  margin-bottom: 16rpx;
+  transition: all 200ms;
+}
+.attach-add-row:active { background: var(--color-bg-soft); color: var(--color-primary); border-color: var(--color-primary); }
+
+.attach-links { display: flex; flex-direction: column; gap: 12rpx; }
+.attach-link-card {
+  display: flex; align-items: center; gap: 12rpx;
+  background: var(--color-bg-soft);
+  border-radius: 12rpx;
+  padding: 16rpx;
+}
+.attach-link-icon { font-size: 36rpx; flex-shrink: 0; }
+.attach-link-info { flex: 1; min-width: 0; }
+.attach-link-title { font-size: 26rpx; color: var(--color-text); font-weight: 500; }
+.attach-link-url { font-size: 22rpx; color: var(--color-text-mute); margin-top: 4rpx; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.attach-link-del {
+  width: 40rpx; height: 40rpx;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32rpx; color: var(--color-text-mute);
+}
+.attach-link-del:active { color: var(--color-danger); }
+
+/* 上传中遮罩 */
+.attach-img-mask {
+  position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex; align-items: center; justify-content: center;
+}
+.attach-spinner {
+  width: 40rpx; height: 40rpx;
+  border: 4rpx solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: attach-spin 800ms linear infinite;
+}
+@keyframes attach-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 上传失败：图片仅存在于本机，冷启动后会失效 */
+.attach-img-fail {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  background: rgba(192, 82, 47, 0.92);
+  color: #ffffff;
+  font-size: 20rpx; line-height: 1.4;
+  text-align: center;
+  padding: 4rpx 0;
+}
+/* ---------- 视频瓦片（封面 + 播放角标 + 时长角标） ---------- */
+.attach-img-wrap--video {
+  background: rgba(0, 0, 0, 0.72);
+}
+/* 封面缺失时的深色占位底（冷启动封面失效 / 封面上传失败） */
+.attach-video-blank {
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.12) 0%, rgba(0, 0, 0, 0) 62%),
+    linear-gradient(160deg, #2A2118 0%, #14100C 100%);
+}
+.attach-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 56rpx;
+  height: 56rpx;
+  margin: -28rpx 0 0 -28rpx;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  border: 2rpx solid rgba(255, 255, 255, 0.72);
+  color: #ffffff;
+  font-size: 24rpx;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 4rpx;
+  box-sizing: border-box;
+}
+.attach-dur {
+  position: absolute;
+  right: 6rpx;
+  bottom: 6rpx;
+  padding: 2rpx 8rpx;
+  border-radius: 6rpx;
+  background: rgba(0, 0, 0, 0.58);
+  color: #ffffff;
+  font-size: 18rpx;
+  line-height: 1.5;
+}
+.attach-mask-text {
+  margin-top: 10rpx;
+  font-size: 18rpx;
+  color: #ffffff;
+  opacity: 0.9;
+}
+/* 上传中遮罩内的 spinner 与文字纵向排列 */
+.attach-img-mask {
+  flex-direction: column;
+}
+
+/* ---------- 视频入口 ---------- */
+.attach-add-row--video {
+  border-style: solid;
+  border-color: var(--color-border);
+}

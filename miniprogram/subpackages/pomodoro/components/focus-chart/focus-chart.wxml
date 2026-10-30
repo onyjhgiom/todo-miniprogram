@@ -1,0 +1,10 @@
+<!--components/focus-chart/focus-chart.wxml-->
+<!-- 纯展示型图表：一张 canvas 承载柱状图与面积曲线两种形态。
+     高度由外部以 rpx 下发（走 --u 体系），宽度自适应容器。 -->
+<canvas
+  id="fcCv"
+  class="fc__cv"
+  type="2d"
+  style="height: calc({{height}} * var(--u, 1rpx));"
+  disable-scroll="{{true}}"
+></canvas>

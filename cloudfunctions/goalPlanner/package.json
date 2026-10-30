@@ -1,0 +1,12 @@
+{
+  "name": "goalPlanner",
+  "version": "1.0.0",
+  "description": "目标拆解云函数：调用文本大模型把目标拆解为可执行的子任务序列，严格输出 JSON 并做结构级校验",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  },
+  "permissions": {
+    "openapi": []
+  }
+}

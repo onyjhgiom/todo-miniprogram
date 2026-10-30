@@ -1,0 +1,92 @@
+<view class="gs tk {{themeCls}}">
+  <!-- 顶部：返回 / 标题 / 计时 / 计分 -->
+  <view class="gs__head grain">
+    <view class="row gs__top">
+      <view class="gs__back ic ic-back" bindtap="onBack"></view>
+      <text class="gs__title serif heavy ellipsis">{{title}}</text>
+      <view class="gs__pause ic {{paused ? 'ic-play' : 'ic-pause'}}" bindtap="onPause"></view>
+    </view>
+    <view class="row row--between gs__meta">
+      <view class="row gs__metaItem">
+        <view class="ic ic-clock ic--sm"></view>
+        <text class="t-sm strong">{{timeText}}</text>
+      </view>
+      <text class="t-sm strong gs__stat">{{statText}}</text>
+    </view>
+  </view>
+
+  <!-- 中部：游戏主区域（插槽） -->
+  <view class="gs__body">
+    <slot></slot>
+  </view>
+
+  <!-- 底部：重置 / 提示 / 首页 -->
+  <view class="gs__foot">
+    <view class="gs__btn gs__btn--ghost" bindtap="onReset">
+      <view class="ic ic-trash ic--sm"></view><text class="t-sm">重置</text>
+    </view>
+    <view wx:if="{{showHint}}" class="gs__btn gs__btn--ghost" bindtap="onHint">
+      <view class="ic ic-note ic--sm"></view><text class="t-sm">提示</text>
+    </view>
+    <view class="gs__btn gs__btn--primary" bindtap="onHome">
+      <view class="ic ic-home ic--sm"></view><text class="t-sm">主页</text>
+    </view>
+  </view>
+
+  <!-- 通关庆祝层：由外部传入 win 触发，浮在游戏区之上 -->
+  <view wx:if="{{win}}" class="gs__win">
+    <view class="gs__winCard card">
+      <view class="gs__winGlow"></view>
+
+      <view class="gs__winBadge">
+        <text class="gs__winBadgeTxt serif">通关</text>
+      </view>
+
+      <text class="gs__winTitle serif heavy">恭喜通关</text>
+      <text wx:if="{{winSub}}" class="gs__winSub t-sm muted-2">{{winSub}}</text>
+
+      <view wx:if="{{winStats.length}}" class="gs__winStats">
+        <view wx:for="{{winStats}}" wx:key="label" class="gs__winStat">
+          <text class="gs__winStatVal serif heavy">{{item.value}}</text>
+          <text class="gs__winStatLbl t-xs muted-2">{{item.label}}</text>
+        </view>
+      </view>
+
+      <view wx:if="{{winNewBest}}" class="gs__winBest">
+        <text class="t-xs">🎉 刷新个人纪录</text>
+      </view>
+
+      <text wx:if="{{winQuote}}" class="gs__winQuote t-sm">「{{winQuote}}」</text>
+
+      <view class="gs__winBtns">
+        <view class="gs__winBtn gs__winBtn--ghost" catchtap="onWinHome"><text class="t-sm">返回主页</text></view>
+        <view class="gs__winBtn gs__winBtn--primary" catchtap="onWinAgain"><text class="t-sm">再来一局</text></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 失败层：由外部传入 fail 触发；可选择「继续尝试」而不强制重来 -->
+  <view wx:if="{{fail && !win}}" class="gs__fail">
+    <view class="gs__winCard card gs__failCard">
+      <view class="gs__failBadge">
+        <text class="gs__failBadgeTxt serif">迷路</text>
+      </view>
+
+      <text class="gs__winTitle serif heavy">这局有点绕</text>
+      <text wx:if="{{failSub}}" class="gs__winSub t-sm muted-2">{{failSub}}</text>
+
+      <view wx:if="{{failStats.length}}" class="gs__winStats">
+        <view wx:for="{{failStats}}" wx:key="label" class="gs__winStat">
+          <text class="gs__winStatVal serif heavy">{{item.value}}</text>
+          <text class="gs__winStatLbl t-xs muted-2">{{item.label}}</text>
+        </view>
+      </view>
+
+      <view class="gs__winBtns">
+        <view class="gs__winBtn gs__winBtn--ghost" catchtap="onFailContinue"><text class="t-sm">继续走</text></view>
+        <view class="gs__winBtn gs__winBtn--primary" catchtap="onFailRetry"><text class="t-sm">{{failBtnText}}</text></view>
+      </view>
+      <view class="gs__failHome" catchtap="onFailHome"><text class="t-xs muted-2">返回主页</text></view>
+    </view>
+  </view>
+</view>

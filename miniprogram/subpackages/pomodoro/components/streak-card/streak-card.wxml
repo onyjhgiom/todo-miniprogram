@@ -1,0 +1,23 @@
+<!--components/streak-card/streak-card.wxml-->
+<!-- 坚持记录（需求十八）：7 个点表示最近 7 天，已坚持的点亮、未坚持的空心。
+     点位用 flex 均分而不是绝对定位，7 个点永远是等距的，不会因天数变化而错位。 -->
+<view class="streak">
+  <view class="streak__top">
+    <text class="streak__cap">坚持记录</text>
+    <view class="streak__days">
+      <text class="streak__days-n">{{days}}</text>
+      <text class="streak__days-u"> 天</text>
+    </view>
+  </view>
+
+  <view class="streak__dots">
+    <view
+      wx:for="{{dots}}"
+      wx:key="*this"
+      wx:for-index="i"
+      class="streak__dot {{item ? 'is-on' : ''}}"
+    ></view>
+  </view>
+
+  <text class="streak__msg">{{message}}</text>
+</view>

@@ -1,0 +1,157 @@
+<!-- subpackages/tools/pages/civil/compare.wxml -->
+<view class="cc themed" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <!-- ===== 顶部说明 ===== -->
+  <view class="cc__hero" style="background:{{heroGradient}}">
+    <view class="cc__hero-title">⚖️ 编制科普 · 对比库</view>
+    <view class="cc__hero-sub">学生最容易吃亏的地方：分不清「有没有编」。这里全部前置标注。</view>
+    <view class="cc__hero-stats">
+      <view class="cc__hs">
+        <text class="cc__hs-n">{{bianCount}}</text>
+        <text class="cc__hs-k">有编制类型</text>
+      </view>
+      <view class="cc__hs-line"></view>
+      <view class="cc__hs">
+        <text class="cc__hs-n">{{unbianCount}}</text>
+        <text class="cc__hs-k">无编制类型</text>
+      </view>
+      <view class="cc__hs-line"></view>
+      <view class="cc__hs">
+        <text class="cc__hs-n">{{tabs[2].count}}</text>
+        <text class="cc__hs-k">应届科普问答</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== tabs ===== -->
+  <view class="cc__tabs">
+    <view class="cc__tab {{tab === item.key ? 'cc__tab--on' : ''}}"
+      wx:for="{{tabs}}" wx:key="key" data-key="{{item.key}}" bindtap="onTab">
+      {{item.label}}<text class="cc__tab-n">{{item.count}}</text>
+    </view>
+  </view>
+
+  <!-- ===== Tab1：编制性质 ===== -->
+  <block wx:if="{{tab === 'compile'}}">
+    <view class="cc__tip">
+      <text class="cc__tip-icon">💡</text>
+      <text class="cc__tip-t">判断标准只有一条：看招录公告里写的是「占编/入编」还是「合同制/派遣」。带编的写「编制」，没编的一定会写清用工形式。</text>
+    </view>
+
+    <view class="cc__c {{item.open ? 'cc__c--on' : ''}}" wx:for="{{compiles}}" wx:key="key">
+      <view class="cc__c-head" data-key="{{item.key}}" bindtap="onToggleCompile"
+        hover-class="cc__press" hover-stay-time="50">
+        <view class="cc__c-dot" style="background:{{item.color}}"></view>
+        <view class="cc__c-main">
+          <view class="cc__c-title">
+            <text class="cc__c-name">{{item.label}}</text>
+            <text class="cx-tag cx-tag--{{item.tone}}">{{item.hasBian ? '有编' : '无编'}}</text>
+          </view>
+          <view class="cc__c-sub">
+            <text class="cc__c-level" style="color:{{item.color}};background:{{item.soft}}">{{item.levelLabel}}</text>
+            <text class="cc__c-count">岗位库 {{item.count}} 条</text>
+          </view>
+        </view>
+        <text class="cc__c-arrow">{{item.open ? '▾' : '▸'}}</text>
+      </view>
+
+      <view class="cc__c-body" wx:if="{{item.open}}">
+        <text class="cc__c-desc">{{item.desc}}</text>
+
+        <view class="cc__c-block">
+          <view class="cc__c-block-t cc__c-block-t--pro">✅ 优势</view>
+          <view class="cc__li" wx:for="{{item.pros}}" wx:for-item="p" wx:key="*this">
+            <text class="cc__dot">·</text><text class="cc__li-t">{{p}}</text>
+          </view>
+        </view>
+
+        <view class="cc__c-block">
+          <view class="cc__c-block-t cc__c-block-t--con">⚠️ 劣势 / 注意</view>
+          <view class="cc__li" wx:for="{{item.cons}}" wx:for-item="p" wx:key="*this">
+            <text class="cc__dot cc__dot--con">·</text><text class="cc__li-t">{{p}}</text>
+          </view>
+        </view>
+
+        <view class="cc__warn" wx:if="{{item.warning}}">
+          <text class="cc__warn-icon">🚨</text>
+          <text class="cc__warn-t">{{item.warning}}</text>
+        </view>
+
+        <block wx:if="{{item.examples.length}}">
+          <view class="cc__eg-t">示例岗位</view>
+          <view class="cc__eg" wx:for="{{item.examples}}" wx:for-item="e" wx:key="*this">
+            <text class="cc__eg-t2">{{e}}</text>
+          </view>
+        </block>
+
+        <view class="cc__go" data-key="{{item.key}}" bindtap="onCompileJobs"
+          hover-class="cc__press" hover-stay-time="50">
+          看「{{item.short}}」的全部岗位 ›
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== Tab2：三赛道对比 ===== -->
+  <block wx:if="{{tab === 'compare'}}">
+    <view class="cc__tip">
+      <text class="cc__tip-icon">📌</text>
+      <text class="cc__tip-t">同一件事在三条赛道上完全不同。先看「编制性质」「考试难度」「适合人群」三行，基本就能定位自己该主攻哪条。</text>
+    </view>
+
+    <view class="cc__cols">
+      <view class="cc__col" wx:for="{{cols}}" wx:key="key" data-key="{{item.key}}" bindtap="onTrack"
+        hover-class="cc__press" hover-stay-time="50">
+        <text class="cc__col-icon">{{item.icon}}</text>
+        <text class="cc__col-name" style="color:{{item.color}}">{{item.short}}</text>
+        <text class="cc__col-go">查看 ›</text>
+      </view>
+    </view>
+
+    <view class="cc__row" wx:for="{{rows}}" wx:key="dim">
+      <view class="cc__row-dim">{{item.dim}}</view>
+      <view class="cc__cell">
+        <text class="cc__cell-k" style="color:{{cols[0].color}}">{{cols[0].short}}</text>
+        <text class="cc__cell-v">{{item.gk}}</text>
+      </view>
+      <view class="cc__cell">
+        <text class="cc__cell-k" style="color:{{cols[1].color}}">{{cols[1].short}}</text>
+        <text class="cc__cell-v">{{item.sy}}</text>
+      </view>
+      <view class="cc__cell">
+        <text class="cc__cell-k" style="color:{{cols[2].color}}">{{cols[2].short}}</text>
+        <text class="cc__cell-v">{{item.yg}}</text>
+      </view>
+      <view class="cc__row-hint">
+        <text class="cc__row-hint-icon">↳</text>
+        <text class="cc__row-hint-t">{{item.hint}}</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== Tab3：应届生身份 ===== -->
+  <block wx:if="{{tab === 'faq'}}">
+    <view class="cc__tip">
+      <text class="cc__tip-icon">🎓</text>
+      <text class="cc__tip-t">应届身份是体制内最值钱的筹码——大量好岗位只对你们开放。这里把最容易踩雷的 8 个问题讲清楚。</text>
+    </view>
+
+    <view class="cc__faq" wx:for="{{faqs}}" wx:key="q">
+      <view class="cc__faq-q" data-i="{{index}}" bindtap="onToggleFaq"
+        hover-class="cc__press" hover-stay-time="50">
+        <text class="cc__faq-qmark">Q{{index + 1}}</text>
+        <text class="cc__faq-qt">{{item.q}}</text>
+        <text class="cc__faq-arrow">{{item.open ? '▾' : '▸'}}</text>
+      </view>
+      <view class="cc__faq-a" wx:if="{{item.open}}">
+        <text class="cc__faq-at">{{item.a}}</text>
+      </view>
+    </view>
+
+    <view class="cc__faq-note">
+      ⚠️ 各省口径不同，报名前请以本省（市）当年招录公告原文为准。本页为通用规则整理，可作决策起点，不作报考依据。
+    </view>
+  </block>
+
+  <view class="cc__pad"></view>
+</view>

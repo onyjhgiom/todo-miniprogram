@@ -1,0 +1,291 @@
+<!--pages/index/index.wxml-->
+<view
+  class="page themed home-style-{{homeStyle}} home-bg-{{homeBg}}"
+  data-theme="{{theme}}"
+  style="{{themeStyle}};{{bgStyle}}"
+>
+  <!-- 电影级舞台层：随主题切换背景场景（暮色湖景/极光/星尘/霓虹网格/墨韵）。
+       homeBg=plain（纯净底色）时用户明确不要装饰，故跳过本层；
+       homeBg=liquid（液态琉璃）自带完整流光背景，再叠电影场景会互相污染，同样跳过。 -->
+  <fx-stage
+    wx:if="{{homeBg !== 'plain' && homeBg !== 'liquid'}}"
+    mode="{{fxMode}}"
+    src="{{fxSrc}}"
+    full="{{fxFull}}"
+    rays="{{true}}"
+    dust="{{true}}"
+    topglow="{{true}}"
+    level="{{fxLevel}}"
+  />
+
+  <!-- 环境氛围层（主页「背景」维度）：ambient-layer--{{homeBg}} 决定装饰形态
+       · warm  暖晖流云（默认）   · plain  纯净底色（全关）
+       · aurora 极光流彩          · nebula 星尘夜空
+       · lattice 月光栅格         · dots   浮点粒子
+       · liquid 液态琉璃（流光绸缎 + 悬浮玻璃球，含专属底色与玻璃变量）
+       三种光斑 + 一个纹理层（ambient-fx）由各背景规则分别启停。 -->
+  <view class="ambient-layer ambient-layer--{{homeBg}}">
+    <view class="ambient-blob ambient-blob--1"></view>
+    <view class="ambient-blob ambient-blob--2"></view>
+    <view class="ambient-blob ambient-blob--3"></view>
+    <view class="ambient-fx"></view>
+    <!-- 液态琉璃专属装饰（仅 liquid 档渲染，pointer-events 随父层关闭）：
+         全场流动渐变 → 虹彩飘带×3 → 斜贯流光带 → 漩涡柔光 → 星屑 → 卫星气泡×2 → 气泡×2 → 焦散光斑 → 玻璃波浪×2 → 顶部折射高光 -->
+    <block wx:if="{{homeBg === 'liquid'}}">
+      <view class="liq-flow"></view>
+      <view class="liq-wave liq-wave--back"></view>
+      <view class="liq-ribbon liq-ribbon--a"></view>
+      <view class="liq-ribbon liq-ribbon--b"></view>
+      <view class="liq-ribbon liq-ribbon--c"></view>
+      <view class="liq-beam"></view>
+      <view class="liq-swirl"></view>
+      <view class="liq-spark"></view>
+      <view class="liq-caustic"></view>
+      <view class="liq-orb liq-orb--c"></view>
+      <view class="liq-orb liq-orb--d"></view>
+      <view class="liq-orb liq-orb--e"></view>
+      <view class="liq-orb liq-orb--f"></view>
+      <view class="liq-wave liq-wave--front"></view>
+      <view class="liq-edge-glow"></view>
+    </block>
+  </view>
+
+  <!-- 内容层：整体压在氛围层之上 -->
+  <view class="page-content ambient-content">
+    <!-- 顶部 hero 统计 -->
+    <stats-card
+      active="{{activeCount}}"
+      today-done="{{todayDone}}"
+      week-done="{{weekDone}}"
+      total-done="{{doneCount}}"
+      streak="{{streak}}"
+      theme="{{theme}}"
+    />
+
+    <!-- 重要日 · 考研倒计时联动 -->
+    <view class="imp-banner" bindtap="onOpenImportantDay" wx:if="{{impReady}}">
+      <view class="imp-banner__l">
+        <text class="imp-banner__tag">🎓 考研 · {{impKaoyan.nodeName}}</text>
+        <text class="imp-banner__big">还有 <text class="imp-banner__n">{{impKaoyan.days}}</text> 天</text>
+        <text class="imp-banner__sub">{{impKaoyan.dateText}} · {{impKaoyan.weekdayText}}</text>
+      </view>
+      <view class="imp-banner__div"></view>
+      <view class="imp-banner__r" wx:if="{{impNext}}">
+        <text class="imp-banner__lab">最近的重要日</text>
+        <text class="imp-banner__t">{{impNext.title}}</text>
+        <text class="imp-banner__c">{{impNext.countdownText}}</text>
+      </view>
+      <text class="imp-banner__arrow">›</text>
+    </view>
+
+    <!-- 视图切换 -->
+    <view-switcher current="list" bind:change="onChangeView" />
+
+    <!-- 筛选区 -->
+    <filter-bar
+      filter="{{filter}}"
+      keyword="{{keyword}}"
+      filters="{{filters}}"
+      counts="{{ { all: totalCount, active: activeCount, done: doneCount } }}"
+      bind:changeFilter="onChangeFilter"
+      bind:changeKeyword="onChangeKeyword"
+      bind:openFilter="onOpenFilter"
+      bind:clearFilter="onClearFilter"
+      bind:resetFilters="onResetFilters"
+    />
+
+    <!-- 今日聚焦：最多 3 件 -->
+    <view wx:if="{{focusItems.length}}" class="home-focus">
+      <view class="home-focus__hd">
+        <text class="home-focus__t">🌿 今天一定要做的 3 件事</text>
+        <text class="home-focus__c">{{focusItems.length}}/3</text>
+      </view>
+      <view
+        wx:for="{{focusItems}}" wx:key="_id" wx:for-item="f"
+        class="home-focus__row" data-id="{{f._id}}" bindtap="onOpenDetail"
+      >
+        <view class="home-focus__check" catchtap="onToggleRow" data-id="{{f._id}}" hover-class="home-focus__check--tap">
+          <text class="home-focus__tick" wx:if="{{f.completed}}">✓</text>
+        </view>
+        <text class="home-focus__content {{f.completed ? 'is-done' : ''}}">{{f.content}}</text>
+      </view>
+    </view>
+
+    <!-- 效率小工具入口：碎片时间匹配 + 年度回忆录 -->
+    <view class="home-tools">
+      <view class="home-tool" hover-class="home-tool--tap" bindtap="onOpenFree">
+        <text class="home-tool__i">⏳</text>
+        <text class="home-tool__t">碎片时间</text>
+      </view>
+      <view class="home-tool" hover-class="home-tool--tap" bindtap="onOpenYearReview">
+        <text class="home-tool__i">📊</text>
+        <text class="home-tool__t">年度回忆录</text>
+      </view>
+    </view>
+
+    <!-- 碎片时间匹配弹层 -->
+    <view wx:if="{{freeOpen}}" class="sheet-mask" bindtap="onCloseFree"></view>
+    <view wx:if="{{freeOpen}}" class="sheet sheet--free">
+      <view class="sheet__hd">
+        <text class="sheet__title">⏳ 碎片时间能做什么</text>
+        <text class="sheet__close" bindtap="onCloseFree">✕</text>
+      </view>
+      <view class="free-presets">
+        <view
+          wx:for="{{freePresets}}" wx:key="*this"
+          class="free-preset {{freeMinutes === item ? 'is-on' : ''}}"
+          data-min="{{item}}" bindtap="onPickFree"
+        >{{item}} 分钟</view>
+      </view>
+      <view class="free-list" wx:if="{{freeMatches.length}}">
+        <view
+          wx:for="{{freeMatches}}" wx:key="_id" wx:for-item="m"
+          class="free-row" data-id="{{m._id}}" bindtap="onOpenDetail"
+        >
+          <text class="free-row__t">{{m.content}}</text>
+          <text class="free-row__m">{{m.estimatedMinutes}} 分钟</text>
+        </view>
+      </view>
+      <view class="free-empty" wx:else>
+        <text class="free-empty__t">这 {{freeMinutes}} 分钟还没有可匹配的小事</text>
+        <text class="free-empty__s">给待办填上「预估耗时」，就能被推荐啦</text>
+      </view>
+    </view>
+
+    <!-- 加载态（仅无数据时显示，刷新不遮挡已有列表） -->
+    <view class="loading" wx:if="{{loading && vCount === 0}}">
+      <view class="loading__spinner"></view>
+      <text class="loading__text">加载中…</text>
+    </view>
+
+    <!-- 空态 -->
+    <view wx:elif="{{vCount === 0}}">
+      <empty-state
+        icon="{{totalCount === 0 ? '✎' : '🔍'}}"
+        title="{{emptyTitle}}"
+        subtitle="{{emptySubtitle}}"
+        action-text="{{totalCount === 0 ? '新建第一项' : ''}}"
+        bind:action="onTapAdd"
+      />
+    </view>
+
+    <!-- ============ 虚拟列表：超大清单（>120 条）只渲染可视窗口 ============ -->
+    <scroll-view
+      wx:elif="{{virtual}}"
+      class="list"
+      scroll-y
+      enhanced
+      show-scrollbar="{{false}}"
+      enable-back-to-top
+      bindscroll="onListScroll"
+    >
+      <!-- 撑高容器：让滚动条与滚动范围覆盖全部数据 -->
+      <view class="vwrapper">
+        <view class="vphantom" style="height:{{vTotalHeight}}px"></view>
+        <view class="vrows">
+          <view
+            class="vrow"
+            wx:for="{{windowItems}}"
+            wx:key="_id"
+            style="height:{{rowH}}px; top:{{item.__top}}px"
+          >
+            <view class="vitem {{item.completed ? 'vitem--done' : ''}}">
+              <view
+                class="vitem__check {{item.completed ? 'vitem__check--on' : ''}}"
+                data-id="{{item._id}}"
+                catchtap="onToggleRow"
+              >
+                <text class="vitem__check-icon" wx:if="{{item.completed}}">✓</text>
+              </view>
+
+              <view class="vitem__body" data-id="{{item._id}}" bindtap="onOpenDetail">
+                <text class="vitem__content">{{item.content}}</text>
+              <view
+                class="vitem__sub"
+                wx:if="{{(!item.completed && item.cdKey !== 'none') || item.location || item.tagText || (item.attachments && item.attachments.length)}}"
+              >
+                <text
+                  wx:if="{{!item.completed && item.cdKey !== 'none'}}"
+                  class="vitem__pill vitem__pill--{{item.cdKey}}"
+                >{{item.cdText}}</text>
+                <text wx:if="{{item.location}}" class="vitem__loc">⌖{{item.location}}</text>
+                <text wx:if="{{item.tagText}}" class="vitem__tags">{{item.tagText}}</text>
+                <text wx:if="{{item.attachments && item.attachments.length}}" class="vitem__attach">📎{{item.attachments.length}}</text>
+              </view>
+              </view>
+
+              <view
+                class="vitem__dot vitem__dot--{{item.priorityColor}}"
+                wx:if="{{item.priority && !item.completed}}"
+              ></view>
+
+              <!-- 删除入口：虚拟行没有完整卡片，这里补齐（catchtap 避免触发行主体跳转） -->
+              <view
+                class="vitem__del"
+                data-id="{{item._id}}"
+                data-content="{{item.content}}"
+                catchtap="onDeleteRow"
+                hover-class="vitem__del--hover"
+                hover-stay-time="80"
+              >×</view>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="list__footer">
+        <text>共 {{vCount}} 项 · 滚动流畅加载</text>
+      </view>
+    </scroll-view>
+
+    <!-- ============ 常规列表：小数据量保留原有卡片视觉 ============ -->
+    <scroll-view
+      wx:else
+      class="list"
+      scroll-y
+      enhanced
+      show-scrollbar="{{false}}"
+      enable-back-to-top
+    >
+      <todo-card
+        wx:for="{{todos}}"
+        wx:key="_id"
+        todo="{{item}}"
+        bind:toggle="onToggle"
+        bind:edit="onOpenDetail"
+        bind:delete="onDelete"
+      />
+      <view class="list__footer">
+        <text wx:if="{{vCount > 0}}">共 {{vCount}} 项</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 批量清除已完成 -->
+  <view class="footer-tip" wx:if="{{doneCount > 0 && filter !== 'done'}}">
+    <text class="footer-tip__text">已完成 {{doneCount}} 项</text>
+    <text class="footer-tip__btn" bindtap="onClearCompleted">一键清除</text>
+  </view>
+
+  <!-- 手写体标语：暮金夜色的点睛（纯装饰） -->
+  <view class="motto" aria-hidden="true">
+    <text class="motto__text">把重要的事，变成习惯</text>
+    <view class="motto__stroke"></view>
+  </view>
+
+  <!-- 悬浮添加按钮 -->
+  <view class="fab" bindtap="onTapAdd" hover-class="fab--hover" hover-stay-time="80">
+    <view class="fab__halo"></view>
+    <text class="fab__icon">+</text>
+  </view>
+
+  <!-- 新建/编辑弹层 -->
+  <todo-composer
+    id="todo-composer"
+    visible="{{composerVisible}}"
+    bind:submit="onComposerSubmit"
+    bind:cancel="onComposerCancel"
+  />
+
+  <!-- 底部导航 -->
+  <bottom-tab tabs="{{tabs}}" current="home" bind:change="onChangeTab" />
+</view>

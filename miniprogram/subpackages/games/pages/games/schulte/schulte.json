@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "舒尔特方格",
+  "usingComponents": {
+    "game-shell": "/subpackages/games/components/game-shell/index"
+  },
+  "disableScroll": true
+}

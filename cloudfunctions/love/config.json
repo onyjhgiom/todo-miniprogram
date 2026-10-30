@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "openapi": []
+  },
+  "timeout": 20,
+  "installDependency": true,
+  "env": {
+    "QWEATHER_KEY": ""
+  }
+}

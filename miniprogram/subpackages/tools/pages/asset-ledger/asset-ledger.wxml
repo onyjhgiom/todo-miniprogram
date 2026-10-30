@@ -1,0 +1,408 @@
+<!--subpackages/tools/pages/asset-ledger/asset-ledger.wxml-->
+<!-- 资产账本：我的资产（日均成本） / 每月支出（订阅·分期） 双 Tab -->
+<view class="al themed" data-theme="{{theme}}" style="{{themeStyle}}">
+
+  <!-- ===================== 顶部标题栏（自定义导航） ===================== -->
+  <!-- padding-top = 状态栏高，height 已含 padding-top（页面 box-sizing 为 border-box）；
+       padding-right 让开微信右上角原生胶囊 —— 否则搜索按钮正好落在胶囊底下，
+       点击会被层级更高的胶囊抢走，表现就是「按不动」。
+       新增入口原先也放在这里（橙色加号），但两个圆钮要跟胶囊抢横向空间、
+       位置又离拇指最远，现已统一迁到内容区右下角的浮动按钮。 -->
+  <view class="al__head" style="padding-top: {{padTop}}px; height: {{navTotal}}px; padding-right: {{navRight}}px;">
+    <view class="al__head-l">
+      <view class="al__round al__round--back" bindtap="onBack" hover-class="al__round--hover" hover-stay-time="120">
+        <view class="ic ic-back"></view>
+      </view>
+      <text class="al__title">{{title}}</text>
+    </view>
+    <view class="al__acts">
+      <view class="al__round" bindtap="onSearchToggle" hover-class="al__round--hover" hover-stay-time="120">
+        <view class="ic ic-search"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 搜索条 -->
+  <view class="al__search" wx:if="{{searchOpen}}">
+    <view class="al__search-box">
+      <view class="ic ic-search ic--sm"></view>
+      <input
+        class="al__search-input"
+        value="{{keyword}}"
+        placeholder="搜索名称或分类"
+        placeholder-class="al__search-ph"
+        confirm-type="search"
+        focus="{{searchOpen}}"
+        bindinput="onSearchInput"
+      />
+      <text class="al__search-clear" wx:if="{{keyword}}" bindtap="onSearchClear">✕</text>
+    </view>
+    <text class="al__search-cancel" bindtap="onSearchToggle">取消</text>
+  </view>
+
+  <!-- ===================== 概览卡 ===================== -->
+  <view class="ov">
+    <view class="ov__head">
+      <text class="ov__title">{{overview.title}}</text>
+      <text class="ov__badge">{{overview.badge}}</text>
+    </view>
+    <view class="ov__body">
+      <view class="ov__col">
+        <text class="ov__label">{{overview.k1Label}}</text>
+        <text class="ov__num">{{overview.k1Value}}</text>
+      </view>
+      <view class="ov__col ov__col--right">
+        <text class="ov__label">{{overview.k2Label}}</text>
+        <text class="ov__num">{{overview.k2Value}}</text>
+      </view>
+    </view>
+    <view class="ov__line"></view>
+    <view class="ov__stats">
+      <view class="ov__stat" wx:for="{{overview.stats}}" wx:key="label">
+        <view class="ov__dot" style="background: {{item.color}};"></view>
+        <text class="ov__stat-label">{{item.label}}</text>
+        <text class="ov__stat-num">{{item.value}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===================== 分类 Tab ===================== -->
+  <scroll-view class="al__cats" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="al__cats-track">
+      <view
+        wx:for="{{cats}}"
+        wx:key="id"
+        class="al__cat {{activeCat === item.id ? 'is-active' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="onCatTap"
+      >
+        <text class="al__cat-text">{{item.name}}</text>
+        <view class="al__cat-line"></view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- ===================== 筛选 chips + 排序 ===================== -->
+  <view class="al__filters">
+    <scroll-view class="al__chips" scroll-x enhanced show-scrollbar="{{false}}">
+      <view class="al__chips-track">
+        <view
+          wx:for="{{chips}}"
+          wx:key="id"
+          class="al__chip {{activeChip === item.id ? 'is-active' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="onChipTap"
+        >{{item.name}}</view>
+      </view>
+    </scroll-view>
+    <view class="al__sort {{sortKey !== 'main' ? 'is-active' : ''}}" bindtap="onSortTap" hover-class="al__sort--hover" hover-stay-time="60">
+      <view class="ic ic-filter"></view>
+    </view>
+  </view>
+
+  <!-- ===================== 卡片瀑布流 ===================== -->
+  <view class="al__grid" wx:if="{{total}}">
+    <view class="al__col">
+      <block wx:for="{{colLeft}}" wx:key="id">
+        <template is="cardTpl" data="{{...item}}" />
+      </block>
+    </view>
+    <view class="al__col">
+      <block wx:for="{{colRight}}" wx:key="id">
+        <template is="cardTpl" data="{{...item}}" />
+      </block>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="al__empty" wx:else>
+    <text class="al__empty-ic">{{tab === 'asset' ? '📦' : '💳'}}</text>
+    <text class="al__empty-t">{{keyword ? '没有匹配的结果' : (tab === 'asset' ? '还没有资产' : '还没有订阅支出')}}</text>
+    <text class="al__empty-s">{{keyword ? '换个关键词试试' : '点右下角 + 添加第一件'}}</text>
+  </view>
+
+  <view class="al__pad"></view>
+
+  <!-- ===================== 右下角新建按钮（FAB） =====================
+       页面唯一的新建入口 —— 原先放在右上角的那个加号已移除：它要与微信原生
+       胶囊抢横向空间（窄屏被迫压到 64rpx），位置又离拇指最远。这里用固定悬浮的
+       大热区按钮，单手拇指即可触达（详情见 wxss 里 .fab 的定位与热区说明）。 -->
+  <view class="fab" bindtap="onCreate" hover-class="fab--hover" hover-stay-time="60">
+    <view class="ic ic-plus ic-plus--lg"></view>
+  </view>
+
+  <!-- ===================== 底部 dock：三个圆矩形按钮 ===================== -->
+  <view class="dock">
+    <view
+      class="dock__btn {{tab === 'asset' ? 'is-active' : ''}}"
+      data-tab="asset"
+      bindtap="onTabTap"
+      hover-class="dock__btn--hover"
+      hover-stay-time="60"
+    >
+      <view class="ic ic-pie"></view>
+      <text class="dock__label">我的资产</text>
+    </view>
+    <view
+      class="dock__btn {{tab === 'spend' ? 'is-active' : ''}}"
+      data-tab="spend"
+      bindtap="onTabTap"
+      hover-class="dock__btn--hover"
+      hover-stay-time="60"
+    >
+      <view class="ic ic-card"></view>
+      <text class="dock__label">每月支出</text>
+    </view>
+    <view
+      class="dock__btn"
+      bindtap="onSkinToggle"
+      hover-class="dock__btn--hover"
+      hover-stay-time="60"
+    >
+      <view class="ic {{skin === 'dark' ? 'ic-sun' : 'ic-moon'}}"></view>
+      <text class="dock__label">{{skin === 'dark' ? '切换浅色' : '切换深色'}}</text>
+    </view>
+  </view>
+  <!-- ===================== 排序弹层 ===================== -->
+  <view class="mask" wx:if="{{sortOpen}}" bindtap="onSortClose">
+    <view class="sheet sheet--sort" catchtap="onSheetStop">
+      <view class="sheet__title">排序方式</view>
+      <view
+        wx:for="{{sortOptions}}"
+        wx:key="id"
+        class="sopt {{sortKey === item.key ? 'is-active' : ''}}"
+        data-key="{{item.key}}"
+        catchtap="onSortPick"
+      >
+        <text class="sopt__text">{{item.name}}</text>
+        <view class="sopt__check" wx:if="{{sortKey === item.key}}"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===================== 新增 / 编辑弹层 ===================== -->
+  <view class="mask" wx:if="{{editorOpen}}" bindtap="onEditorClose">
+    <view class="sheet" catchtap="onSheetStop">
+      <view class="sheet__head">
+        <text class="sheet__act" catchtap="onEditorClose">取消</text>
+        <text class="sheet__title">{{editorTitle}}</text>
+        <text class="sheet__act sheet__act--primary" catchtap="onEditorSave">保存</text>
+      </view>
+
+      <scroll-view class="sheet__body" scroll-y>
+        <!-- ---------- 资产表单 ---------- -->
+        <block wx:if="{{isAsset}}">
+          <view class="fld">
+            <text class="fld__label">名称</text>
+            <input class="fld__input" value="{{assetDraft.name}}" data-key="name" bindinput="onAssetField"
+                   placeholder="如：特斯拉" placeholder-class="fld__ph" />
+          </view>
+
+          <view class="fld__block">
+            <text class="fld__label">图标</text>
+            <view class="pick">
+              <view
+                wx:for="{{iconOptions}}"
+                wx:key="*this"
+                class="pick__ico {{assetDraft.icon === item ? 'is-active' : ''}}"
+                data-v="{{item}}"
+                catchtap="onIconPick"
+              >{{item}}</view>
+            </view>
+          </view>
+
+          <view class="fld">
+            <text class="fld__label">价格</text>
+            <input class="fld__input" type="digit" value="{{assetDraft.priceText}}" data-key="priceText" bindinput="onAssetField"
+                   placeholder="0" placeholder-class="fld__ph" />
+          </view>
+
+          <view class="fld__block">
+            <text class="fld__label">分类</text>
+            <view class="pick">
+              <view
+                wx:for="{{assetCatNames}}"
+                wx:key="*this"
+                class="pick__cat {{assetDraft.catIndex === index ? 'is-active' : ''}}"
+                data-index="{{index}}"
+                catchtap="onAssetCatPick"
+              >{{item}}</view>
+            </view>
+          </view>
+
+          <view class="fld">
+            <text class="fld__label">状态</text>
+            <picker range="{{statusNames}}" value="{{assetDraft.statusIndex}}" bindchange="onAssetStatusChange">
+              <text class="fld__value">{{statusNames[assetDraft.statusIndex]}}</text>
+            </picker>
+          </view>
+
+          <view class="fld">
+            <text class="fld__label">购入日</text>
+            <picker mode="date" value="{{assetDraft.dateText}}" bindchange="onAssetDateChange">
+              <text class="fld__value">{{assetDraft.dateText}}</text>
+            </picker>
+          </view>
+
+          <view class="fld">
+            <text class="fld__label">预期使用年限</text>
+            <input class="fld__input" type="digit" value="{{assetDraft.lifeText}}" data-key="lifeText" bindinput="onAssetField"
+                   placeholder="3" placeholder-class="fld__ph" />
+          </view>
+
+          <view class="fld">
+            <text class="fld__label">质保时长（月，0 = 无）</text>
+            <input class="fld__input" type="digit" value="{{assetDraft.warrantyText}}" data-key="warrantyText" bindinput="onAssetField"
+                   placeholder="0" placeholder-class="fld__ph" />
+          </view>
+
+          <view class="fld__hint">日均成本 = 价格 ÷ 已用天数；进度条按「已用天数 ÷ 预期使用年限」计算。质保会显示在卡片上（如「质保至 2027/9 · 剩 723 天」），过保自动标灰。</view>
+        </block>
+
+        <!-- ---------- 订阅表单 ---------- -->
+        <block wx:else>
+          <view class="fld">
+            <text class="fld__label">名称</text>
+            <input class="fld__input" value="{{spendDraft.name}}" data-key="name" bindinput="onSpendField"
+                   placeholder="如：Saily" placeholder-class="fld__ph" />
+          </view>
+
+          <view class="fld">
+            <text class="fld__label">类型</text>
+            <picker range="{{kindNames}}" value="{{spendDraft.kindIndex}}" bindchange="onSpendKindChange">
+              <text class="fld__value">{{kindNames[spendDraft.kindIndex]}}</text>
+            </picker>
+          </view>
+
+          <!-- 分类放在图标之前：图标候选按分类推荐，先定分类再挑图标才不会来回改 -->
+          <view class="fld__block">
+            <text class="fld__label">分类</text>
+            <view class="pick">
+              <view
+                wx:for="{{spendCatNames}}"
+                wx:key="*this"
+                class="pick__cat {{spendDraft.catIndex === index ? 'is-active' : ''}}"
+                data-index="{{index}}"
+                catchtap="onSpendCatPick"
+              >{{item}}</view>
+            </view>
+          </view>
+
+          <view class="fld__block">
+            <text class="fld__label">Logo 文字（留空则用图标）</text>
+            <view class="pick pick--gap">
+              <input class="fld__input fld__input--box" value="{{spendDraft.logoText}}" data-key="logoText" bindinput="onSpendField"
+                     placeholder="如：Saily" placeholder-class="fld__ph" />
+            </view>
+            <view class="pick">
+              <view
+                wx:for="{{logoColors}}"
+                wx:key="*this"
+                class="pick__color {{spendDraft.logoBg === item ? 'is-active' : ''}}"
+                style="background: {{item}};"
+                data-v="{{item}}"
+                catchtap="onLogoPick"
+              ></view>
+            </view>
+          </view>
+
+          <view class="fld__block" wx:if="{{!spendDraft.logoText}}">
+            <text class="fld__label">图标（按上面的分类推荐）</text>
+            <view class="pick">
+              <view
+                wx:for="{{spendIcons}}"
+                wx:key="*this"
+                class="pick__ico {{spendDraft.icon === item ? 'is-active' : ''}}"
+                data-v="{{item}}"
+                catchtap="onSpendIconPick"
+              >{{item}}</view>
+            </view>
+          </view>
+
+          <view class="fld">
+            <text class="fld__label">周期费（每月）</text>
+            <input class="fld__input" type="digit" value="{{spendDraft.feeText}}" data-key="feeText" bindinput="onSpendField"
+                   placeholder="0" placeholder-class="fld__ph" />
+          </view>
+
+          <block wx:if="{{spendDraft.kindIndex === 0}}">
+            <view class="fld">
+              <text class="fld__label">总价</text>
+              <input class="fld__input" type="digit" value="{{spendDraft.amountText}}" data-key="amountText" bindinput="onSpendField"
+                     placeholder="0" placeholder-class="fld__ph" />
+            </view>
+            <view class="fld">
+              <text class="fld__label">总期数</text>
+              <input class="fld__input" type="number" value="{{spendDraft.periodsText}}" data-key="periodsText" bindinput="onSpendField"
+                     placeholder="60" placeholder-class="fld__ph" />
+            </view>
+            <view class="fld">
+              <text class="fld__label">已还期数</text>
+              <input class="fld__input" type="number" value="{{spendDraft.paidText}}" data-key="paidText" bindinput="onSpendField"
+                     placeholder="0" placeholder-class="fld__ph" />
+            </view>
+          </block>
+
+          <view class="fld">
+            <text class="fld__label">下次缴费日</text>
+            <picker mode="date" value="{{spendDraft.dateText}}" bindchange="onSpendDateChange">
+              <text class="fld__value">{{spendDraft.dateText}}</text>
+            </picker>
+          </view>
+
+          <view class="fld__hint">分类只影响 Tab 归属与图标推荐，不参与金额计算。贷款月供计入「月均固定支出」的金额为月供本身；剩余 = (总期数 − 已还期数) × 月供。</view>
+        </block>
+      </scroll-view>
+    </view>
+  </view>
+
+</view>
+
+<!-- ===================== 卡片模板（资产 / 订阅共用一套结构） ===================== -->
+<template name="cardTpl">
+  <view class="card" data-id="{{id}}" bindtap="onCardTap" hover-class="card--hover" hover-stay-time="60">
+    <view class="card__top">
+      <view
+        class="card__pic {{picKind === 'logo' ? 'card__pic--logo' : ''}}"
+        style="{{picKind === 'logo' ? 'background:' + picBg + ';color:' + picFg : ''}}"
+      >
+        <text wx:if="{{picKind === 'logo'}}" class="card__pic-text">{{picText}}</text>
+        <text wx:else class="card__pic-emoji">{{picEmoji}}</text>
+      </view>
+      <view class="card__badge">
+        <view class="card__dot" style="background: {{badgeColor}};"></view>
+        <text class="card__badge-text">{{badge}}</text>
+      </view>
+    </view>
+
+    <text class="card__name">{{name}}</text>
+    <text class="card__meta">{{meta}}</text>
+
+    <view class="card__amount">
+      <text class="card__num">{{num}}</text>
+      <text class="card__unit">{{unit}}</text>
+      <view class="card__side" wx:if="{{sideNum}}">
+        <text class="card__side-label">{{sideLabel}}</text>
+        <text class="card__side-num">{{sideNum}}</text>
+      </view>
+    </view>
+
+    <view class="card__bar" wx:if="{{showBar}}">
+      <view class="card__fill" style="width: {{progress}}%;"></view>
+    </view>
+
+    <view class="card__warranty" wx:if="{{warrantyLine}}" style="color: {{warrantyColor}};">
+      <view class="ic ic-shield"></view>
+      <text>{{warrantyLine}}</text>
+    </view>
+
+    <view class="card__foot">
+      <view class="card__foot-l">
+        <view class="ic ic-cal" wx:if="{{footIcon}}"></view>
+        <text>{{footLeft}}</text>
+      </view>
+      <text class="card__foot-r" wx:if="{{footRight}}">{{footRight}}</text>
+    </view>
+  </view>
+</template>
+

@@ -1,0 +1,312 @@
+/* pages/tools/tools.wxss */
+.page {
+  min-height: 100vh;
+  background: var(--color-bg);
+  padding: 24rpx 24rpx calc(140rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+/* ===== 吸顶头部 ===== */
+.head {
+  background: var(--color-bg);
+  padding-top: 8rpx;
+}
+.head__title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+.head__title {
+  font-size: 44rpx;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: 1rpx;
+}
+.head__count {
+  font-size: 24rpx;
+  color: var(--color-text-mute);
+}
+
+/* ===== 搜索 ===== */
+.search {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  background: var(--color-card);
+  border: 2rpx solid var(--color-border);
+  border-radius: 999rpx;
+  padding: 24rpx 30rpx;
+  transition: border-color 200ms, box-shadow 200ms;
+}
+.search:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4rpx var(--color-primary-soft);
+}
+.search__icon {
+  font-size: 32rpx;
+  opacity: 0.6;
+}
+.search__input {
+  flex: 1;
+  font-size: 32rpx;
+  color: var(--color-text);
+  height: 52rpx;
+  line-height: 52rpx;
+}
+.search__placeholder {
+  color: var(--color-text-mute);
+}
+.search__clear {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  background: var(--color-bg-soft);
+  color: var(--color-text-soft);
+  font-size: 26rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== 分类 Tab ===== */
+.cat {
+  margin: 24rpx -24rpx 16rpx;
+  padding: 0 24rpx;
+  white-space: nowrap;
+  background: var(--color-bg);
+}
+.cat__track {
+  display: inline-flex;
+  gap: 16rpx;
+  padding-bottom: 8rpx;
+}
+.cat__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 24rpx;
+  border-radius: 999rpx;
+  background: var(--color-card);
+  border: 2rpx solid var(--color-border);
+  color: var(--color-text-soft);
+  transition: all 200ms;
+}
+.cat__icon {
+  font-size: 26rpx;
+}
+.cat__label {
+  font-size: 26rpx;
+}
+.cat__chip.is-active {
+  background: var(--gradient-primary);
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 6rpx 16rpx var(--color-primary-shadow);
+}
+.cat__chip.is-active .cat__label,
+.cat__chip.is-active .cat__icon {
+  color: #ffffff;
+}
+
+/* ===== 工具宫格（响应式：auto-fill 自动适配列数） ===== */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170rpx, 1fr));
+  gap: 20rpx;
+}
+.cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+  background: var(--color-card);
+  border: 2rpx solid var(--color-border);
+  border-radius: 28rpx;
+  padding: 32rpx 16rpx 28rpx;
+  text-align: center;
+  transition: transform 160ms, box-shadow 200ms, border-color 200ms;
+}
+.cell--hover {
+  transform: translateY(-4rpx) scale(0.98);
+  border-color: var(--color-primary-soft);
+  box-shadow: 0 10rpx 24rpx var(--color-primary-shadow);
+}
+/* 无过渡的即时按压：手指按下瞬间立刻响应，不等待动画 */
+.cell {
+  transition: none;
+}
+.cell__badge {
+  position: absolute;
+  top: 12rpx;
+  right: 12rpx;
+  max-width: 140rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 999rpx;
+  font-size: 18rpx;
+  line-height: 1.5;
+  color: #ffffff;
+  background: var(--color-primary);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.cell__icon {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 200ms;
+}
+.cell--hover .cell__icon {
+  transform: scale(1.06);
+}
+.cell__glyph {
+  font-size: 52rpx;
+  line-height: 1;
+  font-weight: 600;
+}
+.cell__name {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.3;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.cell__desc {
+  font-size: 20rpx;
+  color: var(--color-text-mute);
+  line-height: 1.4;
+  max-width: 100%;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+}
+
+/* ===== 空态 ===== */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+  padding: 120rpx 40rpx;
+  text-align: center;
+}
+.empty__icon {
+  font-size: 80rpx;
+  opacity: 0.5;
+}
+.empty__title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.empty__sub {
+  font-size: 24rpx;
+  color: var(--color-text-mute);
+}
+
+/* 即时按压反馈（view 需 hover-class 才生效） */
+.tools-press {
+  opacity: 0.72;
+  transform: scale(0.96);
+}
+
+/* ============================================================
+ * 舞台层配合：fx-stage 是 position:fixed，
+ * 定位元素会盖在未定位的普通内容之上，因此这里把各内容容器显式抬到 z-index:1，
+ * 保证氛围层始终在下、内容始终在上。
+ * ============================================================ */
+.head,
+.cat,
+.grid,
+.empty {
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================================
+ * 剧场版追加：工具中心是「枢纽门户」，要撑得起数十个入口的体量感。
+ * 手法：① 标题金属化 ② 宫格单元实体化（冠光 + 悬浮抬升）
+ *      ③ 图标底托放射渐变，让每个入口自带微光 ④ 搜素框聚焦时的光环
+ * ============================================================ */
+
+/* ① 大标题：金属渐变压印，成为页面的视觉锚点 */
+.head__title {
+  background: var(--gradient-metal, linear-gradient(135deg, #A98743, #C09A5E 42%, #E3C88F 62%, #C09A5E));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 2rpx;
+}
+.head__count {
+  letter-spacing: .5rpx;
+}
+
+/* ③ 宫格单元：从「一格色块」升级为有厚度的玉牌 */
+.cell {
+  box-shadow:
+    var(--crown-light, inset 0 2rpx 0 rgba(255, 255, 255, .8)),
+    var(--elev-1, 0 2rpx 8rpx rgba(74, 58, 42, .05)),
+    var(--edge-line, 0 0 0 1rpx rgba(228, 222, 210, .9));
+  transition:
+    transform 260ms cubic-bezier(.16, .84, .28, 1),
+    box-shadow 260ms cubic-bezier(.16, .84, .28, 1);
+}
+/* 按压 / 悬停：整体抬起，投影加深 —— 明确的三维响应 */
+.cell--hover {
+  transform: translate3d(0, -6rpx, 0) scale(1.02);
+  box-shadow:
+    var(--crown-light, inset 0 2rpx 0 rgba(255, 255, 255, .8)),
+    var(--elev-3, 0 18rpx 48rpx rgba(74, 58, 42, .12)),
+    var(--edge-line, 0 0 0 1rpx rgba(228, 222, 210, .9));
+}
+
+/* ③ 图标底托：加一层放射光晕，让彩色底不再扁平 */
+.cell__icon {
+  box-shadow:
+    0 6rpx 16rpx rgba(74, 58, 42, .1),
+    inset 0 2rpx 0 rgba(255, 255, 255, .55);
+  position: relative;
+}
+.cell__icon::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 168%;
+  height: 168%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, .5), rgba(255, 255, 255, 0) 68%);
+  pointer-events: none;
+  z-index: 0;
+}
+.cell__glyph { position: relative; z-index: 1; }
+
+/* 徽标：描边 + 柔光，避免和单元背景糊在一起 */
+.cell__badge {
+  box-shadow: 0 4rpx 12rpx rgba(192, 82, 47, .32);
+  border: 2rpx solid var(--color-card);
+}
+
+/* ④ 搜索框：静态也有厚度，聚焦时光环更饱满 */
+.search {
+  box-shadow:
+    var(--elev-1, 0 2rpx 8rpx rgba(74, 58, 42, .05)),
+    inset 0 1rpx 0 rgba(255, 255, 255, .7);
+}
+
+/* 分类 chip：激活态加一道顶光，更像被点亮的实体按键 */
+.cat__chip.is-active {
+  box-shadow:
+    0 8rpx 20rpx var(--color-primary-shadow),
+    inset 0 2rpx 0 rgba(255, 255, 255, .3);
+}

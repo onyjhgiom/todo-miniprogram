@@ -1,0 +1,79 @@
+<!-- pages/recruit/calendar.wxml -->
+<view class="cal themed" data-theme="{{theme}}" style="{{themeStyle}}">
+  <view class="cal__hero" style="background:{{heroGradient}}">
+    <view class="cal__hero-top">
+      <text class="cal__title">{{title}}</text>
+      <view class="cal__view">
+        <view class="cal__view-i {{view === 'month' ? 'cal__view-i--on' : ''}}" data-v="month" bindtap="switchView">月</view>
+        <view class="cal__view-i {{view === 'week' ? 'cal__view-i--on' : ''}}" data-v="week" bindtap="switchView">周</view>
+      </view>
+    </view>
+    <view class="cal__hero-sub" wx:if="{{nextHint}}">🎯 {{nextHint}}</view>
+    <view class="cal__hero-sub" wx:else>还没有登记的面试，去投递详情里「添加面试安排」</view>
+    <view class="cal__nav">
+      <view class="cal__nav-btn" bindtap="onPrev">‹</view>
+      <view class="cal__nav-today" bindtap="goToday">今天</view>
+      <view class="cal__nav-btn cal__nav-btn--right" bindtap="onNext">›</view>
+    </view>
+  </view>
+
+  <!-- 星期表头 -->
+  <view class="cal__weekbar">
+    <text wx:for="{{weekLabels}}" wx:key="*this" class="cal__wd">{{item}}</text>
+  </view>
+
+  <!-- 月视图 -->
+  <view class="cal__grid" wx:if="{{view === 'month'}}">
+    <view wx:for="{{grid}}" wx:key="key"
+      class="cal__cell {{item.inMonth ? '' : 'cal__cell--muted'}} {{item.isToday ? 'cal__cell--today' : ''}} {{item.key === selectedKey ? 'cal__cell--sel' : ''}}"
+      data-key="{{item.key}}" bindtap="onCellTap">
+      <text class="cal__day">{{item.day}}</text>
+      <view wx:if="{{item.hasEvent}}" class="cal__dot {{item.ivCount > 0 ? 'cal__dot--iv' : ''}}"></view>
+    </view>
+  </view>
+
+  <!-- 周视图 -->
+  <scroll-view class="cal__week" scroll-x wx:if="{{view === 'week'}}">
+    <view wx:for="{{week}}" wx:key="key"
+      class="cal__wcell {{item.key === selectedKey ? 'cal__wcell--sel' : ''}}"
+      data-key="{{item.key}}" bindtap="onCellTap">
+      <text class="cal__wcell-wd">{{weekLabels[index % 7]}}</text>
+      <text class="cal__wcell-day">{{item.day}}</text>
+      <view wx:if="{{item.hasEvent}}" class="cal__dot {{item.ivCount > 0 ? 'cal__dot--iv' : ''}}"></view>
+    </view>
+  </scroll-view>
+
+  <!-- 当天事件 -->
+  <view class="cal__panel">
+    <view class="cal__panel-title">
+      📌 {{selectedKey}} 的安排
+      <text class="cal__panel-sub" wx:if="{{events.length > 0}}">面试 {{ivCount}} 场 · 截止 {{dueCount}} 项</text>
+    </view>
+    <view wx:if="{{events.length === 0}}" class="cal__empty">这一天没有笔试 / 面试安排</view>
+
+    <view class="cal__event" wx:for="{{events}}" wx:key="key" data-id="{{item.appId}}" bindtap="onEventTap">
+      <view class="cal__event-time" style="color:{{item.color}}">{{item.time}}</view>
+      <view class="cal__event-main">
+        <text class="cal__event-co">{{item.company}}{{item.position ? ' · ' + item.position : ''}}</text>
+        <view class="cal__event-tags">
+          <text class="cal__event-status" style="background:{{item.color}}">{{item.title}}</text>
+          <text class="cal__event-place" wx:if="{{item.place}}">📍 {{item.place}}</text>
+          <text class="cal__event-done" wx:if="{{item.done}}">✓ 已结束</text>
+        </view>
+      </view>
+      <view class="cal__event-act" wx:if="{{item.kind === 'interview' && !item.done}}"
+        data-id="{{item.appId}}" data-iv="{{item.ivId}}" catchtap="finishInterview">已结束</view>
+    </view>
+
+    <!-- 面试当天时间轴（按当天真实安排生成） -->
+    <view class="cal__timeline" wx:if="{{hasInterview}}">
+      <view class="cal__tl-title">🎯 面试当天时间轴</view>
+      <view class="cal__tl" wx:for="{{timeline}}" wx:key="key">
+        <view class="cal__tl-node cal__tl-node--{{item.tone}}"></view>
+        <text class="cal__tl-time cal__tl-time--{{item.tone}}">{{item.time}}</text>
+        <text class="cal__tl-text">{{item.text}}</text>
+      </view>
+      <text class="cal__tl-tip">{{remindScheduled ? '已按面试开始前 30 分钟排期提醒（含微信订阅消息推送）' : '本机已可提前 30 分钟提醒；在投递详情点「同步到待办」可开启后台推送'}}</text>
+    </view>
+  </view>
+</view>

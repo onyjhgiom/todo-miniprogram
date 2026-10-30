@@ -1,0 +1,17 @@
+<game-shell title="{{title}}" timeText="{{timeText}}" statText="{{'分数 ' + score}}" paused="{{paused}}"
+  bind:back="onBack" bind:reset="onReset" bind:home="onHome" bind:pause="onPause">
+  <view class="tt">
+    <view class="row row--between tt__hud">
+      <text class="t-sm muted-2">最高 {{best}}</text>
+      <text class="t-sm muted-2">消行 {{lines}}</text>
+    </view>
+
+    <view class="tt__board">
+      <canvas type="2d" id="cv" class="tt__cv" disable-scroll bindtouchstart="onTouchStart" bindtouchend="onTouchEnd"></canvas>
+    </view>
+
+    <view class="t-xs muted-2 center tt__tip">点击旋转 · 左右滑动移动 · 下滑加速</view>
+
+    <view wx:if="{{over}}" class="tt__again" bindtap="onReset">再来一局</view>
+  </view>
+</game-shell>

@@ -1,0 +1,25 @@
+<!-- 弹幕历史 / 收藏 -->
+<view class="hist">
+  <view class="topbar">
+    <view class="tb-btn primary" bindtap="onNew">＋ 新建弹幕</view>
+    <button class="tb-btn share" open-type="share">分享我的弹幕</button>
+  </view>
+  <view class="stat">共 {{total}} 份 · 收藏 {{favCount}} 份</view>
+
+  <scroll-view class="list" scroll-y>
+    <view class="card" wx:for="{{list}}" wx:key="id">
+      <view class="card-main" bindtap="onOpen" data-id="{{item.id}}">
+        <view class="card-preview">{{item.previewText}}</view>
+        <view class="card-name">{{item.name}}</view>
+        <view class="card-meta">{{item.itemCount}} 条 · {{item.skinLabel}} · {{item.updatedAtLabel}}</view>
+      </view>
+      <view class="card-ops">
+        <text class="op {{item.favorite?'on':''}}" catchtap="onToggleFav" data-id="{{item.id}}">{{item.favorite?'★ 已收藏':'☆ 收藏'}}</text>
+        <text class="op" catchtap="onOpen" data-id="{{item.id}}">打开</text>
+        <text class="op del" catchtap="onDelete" data-id="{{item.id}}">删除</text>
+      </view>
+    </view>
+    <view wx:if="{{!total}}" class="empty">还没有保存的弹幕，去编辑器做一份吧</view>
+    <view style="height:40rpx;"></view>
+  </scroll-view>
+</view>

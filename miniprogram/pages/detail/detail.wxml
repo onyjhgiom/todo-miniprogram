@@ -1,0 +1,141 @@
+<view class="detail-page themed" data-theme="{{theme}}" style="{{themeStyle}}">
+  <view class="detail-hero" style="background: {{heroGradient}};">
+    <view class="detail-content">{{todo.content || '加载中…'}}</view>
+    <view wx:if="{{todo.completed}}" class="detail-completed-mark">✓ 已完成</view>
+    <view wx:if="{{todo.archived}}" class="detail-archived-mark">已归档</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="detail-loading">
+    <text>加载中…</text>
+  </view>
+
+  <block wx:else>
+    <!-- 优先级 -->
+    <view class="detail-section">
+      <view class="detail-section-title">优先级</view>
+      <view class="detail-priority">
+        <view wx:for="{{priorities}}" wx:key="key" class="priority-pill {{todo.priority === item.key ? 'is-active' : ''}}" bindtap="onPriorityChange" data-key="{{item.key}}">
+          <view class="priority-dot" style="background: {{item.color}};"></view>
+          <text>{{item.label}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 截止日期 -->
+    <view class="detail-section">
+      <view class="detail-section-title">截止日期</view>
+      <picker mode="date" value="{{dueDateStr}}" bindchange="onDueDateChange" class="detail-picker">
+        <view class="detail-picker-value">{{dueDateStr || '设置截止日期'}}</view>
+      </picker>
+      <view wx:if="{{dueDateStr}}" class="detail-clear-btn" bindtap="onClearDueDate">清除截止</view>
+    </view>
+
+    <!-- 刚性 / 弹性 -->
+    <view class="detail-section">
+      <view class="detail-section-title">对待方式</view>
+      <view class="detail-rigid">
+        <view class="detail-rigid-opt {{rigid ? 'is-on' : ''}}" bindtap="onRigidToggle" data-v="1">
+          <text class="detail-rigid-emo">🔴</text>
+          <view class="detail-rigid-tx">
+            <text class="detail-rigid-name">刚性必做</text>
+            <text class="detail-rigid-sub">逾期标红强提醒</text>
+          </view>
+        </view>
+        <view class="detail-rigid-opt {{rigid ? '' : 'is-on'}}" bindtap="onRigidToggle" data-v="0">
+          <text class="detail-rigid-emo">🌿</text>
+          <view class="detail-rigid-tx">
+            <text class="detail-rigid-name">弹性可缓</text>
+            <text class="detail-rigid-sub">逾期不催，自动顺延</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 预估时长 -->
+    <view class="detail-section">
+      <view class="detail-section-title">预估耗时</view>
+      <view class="detail-est">
+        <input
+          class="detail-est-in" type="number" placeholder="分钟" placeholder-class="detail-est-ph"
+          value="{{estimatedMinutes}}" bindinput="onEstimatedInput" maxlength="4"
+        />
+        <text class="detail-est-unit">分钟</text>
+      </view>
+      <view wx:if="{{splitHint}}" class="detail-split">
+        <text class="detail-split-emo">💡</text>
+        <text class="detail-split-tx">目标有点大，容易拖延。要不要拆成 15 分钟就能启动的小步骤？比如「先列个大纲」「找 3 篇参考资料」。</text>
+      </view>
+    </view>
+
+    <!-- 今日聚焦 -->
+    <view class="detail-section">
+      <view class="detail-section-title">今日聚焦</view>
+      <view class="detail-focus" bindtap="onFocusToggle">
+        <view class="detail-focus-sw {{focusToday ? 'is-on' : ''}}">
+          <text class="detail-focus-knob"></text>
+        </view>
+        <view class="detail-focus-tx">
+          <text class="detail-focus-name">加入「今天一定要做的 3 件事」</text>
+          <text class="detail-focus-sub">每天最多 3 件，其余先收起来，减轻压力</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 重复 -->
+    <view class="detail-section">
+      <view class="detail-section-title">重复</view>
+      <recurrence-editor value="{{todo.recurrence}}" bind:change="onRecurrenceChange" />
+    </view>
+
+    <!-- 提醒 -->
+    <view class="detail-section">
+      <view class="detail-section-title">提醒</view>
+      <reminder-editor items="{{todo.reminders}}" bind:change="onRemindersChange" />
+    </view>
+
+    <!-- 备注 -->
+    <view class="detail-section">
+      <view class="detail-section-title">备注</view>
+      <textarea class="detail-textarea" value="{{todo.description}}" bindblur="onDescriptionChange" placeholder="添加详细描述…" />
+    </view>
+
+    <!-- 子任务 -->
+    <view class="detail-section">
+      <subtask-list items="{{subtasks}}" bind:add="onSubAdd" bind:toggle="onSubToggle" bind:update="onSubUpdate" bind:remove="onSubRemove" bind:cleardone="onSubClearDone" />
+    </view>
+
+    <!-- 附件 -->
+    <view class="detail-section">
+      <attachment-bar items="{{todo.attachments}}" bind:change="onAttachmentChange" bind:update="onAttachmentUpdate" bind:remove="onAttachmentRemove" />
+    </view>
+
+    <!-- 记录信息：完整展示这条待办的所有字段 -->
+    <view class="detail-section">
+      <view class="detail-section-title">记录信息</view>
+      <view class="detail-meta">
+        <view wx:for="{{meta}}" wx:key="label" class="detail-meta-row">
+          <text class="detail-meta-label">{{item.label}}</text>
+          <text class="detail-meta-value {{item.mono ? 'is-mono' : ''}}" bindtap="onCopyId" data-mono="{{item.mono}}" data-value="{{item.value}}">{{item.value}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 操作 -->
+    <view class="detail-section">
+      <view class="detail-actions">
+        <view class="detail-action" bindtap="onToggleComplete">
+          <view class="detail-action-icon">{{todo.completed ? '↺' : '✓'}}</view>
+          <view>{{todo.completed ? '标为未完成' : '标为完成'}}</view>
+        </view>
+        <view class="detail-action" bindtap="onArchiveToggle">
+          <view class="detail-action-icon">{{todo.archived ? '📤' : '🗄️'}}</view>
+          <view>{{todo.archived ? '恢复任务' : '归档任务'}}</view>
+        </view>
+        <view class="detail-action detail-action-danger" bindtap="onDelete">
+          <view class="detail-action-icon">🗑️</view>
+          <view>删除</view>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

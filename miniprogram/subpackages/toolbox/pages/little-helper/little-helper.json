@@ -1,0 +1,10 @@
+{
+  "navigationStyle": "custom",
+  "navigationBarTitleText": "小琳 · 待办助手",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#080F24",
+  "backgroundColorTop": "#080F24",
+  "backgroundColorBottom": "#080F24",
+  "disableScroll": true,
+  "usingComponents": {}
+}
